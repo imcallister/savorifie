@@ -1,0 +1,17 @@
+[
+{
+  "pk": 1, 
+  "model": "audit.taskdef", 
+  "fields": {
+    "preparers": [
+      1
+    ], 
+    "tmpl": "operations", 
+    "freq": "daily", 
+    "approvers": [
+      1
+    ], 
+    "desc": "operations"
+  }
+}
+]

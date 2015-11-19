@@ -1,0 +1,56 @@
+{% extends base_template %}
+{% load staticfiles %}
+
+
+{% block breadcrumb %}
+<li class="active">Home</li>
+{% endblock %}
+
+
+{% block content %}
+
+
+<!--
+This is where bootstrap starts to get a bit demented.   Surely not all
+these divs are needed.
+
+
+-->
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><a href="/gl/">Actions</a></h3>
+                </div>
+                <div class="panel-body">
+
+                <ul>
+                    <li><a href="/gl/get_transactions/">Download transactions</a></li>
+                    <li><a href="/gl/get_tranlines/">Download tranlines</a></li>
+                    <li><a href="/download_expenses/">Download expenses</a></li>
+                    <li><a href="/recalculate">Recalculate</a></li>
+                </ul>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Placeholder</h3>
+                </div>
+                <div class="panel-body">
+                
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+
+
+
+{% endblock %}

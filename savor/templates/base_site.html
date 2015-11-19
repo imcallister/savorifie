@@ -1,0 +1,81 @@
+{% extends 'common/base_site.html' %}
+{% load staticfiles %}
+
+{% block head_title %}Financifie Site{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{{STATIC_URL}}common/css/bootstrapSwitch.css" />
+    <link href="{{ STATIC_URL }}common/css/icheck/skins/flat/blue.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="{{ STATIC_URL }}common/css/chosen.min.css" media="screen" rel="stylesheet" type="text/css" />
+    <link href="{{ STATIC_URL }}common/handsontable/jquery.handsontable.full.css" media="screen" rel="stylesheet" type="text/css" />
+    
+    <!--define our bootstrap overrides here -->
+    
+    <link rel="stylesheet" href="{{STATIC_URL}}base/css/{{ company_id }}.css" />
+    <link rel="stylesheet" href="{{STATIC_URL}}base/css/bootstrap-table.css"/>
+
+{% endblock %}
+
+{% block brand %}<img src="{% static 'base/img/savor_logo.png' %}" height="25" />{% endblock %}
+
+{% block menu %}
+    
+    <li><a class="btn-sm" type="button" href="/reports/">Reports</a></li>
+    <li><a class="btn-sm" type="button" href="/daily/">Daily</a></li>
+    <li><a class="btn-sm" type="button" href="/audit/tasks/">Compliance</a></li>
+    <li><a class="btn-sm" type="button" href="/forecasts">Forecasting</a></li>
+    <li><a class="btn-sm" type="button" href="/snapshots/glsnapshots">Snapshots</a></li>
+    {% if user.is_superuser %}
+    <li class="btn-group">
+        <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span> POWER USERS <span class="caret"></span></a>
+      <ul class="dropdown-menu" role="menu">
+        <li><a class="btn-sm" type="button" href="/admin/">Admin</a></li>
+        <li><a class="btn-sm" type="button" href="/maintenance/">Maintenance</a></li>
+        <li><a class="btn-sm" type="button" href="/dashboard/">Dashboard</a></li>
+      </ul>
+    </li>
+
+    {% endif %}
+    <li class="btn-group">
+        <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-book"></span> {{ company_id }} <span class="caret"></span></a>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="/choose_company/SAV">SAV</a></li>
+      </ul>
+    </li>
+
+    
+{% endblock %}
+
+{% block breadcrumb %}
+    <li><a href="/gl/accounts_list">Accounts</a></li>
+    <li><a href="/gl/counterparty_list">Counterparties</a></li>
+{% endblock %}
+
+
+{% block extrajs %}
+<script src="{{ STATIC_URL }}common/handsontable/jquery.handsontable.full.js"></script>
+<script src="{{ STATIC_URL }}common/jeditable/jquery.jeditable.js"></script>
+<script src="{{ STATIC_URL }}common/jeditable/bootstrap-datepicker.js"></script>
+<script src="{{ STATIC_URL }}common/js/ajax_setup.js"></script>
+<script src="{{ STATIC_URL }}common/js/editable.js"></script>
+<script src="{{ STATIC_URL }}common/js/jquery.autosize-min.js"></script>
+<script src="{{ STATIC_URL }}common/js/task_monitoring.js"></script>
+<script src="{{ STATIC_URL }}common/js/progress_bar.js"></script>
+<script src="{{ STATIC_URL }}common/js/monitor_controller.js"></script>
+<script src="{{ STATIC_URL }}common/js/jquery.confirmModal.js"></script>
+
+<script src="{{ STATIC_URL }}common/js/tinymce/jquery.tinymce.min.js"></script>
+<script src="{{ STATIC_URL }}common/js/tinymce/tinymce.min.js"></script>
+
+<script src="{{ STATIC_URL }}common/js/jquery.icheck.min.js"></script>
+<script src="{{ STATIC_URL }}common/js/chosen.jquery.min.js"></script>
+
+<script src="{{ STATIC_URL }}common/js/rptfileupload.js"></script>
+<script src="{{ STATIC_URL }}common/js/bootstrapSwitch.js"></script>
+<script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
+<script src="{{ STATIC_URL }}base/js/jquery.min.js"></script>
+<script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+<script src="{{ STATIC_URL }}base/js/bootstrap.min.js"></script>
+<script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
+
+{% endblock %}

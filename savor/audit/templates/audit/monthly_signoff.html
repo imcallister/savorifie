@@ -1,0 +1,111 @@
+{% extends 'audit/base_audit.html' %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ comment_form.media.css }}
+{% endblock %}
+
+{% block content %}
+
+{% load tags %}
+
+
+<h3 class="pull-right">{{status}}</h3>
+<h2>Monthly Books Signoff for {{date}}</h2>
+
+
+
+
+<div class="container-fluid" id="wrapper">
+
+    <div class="accordion" id="accordion">
+    {% include "accordion_cmpnt.html" with title="Audit Trail" content=audit_trail tag="audit" parent="accordion" %}
+    </div>
+
+
+    <div class="accordion" id="accordion2">
+
+        {% include "accordion_cmpnt.html" with title="Large Expenses" content=large_expenses tag="large_expenses" parent="accordion2" %}
+
+        {% include "accordion_cmpnt.html" with title="Nominal Entries" content=nominal tag="nominal_view" parent="accordion2" %}
+
+        {% include "accordion_cmpnt.html" with title="Stock Comp Entries" content=stock_comp tag="stock_comp_view" parent="accordion2" %}
+
+        {% include "accordion_cmpnt.html" with title="Capitalization, Amortization and Depreciation" content=cap_amort tag="cap_amort_view" parent="accordion2" %}
+
+        {% include "accordion_cmpnt.html" with title="Revenue Trends" content=rev_trends tag="rev_view" parent="accordion2" %}
+
+        {% include "accordion_cmpnt.html" with title="Expense Trends" content=exp_trends tag="exp_view" parent="accordion2" %}
+
+
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <h3><a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+                  Change in Shareholder Equity</a></h3>
+            </div>
+            <div id="collapseOne" class="accordion-body collapse">
+                <div class="accordion-inner">
+                  {% include "gl/report_snippet.html" with rows=cap_rows column_titles=cap_col_titles %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block sidebar %}
+
+<div class="spacer"></div>
+
+{% include "modal_comment.html" with id="add_comment" title="Add Comment" post_url="task_comment" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Add Comment" %}
+
+{% include "modal_comment.html" with id="signoff_comment" title="Sign Off" post_url="task_signoff" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Approve" %}
+
+{% include "modal_comment.html" with id="submit_comment" title="Submit for approval" post_url="task_submit" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Submit for approval" %}
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><a href="/gl/">Monthly Reports</a></h3>
+    </div>
+    <div class="panel-body">
+        <ul>
+            <li><a href="/reporting/reports/BalanceSheet/?col_tag={{YR}}M{{MTH}}">Balance Sheet</a></li>
+            <li><a href="/reporting/reports/IncomeStatement/?col_tag={{YR}}M{{MTH}}">Income Statement</a></li>
+            <li><a href="/reporting/reports/Cashflow/?col_tag={{YR}}M{{MTH}}">Cashflow Statement</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><a href="/gl/">YTD Reports</a></h3>
+    </div>
+    <div class="panel-body">
+        <ul>
+            <li><a href="/reporting/reports/BalanceSheet/?col_tag={{YR}}Monthly">Balance Sheet</a></li>
+            <li><a href="/reporting/reports/IncomeStatement/?col_tag={{YR}}Monthly">Income Statement</a></li>
+            <li><a href="/reporting/reports/Cashflow/?col_tag={{YR}}Monthly">Cashflow Statement</a></li>
+        </ul>
+    </div>
+</div>
+
+<div>
+    <h3>Actions</h3>
+    <ul class="nav nav-pills nav-stacked">
+        <li><a data-toggle="modal" href="#add_comment{#/audit/task/comment?id={{task_id}#}" class="btn btn-primary" type="submit" name="comment">Comment</a></li>
+        <li><a data-toggle="modal" href="#submit_comment{#/audit/task/submit?id={{task_id}#}" class="btn btn-primary" type="submit" name="signoff">Submit</a></li>
+        <li><a data-toggle="modal" href="#signoff_comment{#/audit/task/signoff?id={{task_id}#}" class="btn btn-primary" type="submit" name="signoff">Approve</a></li>
+    </ul>
+</div>
+{% endblock %}
+
+
+
+{% block extrajs %}
+    {{comment_form.media.js}}
+    {{block.super}}
+
+{% endblock %}

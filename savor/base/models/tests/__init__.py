@@ -1,0 +1,1 @@
+from base.models.tests.test_expense import ExpenseTestCase

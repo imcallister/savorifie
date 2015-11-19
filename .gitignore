@@ -1,0 +1,17 @@
+.Python
+.DS_Store
+*.ipynb
+*.idea/*
+*.pyc
+*.pyo
+*.sublime-*
+*.swp
+*.ipynb
+*.iml
+/bin/
+/data/
+/include/
+/lib/
+/man/
+/logs/
+savor/localsettings.py

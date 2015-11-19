@@ -1,0 +1,18 @@
+[
+{
+  "pk": 1, 
+  "model": "environment.variable", 
+  "fields": {
+    "value": "SAV", 
+    "key": "DEFAULT_COMPANY_ID"
+  }
+},
+{
+  "pk": 2, 
+  "model": "environment.variable", 
+  "fields": {
+    "value": "savor.base.models", 
+    "key": "BMO_MODULES"
+  }
+}
+]

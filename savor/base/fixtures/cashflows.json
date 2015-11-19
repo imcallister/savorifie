@@ -1,0 +1,62 @@
+[
+{
+  "pk": 2, 
+  "model": "base.cashflow", 
+  "fields": {
+    "ext_account": 1, 
+    "counterparty": "mastercard", 
+    "description": "here it is", 
+    "post_date": "2015-10-27", 
+    "amount": "123.10", 
+    "trans_type": "3010"
+  }
+},
+{
+  "pk": 3, 
+  "model": "base.cashflow", 
+  "fields": {
+    "ext_account": 1, 
+    "counterparty": "330_Hudson", 
+    "description": "here it is", 
+    "post_date": "2014-10-27", 
+    "amount": "123.10", 
+    "trans_type": "3010"
+  }
+},
+{
+  "pk": 4, 
+  "model": "base.cashflow", 
+  "fields": {
+    "ext_account": 2, 
+    "counterparty": "Caliber", 
+    "description": "here it is", 
+    "post_date": "2015-07-27", 
+    "amount": "123.10", 
+    "trans_type": "3010"
+  }
+},
+{
+  "pk": 5, 
+  "model": "base.cashflow", 
+  "fields": {
+    "ext_account": 3, 
+    "counterparty": "Fresh", 
+    "description": "here it is", 
+    "post_date": "2015-10-22", 
+    "amount": "123.10", 
+    "trans_type": "3010"
+  }
+},
+{
+  "pk": 6, 
+  "model": "base.cashflow", 
+  "fields": {
+    "ext_account": 3, 
+    "counterparty": "mastercard", 
+    "description": "here it is", 
+    "post_date": "2015-08-27", 
+    "amount": "123.10", 
+    "trans_type": "3010"
+  }
+}
+]

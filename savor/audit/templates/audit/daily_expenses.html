@@ -1,0 +1,55 @@
+{% extends 'audit/base_audit.html' %}
+
+{% block extrahead %}
+  {{ block.super }}
+  {{ comment_form.media.css }}
+{% endblock %}
+
+{% block content %}
+  <h3 class="pull-right">{{status}}</h3>
+  <h2>Daily Expenses for {{date}}</h2>
+
+  {% load tags %}
+  
+
+  <div class="accordion" id="accordion">
+
+          {% include "accordion_cmpnt.html" with title="Check External Balances" content=check_bals tag="bals" parent="accordion" %}
+          {% include "accordion_cmpnt.html" with title="New and Changed Nominal Transactions" content=nominal_changes tag="chgs" parent="accordion" %}
+          {% include "accordion_cmpnt.html" with title="New and Changed Expenses" content=expense_changes tag="expchgs" parent="accordion" %}
+
+  </div>
+
+
+  {% include "modal_comment.html" with id="add_comment" title="Add Comment" post_url="task_comment" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Add Comment" %}
+
+  {% include "modal_comment.html" with id="signoff_comment" title="Sign Off" post_url="task_signoff" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Approve" %}
+
+  {% include "modal_comment.html" with id="submit_comment" title="Submit for approval" post_url="task_submit" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Submit for approval" %}
+
+{% endblock %}
+
+  
+{% block sidebar %}
+<div>
+    <ul class="nav nav-pills nav-stacked">
+      <li><a data-toggle="modal" href="#add_comment{#/audit/task/comment?id={{task_id}#}" class="btn btn-primary" type="submit" name="comment">Add Comment</a></li>
+      <li><a data-toggle="modal" href="#submit_comment{#/audit/task/submit?id={{task_id}#}" class="btn btn-primary" type="submit" name="signoff">Submit</a></li>
+      <li><a data-toggle="modal" href="#signoff_comment{#/audit/task/signoff?id={{task_id}#}" class="btn btn-primary" type="submit" name="signoff">Approve</a></li>
+    </ul>
+</div>
+
+</br>
+{{block.super}}
+{% endblock %}
+
+{% block extrajs %}
+    {{comment_form.media.js}}
+    {{block.super}}
+    <script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap.min.js"></script>
+
+    
+{% endblock %}

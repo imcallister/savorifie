@@ -1,0 +1,41 @@
+<div class="accordion-group">
+  <div class="accordion-heading">
+    <h3><a class="accordion-toggle" data-toggle="collapse" data-parent="{{parent}}" href="#collapse{{form_name}}">
+      {{form_title}}</a>
+    </h3>
+  </div>
+  <div id="collapse{{form_name}}" class="accordion-body collapse">
+    <div class="accordion-inner">
+      <div>
+        <form class="form-inline" role="form">
+            <input type="hidden" name="form_type" value="{{ form_type }}">
+            {% for field in form %}
+              {{field}}
+            {% endfor %}
+            <button type="submit" class="btn btn-info">
+              <i class="glyphicon glyphicon-search"></i>
+            </button>
+        </form>
+
+        <table class="table table-striped table-condensed">
+          <tr>
+            {% for col in col_titles %}
+              <th>{{ col }}</th>
+            {% endfor %}
+          </tr>
+
+          {% load tags %}
+          {% for record in queryset %}
+            <tr>
+
+              {% for fld in flds %}
+                <td>{{ record | _getattr:fld }}</td>
+              {% endfor %}
+              
+            </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

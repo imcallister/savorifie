@@ -1,0 +1,1 @@
+Use this for site-wide templates

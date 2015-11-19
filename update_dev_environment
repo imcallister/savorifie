@@ -1,0 +1,39 @@
+#!/bin/bash
+
+if [ "True" != "`python -c "import sys; print hasattr(sys, 'real_prefix')"`" ]; then
+    echo "ATTENTION!"
+    echo "You must use this script whilst inside a virtualenv!"
+    echo " "
+    exit 1
+fi
+echo
+echo "Updating dev environment. Will wipe out and replace all data"
+echo " "
+ENVDIR="`python -c \"import os, sys; print os.path.abspath(sys.prefix)\"`"
+
+cd $ENVDIR
+
+
+
+dropdb savorifie
+createdb savorifie
+
+python manage.py syncdb --noinput
+
+#these fixtures were derived from live data in mid March 2015.  May
+#need rebuilding from time to time.  Small in total
+
+echo "Loading user fixture"
+python manage.py loaddata savor_users
+echo "Loading gl objects fixture"
+python manage.py loaddata savor_gl_objs
+echo "Loading gl accounts fixture"
+python manage.py loaddata savor_accounts
+echo "Loading base_stockentry fixture"
+python manage.py loaddata base_stockentry
+echo "Loading environment fixture"
+python manage.py loaddata savor_environment
+echo "Loading reportdefs fixture"
+python manage.py loaddata savor_reportdefs
+echo "Loading audit_taskdef fixture"
+python manage.py loaddata audit_taskdef
