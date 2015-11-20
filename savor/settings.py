@@ -19,7 +19,7 @@ DEVELOP = startup.isDevelopmentServer()
 DEBUG = DEVELOP or (os.environ.get('DEBUG', 0) == '1')
 
 # can be overrided by setting the accountifie_SVC_URL dyn variable on the /admin/system/variable/ page
-accountifie_SVC_URL = os.environ.get('accountifie_SVC_URL', 'http://localhost:5124')
+ACCOUNTIFIE_SVC_URL = os.environ.get('ACCOUNTIFIE_SVC_URL', 'http://localhost:5124')
 
 # can be overrided by setting the DEFAULT_GL_STRATEGY dyn variable on the /admin/system/variable/ page
 DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
@@ -158,7 +158,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
-    #"accountifie.common.views.base_templates",
+    "accountifie.common.views.base_templates",
 
     "base.views.company_context",
     )

@@ -4,7 +4,7 @@ import datetime
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 from simple_history.models import HistoricalRecords
@@ -53,7 +53,7 @@ class NominalTransaction(models.Model, BusinessModelObject):
 
     content_type = models.ForeignKey(ContentType, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
-    source_object =  generic.GenericForeignKey()
+    source_object =  GenericForeignKey()
 
     comment = models.CharField(max_length=200, default="None")
 

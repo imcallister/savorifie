@@ -33,8 +33,8 @@ FREQ = [
 class TaskDef(models.Model):
     desc = models.CharField(max_length=100)
     freq = models.CharField(choices=FREQ, max_length=10)
-    approvers = models.ManyToManyField(User, blank=True, null=True, related_name="a")
-    preparers = models.ManyToManyField(User, blank=True, null=True, related_name="p")
+    approvers = models.ManyToManyField(User, blank=True, related_name="a")
+    preparers = models.ManyToManyField(User, blank=True, related_name="p")
     tmpl = models.CharField(max_length=100)
 
     def __str__(self):
