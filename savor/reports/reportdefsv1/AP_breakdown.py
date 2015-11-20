@@ -2,10 +2,10 @@ import datetime
 import pandas as pd
 from dateutil.parser import parse
 
-from financifie.reporting.models import Report, BasicBand, TextBand
+from accountifie.reporting.models import Report, BasicBand, TextBand
 from _utils import DZERO
-import financifie.gl.models as gl
-import financifie._utils as utils
+import accountifie.gl.models as gl
+import accountifie._utils as utils
 
 
 class APBreakdown(Report):

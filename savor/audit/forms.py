@@ -2,8 +2,8 @@ from django import forms
 
 from betterforms.forms import Fieldset, BetterModelForm
 
-from financifie.toolkit.forms import Html5Mixin, BootstrapMixin, BootstrapForm
-from financifie.toolkit.fields.htmlfield import HtmlFormField
+from accountifie.toolkit.forms import Html5Mixin, BootstrapMixin, BootstrapForm
+from accountifie.toolkit.fields.htmlfield import HtmlFormField
 
 import audit.models
 

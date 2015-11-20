@@ -23,27 +23,27 @@ from django.template import RequestContext
 from django.views.generic.detail import DetailView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from financifie.toolkit.forms import FileForm, SplashForm
+from accountifie.toolkit.forms import FileForm, SplashForm
 
-from financifie.tasks.utils import task, utcnow
-from financifie.tasks.models import DeferredTask, isDetachedTask, setProgress, setStatus
+from accountifie.tasks.utils import task, utcnow
+from accountifie.tasks.models import DeferredTask, isDetachedTask, setProgress, setStatus
 
 
-from financifie.gl.models import ExternalBalance, Transaction, TranLine
+from accountifie.gl.models import ExternalBalance, Transaction, TranLine
 
-from financifie.query.query_manager import QueryManager
+from accountifie.query.query_manager import QueryManager
 import base.models as base
-from financifie.forecasts.models import Forecast
-from financifie.gl.models import Company
-import financifie.gl.api
-import financifie.environment.api
-import financifie.toolkit
+from accountifie.forecasts.models import Forecast
+from accountifie.gl.models import Company
+import accountifie.gl.api
+import accountifie.environment.api
+import accountifie.toolkit
 import base.api
 from .models import Expense, Mcard, NominalTransaction, NominalTranLine
 import base.importers
 
 import base_settings
-import financifie._utils
+import accountifie._utils
 
 
 logger = logging.getLogger('default')
@@ -75,7 +75,7 @@ def company_context(request):
     This is not a view.
     """
     
-    company_id = financifie._utils.get_company(request)
+    company_id = accountifie._utils.get_company(request)
     data = {'company_id': company_id}
     if company_id:
         try:
@@ -161,7 +161,7 @@ def upload_file(request, file_type, check=False):
         else:
             raise ValueError("Unexpected file type; know about expense, checking, saving, mcard")
 
-        return financifie.toolkit.uploader.upload_file(request, **config)
+        return accountifie.toolkit.uploader.upload_file(request, **config)
     else:
         form = FileForm()
         context = {'form': form, 'file_type': file_type}
@@ -183,7 +183,7 @@ def expense_drilldown(request):
 
 
 def calc_drilldown():
-    accts = financifie.gl.api.accounts({})
+    accts = accountifie.gl.api.accounts({})
     ACCT_MAP = dict((acct['id'], acct['display_name']) for acct in accts)
 
     acct_list = [str(x) for x in range(7000,7100)]

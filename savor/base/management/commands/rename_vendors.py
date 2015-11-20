@@ -9,7 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from base.matching import match_expenses_to_vendors, old_to_new_vendors
 from base.models import Expense, Mcard
-from financifie.gl.models import Counterparty
+from accountifie.gl.models import Counterparty
 
 class Command(BaseCommand):
     option_list = BaseCommand.option_list + (

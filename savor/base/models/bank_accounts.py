@@ -2,11 +2,11 @@ from django.db import models
 
 from simple_history.models import HistoricalRecords
 
-import financifie.gl.bmo
+import accountifie.gl.bmo
 
 
 
-class Cashflow(models.Model, financifie.gl.bmo.BusinessModelObject):
+class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
     ext_account = models.ForeignKey('gl.ExternalAccount')
     post_date = models.DateField()
     amount = models.DecimalField(max_digits=11, decimal_places=2)

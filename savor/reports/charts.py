@@ -4,13 +4,13 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-from financifie.query.query_manager import QueryManager
-import financifie.reporting.models
-import financifie.environment.api
+from accountifie.query.query_manager import QueryManager
+import accountifie.reporting.models
+import accountifie.environment.api
 
 
 def display_name(path):
-    display_name = financifie.environment.api.alias({'name': path})
+    display_name = accountifie.environment.api.alias({'name': path})
     if display_name:
         return display_name
     else:
@@ -52,7 +52,7 @@ def chart_data_json2(request):
 
 @login_required
 def chart_data_json3(request):
-    net_cap = dict((x.date.isoformat(), float(x.balance)) for x in financifie.reporting.models.MetricEntry.objects.filter(metric__name='Net Capital'))
+    net_cap = dict((x.date.isoformat(), float(x.balance)) for x in accountifie.reporting.models.MetricEntry.objects.filter(metric__name='Net Capital'))
 
     data = {}
     data['chart_data'] = {}

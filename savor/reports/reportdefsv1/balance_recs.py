@@ -3,11 +3,11 @@ import pandas as pd
 from dateutil.parser import parse
 
 
-from financifie.reporting.models import Report, BasicBand, TextBand
+from accountifie.reporting.models import Report, BasicBand, TextBand
 from _utils import DZERO
 from query.query_manager import QueryManager
-import financifie.gl.api
-import financifie._utils as utils
+import accountifie.gl.api
+import accountifie._utils as utils
 
 
 class RecBalances(Report):
@@ -50,7 +50,7 @@ class RecBalances(Report):
         bals['diff'] = bals['current'] - bals['snapshot']
         bals.loc['Total'] = bals.apply(sum, axis=0)
         
-        accts = financifie.gl.api.accounts({})
+        accts = accountifie.gl.api.accounts({})
 
         acct_map = dict((a['id'], a['display_name']) for a in accts)
         label_map = lambda x: x + ': ' + acct_map[x] if x in acct_map else x

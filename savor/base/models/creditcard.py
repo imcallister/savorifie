@@ -3,15 +3,15 @@ from django.db import models
 
 from simple_history.models import HistoricalRecords
 
-import financifie.gl.models
-from financifie.gl.bmo import BusinessModelObject
-import financifie._utils
-import financifie.environment.api
+import accountifie.gl.models
+from accountifie.gl.bmo import BusinessModelObject
+import accountifie._utils
+import accountifie.environment.api
 
 
 class Mcard(models.Model, BusinessModelObject):
     # note that this is only for charges, not for payments
-    company = models.ForeignKey('gl.Company', default=financifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
 
     trans_date = models.DateField()
     post_date = models.DateField()
@@ -46,14 +46,14 @@ class Mcard(models.Model, BusinessModelObject):
         models.Model.delete(self)
 
     def get_gl_transactions(self):
-        mcard = financifie.gl.models.Counterparty.objects.get(id='mastercard')
-        debit = financifie.gl.models.Account.objects.get(display_name='Mastercard')
+        mcard = accountifie.gl.models.Counterparty.objects.get(id='mastercard')
+        debit = accountifie.gl.models.Account.objects.get(display_name='Mastercard')
         if self.type == 'Fee':
-            credit = financifie.gl.models.Account.objects.get(display_name='Banks Fees')
+            credit = accountifie.gl.models.Account.objects.get(display_name='Banks Fees')
             cp = mcard
             comment = 'Mastercard Fees'
         else:
-            credit = financifie.gl.models.Account.objects.get(id=financifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
+            credit = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
             cp = self.counterparty
             comment= "MasterCard ending #%s trans #%s: %s" % (self.card_number, self.id, cp)
 
@@ -75,7 +75,7 @@ class Mcard(models.Model, BusinessModelObject):
 
 class AMEX(models.Model, BusinessModelObject):
     # note that this is only for charges, not for payments
-    company = models.ForeignKey('gl.Company', default=financifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
 
     date = models.DateField()
     amount = models.FloatField(null=True)
@@ -104,9 +104,9 @@ class AMEX(models.Model, BusinessModelObject):
         models.Model.delete(self)
 
     def get_gl_transactions(self):
-        debit = financifie.gl.models.Account.objects.get(display_name='Amex')
-        credit = financifie.gl.models.Account.objects.get(id=financifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
-        amex = financifie.gl.models.Counterparty.objects.get(id='amex')
+        debit = accountifie.gl.models.Account.objects.get(display_name='Amex')
+        credit = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
+        amex = accountifie.gl.models.Counterparty.objects.get(id='amex')
 
         trans = []
         trans.append(dict(

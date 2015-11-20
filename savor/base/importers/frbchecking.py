@@ -1,6 +1,6 @@
 import datetime
 
-import financifie.gl.models
+import accountifie.gl.models
 
 
 def exclude_frbchecking():
@@ -11,7 +11,7 @@ def unique_frbchecking(instance):
     if instance.__class__.objects.filter(post_date=instance.post_date, amount=instance.amount, external_id=instance.external_id):
         return False
     else:
-        instance.ext_account = financifie.gl.models.ExternalAccount.objects.get(gl_account__id='1001')
+        instance.ext_account = accountifie.gl.models.ExternalAccount.objects.get(gl_account__id='1001')
         return instance
 
 

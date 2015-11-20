@@ -2,7 +2,7 @@ import pandas as pd
 from decimal import Decimal
 
 import base.models as base
-import financifie.gl.models as gl
+import accountifie.gl.models as gl
 
 
 def stock_table(start_date, end_date):

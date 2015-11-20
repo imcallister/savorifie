@@ -11,10 +11,10 @@ from decimal import Decimal
 from simple_history.models import HistoricalRecords
 from dateutil.relativedelta import relativedelta
 
-from financifie.gl.bmo import BusinessModelObject
-import financifie.gl.models
-import financifie.environment.api
-import financifie._utils
+from accountifie.gl.bmo import BusinessModelObject
+import accountifie.gl.models
+import accountifie.environment.api
+import accountifie._utils
 
 logger = logging.getLogger('default')
 
@@ -45,7 +45,7 @@ class Expense(models.Model, BusinessModelObject):
     will be populated in Django AFTER loading wth the correct foreign keys.
 
     """
-    company = models.ForeignKey('gl.Company', default=financifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
     
     stub = models.BooleanField(default=False)
     from_cf = models.ForeignKey('base.Cashflow', null=True)
@@ -112,7 +112,7 @@ class Expense(models.Model, BusinessModelObject):
 
     def _capitalize(self, debit):
         # capitalising or not
-        all_deprec_accts = dict((x.cap_account, x) for x in financifie.gl.models.DepreciationPolicy.objects.all())
+        all_deprec_accts = dict((x.cap_account, x) for x in accountifie.gl.models.DepreciationPolicy.objects.all())
         capitalize_it =  (debit in all_deprec_accts and abs(self.amount) >= 500.0)
         expense_it = (debit in all_deprec_accts and abs(self.amount) < 500.0)
 
@@ -120,7 +120,7 @@ class Expense(models.Model, BusinessModelObject):
         months = None
         if expense_it:
             exp_path = debit.path.replace('assets.noncurr.premandequip', 'equity.retearnings.opexp.admin')
-            debit = financifie.gl.models.Account.objects.filter(path=exp_path)[0]      
+            debit = accountifie.gl.models.Account.objects.filter(path=exp_path)[0]      
         elif capitalize_it:
             acc_asset_dep = all_deprec_accts[debit].depreciation_account
             months = all_deprec_accts[debit].depreciation_period
@@ -135,9 +135,9 @@ class Expense(models.Model, BusinessModelObject):
         """
 
         capitalize_it, debit, acc_asset_dep, months  = self._capitalize(self.account)
-        ACCTS_PAYABLE = financifie.gl.models.Account.objects.get(id=financifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
-        PREPAID_EXP = financifie.gl.models.Account.objects.get(id=financifie.environment.api.variable({'name': 'GL_PREPAID_EXP'}))
-        ACCRUED_LIAB = financifie.gl.models.Account.objects.get(id=financifie.environment.api.variable({'name': 'GL_ACCRUED_LIAB'}))
+        ACCTS_PAYABLE = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
+        PREPAID_EXP = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_PREPAID_EXP'}))
+        ACCRUED_LIAB = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCRUED_LIAB'}))
         
         trans = []
 
@@ -159,11 +159,11 @@ class Expense(models.Model, BusinessModelObject):
 
             # and now amort/deprec over appropriate time period
 
-            amort_accts = financifie.gl.models.Account.objects.filter(path=debit.path + '.amortization')
+            amort_accts = accountifie.gl.models.Account.objects.filter(path=debit.path + '.amortization')
             if len(amort_accts) > 0:
                 acc_pl_dep = amort_accts[0]
 
-            deprec_accts = financifie.gl.models.Account.objects.filter(path=debit.path + '.depreciation')
+            deprec_accts = accountifie.gl.models.Account.objects.filter(path=debit.path + '.depreciation')
             if len(deprec_accts) > 0:
                 acc_pl_dep = deprec_accts[0]
 

@@ -7,8 +7,8 @@ from django.contrib.admin import SimpleListFilter
 from simple_history.admin import SimpleHistoryAdmin
 
 from .models import *
-from financifie.gl.bmo import on_bmo_save
-from financifie.gl.models import Account
+from accountifie.gl.bmo import on_bmo_save
+from accountifie.gl.models import Account
 
 
 
@@ -47,7 +47,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
     actions = ['make_expense_stubs']
 
     def make_expense_stubs(self, request, queryset):
-        stub_account = financifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
+        stub_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
         new_stubs = 0
         for cf in queryset.all():
             if Expense.objects.filter(from_cf=cf).count()==0:

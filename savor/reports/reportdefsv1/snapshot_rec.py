@@ -5,11 +5,11 @@ from dateutil.parser import parse
 
 from django.conf import settings
 
-from financifie.reporting.models import Report, BasicBand, TextBand
+from accountifie.reporting.models import Report, BasicBand, TextBand
 from _utils import DZERO
 from query.query_manager import QueryManager
-import financifie.gl.api
-import financifie._utils as utils
+import accountifie.gl.api
+import accountifie._utils as utils
 
 import logging
 
@@ -68,7 +68,7 @@ class SnapshotRec(Report):
             bals[col] = bals[col].map(lambda x: Decimal(x))
         bals['diff'] = bals['snapshot'] - bals['current']
         
-        accts = financifie.gl.api.accounts({})
+        accts = accountifie.gl.api.accounts({})
 
         acct_map = dict((a['id'], a['display_name']) for a in accts)
         

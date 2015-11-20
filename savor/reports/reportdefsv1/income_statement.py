@@ -3,7 +3,7 @@ from decimal import Decimal
 import pandas as pd
 from dateutil.parser import parse
 
-from financifie.reporting.models import Report, BasicBand, TextBand
+from accountifie.reporting.models import Report, BasicBand, TextBand
 from _utils import DZERO
 import _utils as utils
 

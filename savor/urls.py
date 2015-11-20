@@ -21,13 +21,13 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     
     url(r'', include('base.urls')),
-    url(r'', include('financifie.toolkit.urls')),
+    url(r'', include('accountifie.toolkit.urls')),
 
-    url(r'^forecasts/', include('financifie.forecasts.urls')),
-    url(r'^gl/', include('financifie.gl.urls')),
-    url(r'^snapshot/', include('financifie.snapshot.urls')),
-    url(r'^reporting/', include('financifie.reporting.urls')),
-    url(r'^environment/', include('financifie.environment.urls')),
+    url(r'^forecasts/', include('accountifie.forecasts.urls')),
+    url(r'^gl/', include('accountifie.gl.urls')),
+    url(r'^snapshot/', include('accountifie.snapshot.urls')),
+    url(r'^reporting/', include('accountifie.reporting.urls')),
+    url(r'^environment/', include('accountifie.environment.urls')),
     url(r'^audit/', include('audit.urls')),    
     
     

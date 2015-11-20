@@ -5,8 +5,8 @@ from collections import defaultdict
 import pandas as pd
 import numpy as np
 
-from financifie.reporting.models import Report, BasicBand, TextBand
-import financifie.gl.models
+from accountifie.reporting.models import Report, BasicBand, TextBand
+import accountifie.gl.models
 from _utils import DZERO, fmt
 import _utils as utils
 import reporting.stock_tables as stock_tables
@@ -79,7 +79,7 @@ class ChgInEquityStatement(Report):
 
         child_paths = []
         for path in ['equity.prefstock', 'equity.commonstock', 'equity.apic']:
-            child_paths += financifie.gl.models.get_child_paths(path)
+            child_paths += accountifie.gl.models.get_child_paths(path)
 
         top_df = self.query_manager.pd_path_balances(self.company_id, self.dates, paths)
         

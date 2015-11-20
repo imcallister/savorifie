@@ -5,7 +5,7 @@ from django.template import RequestContext
 
 import audit._helpers as hlp
 import tables.bstrap_tables
-import financifie.reporting.api
+import accountifie.reporting.api
 
 @login_required
 def monthly_signoff(request, id):

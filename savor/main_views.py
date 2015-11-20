@@ -5,10 +5,10 @@ from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from financifie.gl.models import ExternalBalance, ExternalAccount
-from financifie.query.query_manager import QueryManager
-import financifie._utils
-import financifie.environment.api
+from accountifie.gl.models import ExternalBalance, ExternalAccount
+from accountifie.query.query_manager import QueryManager
+import accountifie._utils
+import accountifie.environment.api
 
 from base.models import Expense, Mcard, Cashflow
 
@@ -25,8 +25,8 @@ def reports(request):
 
 @login_required
 def home(request):
-    from_date, to_date = financifie._utils.extractDateRange(request)
-    company_id = financifie._utils.get_company(request)
+    from_date, to_date = accountifie._utils.extractDateRange(request)
+    company_id = accountifie._utils.get_company(request)
     #gather some info on what we have in the database
     expenses = Expense.objects.filter(company_id=company_id)
     stub_expenses = Expense.objects.filter(stub=True).count()
@@ -81,7 +81,7 @@ def home(request):
 @login_required
 def daily(request):
     today = datetime.datetime.now().date()
-    bank_accts = financifie.environment.api.variable_list({'name': 'BANK_ACCOUNTS'})
+    bank_accts = accountifie.environment.api.variable_list({'name': 'BANK_ACCOUNTS'})
   
     missing_bank_bals = []
 
@@ -89,8 +89,8 @@ def daily(request):
         if ExternalBalance.objects.filter(account=acct).filter(date=today).count() == 0:
             missing_bank_bals.append(acct)
 
-    company_id = financifie._utils.get_company(request)
-    from_date, to_date = financifie._utils.extractDateRange(request)
+    company_id = accountifie._utils.get_company(request)
+    from_date, to_date = accountifie._utils.extractDateRange(request)
     
     # new style
     gl_strategy = request.GET.get('gl_strategy', None)

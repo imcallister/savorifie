@@ -7,7 +7,7 @@ import pandas as pd
 
 import tables
 import models as audit
-from financifie.toolkit.forms import CommentForm
+from accountifie.toolkit.forms import CommentForm
 import importers.ATS
 
 EASTERN = pytz.timezone('US/Eastern')

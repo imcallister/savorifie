@@ -2,8 +2,8 @@ import datetime
 import pandas as pd
 from dateutil.parser import parse
 
-from financifie.reporting.models import Report, BasicBand, TextBand
-import financifie.gl.models
+from accountifie.reporting.models import Report, BasicBand, TextBand
+import accountifie.gl.models
 from _utils import DZERO
 import _utils as utils
 
@@ -34,7 +34,7 @@ class BalanceSheet(Report):
             header = {'fmt_tag': 'header', 'label': self.label_map(table_path)}
             table_data.append(header)
 
-            table_paths = utils.order_paths(financifie.gl.models.get_child_paths(table_path))
+            table_paths = utils.order_paths(accountifie.gl.models.get_child_paths(table_path))
             
             path_totals = pd.Series(index=self.column_order)
             path_totals = 0

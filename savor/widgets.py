@@ -1,4 +1,4 @@
-from financifie.middleware.docengine import getCurrentRequest
+from accountifie.middleware.docengine import getCurrentRequest
 import django.template
 from django.shortcuts import render
 

@@ -35,7 +35,7 @@
   "pk": 9, 
   "model": "reporting.reportdef", 
   "fields": {
-    "path": "financifie.reporting.core_reports.trialbalance", 
+    "path": "accountifie.reporting.core_reports.trialbalance", 
     "name": "TrialBalance"
   }
 },
@@ -43,7 +43,7 @@
   "pk": 11, 
   "model": "reporting.reportdef", 
   "fields": {
-    "path": "financifie.reporting.core_reports.activity", 
+    "path": "accountifie.reporting.core_reports.activity", 
     "name": "AccountActivity"
   }
 },

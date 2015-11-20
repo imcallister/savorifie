@@ -9,7 +9,7 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 
 
-from financifie.middleware.docengine import getCurrentUser
+from accountifie.middleware.docengine import getCurrentUser
 
 import audit.models
 from audit.forms import TaskBetterForm

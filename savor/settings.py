@@ -2,7 +2,7 @@
 import os, sys, json, pandas
 
 #introspects the environment to minimize use of localsettings
-from financifie.toolkit import startup
+from accountifie.toolkit import startup
 
 # stop those annoying warnings
 pandas.options.mode.chained_assignment = None
@@ -18,8 +18,8 @@ CLIENT_PROJECT = os.path.split(ENVIRON_DIR)[1]
 DEVELOP = startup.isDevelopmentServer()
 DEBUG = DEVELOP or (os.environ.get('DEBUG', 0) == '1')
 
-# can be overrided by setting the FINANCIFIE_SVC_URL dyn variable on the /admin/system/variable/ page
-FINANCIFIE_SVC_URL = os.environ.get('FINANCIFIE_SVC_URL', 'http://localhost:5124')
+# can be overrided by setting the accountifie_SVC_URL dyn variable on the /admin/system/variable/ page
+accountifie_SVC_URL = os.environ.get('accountifie_SVC_URL', 'http://localhost:5124')
 
 # can be overrided by setting the DEFAULT_GL_STRATEGY dyn variable on the /admin/system/variable/ page
 DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
@@ -142,12 +142,12 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'financifie.middleware.docengine.UserFindingMiddleware',
+    'accountifie.middleware.docengine.UserFindingMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'financifie.middleware.ssl.SSLRedirect',
+    'accountifie.middleware.ssl.SSLRedirect',
     'simple_history.middleware.HistoryRequestMiddleware',
-    'financifie.toolkit.error_handling.StandardExceptionMiddleware'
+    'accountifie.toolkit.error_handling.StandardExceptionMiddleware'
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -158,7 +158,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.static",
     "django.core.context_processors.tz",
     "django.contrib.messages.context_processors.messages",
-    #"financifie.common.views.base_templates",
+    #"accountifie.common.views.base_templates",
 
     "base.views.company_context",
     )
@@ -187,8 +187,8 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'djangosecure',
     #'cerberos',
-    'financifie.dashboard',
-    'financifie.common',
+    'accountifie.dashboard',
+    'accountifie.common',
     
     'django_nose',
     'django_extensions',
@@ -200,11 +200,11 @@ INSTALLED_APPS = (
     'base',
     'audit',
         
-    'financifie.forecasts',
-    'financifie.gl',
-    'financifie.snapshot',
-    'financifie.environment',
-    'financifie.reporting',
+    'accountifie.forecasts',
+    'accountifie.gl',
+    'accountifie.snapshot',
+    'accountifie.environment',
+    'accountifie.reporting',
     
     'django_admin_bootstrapped',
     'django.contrib.admin',
@@ -257,7 +257,7 @@ LOGGING = {
             },
         'database': {
             'level': 'INFO', # i.e., allows for logging messages of level INFO or higher
-            'class': 'financifie.common.log.DbLogHandler'
+            'class': 'accountifie.common.log.DbLogHandler'
             }
         },
     'loggers': {

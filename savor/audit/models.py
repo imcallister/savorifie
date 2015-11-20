@@ -9,8 +9,8 @@ from django.utils.safestring import mark_safe
 import simple_history.models
 from django_model_changes import ChangesMixin
 
-from financifie.toolkit.fields.htmlfield import HtmlField
-from financifie.middleware.docengine import getCurrentUser
+from accountifie.toolkit.fields.htmlfield import HtmlField
+from accountifie.middleware.docengine import getCurrentUser
 
 
 TZ = pytz.timezone(settings.TIME_ZONE)

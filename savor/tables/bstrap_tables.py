@@ -1,7 +1,7 @@
 from django.template import Context
 from django.template.loader import get_template
 
-from financifie._utils import get_default_company
+from accountifie._utils import get_default_company
 
 
 def get_bstrap_table(data_url, row_defs, pagination="true", pagination_num=25):

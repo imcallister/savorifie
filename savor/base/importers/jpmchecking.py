@@ -1,6 +1,6 @@
 import datetime
 
-import financifie.gl.models
+import accountifie.gl.models
 
 
 def exclude_jpmchecking():
