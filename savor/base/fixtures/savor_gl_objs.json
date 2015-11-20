@@ -155,6 +155,16 @@
   }
 },
 {
+  "pk": "3110", 
+  "model": "gl.account", 
+  "fields": {
+    "ordering": 0, 
+    "path": "liabilities.curr.accliab", 
+    "role": "liability", 
+    "display_name": "Accrued Liabilities"
+  }
+},
+{
   "pk": "3500", 
   "model": "gl.account", 
   "fields": {
@@ -682,6 +692,16 @@
     "path": "equity.retearnings.taxexp.statecorp", 
     "role": "expense", 
     "display_name": "State Taxes and Fees"
+  }
+},
+{
+  "pk": "9999", 
+  "model": "gl.account", 
+  "fields": {
+    "ordering": 0, 
+    "path": "unallocated", 
+    "role": "expense", 
+    "display_name": "Unallocated"
   }
 }
 ]

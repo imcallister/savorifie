@@ -27,8 +27,6 @@ echo "Loading user fixture"
 python manage.py loaddata savor_users
 echo "Loading gl objects fixture"
 python manage.py loaddata savor_gl_objs
-echo "Loading gl accounts fixture"
-python manage.py loaddata savor_accounts
 echo "Loading base_stockentry fixture"
 python manage.py loaddata base_stockentry
 echo "Loading environment fixture"
