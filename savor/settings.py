@@ -196,8 +196,9 @@ INSTALLED_APPS = (
 
     'betterforms',
     #'json_field',
-
+    
     'base',
+    
     'audit',
         
     'accountifie.forecasts',
@@ -205,9 +206,12 @@ INSTALLED_APPS = (
     'accountifie.snapshot',
     'accountifie.environment',
     'accountifie.reporting',
+    'accountifie.tasks',
+
     
     'django_admin_bootstrapped',
     'django.contrib.admin',
+    
     
 )
 

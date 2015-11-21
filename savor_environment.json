@@ -1,0 +1,66 @@
+[
+{
+  "fields": {
+    "value": "SAV",
+    "key": "DEFAULT_COMPANY_ID"
+  },
+  "model": "environment.variable",
+  "pk": 1
+},
+{
+  "fields": {
+    "value": "savor.base.models",
+    "key": "BMO_MODULES"
+  },
+  "model": "environment.variable",
+  "pk": 2
+},
+{
+  "fields": {
+    "value": "1001",
+    "key": "BANK_ACCOUNTS"
+  },
+  "model": "environment.variable",
+  "pk": 3
+},
+{
+  "fields": {
+    "value": "http://localhost:5124",
+    "key": "ACCOUNTIFIE_SVC_URL"
+  },
+  "model": "environment.variable",
+  "pk": 4
+},
+{
+  "fields": {
+    "value": "3000",
+    "key": "GL_ACCOUNTS_PAYABLE"
+  },
+  "model": "environment.variable",
+  "pk": 5
+},
+{
+  "fields": {
+    "value": "1250",
+    "key": "GL_PREPAID_EXP"
+  },
+  "model": "environment.variable",
+  "pk": 6
+},
+{
+  "fields": {
+    "value": "3110",
+    "key": "GL_ACCRUED_LIAB"
+  },
+  "model": "environment.variable",
+  "pk": 7
+},
+{
+  "fields": {
+    "value": "9999",
+    "key": "UNALLOCATED_ACCT"
+  },
+  "model": "environment.variable",
+  "pk": 8
+}
+]
