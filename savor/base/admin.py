@@ -49,12 +49,13 @@ class CashflowAdmin(SimpleHistoryAdmin):
     def make_expense_stubs(self, request, queryset):
         stub_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
         new_stubs = 0
-        for cf in queryset.all():
+        from_AP = queryset.filter(trans_type__id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
+        for cf in from_AP.all():
             if Expense.objects.filter(from_cf=cf).count()==0:
                 new_stubs += 1
                 Expense(comment=cf.description, counterparty=cf.counterparty, account_id=stub_account, from_cf=cf,
                         expense_date=cf.post_date, start_date=cf.post_date, amount=cf.amount, stub=True).save()
-        self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (new_stubs, queryset.count()-new_stubs))
+        self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (new_stubs, from_AP.count()-new_stubs))
         
 
 admin.site.register(Cashflow, CashflowAdmin)   
@@ -96,9 +97,10 @@ admin.site.register(BadExpense, BadExpenseAdmin)
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)
     actions = ['delete_model']
-    list_display = ('id', 'expense_date','paid_from', 'counterparty', 'employee','currency','amount',)
+    list_display = ('id', 'account','expense_date','paid_from', 'comment', 'counterparty', 'employee','currency','amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['expense_category', 'reason', 'employee__employee_name','id','counterparty__id']
+    list_editable = ('employee', 'account', 'paid_from', 'comment')
     #inlines = [McardExpenseInline]  - wrong, or needs Django 1.7?
 
     def get_actions(self, request):

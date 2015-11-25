@@ -20,7 +20,6 @@ logger = logging.getLogger('default')
 
 DZERO = Decimal('0')
 
-ACCT_CHGS = {'2001': '1701', '2002': '1703', '2003': '1705', '2004': '1707', '2005': '1709', '2006': '1711', '2007': '1713'}
 
 EASTERN = pytz.timezone('US/Eastern')
 
@@ -39,32 +38,23 @@ def get_changed(dt):
 
 
 class Expense(models.Model, BusinessModelObject):
-    """This aims to hold incoming data from the Certify CSV files.
-
-    Column names match (apart from some agreed mangling).  Extra fields
-    will be populated in Django AFTER loading wth the correct foreign keys.
-
-    """
+    
     company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
     
     stub = models.BooleanField(default=False)
     from_cf = models.ForeignKey('base.Cashflow', null=True)
 
-    #django generates an employee_id column which is exactly what we will set
     employee = models.ForeignKey('gl.Employee', null=True)
     account = models.ForeignKey('gl.Account')
     
-    #django generates a department_id column which is exactly what we will set
     expense_date = models.DateField(null=True)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True, blank=True)
     amount = models.FloatField(null=True)
     
-    currency = models.CharField(max_length=10)
+    currency = models.CharField(max_length=10, default='USD')
     process_date = models.DateField(null=True)
 
-
-    #These fields are added by our system or by a human
     counterparty = models.ForeignKey('gl.Counterparty', null=True, blank=True, help_text="We need to match this up")
 
     paid_from = models.ForeignKey('gl.Account', null=True, blank=True, 

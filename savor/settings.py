@@ -188,7 +188,6 @@ INSTALLED_APPS = (
     'djangosecure',
     #'cerberos',
     'accountifie.dashboard',
-    'accountifie.common',
     
     'django_nose',
     'django_extensions',
@@ -198,8 +197,9 @@ INSTALLED_APPS = (
     #'json_field',
     
     'base',
-    
     'audit',
+
+    'accountifie.common',
         
     'accountifie.forecasts',
     'accountifie.gl',
