@@ -54,7 +54,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
             if Expense.objects.filter(from_cf=cf).count()==0:
                 new_stubs += 1
                 Expense(comment=cf.description, counterparty=cf.counterparty, account_id=stub_account, from_cf=cf,
-                        expense_date=cf.post_date, start_date=cf.post_date, amount=cf.amount, stub=True).save()
+                        expense_date=cf.post_date, start_date=cf.post_date, amount=-cf.amount, stub=True).save()
         self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (new_stubs, from_AP.count()-new_stubs))
         
 
