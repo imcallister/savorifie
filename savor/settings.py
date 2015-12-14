@@ -1,8 +1,6 @@
 # Project project Django settings.
 import os, sys, json, pandas
 
-#introspects the environment to minimize use of localsettings
-from accountifie.toolkit import startup
 
 # stop those annoying warnings
 pandas.options.mode.chained_assignment = None
@@ -15,7 +13,7 @@ ENVIRON_DIR = os.path.realpath(os.path.join(PROJECT_DIR, '..'))
 
 CLIENT_PROJECT = os.path.split(ENVIRON_DIR)[1]
 
-DEVELOP = startup.isDevelopmentServer()
+DEVELOP = True
 DEBUG = DEVELOP or (os.environ.get('DEBUG', 0) == '1')
 
 # can be overrided by setting the accountifie_SVC_URL dyn variable on the /admin/system/variable/ page

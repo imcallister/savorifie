@@ -4,8 +4,8 @@ import pandas as pd
 from dateutil.parser import parse
 
 from accountifie.reporting.models import Report, BasicBand, TextBand
-from _utils import DZERO
-import _utils as utils
+from accountifie._utils import DZERO
+import accountifie._utils as utils
 
 
 class IncomeStatement(Report):

@@ -9,7 +9,6 @@ from django.utils.safestring import mark_safe
 import simple_history.models
 from django_model_changes import ChangesMixin
 
-from accountifie.toolkit.fields.htmlfield import HtmlField
 from accountifie.middleware.docengine import getCurrentUser
 
 
@@ -129,7 +128,7 @@ class AuditRecord(ChangesMixin, models.Model):
   timestamp = models.DateTimeField()
   desc = models.CharField(max_length=50)
   task = models.ForeignKey(Task)
-  comment = HtmlField(target="block", blank=True, help_text="Please add comment")
+  comment = models.TextField()
 
   @property
   def comment_fmt(self):

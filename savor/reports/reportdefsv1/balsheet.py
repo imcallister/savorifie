@@ -4,8 +4,8 @@ from dateutil.parser import parse
 
 from accountifie.reporting.models import Report, BasicBand, TextBand
 import accountifie.gl.models
-from _utils import DZERO
-import _utils as utils
+from accountifie._utils import DZERO
+import accountifie._utils as utils
 
 
 class BalanceSheet(Report):

@@ -3,7 +3,6 @@ from django import forms
 from betterforms.forms import Fieldset, BetterModelForm
 
 from accountifie.toolkit.forms import Html5Mixin, BootstrapMixin, BootstrapForm
-from accountifie.toolkit.fields.htmlfield import HtmlFormField
 
 import audit.models
 
@@ -31,5 +30,4 @@ class TaskBetterForm(BootstrapMixin, Html5Mixin, BetterModelForm):
 
 
 class CommentForm(BootstrapForm):
-
-    comment = HtmlFormField(label="Comment", required=False)
+    comment = forms.CharField(widget=forms.Textarea)

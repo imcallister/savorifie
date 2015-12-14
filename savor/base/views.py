@@ -23,7 +23,7 @@ from django.template import RequestContext
 from django.views.generic.detail import DetailView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from accountifie.toolkit.forms import FileForm, SplashForm
+from forms import FileForm
 
 from accountifie.tasks.utils import task, utcnow
 from accountifie.tasks.models import DeferredTask, isDetachedTask, setProgress, setStatus
