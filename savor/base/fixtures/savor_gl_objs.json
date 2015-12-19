@@ -75,633 +75,663 @@
   }
 },
 {
-  "pk": "1001", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "assets.curr.cash.checking", 
-    "role": "asset", 
+    "ordering": 0,
+    "path": "assets.curr.cash.checking",
+    "role": "asset",
     "display_name": "First Republic Checking"
-  }
+  },
+  "model": "gl.account",
+  "pk": "1001"
 },
 {
-  "pk": "1100", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "assets.curr.ar", 
-    "role": "asset", 
+    "ordering": 0,
+    "path": "assets.curr.ar",
+    "role": "asset",
     "display_name": "Accounts Receivable"
-  }
+  },
+  "model": "gl.account",
+  "pk": "1100"
 },
 {
-  "pk": "1250", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "assets.curr.other.prepaidexp", 
-    "role": "asset", 
+    "ordering": 0,
+    "path": "assets.curr.other.prepaidexp",
+    "role": "asset",
     "display_name": "Prepaid Expenses"
-  }
+  },
+  "model": "gl.account",
+  "pk": "1250"
 },
 {
-  "pk": "1501", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "assets.curr.inventory.library.babyyears", 
-    "role": "asset", 
+    "ordering": 0,
+    "path": "assets.curr.inventory.library.babyyears",
+    "role": "asset",
     "display_name": "Inventory--  Library, Baby Years"
-  }
+  },
+  "model": "gl.account",
+  "pk": "1501"
 },
 {
-  "pk": "1502", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "assets.curr.inventory.library.schoolyears", 
-    "role": "asset", 
+    "ordering": 0,
+    "path": "assets.curr.inventory.library.schoolyears",
+    "role": "asset",
     "display_name": "Inventory--  Library, School Years"
-  }
+  },
+  "model": "gl.account",
+  "pk": "1502"
 },
 {
-  "pk": "3000", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "liabilities.curr.ap", 
-    "role": "liability", 
+    "ordering": 0,
+    "path": "liabilities.curr.ap",
+    "role": "liability",
     "display_name": "Accounts Payable"
-  }
+  },
+  "model": "gl.account",
+  "pk": "3000"
 },
 {
-  "pk": "3010", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "liabilities.curr.accrued", 
-    "role": "liability", 
+    "ordering": 0,
+    "path": "liabilities.curr.accrued",
+    "role": "liability",
     "display_name": "Accrued Liabilities"
-  }
+  },
+  "model": "gl.account",
+  "pk": "3010"
 },
 {
-  "pk": "3100", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "liabilities.noncurr.loan.partner", 
-    "role": "liability", 
+    "ordering": 0,
+    "path": "liabilities.noncurr.loan.partner",
+    "role": "liability",
     "display_name": "Partner Loans"
-  }
+  },
+  "model": "gl.account",
+  "pk": "3100"
 },
 {
-  "pk": "3110", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "liabilities.curr.accliab", 
-    "role": "liability", 
+    "ordering": 0,
+    "path": "liabilities.curr.accliab",
+    "role": "liability",
     "display_name": "Accrued Liabilities"
-  }
+  },
+  "model": "gl.account",
+  "pk": "3110"
 },
 {
-  "pk": "3500", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.partnercontribs", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.partnercontribs",
+    "role": "capital",
     "display_name": "Partner Contributions"
-  }
+  },
+  "model": "gl.account",
+  "pk": "3500"
 },
 {
-  "pk": "4050", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.sales.product", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.sales.product",
+    "role": "capital",
     "display_name": "Product Sales"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4050"
 },
 {
-  "pk": "4051", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.sales.product.LBYE", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.sales.product.LBYE",
+    "role": "capital",
     "display_name": "Sales -- Library Baby Years"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4051"
 },
 {
-  "pk": "4052", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.sales.product.LSYE", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.sales.product.LSYE",
+    "role": "capital",
     "display_name": "Sales -- Library School Years"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4052"
 },
 {
-  "pk": "4201", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.costofsales.product.LBYE", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.costofsales.product.LBYE",
+    "role": "capital",
     "display_name": "Cost of Sales -- Library Baby Years"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4201"
 },
 {
-  "pk": "4202", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.costofsales.product.LSYE", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.costofsales.product.LSYE",
+    "role": "capital",
     "display_name": "Cost of Sales -- Library School Years"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4202"
 },
 {
-  "pk": "4450", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.sales.restocking", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.sales.restocking",
+    "role": "capital",
     "display_name": "Restocking Fees"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4450"
 },
 {
-  "pk": "4500", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.sales.returns", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.sales.returns",
+    "role": "capital",
     "display_name": "Sales Returns"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4500"
 },
 {
-  "pk": "4525", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.sales.replace.warranty", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.sales.replace.warranty",
+    "role": "capital",
     "display_name": "Replacements (Warranty)"
-  }
+  },
+  "model": "gl.account",
+  "pk": "4525"
 },
 {
-  "pk": "5065", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.costofsales.packaging", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.costofsales.packaging",
+    "role": "capital",
     "display_name": "Product Packaging (in distro price)"
-  }
+  },
+  "model": "gl.account",
+  "pk": "5065"
 },
 {
-  "pk": "5070", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.costofsales.shipping", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.costofsales.shipping",
+    "role": "capital",
     "display_name": "Outbound Shipping & Handling"
-  }
+  },
+  "model": "gl.account",
+  "pk": "5070"
 },
 {
-  "pk": "5075", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.costofsales.defectivegoods", 
-    "role": "capital", 
+    "ordering": 0,
+    "path": "equity.retearnings.costofsales.defectivegoods",
+    "role": "capital",
     "display_name": "Defective Goods"
-  }
+  },
+  "model": "gl.account",
+  "pk": "5075"
 },
 {
-  "pk": "6001", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.merchantfees.visa_mcard", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.merchantfees.visa_mcard",
+    "role": "expense",
     "display_name": "Merchant Fees - Visa/Mastercard"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6001"
 },
 {
-  "pk": "6002", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.merchantfees.amex", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.merchantfees.amex",
+    "role": "expense",
     "display_name": "Merchant Fees - AMEX"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6002"
 },
 {
-  "pk": "6003", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.merchantfees.paypal", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.merchantfees.paypal",
+    "role": "expense",
     "display_name": "Merchant Fees - Paypal"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6003"
 },
 {
-  "pk": "6004", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.merchantfees.square", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.merchantfees.square",
+    "role": "expense",
     "display_name": "Merchant Fees - Square"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6004"
 },
 {
-  "pk": "6010", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.payroll", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.payroll",
+    "role": "expense",
     "display_name": "Payroll"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6010"
 },
 {
-  "pk": "6020", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.occupancy.rent", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.occupancy.rent",
+    "role": "expense",
     "display_name": "Rent"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6020"
 },
 {
-  "pk": "6021", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.occupancy.utilities", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.occupancy.utilities",
+    "role": "expense",
     "display_name": "Utilities"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6021"
 },
 {
-  "pk": "6031", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.localtrans", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.revenue.opexp.localtrans",
+    "role": "expense",
     "display_name": "Local Transportation"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6031"
 },
 {
-  "pk": "6032", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.travel", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.travel",
+    "role": "expense",
     "display_name": "Travel"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6032"
 },
 {
-  "pk": "6033", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.lodging", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.lodging",
+    "role": "expense",
     "display_name": "Lodging"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6033"
 },
 {
-  "pk": "6034", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.mealsent", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.mealsent",
+    "role": "expense",
     "display_name": "Meals & Entertainment"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6034"
 },
 {
-  "pk": "6040", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.insurance", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.insurance",
+    "role": "expense",
     "display_name": "Insurance"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6040"
 },
 {
-  "pk": "6051", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.proffees.legal", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.proffees.legal",
+    "role": "expense",
     "display_name": "Legal (includes patent work)"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6051"
 },
 {
-  "pk": "6052", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.proffees.acctg", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.proffees.acctg",
+    "role": "expense",
     "display_name": "Accountinhg"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6052"
 },
 {
-  "pk": "6053", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.proffees.strategy", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.proffees.strategy",
+    "role": "expense",
     "display_name": "Strategy Consulting"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6053"
 },
 {
-  "pk": "6061", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.design", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.proffees.legal.fundraise",
+    "role": "expense",
+    "display_name": "Legal (fundraising)"
+  },
+  "model": "gl.account",
+  "pk": "6054"
+},
+{
+  "fields": {
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.design",
+    "role": "expense",
     "display_name": "Design"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6061"
 },
 {
-  "pk": "6062", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.design.graphics", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.design.graphics",
+    "role": "expense",
     "display_name": "Graphics"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6062"
 },
 {
-  "pk": "6063", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.design.prototypes", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.design.prototypes",
+    "role": "expense",
     "display_name": "Prototypes"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6063"
 },
 {
-  "pk": "6064", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.design.research", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.design.research",
+    "role": "expense",
     "display_name": "Product Research"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6064"
 },
 {
-  "pk": "6071", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.general.supplies", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.general.supplies",
+    "role": "expense",
     "display_name": "Supplies"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6071"
 },
 {
-  "pk": "6072", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.general.shippinh", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.general.shippinh",
+    "role": "expense",
     "display_name": "Shipping"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6072"
 },
 {
-  "pk": "6073", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.general.subscriptions", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.general.subscriptions",
+    "role": "expense",
     "display_name": "Dues & Subscriptions"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6073"
 },
 {
-  "pk": "6074", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.general.cloudservices", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.general.cloudservices",
+    "role": "expense",
     "display_name": "Cloud Software Services"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6074"
 },
 {
-  "pk": "6079", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.general.other", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.general.other",
+    "role": "expense",
     "display_name": "Other General & Admin"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6079"
 },
 {
-  "pk": "6111", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.infra.cloud", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.infra.cloud",
+    "role": "expense",
     "display_name": "Cloud Services"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6111"
 },
 {
-  "pk": "6112", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.infra.webhost", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.infra.webhost",
+    "role": "expense",
     "display_name": "Web Hosting"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6112"
 },
 {
-  "pk": "6113", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.infra.software", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.infra.software",
+    "role": "expense",
     "display_name": "Software Licences"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6113"
 },
 {
-  "pk": "6114", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.infra.devcosts", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.infra.devcosts",
+    "role": "expense",
     "display_name": "Development Costs"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6114"
 },
 {
-  "pk": "6201", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.advert.general", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.advert.general",
+    "role": "expense",
     "display_name": "Advertising"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6201"
 },
 {
-  "pk": "6202", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.advert.materials", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.advert.materials",
+    "role": "expense",
     "display_name": "Marketing Materials"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6202"
 },
 {
-  "pk": "6203", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.advert.tradeshow", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.advert.tradeshow",
+    "role": "expense",
     "display_name": "Tradeshow fees"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6203"
 },
 {
-  "pk": "6204", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.advert.digital", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.advert.digital",
+    "role": "expense",
     "display_name": "Digital Production"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6204"
 },
 {
-  "pk": "6501", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.distn.storage", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.advert.photo",
+    "role": "expense",
+    "display_name": "Photography"
+  },
+  "model": "gl.account",
+  "pk": "6205"
+},
+{
+  "fields": {
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.distn.storage",
+    "role": "expense",
     "display_name": "Storage"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6501"
 },
 {
-  "pk": "6502", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.distn.fulfill", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.distn.fulfill",
+    "role": "expense",
     "display_name": "Fulfillment"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6502"
 },
 {
-  "pk": "6503", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.distn.stocking", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.distn.stocking",
+    "role": "expense",
     "display_name": "Receiving & Stocking"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6503"
 },
 {
-  "pk": "6504", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.distn.returnprocess", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.distn.returnprocess",
+    "role": "expense",
     "display_name": "Return Processing"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6504"
 },
 {
-  "pk": "6505", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.distn.warehousecosts", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.distn.warehousecosts",
+    "role": "expense",
     "display_name": "Warehouse Costs"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6505"
 },
 {
-  "pk": "6506", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.distn.acctadmin", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.distn.acctadmin",
+    "role": "expense",
     "display_name": "Account Admin"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6506"
 },
 {
-  "pk": "6600", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.revenue.opexp.product.testing", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.product.testing",
+    "role": "expense",
     "display_name": "Product  Safety Testing"
-  }
+  },
+  "model": "gl.account",
+  "pk": "6600"
 },
 {
-  "pk": "7090", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.retearnings.opexp.admin.bankfees", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.product.upc",
+    "role": "expense",
+    "display_name": "UPC Codes"
+  },
+  "model": "gl.account",
+  "pk": "6601"
+},
+{
+  "fields": {
+    "ordering": 0,
+    "path": "equity.retearnings.opexp.admin.bankfees",
+    "role": "expense",
     "display_name": "Bank Charges"
-  }
+  },
+  "model": "gl.account",
+  "pk": "7090"
 },
 {
-  "pk": "8001", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "equity.retearnings.taxexp.statecorp", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "equity.retearnings.taxexp.statecorp",
+    "role": "expense",
     "display_name": "State Taxes and Fees"
-  }
+  },
+  "model": "gl.account",
+  "pk": "8001"
 },
 {
-  "pk": "9999", 
-  "model": "gl.account", 
   "fields": {
-    "ordering": 0, 
-    "path": "unallocated", 
-    "role": "expense", 
+    "ordering": 0,
+    "path": "unallocated",
+    "role": "expense",
     "display_name": "Unallocated"
-  }
+  },
+  "model": "gl.account",
+  "pk": "9999"
 }
 ]

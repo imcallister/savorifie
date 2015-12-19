@@ -140,7 +140,7 @@ class Expense(models.Model, BusinessModelObject):
                     date=self.start_date,
                     date_end=None,
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'CPLZ'),
-                    comment= "Capitalized Asset, %s: %s" % (self.id, self.vendor),
+                    comment= "Capitalized Asset, %s: %s" % (self.id, self.comment),
                     lines=[
                         (debit, Decimal(self.amount), self.counterparty),
                         (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty),
@@ -162,7 +162,7 @@ class Expense(models.Model, BusinessModelObject):
                     date=self.start_date,
                     date_end=self.start_date + relativedelta(months=months),
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'DPRC'),
-                    comment= "Depreciating asset,  %s: %s" % (self.id, self.vendor),
+                    comment= "Depreciating asset,  %s: %s" % (self.id, self.comment),
                     lines=[
                         (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty),
                         (acc_asset_dep, Decimal(self.amount), self.counterparty),
@@ -179,7 +179,7 @@ class Expense(models.Model, BusinessModelObject):
                     date=self.start_date,
                     date_end=None,
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'AP'),
-                    comment= "AP for %s: %s" % (self.id, self.vendor),
+                    comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
                         (PREPAID_EXP, Decimal(self.amount), self.counterparty),
                         (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty),
@@ -192,7 +192,7 @@ class Expense(models.Model, BusinessModelObject):
                     date=self.start_date,
                     date_end=self.end_date,
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'EXPS'),
-                    comment= "Expensing %s: %s" % (self.id, self.vendor),
+                    comment= "Expensing %s: %s" % (self.id, self.comment),
                     lines=[
                         (debit, Decimal(self.amount), self.counterparty),
                         (PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty),
@@ -207,7 +207,7 @@ class Expense(models.Model, BusinessModelObject):
                     date=self.end_date,
                     date_end=None,
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'AL2AP'),
-                    comment= "AP for %s: %s" % (self.id, self.vendor),
+                    comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
                         (ACCRUED_LIAB, Decimal(self.amount), self.counterparty),
                         (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty),
@@ -220,7 +220,7 @@ class Expense(models.Model, BusinessModelObject):
                     date=self.start_date,
                     date_end=self.end_date,
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'AL'),
-                    comment= "Accruing %s: %s" % (self.id, self.vendor),
+                    comment= "Accruing %s: %s" % (self.id, self.comment),
                     lines=[
                         (debit, Decimal(self.amount), self.counterparty),
                         (ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty),
@@ -233,7 +233,7 @@ class Expense(models.Model, BusinessModelObject):
                 date=self.start_date,
                 date_end=None,
                 trans_id='%s.%s.%s' % ('EXP', self.id, 'EXP'),
-                comment= "%s" % (self.id),
+                comment= "%s: %s" % (self.id, self.comment),
                 lines=[
                     (debit, float(self.amount), self.counterparty),
                     (ACCTS_PAYABLE, 0 - float(self.amount), self.counterparty),
