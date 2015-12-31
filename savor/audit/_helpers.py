@@ -8,7 +8,7 @@ import pandas as pd
 import tables
 import models as audit
 from .forms import CommentForm
-import importers.ATS
+
 
 EASTERN = pytz.timezone('US/Eastern')
 UTC = pytz.timezone('UTC')

@@ -419,7 +419,7 @@
     "ordering": 0,
     "path": "equity.retearnings.opexp.proffees.acctg",
     "role": "expense",
-    "display_name": "Accountinhg"
+    "display_name": "Accounting"
   },
   "model": "gl.account",
   "pk": "6052"
