@@ -38,7 +38,7 @@ except ImportError:
 try:
     from localsettings import DB_HOST
 except ImportError:
-    DB_HOST = 'postgresql01'
+    DB_HOST = 'localhost'
 
 
 # end of over-rides for ansible lineinfile
