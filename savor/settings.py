@@ -40,6 +40,7 @@ try:
 except ImportError:
     DB_HOST = 'localhost'
 
+# override database variables
 
 # end of over-rides for ansible lineinfile
 
