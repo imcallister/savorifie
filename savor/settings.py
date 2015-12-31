@@ -25,11 +25,11 @@ DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
 try:
     from localsettings import DB_NAME
 except ImportError:
-    DB_NAME = 'savorifie'
+    DB_NAME = 'accountifie'
 try:
     from localsettings import DB_USER
 except ImportError:
-    DB_USER = 'savorifie'
+    DB_USER = 'accountifie'
 try:
     from localsettings import DB_PASSWORD
 except ImportError:
