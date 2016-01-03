@@ -9,12 +9,12 @@ body {
 </style>
 {% endblock %}
 
-{% block title %}{{title|default:"Savorifie"}}{% endblock %}
+{% block title %}{{site_title}}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
 
-    <p class="text-info lead">{% block lead %}<img src="{{STATIC_URL}}base/img/savor_logo.png" height="100"/>{% endblock %}</p>
+    <p class="text-info lead">{% block lead %}<img src="{{STATIC_URL}}base/img/{{logo}}" height="100"/>{% endblock %}</p>
 
 
     <div class="row">

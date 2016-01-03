@@ -6,6 +6,9 @@ import os, sys, json, pandas
 pandas.options.mode.chained_assignment = None
 
 PROJECT_NAME = 'savor'
+LOGO = 'savor_logo.png'
+SITE_TITLE = 'savorifie'
+
 PROJECT_DIR = os.path.realpath(os.path.dirname(__file__))
 sys.path.append(PROJECT_DIR)
 

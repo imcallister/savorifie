@@ -1,10 +1,10 @@
 {% extends "admin/base.html" %}
 {% load i18n %}{% load admin_static bootstrapped_goodies_tags %}
 
-{% block title %}Savorifie{% endblock %}
+{% block title %}{{site_title}}{% endblock %}
 
 {% block branding %}
-<a class="navbar-brand" href="/"><img src="/static/base/img/savor_logo.png" height="25" /></a>
+<a class="navbar-brand" href="/"><img src="/static/base/img/{{logo}}" height="25" /></a>
 {% endblock %}
 
 {% block welcome-msg %}{% endblock %}

@@ -6,7 +6,6 @@ urlpatterns = patterns('',
  
     
     url(r'^download_expenses/$', views.output_expenses),
-    url(r'^expense_drilldown/$', views.expense_drilldown),
     
     url(r'^base/upload/(?P<file_type>.*)/$', views.upload_file, name='upload_file'),    
     
