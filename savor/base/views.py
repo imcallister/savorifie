@@ -42,7 +42,6 @@ import base.api
 from .models import Expense, Mcard, NominalTransaction, NominalTranLine
 import base.importers
 
-import base_settings
 import accountifie._utils
 
 
@@ -76,11 +75,13 @@ def company_context(request):
     """
     
     company_id = accountifie._utils.get_company(request)
-    data = {'company_id': company_id}
+    data = {'company_id': company_id, 'logo': settings.LOGO, 'site_title': settings.SITE_TITLE}
+
     if company_id:
         try:
             company = Company.objects.get(pk=company_id)
             data.update({'company':company})
+            data.update({'color_code': company.color_code})
         except Company.DoesNotExist:
             pass 
     return data
@@ -168,47 +169,6 @@ def upload_file(request, file_type, check=False):
         return render_to_response('base/upload_csv.html', context,
                               context_instance=RequestContext(request))
     
-def expense_drilldown(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="drilldown.csv"'
-    writer = csv.writer(response)
-
-    drilldown = calc_drilldown()
-
-    writer.writerow(list(drilldown.index.names) + list(drilldown.columns))
-    for row_idx in drilldown.index:
-        line = list(drilldown.loc[row_idx].name) + list(drilldown.loc[row_idx].values)
-        writer.writerow(line)
-    return response
-
-
-def calc_drilldown():
-    accts = accountifie.gl.api.accounts({})
-    ACCT_MAP = dict((acct['id'], acct['display_name']) for acct in accts)
-
-    acct_list = [str(x) for x in range(7000,7100)]
-    acct_list += ['1705','1250']
-    history = QueryManager().pd_history('SAV', 'account_list', None, incl=acct_list, excl_contra=['4150'])
-
-    drop = ['4150','3005','1103']
-
-    
-    history = history[~history['contra_accts'].isin(drop)]
-    history['month'] = history['date'].map(lambda x: datetime.date(x.year, x.month, 1))
-    history['name'] = history['account_id'].map(lambda x: ACCT_MAP[x] if x in ACCT_MAP else None)
-    drilldown = history[['month','account_id','name','counterparty','amount']].groupby(['month','name','account_id','counterparty']).sum().unstack(level='month')
-    drilldown.columns = drilldown.columns.droplevel()
-    drilldown.fillna(0,inplace=True)
-
-    top_cps = ['GOOG']
-
-    drilldown.index = pd.MultiIndex.from_tuples(drilldown.index.map(lambda x: (x[0], x[1], x[2] if x[2] in top_cps else '(various)')), names=['name','acct','cp'])
-    drilldown = drilldown.groupby(level=['name','acct','cp']).sum().dropna()
-    drilldown['Total'] = drilldown.sum(axis=1)
-
-    drilldown.sortlevel(level='acct', inplace=True)
-    return drilldown
-
 
 @login_required
 def output_expenses(request):

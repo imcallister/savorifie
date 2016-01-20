@@ -6,6 +6,9 @@ import os, sys, json, pandas
 pandas.options.mode.chained_assignment = None
 
 PROJECT_NAME = 'savor'
+LOGO = 'savor_logo.png'
+SITE_TITLE = 'savorifie'
+
 PROJECT_DIR = os.path.realpath(os.path.dirname(__file__))
 sys.path.append(PROJECT_DIR)
 
@@ -25,11 +28,11 @@ DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
 try:
     from localsettings import DB_NAME
 except ImportError:
-    DB_NAME = 'savorifie'
+    DB_NAME = 'accountifie'
 try:
     from localsettings import DB_USER
 except ImportError:
-    DB_USER = 'savorifie'
+    DB_USER = 'accountifie'
 try:
     from localsettings import DB_PASSWORD
 except ImportError:
@@ -40,6 +43,7 @@ try:
 except ImportError:
     DB_HOST = 'localhost'
 
+# override database variables
 
 # end of over-rides for ansible lineinfile
 
