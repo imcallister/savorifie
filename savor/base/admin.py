@@ -86,13 +86,6 @@ class AMEXAdmin(SimpleHistoryAdmin):
 admin.site.register(AMEX, AMEXAdmin)
 
 
-class BadExpenseAdmin(admin.ModelAdmin):
-    list_display = ['certify_id', 'comment']
-    search_fields = ['certify_id']
-admin.site.register(BadExpense, BadExpenseAdmin)
-
-
-
 
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)

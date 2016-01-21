@@ -102,7 +102,7 @@ class NominalTransaction(models.Model, BusinessModelObject):
 
         lines = []
         for line in self.nominaltranline_set.all():
-            lines.append((line.account, line.amount, line.counterparty))
+            lines.append((line.account, line.amount, line.counterparty, []))
         
         # if linked to another object use that in ID
         if self.object_id is not None:

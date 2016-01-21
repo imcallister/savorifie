@@ -36,30 +36,42 @@ def get_changed(dt):
     filt_history = [dict((k,str(v)) for k,v in exp.iteritems() if k in cols) for exp in history]
     return json.dumps(filt_history)
 
+class ExpenseAllocation(models.Model):
+    expense = models.ForeignKey('base.Expense')
+    project = models.ForeignKey('gl.Project')
+    amount = models.DecimalField(max_digits=11, decimal_places=2)
+
+    class Meta:
+        app_label = 'base'
+        db_table = 'base_expenseallocation'
+
+    def __unicode__(self):
+        return '%.2f: Project %s' %(self.amount, self.project)
+
 
 class Expense(models.Model, BusinessModelObject):
     
     company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
     
-    stub = models.BooleanField(default=False)
-    from_cf = models.ForeignKey('base.Cashflow', null=True)
-
     employee = models.ForeignKey('gl.Employee', null=True)
     account = models.ForeignKey('gl.Account')
     
     expense_date = models.DateField(null=True)
     start_date = models.DateField(null=True)
     end_date = models.DateField(null=True, blank=True)
-    amount = models.FloatField(null=True)
+    amount = models.DecimalField(max_digits=11, decimal_places=2, null=True)
     
     currency = models.CharField(max_length=10, default='USD')
     process_date = models.DateField(null=True)
 
     counterparty = models.ForeignKey('gl.Counterparty', null=True, blank=True, help_text="We need to match this up")
+    
+    stub = models.BooleanField(default=False, help_text='incomplete, created from cashflow')
+    from_cf = models.ForeignKey('base.Cashflow', null=True, blank=True, help_text='created from cashflow')
 
     paid_from = models.ForeignKey('gl.Account', null=True, blank=True, 
         help_text="shows the account this was paid from, or is owed to",
-        limit_choices_to={'id__in': [1001, 1002, 1003, 3000, 3010, 3020, 3250, 1250]
+        limit_choices_to={'id__in': [1001, 1002, 1003, 3000, 3010, 3020, 3250, 20100]
             },
         related_name='paid_from'
         )
@@ -117,6 +129,22 @@ class Expense(models.Model, BusinessModelObject):
         return capitalize_it, debit, acc_asset_dep, months 
 
 
+    def _get_exp_lines(self, exp_acct):
+        #allocations = self.expenseallocation_set.all()
+        allocations = ExpenseAllocation.objects.filter(expense=self)
+        exp_lines = []
+        running_total = DZERO
+        if len(allocations) > 0:
+            for allocation in allocations:
+                exp_lines.append((exp_acct, Decimal(allocation.amount), self.counterparty, ['project_%s' % allocation.project.id]))
+                running_total += Decimal(allocation.amount)
+
+        if abs(Decimal(self.amount) - running_total) >= Decimal('0.005'):
+            exp_lines.append((exp_acct, Decimal(self.amount) - running_total, self.counterparty, []))
+        
+        return exp_lines
+
+
     def get_gl_transactions(self):
         """We just debit the expense account and credit the generic
         Accounts Payable, whoever it is.  We do not at this stage
@@ -135,18 +163,19 @@ class Expense(models.Model, BusinessModelObject):
 
         if capitalize_it:
             # book to asset account
-            trans.append(dict(
-                    company=self.company,
-                    date=self.start_date,
-                    date_end=None,
-                    trans_id='%s.%s.%s' % ('EXP', self.id, 'CPLZ'),
-                    comment= "Capitalized Asset, %s: %s" % (self.id, self.comment),
-                    lines=[
-                        (debit, Decimal(self.amount), self.counterparty),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty),
-                        ]
-                    ))
+            tran = dict(
+                        company=self.company,
+                        date=self.start_date,
+                        date_end=None,
+                        trans_id='%s.%s.%s' % ('EXP', self.id, 'CPLZ'),
+                        comment= "Capitalized Asset, %s: %s" % (self.id, self.comment),
+                        lines=[
+                            (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                            ]
+                    )
 
+            tran['lines'] += self._get_exp_lines(debit)
+            trans.append(tran)
             # and now amort/deprec over appropriate time period
 
             amort_accts = accountifie.gl.models.Account.objects.filter(path=debit.path + '.amortization')
@@ -164,8 +193,8 @@ class Expense(models.Model, BusinessModelObject):
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'DPRC'),
                     comment= "Depreciating asset,  %s: %s" % (self.id, self.comment),
                     lines=[
-                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty),
-                        (acc_asset_dep, Decimal(self.amount), self.counterparty),
+                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (acc_asset_dep, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
                         ]
                     ))
 
@@ -181,23 +210,22 @@ class Expense(models.Model, BusinessModelObject):
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'AP'),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (PREPAID_EXP, Decimal(self.amount), self.counterparty),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty),
+                        (PREPAID_EXP, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
                         ]
                     ))
 
                 # expense over period
-                trans.append(dict(
-                    company=self.company,
-                    date=self.start_date,
-                    date_end=self.end_date,
-                    trans_id='%s.%s.%s' % ('EXP', self.id, 'EXPS'),
-                    comment= "Expensing %s: %s" % (self.id, self.comment),
-                    lines=[
-                        (debit, Decimal(self.amount), self.counterparty),
-                        (PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty),
-                        ]
-                    ))
+                tran = dict(
+                            company=self.company,
+                            date=self.start_date,
+                            date_end=self.end_date,
+                            trans_id='%s.%s.%s' % ('EXP', self.id, 'EXPS'),
+                            comment= "Expensing %s: %s" % (self.id, self.comment),
+                            lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
+                        )
+                tran['lines'] += self._get_exp_lines(debit)
+                trans.append(tran)
             else:
                 # paid in arrears
                 
@@ -209,45 +237,35 @@ class Expense(models.Model, BusinessModelObject):
                     trans_id='%s.%s.%s' % ('EXP', self.id, 'AL2AP'),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty),
+                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
                         ]
                     ))
 
                 # accrue expense over period
-                trans.append(dict(
-                    company=self.company,
-                    date=self.start_date,
-                    date_end=self.end_date,
-                    trans_id='%s.%s.%s' % ('EXP', self.id, 'AL'),
-                    comment= "Accruing %s: %s" % (self.id, self.comment),
-                    lines=[
-                        (debit, Decimal(self.amount), self.counterparty),
-                        (ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty),
-                        ]
-                    ))
+                tran = dict(
+                            company=self.company,
+                            date=self.start_date,
+                            date_end=self.end_date,
+                            trans_id='%s.%s.%s' % ('EXP', self.id, 'AL'),
+                            comment= "Accruing %s: %s" % (self.id, self.comment),
+                            lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
+                        )
+                
+                tran['lines'] += self._get_exp_lines(debit)
+                trans.append(tran)
 
         else: # single date
-            trans.append(dict(
-                company=self.company,
-                date=self.start_date,
-                date_end=None,
-                trans_id='%s.%s.%s' % ('EXP', self.id, 'EXP'),
-                comment= "%s: %s" % (self.id, self.comment),
-                lines=[
-                    (debit, float(self.amount), self.counterparty),
-                    (ACCTS_PAYABLE, 0 - float(self.amount), self.counterparty),
-                    ]
-                ))
+            tran = dict(
+                    company=self.company,
+                    date=self.start_date,
+                    date_end=None,
+                    trans_id='%s.%s.%s' % ('EXP', self.id, 'EXP'),
+                    comment= "%s: %s" % (self.id, self.comment),
+                    lines=[(ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),]
+                )
+
+            tran['lines'] += self._get_exp_lines(debit)
+            trans.append(tran)
 
         return trans
-
-class BadExpense(models.Model):
-    # for Certify expenses that we want to exclude from loading
-    certify_id = models.CharField(max_length=20)
-    comment = models.TextField(max_length=200, null=True, blank=True)
-
-    class Meta:
-        app_label = 'base'
-        db_table = 'base_badexpense'
-

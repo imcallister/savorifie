@@ -65,8 +65,8 @@ class Mcard(models.Model, BusinessModelObject):
             comment= comment,
             long_desc= self.description,
             lines=[ # not sure of signs here
-                (debit, float(self.amount), mcard),
-                (credit, 0 - float(self.amount), cp),
+                (debit, float(self.amount), mcard, []),
+                (credit, 0 - float(self.amount), cp, []),
                 ]
             ))
 
