@@ -74,6 +74,7 @@ these divs are needed.
                     <thead>
                         <th>Counterparty</th>
                         <th>Amount</th>
+                        <th></th>
                     </thead>
                     <tbody>
                     {% for row in creditor_rows %}
@@ -82,9 +83,11 @@ these divs are needed.
                             <td class="align-right">
                                 <a href="{{row.2}}">{{row.1}}</a>
                             </td>
-                        </tr>    {% endfor %}
-
-                    
+                            <td class="align-right">
+                                <a href="{{row.3}}">Make expense from CF</a>
+                            </td>
+                        </tr>    
+                    {% endfor %}
                     </tbody>
                 </table>
                 </div>

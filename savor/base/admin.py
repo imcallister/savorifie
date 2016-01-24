@@ -44,6 +44,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty', 'trans_type', )
     list_filter = ('ext_account', UnmatchedCashflows)
     list_editable = ('counterparty', 'trans_type',)
+    search_fields = ('counterparty__id',)
     actions = ['make_expense_stubs']
 
     def make_expense_stubs(self, request, queryset):

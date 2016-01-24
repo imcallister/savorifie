@@ -64,7 +64,8 @@ def home(request):
     for i in ap_table.index:
         if abs(ap_table.loc[i]) > 1:
             drilldown = '/reporting/history/account/3000/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
-            ap_rows.append([i, ap_table.loc[i], drilldown])
+            missing_exp = '/admin/base/cashflow/?q=%s' %i
+            ap_rows.append([i, ap_table.loc[i], drilldown, missing_exp])
 
 
     context = dict(
