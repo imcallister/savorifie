@@ -75,16 +75,12 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def get_gl_transactions(self):
 
         cf_acct = self.ext_account.gl_account
-        depositary = self.ext_account.counterparty
-
         tran = []
-
-        
         tran = dict(company=self.ext_account.company,
                     date=self.post_date,
                     comment= "%s: %s" % (self.id, self.description[:75]),
                     trans_id='%s.%s.%s' % (self.ext_account.label, self.id, 'CFLOW'),
-                    lines=[(cf_acct, Decimal(self.amount), depositary, []),
+                    lines=[(cf_acct, Decimal(self.amount), self.counterparty, []),
                             (self.trans_type, -Decimal(self.amount), self.counterparty, [self.tag] if self.tag else [])]
                     )
 
