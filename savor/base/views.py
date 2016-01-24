@@ -73,10 +73,11 @@ def company_context(request):
 
     This is not a view.
     """
-    
     company_id = accountifie._utils.get_company(request)
     data = {'company_id': company_id, 'logo': settings.LOGO, 'site_title': settings.SITE_TITLE}
 
+    data['ap_acct'] = accountifie.environment.api.variable({'name':'GL_ACCOUNTS_PAYABLE'})
+    
     if company_id:
         try:
             company = Company.objects.get(pk=company_id)
