@@ -209,6 +209,7 @@ INSTALLED_APPS = (
     'accountifie.environment',
     'accountifie.reporting',
     'accountifie.tasks',
+    'accountifie.cal',
 
     
     'django_admin_bootstrapped',
