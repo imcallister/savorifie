@@ -1,6 +1,10 @@
 {% extends "admin/base.html" %}
 {% load i18n %}{% load admin_static bootstrapped_goodies_tags %}
 
+{% block extrahead %}
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/base.css" />
+{% endblock %}
+
 {% block title %}{{site_title}}{% endblock %}
 
 {% block branding %}
