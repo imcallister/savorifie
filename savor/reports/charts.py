@@ -1,6 +1,6 @@
 import datetime
 import json
-
+from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
@@ -12,7 +12,7 @@ import accountifie.environment.api
 def display_name(path):
     display_name = accountifie.environment.api.alias({'name': path})
     if display_name:
-        return display_name
+        return display_name['display_as']
     else:
         return path
 
@@ -63,16 +63,19 @@ def chart_data_json3(request):
 
 @login_required
 def chart_data_json4(request):
-    raw_data = QueryManager().path_drilldown('SAV', {'2015M05':'2015M05', '2015M06':'2015M06', '2015M07':'2015M07'}, 'equity.retearnings.opexp', excl_contra=['4150'])
+    raw_data = QueryManager().path_drilldown('SAV', {'2015M10':'2015M10', '2015M11':'2015M11', '2015M12':'2015M12'}, 'equity.retearnings.opexp', excl_contra=['4150'])
     # pull out top 5
     total_exp = raw_data.sum(axis=1)
     total_exp.sort()
+    
     tbl_data = raw_data.loc[total_exp.index[:5]]
     tbl_data.loc['rest'] = raw_data.loc[total_exp.index[5:]].sum(axis=0)
     tbl_data.index = tbl_data.index.map(display_name)
+    
     data = {}
     data['chart_data'] = {}
     data['chart_data']['dates'] = list(tbl_data.columns)
-    data['chart_data']['values'] = dict((pth, [-float(tbl_data.loc[pth, x]) for x in data['chart_data']['dates']]) for pth in tbl_data.index)
+    data['chart_data']['values'] = dict((pth, [-int(tbl_data.loc[pth, x]) for x in data['chart_data']['dates']]) for pth in tbl_data.index)
+
     return HttpResponse(json.dumps(data), content_type='application/json')
 
