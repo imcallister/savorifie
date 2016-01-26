@@ -175,3 +175,70 @@ class NominalTransactionAdmin(SimpleHistoryAdmin):
         return admin.ModelAdmin.response_add(self, request, obj)
 
 admin.site.register(NominalTransaction, NominalTransactionAdmin)
+
+
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('short_code', 'description')
+    search_fields = ('short_code',)
+
+
+
+class TaxCollectorAdmin(admin.ModelAdmin):
+    list_display = ('entity',)
+    list_editable = ('entity',)
+    search_fields = ('entity',)
+
+
+
+admin.site.register(TaxCollector, TaxCollectorAdmin)
+admin.site.register(Product, ProductAdmin)
+
+
+#special signal as normal GL update doesn't work with NominalTransaction
+sale_saved = django.dispatch.Signal(providing_args=[])
+sale_saved.connect(on_bmo_save)
+
+
+class UnitSaleInlineFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        pass
+
+class UnitSaleInline(admin.TabularInline):
+    model = UnitSale
+    can_delete = True
+    extra = 0
+    #formset = UnitSaleInlineFormset
+    
+     
+    
+class SalesTaxInline(admin.TabularInline):
+    model = SalesTax
+    can_delete = True
+    extra = 0
+
+class SaleAdmin(SimpleHistoryAdmin):
+    list_display=('external_ref', 'sale_date', 'channel', 'customer_code',  'fulfill_status', 'discount_code',)
+    list_filter = ('channel','fulfill_status',)
+    search_fields = ('external_ref', 'channel','fulfill_status',)
+    save_as = True
+    inlines = [
+        UnitSaleInline,
+        SalesTaxInline
+        ]
+
+    fieldsets = (
+        ('Order Details', {'fields': (('channel', 'external_ref',), ('customer_code', 'fulfill_status'), ('memo', ), ('shipping', ))}),
+        ('Discount', {'fields': (('discount', 'discount_code',), )}),
+    )
+
+    def response_change(self, request, new_object):
+        "They saved a change - send signal"
+        sale_saved.send(new_object)
+        return admin.ModelAdmin.response_change(self, request, new_object)
+
+    def response_add(self, request, obj):
+        "They added a new nom tran - send signal"
+        sale_saved.send(obj)
+        return admin.ModelAdmin.response_add(self, request, obj)
+
+admin.site.register(Sale, SaleAdmin)

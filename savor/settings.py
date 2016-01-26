@@ -152,6 +152,8 @@ MIDDLEWARE_CLASSES = (
     'accountifie.toolkit.error_handling.StandardExceptionMiddleware'
 )
 
+
+
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
