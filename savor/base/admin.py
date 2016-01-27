@@ -227,7 +227,7 @@ class SaleAdmin(SimpleHistoryAdmin):
         ]
 
     fieldsets = (
-        ('Order Details', {'fields': (('channel', 'external_ref',), ('customer_code', 'fulfill_status'), ('memo', ), ('shipping', ))}),
+        ('Order Details', {'fields': (('channel', 'sale_date'), ('customer_code', 'external_ref',), ('memo', 'fulfill_status',), ('shipping', ))}),
         ('Discount', {'fields': (('discount', 'discount_code',), )}),
     )
 
