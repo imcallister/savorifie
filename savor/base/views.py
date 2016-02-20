@@ -60,6 +60,21 @@ def large_expenses(request):
     dt = parse(request.GET.get('date'))
     return HttpResponse(json.dumps(base.api.large_expenses(dt), cls=DjangoJSONEncoder), content_type="application/json")
 
+
+@login_required
+def dump_fixtures(request):
+    output = StringIO()
+
+    call_command('dumpdata', 'gl', 'environment','base','--indent=2', stdout=output)
+    data = output.getvalue()
+    output.close()
+
+    file_label = 'fixtures_%s' % datetime.datetime.now().strftime('%d-%b-%Y_%H-%M')
+    response = HttpResponse(data, content_type="application/json")
+    response['Content-Disposition'] = 'attachment; filename=%s' % file_label
+    return response
+
+
 @login_required
 def nominal(request):
     dt = parse(request.GET.get('date'))
