@@ -128,22 +128,6 @@ def upload_file(request, file_type, check=False):
                           value_cleaner=base.importers.clean_expense_values,
                           exclude=base.importers.exclude_expense(),
                           post_process=None)
-        elif file_type == 'jpmchecking':
-            config = dict(file_type=file_type,
-                          model='base.Cashflow', 
-                          unique=base.importers.unique_jpmchecking, 
-                          name_cleaner=base.importers.clean_jpmchecking_fields, 
-                          value_cleaner=base.importers.clean_jpmchecking_values,
-                          exclude=[],
-                          post_process=None)
-        elif file_type == 'jpmsaving':
-            config = dict(file_type=file_type,
-                          model='base.Cashflow', 
-                          unique=base.importers.unique_jpmsaving, 
-                          name_cleaner=base.importers.clean_jpmsaving_fields, 
-                          value_cleaner=base.importers.clean_jpmsaving_values,
-                          exclude=[],
-                          post_process=None)
         elif file_type == 'frbchecking':
             config = dict(file_type=file_type,
                           model='base.Cashflow', 
@@ -152,14 +136,8 @@ def upload_file(request, file_type, check=False):
                           value_cleaner=base.importers.clean_frbchecking_values,
                           exclude=[],
                           post_process=None)
-        elif file_type == 'mcard':
-            config = dict(file_type=file_type,
-                          model='base.Mcard', 
-                          unique=base.importers.unique_mcard, 
-                          name_cleaner=base.importers.clean_jpmchecking_fields, 
-                          value_cleaner=base.importers.clean_jpmchecking_values,
-                          exclude=[],
-                          post_process=None)
+        elif file_type == 'shopify':
+          return shopify_upload(request)
         else:
             raise ValueError("Unexpected file type; know about expense, checking, saving, mcard")
 
@@ -170,6 +148,7 @@ def upload_file(request, file_type, check=False):
         return render_to_response('base/upload_csv.html', context,
                               context_instance=RequestContext(request))
     
+
 
 @login_required
 def output_expenses(request):
