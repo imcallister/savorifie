@@ -91,7 +91,7 @@ def company_context(request):
     """
     company_id = accountifie._utils.get_company(request)
     data = {'company_id': company_id, 'logo': settings.LOGO, 'site_title': settings.SITE_TITLE}
-
+    data['admin_site_title'] = settings.SITE_TITLE
     data['ap_acct'] = accountifie.environment.api.variable({'name':'GL_ACCOUNTS_PAYABLE'})
     
     if company_id:
