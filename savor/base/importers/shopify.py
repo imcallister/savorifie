@@ -124,4 +124,5 @@ def process_shopify(file_name):
                 unitsale_obj = UnitSale(**obj_data)
                 unitsale_obj.save()
 
+            sale_obj.save()
     return exist_sales_ctr, new_sales_ctr
