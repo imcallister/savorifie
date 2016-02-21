@@ -153,7 +153,7 @@ def upload_file(request, file_type, check=False):
                           exclude=[],
                           post_process=None)
         elif file_type == 'shopify':
-          return shopify_upload(request)
+          return base.importers.shopify.order_upload(request)
         else:
             raise ValueError("Unexpected file type; know about expense, checking, saving, mcard")
 
@@ -164,6 +164,8 @@ def upload_file(request, file_type, check=False):
         return render_to_response('base/upload_csv.html', context,
                               context_instance=RequestContext(request))
     
+
+
 
 
 @login_required
