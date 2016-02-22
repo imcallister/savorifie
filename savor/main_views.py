@@ -27,10 +27,7 @@ def reports(request):
 def home(request):
     from_date, to_date = accountifie._utils.extractDateRange(request)
     company_id = accountifie._utils.get_company(request)
-    #gather some info on what we have in the database
     expenses = Expense.objects.filter(company_id=company_id)
-    
-    
     
     context = dict(
         company_id = company_id

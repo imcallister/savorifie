@@ -16,25 +16,9 @@ def display_name(path):
     else:
         return path
 
-@login_required
-def chart_data_json(request):
-    today = datetime.datetime.now().date()
-    dt_rng = [today + datetime.timedelta(days=-x) for x in range(28)]
-
-    dts = dict((x.isoformat(), x) for x in dt_rng if x.weekday()<5)
-    rslts = QueryManager().pd_acct_balances('SAV', dts, acct_list=['5001'])
-    values = dict((x, float(-rslts.loc['5001'][x])) for x in dts)
-    data = {}
-    params = request.GET
-    data['chart_data'] = {}
-    data['chart_data']['dates'] = sorted(values.keys())
-    data['chart_data']['values'] = [values[x] for x in data['chart_data']['dates']]
-
-    return HttpResponse(json.dumps(data), content_type='application/json')
-
 
 @login_required
-def chart_data_json2(request):
+def cash_balances(request):
     today = datetime.datetime.now().date()
     dt_rng = [today + datetime.timedelta(days=-x) for x in range(60)]
     dts = dict((x.isoformat(), x) for x in dt_rng if x.weekday()<5)
@@ -50,19 +34,9 @@ def chart_data_json2(request):
     
     return HttpResponse(json.dumps(data), content_type='application/json')
 
-@login_required
-def chart_data_json3(request):
-    net_cap = dict((x.date.isoformat(), float(x.balance)) for x in accountifie.reporting.models.MetricEntry.objects.filter(metric__name='Net Capital'))
-
-    data = {}
-    data['chart_data'] = {}
-    data['chart_data']['dates'] = sorted(net_cap.keys())
-    data['chart_data']['values'] = [net_cap[x] for x in data['chart_data']['dates'] if x in net_cap]
-    
-    return HttpResponse(json.dumps(data), content_type='application/json')
 
 @login_required
-def chart_data_json4(request):
+def expense_trends(request):
     raw_data = QueryManager().path_drilldown('SAV', {'2015M10':'2015M10', '2015M11':'2015M11', '2015M12':'2015M12'}, 'equity.retearnings.opexp', excl_contra=['4150'])
     # pull out top 5
     total_exp = raw_data.sum(axis=1)

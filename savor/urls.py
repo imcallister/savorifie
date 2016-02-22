@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     
     url(r'', include('base.urls')),
+    url(r'^reports/', include('reports.urls')),
     url(r'', include('accountifie.toolkit.urls')),
     url(r'', include('accountifie.common.urls')),
 
