@@ -443,39 +443,3 @@
 
 
 {% endblock %}
-
-{% block extrajs %}
-<script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
-<script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
-
-
-<script type="text/javascript">
-$(document).ready(function() {
-
-     var avgByDayOptions = {
-        chart: {
-            renderTo: 'chart_panel',
-            type: 'line',
-        },
-        legend: {enabled: false},
-        title: {text: 'Cumulative Crossed Revenue'},
-        subtitle: {text: 'Last month'},
-        xAxis: {title: {text: null}, labels: {rotation: -45}, type:'datetime'},
-        yAxis: {title: {text: null}},
-        series: [{}],
-    };
-
-    $.ajax({
-        type: 'get',
-        url: "{% url 'chart_data_json' %}",
-        success:function(data) {
-                avgByDayOptions.xAxis.categories = data['chart_data']['dates'];
-                avgByDayOptions.series[0].name = 'Revenue';
-                avgByDayOptions.series[0].data = data['chart_data']['values'];
-                var chart = new Highcharts.Chart(avgByDayOptions);
-        }
-    });
-
-} );
-</script>
-{% endblock %}

@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from accountifie.query.query_manager import QueryManager
 import accountifie.reporting.models
 import accountifie.environment.api
+from accountifie._utils import monthrange
 
 
 def display_name(path):
@@ -20,7 +21,7 @@ def display_name(path):
 @login_required
 def cash_balances(request):
     today = datetime.datetime.now().date()
-    dt_rng = [today + datetime.timedelta(days=-x) for x in range(60)]
+    dt_rng = [today + datetime.timedelta(days=-x) for x in range(180)]
     dts = dict((x.isoformat(), x) for x in dt_rng if x.weekday()<5)
     SAV_rslts = QueryManager().pd_acct_balances('SAV', dts, acct_list=['1001'])
     values = dict((x, float(-SAV_rslts.loc['1001'][x])) for x in dts)
@@ -37,7 +38,15 @@ def cash_balances(request):
 
 @login_required
 def expense_trends(request):
-    raw_data = QueryManager().path_drilldown('SAV', {'2015M10':'2015M10', '2015M11':'2015M11', '2015M12':'2015M12'}, 'equity.retearnings.opexp', excl_contra=['4150'])
+
+    # dynamically generate the dates
+    today = datetime.datetime.now().date()
+    last_year = datetime.date(today.year-1, today.month, today.day)
+
+    all_dts = ['%sM%02d' % (x[0], x[1]) for x in list(monthrange(last_year,today))]
+    cols = dict(zip(all_dts, all_dts))
+    
+    raw_data = QueryManager().path_drilldown('SAV', cols, 'equity.retearnings.opexp', excl_contra=['4150'])
     # pull out top 5
     total_exp = raw_data.sum(axis=1)
     total_exp.sort()
