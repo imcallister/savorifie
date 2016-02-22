@@ -66,7 +66,7 @@ def dump_fixtures(request):
     output = StringIO()
 
     call_command('dumpdata', 'auth.group', 'auth.user', 'gl.company', 'gl.department', 'gl.employee', 'gl.counterparty',
-                  'gl.account', 'gl.externalaccount', 'environment', 'audit', 'reporting', 'base', '--indent=2', stdout=output)
+                  'gl.account', 'gl.externalaccount', 'environment', 'audit', 'reporting', 'base','--indent=2', stdout=output)
     data = output.getvalue()
     output.close()
 

@@ -186,7 +186,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         # SHIPPING
         shipping_acct = accountifie.gl.api.account({'path': 'liabilities.curr.accrued.shipping'})['id']
-        tran['lines'].append((shipping_acct, -self.shipping, None, []))
+        tran['lines'].append((shipping_acct, -self.shipping, 'retail_buyer', []))
 
         # TAXES
         sales_tax_acct = accountifie.gl.api.account({'path': 'liabilities.curr.accrued.salestax'})['id']

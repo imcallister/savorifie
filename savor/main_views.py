@@ -29,52 +29,11 @@ def home(request):
     company_id = accountifie._utils.get_company(request)
     #gather some info on what we have in the database
     expenses = Expense.objects.filter(company_id=company_id)
-    stub_expenses = Expense.objects.filter(stub=True).count()
-
-    chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
-    cashflows = Cashflow.objects.filter(ext_account=chk_acct)
-    incomplete_cashflows = cashflows.filter(counterparty=None).count()
-
-    incomplete_rows = []
-    incomplete_rows.append(['Expenses', stub_expenses, '/admin/base/expense/?unmatched=UNMATCHED'])
-    incomplete_rows.append(['Payments -- 1001', incomplete_cashflows, '/admin/base/cashflow/?unmatched=UNMATCHED'])
-
-
-
-    expense_count = expenses.count()
-    if expense_count:
-        expense_latest = expenses.order_by('-expense_date')[0].expense_date #one sql query I hope
-    else:
-        expense_latest = datetime.date.today()
-
     
-
-    mcard = Mcard.objects.filter(company_id=company_id)
-    mcard_count = mcard.count()
-    if mcard_count:
-        mcard_latest = mcard.order_by('-trans_date')[0].trans_date
-    else:
-        mcard_latest = datetime.date.today()
-
-    gl_strategy = request.GET.get('gl_strategy', None)
-    query_manager = QueryManager(gl_strategy=gl_strategy)
-    ap_table = query_manager.balance_by_cparty(company_id, ['3000'])
-
-    ap_rows = []
-    for i in ap_table.index:
-        if abs(ap_table.loc[i]) > 1:
-            drilldown = '/reporting/history/account/3000/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
-            missing_exp = '/admin/base/cashflow/?q=%s' %i
-            ap_rows.append([i, ap_table.loc[i], drilldown, missing_exp])
-
-
+    
+    
     context = dict(
-        expense_count = expense_count,
-        incomplete_rows = incomplete_rows,
-        mcard_count = mcard_count,
-        mcard_latest = mcard_latest,
-        company_id = company_id,
-        creditor_rows = ap_rows
+        company_id = company_id
         )
 
     return render_to_response('main_views/home.html', context, RequestContext(request))
@@ -99,7 +58,14 @@ def daily(request):
     query_manager = QueryManager(gl_strategy=gl_strategy)
     ap_table = query_manager.balance_by_cparty(company_id, ['3000'])
     prepaid_table = query_manager.balance_by_cparty(company_id, ['1250','1251'], to_date=today)
-    al_table = query_manager.balance_by_cparty(company_id, ['3110'], to_date=today)
+    al_table = query_manager.balance_by_cparty(company_id, ['3010','3011','3012','3040','3050'], to_date=today)
+
+    chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
+    cashflows = Cashflow.objects.filter(ext_account=chk_acct)
+    
+    stub_expenses = Expense.objects.filter(stub=True).count()
+    incomplete_cashflows = cashflows.filter(counterparty=None).count()
+
 
     ap_rows = []
     for i in ap_table.index:
@@ -116,8 +82,24 @@ def daily(request):
     al_rows = []
     for i in al_table.index:
         if abs(al_table.loc[i]) > 1:
-            drilldown = '/reporting/history/account/3110/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
+            drilldown = '/reporting/history/path/liabilities_curr_accrued/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
             al_rows.append([i, al_table.loc[i], drilldown])
+
+    incomplete_rows = []
+    incomplete_rows.append(['Expenses', stub_expenses, '/admin/base/expense/?unmatched=UNMATCHED'])
+    incomplete_rows.append(['Payments -- 1001', incomplete_cashflows, '/admin/base/cashflow/?unmatched=UNMATCHED'])
+
+
+    gl_strategy = request.GET.get('gl_strategy', None)
+    query_manager = QueryManager(gl_strategy=gl_strategy)
+    ap_table = query_manager.balance_by_cparty(company_id, ['3000'])
+
+    creditor_rows = []
+    for i in ap_table.index:
+        if abs(ap_table.loc[i]) > 1:
+            drilldown = '/reporting/history/account/3000/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
+            missing_exp = '/admin/base/cashflow/?q=%s' %i
+            creditor_rows.append([i, ap_table.loc[i], drilldown, missing_exp])
 
     #gather some info on what we have in the database
     expenses = Expense.objects.filter(company_id=company_id)
@@ -127,27 +109,16 @@ def daily(request):
     else:
         expense_latest = datetime.date.today()
 
-    
-
-    mcard = Mcard.objects.filter(company_id=company_id)
-    mcard_count = mcard.count()
-    if mcard_count:
-        mcard_latest = mcard.order_by('-trans_date')[0].trans_date
-    else:
-        mcard_latest = datetime.date.today()
-
-    
     if len(missing_bank_bals) > 0:
         messages.info(request, 'Missing external account balances: %s' % ','.join(missing_bank_bals))
 
     context = dict(
         expense_count = expense_count,
         expense_latest = expense_latest,
-        mcard_count = mcard_count,
-        mcard_latest = mcard_latest,
-        creditor_rows = ap_rows,
+        creditor_rows = creditor_rows,
         prepaid_rows = prepaid_rows,
         al_rows = al_rows,
+        incomplete_rows = incomplete_rows
         )
 
 
