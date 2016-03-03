@@ -178,7 +178,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         tran = dict(company=self.company,
                     date=self.sale_date,
                     comment= "%s: %s" % (self.channel, self.external_ref),
-                    trans_id='%s.%s.%s' % ('SALE', self.id, 'SALE'),
+                    trans_id='%s.%s.%s' % (self.short_code, self.id, 'SALE'),
+                    bmo_id=self.id,
                     lines=[]
                     )
 

@@ -80,7 +80,8 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
         tran = dict(company=self.ext_account.company,
                     date=self.post_date,
                     comment= "%s: %s" % (self.id, self.description[:75]),
-                    trans_id='%s.%s.%s' % (self.ext_account.label, self.id, 'CFLOW'),
+                    trans_id='%s.%s.%s' % (self.short_code, self.id, self.ext_account.label),
+                    bmo_id=self.id,
                     lines=[(cf_acct, Decimal(self.amount), self.counterparty, []),
                             (self.trans_type, -Decimal(self.amount), self.counterparty, [self.tag] if self.tag else [])]
                     )

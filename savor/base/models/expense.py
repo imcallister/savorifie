@@ -168,7 +168,8 @@ class Expense(models.Model, BusinessModelObject):
                         company=self.company,
                         date=self.start_date,
                         date_end=None,
-                        trans_id='%s.%s.%s' % ('EXP', self.id, 'CPLZ'),
+                        trans_id='%s.%s.%s' % (self.short_code, self.id, 'CPLZ'),
+                        bmo_id=self.id,
                         comment= "Capitalized Asset, %s: %s" % (self.id, self.comment),
                         lines=[
                             (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
@@ -191,7 +192,8 @@ class Expense(models.Model, BusinessModelObject):
                     company=self.company,
                     date=self.start_date,
                     date_end=self.start_date + relativedelta(months=months),
-                    trans_id='%s.%s.%s' % ('EXP', self.id, 'DPRC'),
+                    trans_id='%s.%s.%s' % (self.short_code, self.id, 'DPRC'),
+                    bmo_id=self.id,
                     comment= "Depreciating asset,  %s: %s" % (self.id, self.comment),
                     lines=[
                         (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
@@ -208,7 +210,8 @@ class Expense(models.Model, BusinessModelObject):
                     company=self.company,
                     date=self.start_date,
                     date_end=None,
-                    trans_id='%s.%s.%s' % ('EXP', self.id, 'AP'),
+                    trans_id='%s.%s.%s' % (self.short_code, self.id, 'AP'),
+                    bmo_id=self.id,
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
                         (PREPAID_EXP, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
@@ -221,7 +224,8 @@ class Expense(models.Model, BusinessModelObject):
                             company=self.company,
                             date=self.start_date,
                             date_end=self.end_date,
-                            trans_id='%s.%s.%s' % ('EXP', self.id, 'EXPS'),
+                            trans_id='%s.%s.%s' % (self.short_code, self.id, 'EXPS'),
+                            bmo_id=self.id,
                             comment= "Expensing %s: %s" % (self.id, self.comment),
                             lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
                         )
@@ -235,7 +239,8 @@ class Expense(models.Model, BusinessModelObject):
                     company=self.company,
                     date=self.end_date,
                     date_end=None,
-                    trans_id='%s.%s.%s' % ('EXP', self.id, 'AL2AP'),
+                    trans_id='%s.%s.%s' % (self.short_code, self.id, 'AL2AP'),
+                    bmo_id=self.id,
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
                         (ACCRUED_LIAB, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
@@ -248,7 +253,8 @@ class Expense(models.Model, BusinessModelObject):
                             company=self.company,
                             date=self.start_date,
                             date_end=self.end_date,
-                            trans_id='%s.%s.%s' % ('EXP', self.id, 'AL'),
+                            trans_id='%s.%s.%s' % (self.short_code, self.id, 'AL'),
+                            bmo_id=self.id,
                             comment= "Accruing %s: %s" % (self.id, self.comment),
                             lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
                         )
@@ -261,7 +267,8 @@ class Expense(models.Model, BusinessModelObject):
                     company=self.company,
                     date=self.start_date,
                     date_end=None,
-                    trans_id='%s.%s.%s' % ('EXP', self.id, 'EXP'),
+                    trans_id='%s.%s.%s' % (self.short_code, self.id, 'EXP'),
+                    bmo_id=self.id,
                     comment= "%s: %s" % (self.id, self.comment),
                     lines=[(ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),]
                 )

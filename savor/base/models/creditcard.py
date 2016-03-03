@@ -61,7 +61,8 @@ class Mcard(models.Model, BusinessModelObject):
         trans.append(dict(
             company=self.company,
             date=self.trans_date,
-            trans_id='%s.%s.%s' % ('MCARD', self.id, 'CHRG'),
+            trans_id='%s.%s.%s' % (self.short_code, self.id, 'CHRG'),
+            bmo_id=self.id,
             comment= comment,
             long_desc= self.description,
             lines=[ # not sure of signs here
@@ -113,7 +114,8 @@ class AMEX(models.Model, BusinessModelObject):
         trans.append(dict(
             company=self.company,
             date=self.date,
-            trans_id='%s.%s.%s' % ('AMEX', self.id, 'CHRG'),
+            trans_id='%s.%s.%s' % (self.short_code, self.id, 'CHRG'),
+            bmo_id=self.id,
             comment= "Paid AMEX. %s: %s" % (self.id, self.counterparty),
             lines=[ # not sure of signs here
                 (debit, 0 - float(self.amount), amex),
