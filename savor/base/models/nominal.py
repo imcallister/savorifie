@@ -58,6 +58,7 @@ class NominalTransaction(models.Model, BusinessModelObject):
     comment = models.CharField(max_length=200, default="None")
 
     history = HistoricalRecords()
+    short_code = 'NOML'
 
     class Meta:
         app_label = 'base'

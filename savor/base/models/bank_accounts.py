@@ -15,7 +15,6 @@ class CashflowAllocation(models.Model):
     trans_type = models.ForeignKey('gl.Account', null=True, blank=True, help_text="We need to match this up")
     project = models.ForeignKey('gl.Project', null=True, blank=True)
     tag = models.CharField(max_length=30, null=True, blank=True)
-
     
     history = HistoricalRecords()
 
@@ -29,6 +28,7 @@ class CashflowAllocation(models.Model):
 
 
 class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
+    company = models.ForeignKey('gl.Company', default='SAV')
     ext_account = models.ForeignKey('gl.ExternalAccount')
     post_date = models.DateField()
     amount = models.DecimalField(max_digits=11, decimal_places=2)
@@ -39,6 +39,7 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
     tag = models.CharField(max_length=30, null=True, blank=True)
     
     history = HistoricalRecords()
+    short_code = 'CFLOW'
 
     class Meta:
         app_label = 'base'

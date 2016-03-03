@@ -78,6 +78,7 @@ class Expense(models.Model, BusinessModelObject):
     comment = models.CharField(max_length=200, blank=True, null=True, help_text="Details of any modifications/notes added in Django")    
 
     history = HistoricalRecords()
+    short_code = 'EXP'
 
     class Meta:
         app_label = 'base'

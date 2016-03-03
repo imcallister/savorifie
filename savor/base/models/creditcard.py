@@ -25,7 +25,7 @@ class Mcard(models.Model, BusinessModelObject):
     counterparty = models.ForeignKey('gl.Counterparty', null=True, blank=True, help_text="We need to match this up")
 
     history = HistoricalRecords()
-
+    short_code = 'MCARD'
 
     def __unicode__(self):
         return '%s: %s: %s' % (self.id, self.trans_date.isoformat(), self.counterparty)
@@ -85,6 +85,7 @@ class AMEX(models.Model, BusinessModelObject):
     counterparty = models.ForeignKey('gl.Counterparty', null=True, blank=True, help_text="We need to match this up")
 
     history = HistoricalRecords()
+    short_code = 'AMEX'
 
     def __unicode__(self):
         return 'AMEX %s: %s: %s' % (self.id, self.date.isoformat(), self.counterparty)

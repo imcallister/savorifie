@@ -80,6 +80,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     fulfill_status = models.CharField(choices=FULFILL_STATUS, max_length=25)
     
     history = HistoricalRecords()
+    short_code = 'SALE'
 
     class Meta:
         app_label = 'base'
