@@ -43,7 +43,7 @@ class IncomeStatement(Report):
 
 
             table_list = []
-            income = self.query_manager.path_drilldown(self.company_id, self.columns, table_path, excl_contra=['4150'])
+            income = self.query_manager.path_drilldown(self.company_id, self.columns, table_path, excl_contra=['3700'])
             
             if len(income) > 0:
                 income['fmt_tag'] = 'item'
@@ -66,7 +66,7 @@ class IncomeStatement(Report):
             
         other_expense_data = []
         for path in ['equity.retearnings.' + x for x in ['interestexpense', 'taxexp', 'gainloss']]:
-            other_expense_data.append(self.query_manager.pd_path_balances(self.company_id, self.columns, [path], excl_contra=['4150'])) 
+            other_expense_data.append(self.query_manager.pd_path_balances(self.company_id, self.columns, [path], excl_contra=['3700'])) 
         other_expenses = pd.concat(other_expense_data)
 
         path_totals['other_expenses'] = other_expenses.sum(axis=0)

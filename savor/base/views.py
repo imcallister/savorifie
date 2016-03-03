@@ -76,6 +76,9 @@ def dump_fixtures(request):
     return response
 
 
+
+
+
 @login_required
 def nominal(request):
     dt = parse(request.GET.get('date'))

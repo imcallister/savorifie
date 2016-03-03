@@ -64,16 +64,11 @@
 <!-- Header -->
 <div id="top-nav" class="navbar navbar{% block nav_inverse %}-inverse{% endblock %} navbar-fixed-top">
   <div class="container">
-    <div class="navbar-header">
-       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-         <span class="sr-only">Toggle navigation</span>
-         <span class="icon-bar"></span>
-         <span class="icon-bar"></span>
-         <span class="icon-bar"></span>
-       </button>
-        <a class="navbar-brand" href="/"><img src="{{STATIC_URL}}base/img/{{logo}}" height='150%'/></a>
-  </div>
+    
   <div class="navbar-collapse collapse navbar-responsive-collapse">
+    <div>
+      <a class="navbar-brand" href="/"><img src="{{STATIC_URL}}base/img/{{logo}}" height='150%'/></a>
+    </div>
     <ul class="nav navbar-nav pull-right">
         <li><a class="btn-sm" type="button" href="/reports/">Reports</a></li>
         <li><a class="btn-sm" type="button" href="/daily/">Daily</a></li>
