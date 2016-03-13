@@ -21,7 +21,6 @@ def get_expense_data(expense, flds):
     return data
 
 
-
 def get_nom_changes(dt):
     cutoff = datetime.datetime(dt.year, dt.month, dt.day, tzinfo=EASTERN)
     qs_list = [nom.history.get_queryset()[0] for nom in NominalTransaction.objects.all()]

@@ -1,45 +1,29 @@
-import os, csv, json
-from ast import literal_eval
+import json
 from StringIO import StringIO
-import datetime
-import gzip
 import csv
 import datetime
 from dateutil.parser import parse
+from collections import OrderedDict
 
 import logging
-import pandas as pd
 
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.core.management import call_command
 from django.core.serializers.json import DjangoJSONEncoder
-from django.core.urlresolvers import reverse
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.generic.detail import DetailView
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 from forms import FileForm
 
-from accountifie.tasks.utils import task, utcnow
-from accountifie.tasks.models import DeferredTask, isDetachedTask, setProgress, setStatus
-
-
-from accountifie.gl.models import ExternalBalance, Transaction, TranLine
-
-from accountifie.query.query_manager import QueryManager
 import base.models as base
-from accountifie.forecasts.models import Forecast
 from accountifie.gl.models import Company
 import accountifie.gl.api
 import accountifie.environment.api
 import accountifie.toolkit
 import base.api
-from .models import Expense, Mcard, NominalTransaction, NominalTranLine
 import base.importers
 
 import accountifie._utils
@@ -52,14 +36,13 @@ def api(request, api_view):
     return HttpResponse(json.dumps(base.api.get(api_view, params), cls=DjangoJSONEncoder), content_type="application/json")
 
 
-
+"""
 # TODO   MOVE TO API
-
 @login_required
 def large_expenses(request):
     dt = parse(request.GET.get('date'))
     return HttpResponse(json.dumps(base.api.large_expenses(dt), cls=DjangoJSONEncoder), content_type="application/json")
-
+"""
 
 @login_required
 def dump_fixtures(request):
@@ -76,9 +59,6 @@ def dump_fixtures(request):
     return response
 
 
-
-
-
 @login_required
 def nominal(request):
     dt = parse(request.GET.get('date'))
@@ -92,21 +72,28 @@ def company_context(request):
 
     This is not a view.
     """
+    
     company_id = accountifie._utils.get_company(request)
     data = {'company_id': company_id, 'logo': settings.LOGO, 'site_title': settings.SITE_TITLE}
     data['admin_site_title'] = settings.SITE_TITLE
-    data['ap_acct'] = accountifie.environment.api.variable({'name':'GL_ACCOUNTS_PAYABLE'})
+    data['company_color'] = accountifie.gl.api.get_company_color({'company_id': company_id})
+    
+    data['menu_items'] = OrderedDict([('Reports', "/reports/"),
+                                     ('Daily', "/daily/"),
+                                     ('Compliance', '/audit/tasks'),
+                                     ('Forecasting', '/forecasts'),
+                                     ('Snapshots', '/snapshot/glsnapshots')
+                                    ])
+
+    data['company_list'] = [x['id'] for x in accountifie.gl.api.companies({})]
     
     if company_id:
         try:
             company = Company.objects.get(pk=company_id)
             data.update({'company':company})
-            data.update({'color_code': company.color_code})
         except Company.DoesNotExist:
             pass 
     return data
-
-
 
 
 @login_required
@@ -166,9 +153,6 @@ def upload_file(request, file_type, check=False):
         context = {'form': form, 'file_type': file_type}
         return render_to_response('base/upload_csv.html', context,
                               context_instance=RequestContext(request))
-    
-
-
 
 
 @login_required
