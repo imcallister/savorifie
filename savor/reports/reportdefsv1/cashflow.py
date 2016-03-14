@@ -4,7 +4,8 @@ from dateutil.parser import parse
 import numpy as np
 
 from accountifie.reporting.models import Report, BasicBand, TextBand
-import accountifie._utils
+from accountifie._utils import DZERO
+import accountifie._utils as utils
 
 
 class Cashflow(Report):
@@ -19,8 +20,8 @@ class Cashflow(Report):
         self.column_order = []
         self.set_company()
         self.calc_type = 'diff'
-        self.label_map = accountifie._utils.get_alias
-        self.link_map = accountifie._utils.path_history_link
+        self.label_map = utils.get_alias
+        self.link_map = utils.path_history_link
     
         self.works_for = ['SAV']
     
@@ -92,7 +93,7 @@ class Cashflow(Report):
         inv_cash['link'] = inv_cash.index.map(self.link_map)
 
 
-        inv_cash.loc['inv_cash'] = inv_cash[self.column_order].apply(lambda x: sum(x), axis=0).fillna(accountifie._utils.DZERO)
+        inv_cash.loc['inv_cash'] = inv_cash[self.column_order].apply(lambda x: sum(x), axis=0).fillna(DZERO)
         path_totals['inv'] = inv_cash.loc['inv_cash'].copy()
         inv_cash.loc['inv_cash', 'fmt_tag'] = 'minor_total'
         inv_cash.loc['inv_cash', 'label'] = 'Net cash provided by investing activities'
@@ -116,7 +117,7 @@ class Cashflow(Report):
         fin_cash['label'] = fin_cash.index.map(self.label_map)
         fin_cash['link'] = fin_cash.index.map(self.link_map)
 
-        fin_cash.loc['fin_cash'] = fin_cash[self.column_order].apply(lambda x: sum(x), axis=0).fillna(accountifie._utils.DZERO)
+        fin_cash.loc['fin_cash'] = fin_cash[self.column_order].apply(lambda x: sum(x), axis=0).fillna(DZERO)
         path_totals['fin'] = fin_cash.loc['fin_cash'].copy()
         fin_cash.loc['fin_cash','fmt_tag'] = 'minor_total'
         fin_cash.loc['fin_cash','label'] = 'Net cash provided by financing activities'
@@ -124,7 +125,7 @@ class Cashflow(Report):
         
         table_data += fin_cash.to_dict(orient='records')
 
-        net_cash = pd.DataFrame(path_totals).sum(axis=1).fillna(accountifie._utils.DZERO)
+        net_cash = pd.DataFrame(path_totals).sum(axis=1).fillna(DZERO)
         net_cash['label'] = 'NET INCREASE IN CASH'
         net_cash['fmt_tag'] = 'major_total'
         net_cash['link'] = ''
@@ -136,12 +137,12 @@ class Cashflow(Report):
         start_periods = {}
         for title in self.columns:
             period_tag = self.columns[title]
-            start_periods[title] = accountifie._utils.start_of_period(period_tag) - datetime.timedelta(days=1)
+            start_periods[title] = utils.start_of_period(period_tag) - datetime.timedelta(days=1)
 
         end_periods = {}
         for title in self.columns:
             period_tag = self.columns[title]
-            end_periods[title] = accountifie._utils.end_of_period(period_tag)
+            end_periods[title] = utils.end_of_period(period_tag)
 
         start_cashbal = self.query_manager.pd_path_balances(self.company_id, start_periods, ['assets.curr.cashandeq'], assets=True).loc['assets.curr.cashandeq']
         end_cashbal = self.query_manager.pd_path_balances(self.company_id, end_periods, ['assets.curr.cashandeq'], assets=True).loc['assets.curr.cashandeq']

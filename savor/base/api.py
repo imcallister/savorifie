@@ -52,8 +52,9 @@ def model_changes(request, model_type):
         return HttpResponse(json.dumps('unknown model_type'))
 
 
-def large_expenses(dt):
+def large_expenses(query_dict):
     threshold = 500
+    dt = parse(query_dict.get('date')).date()
     lg_expenses = Expense.objects.filter(expense_date__year=dt.year, expense_date__month=dt.month)\
                                       .filter(amount__gte=threshold) \
                                       .exclude(counterparty__id__in=['salesent','salestravel','salesaccom'])
@@ -62,7 +63,8 @@ def large_expenses(dt):
     return [get_expense_data(expense, flds) for expense in lg_expenses]
 
 
-def nominal(dt):
+def nominal(query_dict):
+    dt = parse(query_dict.get('date')).date()
     all_nominal = NominalTransaction.objects.filter(date__year=dt.year, date__month=dt.month)
 
     flds = ['date','comment','account0','amount0','account1','amount1']

@@ -9,7 +9,7 @@ from accountifie.reporting.models import Report, BasicBand, TextBand
 import accountifie.gl.models
 from _utils import DZERO, fmt
 import _utils as utils
-import reporting.stock_tables as stock_tables
+import reports.stock_tables as stock_tables
 
 
 COL_LABELS = {'start': "Shareholder Equity at Start of Period",

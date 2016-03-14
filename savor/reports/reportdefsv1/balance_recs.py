@@ -4,7 +4,7 @@ from dateutil.parser import parse
 
 
 from accountifie.reporting.models import Report, BasicBand, TextBand
-from _utils import DZERO
+from accountifie._utils import DZERO
 from query.query_manager import QueryManager
 import accountifie.gl.api
 import accountifie._utils as utils

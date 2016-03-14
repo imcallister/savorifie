@@ -25,7 +25,7 @@ def monthly_signoff(request, id):
     context['exp_trends'] = tables.bstrap_tables.balance_trends(task.as_of, accts_path='opexp')
 
     col_tag = '%dM%s' % (task.as_of.year, '{:02d}'.format(task.as_of.month))
-    rpt_context = core.reporting.api.html_report_snippet('ChgInEquityStatement', 'SAV', version='v1', col_tag=col_tag)
+    rpt_context = accountifie.reporting.api.html_report_snippet('ChgInEquityStatement', 'SAV', version='v1', col_tag=col_tag)
     context['cap_rows'] = rpt_context['rows']
     context['cap_col_titles'] = rpt_context['column_titles']
 
