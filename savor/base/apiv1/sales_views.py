@@ -23,6 +23,27 @@ def sales(qstring):
     return [model_to_dict(sale, fields=[field.name for field in sale._meta.fields]) for sale in all_sales]
 
 
+def summary_sales_stats(qstring):
+    
+    start_date = qstring.get('from_date', settings.DATE_EARLY)
+    end_date = qstring.get('to_date', datetime.datetime.now().date())
+
+    if type(start_date) != datetime.date:
+        start_date = parse(start_date).date()
+    if type(end_date) != datetime.date:
+        end_date = parse(end_date).date()
+
+    all_unit_sales = UnitSale.objects.filter(sale__sale_date__gte=start_date, sale__sale_date__lte=end_date)
+    
+    stats = {}
+    stats['BYE_sold'] = len([x for x in all_unit_sales if x.product.short_code=='BYE'])
+    stats['SYE_sold'] = len([x for x in all_unit_sales if x.product.short_code=='SYE'])
+
+    stats['BYE_unfulfilled'] = len([x for x in all_unit_sales if x.product.short_code=='BYE' and x.sale.fulfill_status=='unfulfilled'])
+    stats['SYE_unfulfilled'] = len([x for x in all_unit_sales if x.product.short_code=='SYE' and x.sale.fulfill_status=='unfulfilled'])
+
+    return stats
+
 def unit_sales(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
@@ -40,7 +61,7 @@ def unit_sales(qstring):
     for u_sale in all_unit_sales:
         data = get_model_data(u_sale, u_sale_flds)
         data.update(get_model_data(u_sale.sale, sale_flds))
-        data['sale_id'] = u_sale.sale.id
+        data['sale_link'] = u_sale.sale.id_link
         output_data.append(data)
 
     return output_data

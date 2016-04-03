@@ -19,24 +19,20 @@
         <h3>Stats</h3>
         <ul class="list-group .col-md-4">
             <li class="list-group-item">
-                <span class="badge">{{trade_count}}</span>
-                Trade count
+                <span class="badge">{{BYE_sold}}</span>
+                BYE sold
             </li>
             <li class="list-group-item">
-                <span class="badge">{{record_count}}</span>
-                Record Count
+                <span class="badge">{{SYE_sold}}</span>
+                BYE sold
             </li>
             <li class="list-group-item">
-                <span class="badge">{{trades_missing_record}}</span>
-                Trades for which no clearing record found
+                <span class="badge">{{BYE_unfulfilled}}</span>
+                BYE unfulfilled
             </li>
             <li class="list-group-item">
-                <span class="badge">{{clearing_missing_trades}}</span>
-                Clearing records for which no trade found
-            </li>
-            <li class="list-group-item">
-                <span class="badge">{{cancel_count}}</span>
-                Canceled Trades
+                <span class="badge">{{SYE_unfulfilled}}</span>
+                SYE unfulfilled
             </li>
         </ul>
     </div>
@@ -55,18 +51,11 @@
 <div>
     <h3>Actions</h3>
     <ul class="nav nav-pills nav-stacked">
-        <li><a href="/audit/trades/get?id={{task_id}}" class="btn btn-primary" type="submit" name="load_trades">Load from EFIE</a></li>
-        <li><a href="/audit/clearing/get?id={{task_id}}" class="btn btn-primary" type="submit" name="load_clearing_agent">Load from Clearing Agent</a></li>
-        <li><a href="/audit/match?id={{task_id}}" class="btn btn-primary" type="submit" name="match">Match</a></li>
-        <li><a href="/audit/settle_all?id={{task_id}}" class="btn btn-primary" type="submit" name="settle_all">Settle All</a></li>
-        <li><a data-toggle="modal" href="#submit_comment{#/audit/task/submit?id={{task_id}#}" class="btn btn-primary" type="submit" name="signoff">Submit</a></li>
-        <li><a data-toggle="modal" href="#signoff_comment{#/audit/task/signoff?id={{task_id}#}" class="btn btn-primary" type="submit" name="signoff">Approve</a></li>
+        <li><a href="/audit/trades/get?id={{task_id}}" class="btn btn-primary" type="submit" name="load_trades">Send to warehouse</a></li>
+        <li><a href="/audit/clearing/get?id={{task_id}}" class="btn btn-primary" type="submit" name="load_clearing_agent">Load warehouse fulfillment info</a></li>
         
     </ul>
 </div>
-{% include "modal_comment.html" with id="signoff_comment" title="Sign Off" post_url="task_signoff" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Approve" %}
-
-{% include "modal_comment.html" with id="submit_comment" title="Submit for approval" post_url="task_submit" post_id=task_id post_name="task_id" comment_form=comment_form submit_text="Submit for approval" %}
 
 {% endblock %}
 

@@ -1,3 +1,4 @@
+from django.utils.safestring import mark_safe
 from decimal import Decimal
 from django.db import models
 
@@ -93,6 +94,11 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def delete(self):
         self.delete_from_gl()
         models.Model.delete(self)
+
+    @property
+    def id_link(self):
+        return mark_safe('<a href="/admin/base/sale/%s">%s</a>' % (self.id, self.id))
+
 
     def _get_unitsales(self):
         unitsales = self.unitsale_set.all()
