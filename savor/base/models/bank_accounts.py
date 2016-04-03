@@ -52,6 +52,10 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
         models.Model.save(self)
         self.update_gl()
 
+    def delete(self):
+        self.delete_from_gl()
+        models.Model.delete(self)
+    
     def _get_alloc_lines(self):
         allocations = self.cashflowallocation_set.all()
         
@@ -81,7 +85,7 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     date=self.post_date,
                     comment= "%s: %s" % (self.id, self.description[:75]),
                     trans_id='%s.%s.%s' % (self.short_code, self.id, self.ext_account.label),
-                    bmo_id=self.id,
+                    bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[(cf_acct, Decimal(self.amount), self.counterparty, []),
                             (self.trans_type, -Decimal(self.amount), self.counterparty, [self.tag] if self.tag else [])]
                     )

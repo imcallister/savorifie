@@ -1,29 +1,10 @@
 from django.template import Context
 from django.template.loader import get_template
 
-from accountifie._utils import get_default_company
+from accountifie.toolkit.utils import get_default_company
+from accountifie.toolkit.utils import get_bstrap_table
 
 
-def get_bstrap_table(data_url, row_defs, pagination="true", pagination_num=25):
-    context = {}
-
-    context['data_url'] = data_url
-    context['row_defs'] = row_defs
-    context['pagination'] = pagination
-    context['pagination_num'] = pagination_num
-
-    tmpl = get_template('bstrap_table.html')
-    return tmpl.render(Context(context))
-
-
-def daily_activity(dt):
-    data_url = "/reporting/reports/AccountActivity/?col_tag=daily_%s&format=json" % dt.isoformat()
-    row_defs = [{'data_field': 'label', 'value': 'Account', 'formatter': 'nameFormatter'},
-                {'data_field': 'Yesterday', 'value': 'Yesterday', 'formatter': 'drillFormatter'},
-                {'data_field': 'Change', 'value': 'Change', 'formatter': 'drillFormatter'},
-                {'data_field': 'Today', 'value': 'Today', 'formatter': 'drillFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
 
 
 def large_expenses(dt):
@@ -39,13 +20,26 @@ def large_expenses(dt):
     return get_bstrap_table(data_url, row_defs)
 
 
+def unit_sales():
+    data_url = "/api/base/unit_sales"
+    row_defs = [{'data_field': 'sale_id', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'product', 'value': 'Product code', 'formatter': 'nameFormatter'},
+                {'data_field': 'fulfill_status', 'value': 'Fulfill status', 'formatter': 'nameFormatter'},
+                {'data_field': 'unit_price', 'value': 'Unit Price', 'formatter': 'nameFormatter'},
+                {'data_field': 'quantity', 'value': 'Quantity', 'formatter': 'nameFormatter'},
+                {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+                {'data_field': 'external_ref', 'value': 'External Ref', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
 def nominal(dt):
     if type(dt) == str:
         dt_str = dt
     else:
         dt_str = dt.isoformat()
 
-    data_url = "/base/api/nominal/?date=%s" % dt_str
+    data_url = "/api/base/nominal/?date=%s" % dt_str
     row_defs = [{'data_field': 'date', 'value': 'Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'comment', 'value': 'Comment', 'formatter': 'nameFormatter'},
                 {'data_field': 'account0', 'value': 'Account1', 'formatter': 'nameFormatter'},
@@ -55,23 +49,8 @@ def nominal(dt):
             ]
     return get_bstrap_table(data_url, row_defs)
 
-
-def balance_trends(dt, acct_list=None, accts_path=None, company_id=get_default_company()):
-    if acct_list:
-        data_url = "/reporting/api/balance_trends/?date=%s&acct_list=%s&company_id=%s" %( dt, '.'.join(acct_list), company_id)
-    elif accts_path:
-        data_url = "/reporting/api/balance_trends/?date=%s&accts_path=%s&company_id=%s" %( dt, accts_path, company_id)
-
-    row_defs = [{'data_field': 'label', 'value': 'Date', 'formatter': 'nameFormatter'},
-                {'data_field': 'M_2', 'value': '2 Months Ago', 'formatter': 'drillFormatter'},
-                {'data_field': 'M_1', 'value': '1 Month Ago', 'formatter': 'drillFormatter'},
-                {'data_field': 'M_0', 'value': 'This Month', 'formatter': 'drillFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
-
-
 def nominal_changes(dt):
-    data_url = "/base/api/changes/nominal/?date=%s" % dt.isoformat()
+    data_url = "/api/base/changes/nominal/?date=%s" % dt.isoformat()
     row_defs = [{'data_field': 'id', 'value': 'ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'company_id', 'value': 'Company', 'formatter': 'nameFormatter'},
                 {'data_field': 'history_type', 'value': 'Change', 'formatter': 'nameFormatter'},
@@ -80,7 +59,7 @@ def nominal_changes(dt):
     return get_bstrap_table(data_url, row_defs)
 
 def expense_changes(dt):
-    data_url = "/base/api/changes/expense/?date=%s" % dt.isoformat()
+    data_url = "/api/base/changes/expense/?date=%s" % dt.isoformat()
     row_defs = [{'data_field': 'id', 'value': 'ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'start_date', 'value': 'Start Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'glcode', 'value': 'GL Account', 'formatter': 'nameFormatter'},
@@ -88,26 +67,9 @@ def expense_changes(dt):
             ]
     return get_bstrap_table(data_url, row_defs)
 
-def check_external_bals(dt, company_id=get_default_company()):
-    data_url = "/gl/api/check_external_bals/?date=%s&company_id=%s" % (dt.isoformat(), company_id)
-    row_defs = [{'data_field': 'Account', 'value': 'Account', 'formatter': 'nameFormatter'},
-                {'data_field': 'Internal', 'value': 'Internal', 'formatter': 'valueFormatter'},
-                {'data_field': 'External', 'value': 'External', 'formatter': 'valueFormatter'},
-                {'data_field': 'Diff', 'value': 'Diff', 'formatter': 'valueFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
-
-def external_bals_history(dt, company_id=get_default_company(), acct=''):
-    data_url = "/gl/api/external_bals_history/?date=%s&company_id=%s&acct=%s" % (dt.isoformat(), company_id, acct)
-    row_defs = [{'data_field': 'Date', 'value': 'Date', 'formatter': 'nameFormatter'},
-                {'data_field': 'Internal', 'value': 'Internal', 'formatter': 'valueFormatter'},
-                {'data_field': 'External', 'value': 'External', 'formatter': 'valueFormatter'},
-                {'data_field': 'Diff', 'value': 'Diff', 'formatter': 'valueFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
 
 def tasks():
-    data_url = 'api/tasks_list/'
+    data_url = '/audit/api/tasks_list/'
     row_defs = [{'data_field': 'id_link', 'value': 'ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'status_tag', 'value': 'Status', 'formatter': 'nameFormatter'},
                 {'data_field': 'task_def', 'value': 'Task Def', 'formatter': 'nameFormatter'},
@@ -135,15 +97,6 @@ def audit_trail():
             ]
     return get_bstrap_table(data_url, row_defs)
 
-def snapshots():
-    data_url = '/snapshot/api/snapshots/'
-    row_defs = [{'data_field': 'id', 'value': 'ID', 'formatter': 'nameFormatter'},
-                {'data_field': 'short_desc', 'value': 'Description', 'formatter': 'nameFormatter'},
-                {'data_field': 'closing_date', 'value': 'Closing Date', 'formatter': 'nameFormatter'},
-                {'data_field': 'snapped_at', 'value': 'Snapped At', 'formatter': 'nameFormatter'},
-                {'data_field': 'reconciliation', 'value': 'Reconciliation', 'formatter': 'nameFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
 
 def task_audit(task_id):
     data_url = "/audit/api/task_audit/?id=%s" % task_id
@@ -154,11 +107,3 @@ def task_audit(task_id):
             ]
     return get_bstrap_table(data_url, row_defs)
 
-
-def forecasts():
-    data_url = "/forecasts/api/forecasts_list"
-    row_defs = [{'data_field': 'id_link', 'value': 'Label', 'formatter': 'nameFormatter'},
-                {'data_field': 'start_date', 'value': 'Start Date', 'formatter': 'nameFormatter'},
-                {'data_field': 'comment', 'value': 'Comment', 'formatter': 'nameFormatter'}
-            ]
-    return get_bstrap_table(data_url, row_defs)

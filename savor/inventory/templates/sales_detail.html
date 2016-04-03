@@ -1,0 +1,65 @@
+{% extends 'audit/base_audit.html' %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ comment_form.media.css }}
+{% endblock %}
+
+{% block content %}
+
+
+<h3 class="pull-right">{{status}}</h3>
+<h2>Operations for {{date}}</h2>
+
+
+
+<div class="container-fluid" id="wrapper">
+
+    <div class="accordion" id="accordion">
+        {% include "accordion_cmpnt.html" with title="Audit Trail" content=audit_trail tag="audit" parent="accordion" %}
+    </div>
+
+  
+    <div>
+        <h3>Reconciliation Stats</h3>
+        <ul class="list-group .col-md-4">
+            <li class="list-group-item">
+                <span class="badge">{{trade_count}}</span>
+                Trade count
+            </li>
+            <li class="list-group-item">
+                <span class="badge">{{record_count}}</span>
+                Record Count
+            </li>
+            <li class="list-group-item">
+                <span class="badge">{{trades_missing_record}}</span>
+                Trades for which no clearing record found
+            </li>
+            <li class="list-group-item">
+                <span class="badge">{{clearing_missing_trades}}</span>
+                Clearing records for which no trade found
+            </li>
+            <li class="list-group-item">
+                <span class="badge">{{cancel_count}}</span>
+                Canceled Trades
+            </li>
+        </ul>
+    </div>
+
+    <div class="accordion" id="accordion2">
+      
+        {% include "accordion_cmpnt.html" with title="Unit Sales" content=unit_sales tag="unit_sales" parent="accordion2" %}
+
+        
+    </div>
+</div>
+  
+{% endblock %}
+
+
+
+{% block extrajs %}
+    {{comment_form.media.js}}
+    {{block.super}}
+    
+{% endblock %}

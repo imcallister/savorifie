@@ -20,17 +20,12 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     
+    url(r'', include('audit.urls')),
     url(r'', include('base.urls')),
     url(r'^reports/', include('reports.urls')),
-    url(r'', include('accountifie.toolkit.urls')),
-    url(r'', include('accountifie.common.urls')),
+    url(r'^inventory/', include('inventory.urls')),
 
-    url(r'^forecasts/', include('accountifie.forecasts.urls')),
-    url(r'^gl/', include('accountifie.gl.urls')),
-    url(r'^snapshot/', include('accountifie.snapshot.urls')),
-    url(r'^reporting/', include('accountifie.reporting.urls')),
-    url(r'^environment/', include('accountifie.environment.urls')),
-    url(r'^audit/', include('audit.urls')),    
-    
+    # general accountifie urls
+    url (r'', include('accountifie.urls'))
     
 )

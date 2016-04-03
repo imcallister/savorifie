@@ -1,9 +1,12 @@
 var cash_bals_chart = function(data_url, renderTo) {    
+        
      var avgByDayOptions2 = {
         chart: {
             renderTo: renderTo,
             type: 'line',
         },
+
+
         legend: {enabled: true},
         title: {text: 'Cash Balances'},
         subtitle: {text: 'Last month'},

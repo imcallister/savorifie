@@ -117,7 +117,7 @@ class NominalTransaction(models.Model, BusinessModelObject):
             date_end=self.date_end,
             comment=self.comment,
             trans_id='%s.%s.%s' % (self.short_code, self.id, cmpnt3),
-            bmo_id=self.id,
+            bmo_id='%s.%s' % (self.short_code, self.id),
             lines=lines
             )
         return [trans]

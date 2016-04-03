@@ -201,7 +201,8 @@ INSTALLED_APPS = (
     #'json_field',
     
     'base',
-    'audit',
+    'inventory',
+
 
     'accountifie.common',
         

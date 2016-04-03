@@ -179,7 +179,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     date=self.sale_date,
                     comment= "%s: %s" % (self.channel, self.external_ref),
                     trans_id='%s.%s.%s' % (self.short_code, self.id, 'SALE'),
-                    bmo_id=self.id,
+                    bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[]
                     )
 
