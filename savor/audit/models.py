@@ -39,6 +39,10 @@ class TaskDef(models.Model):
     def __str__(self):
         return self.desc
 
+    class Meta:
+      app_label = 'audit'
+      db_table = 'audit_taskdef'
+
 
 class Task(models.Model):
   _STATUS_COLOR_CLASS = dict(zip(zip(*TASK_STATUS_CHOICES)[0], ('info', 'warning', 'success', 'success',)))
@@ -54,6 +58,8 @@ class Task(models.Model):
 
   class Meta:
       ordering = ["-as_of"]
+      app_label = 'audit'
+      db_table = 'audit_taskdef'
 
 
   def can_prep(self, user):
@@ -129,6 +135,11 @@ class AuditRecord(ChangesMixin, models.Model):
   desc = models.CharField(max_length=50)
   task = models.ForeignKey(Task)
   comment = models.TextField()
+
+  class Meta:
+      app_label = 'audit'
+      db_table = 'audit_auditrecord'
+
 
   @property
   def comment_fmt(self):

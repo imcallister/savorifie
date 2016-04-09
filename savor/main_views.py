@@ -39,7 +39,8 @@ def home(request):
 def daily(request):
     today = datetime.datetime.now().date()
     bank_accts = accountifie.environment.api.variable_list({'name': 'BANK_ACCOUNTS'})
-  
+    unalloc_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
+
     missing_bank_bals = []
 
     for acct in bank_accts:
@@ -60,7 +61,7 @@ def daily(request):
     chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
     
-    stub_expenses = Expense.objects.filter(stub=True).count()
+    stub_expenses = Expense.objects.filter(account_id=unalloc_account).count()
     incomplete_cashflows = cashflows.filter(counterparty=None).count()
 
 

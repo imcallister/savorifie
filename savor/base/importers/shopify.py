@@ -42,7 +42,6 @@ def get_taxes(row):
 
 def order_upload(request):
 
-    
     form = FileForm(request.POST, request.FILES)
 
     if form.is_valid():

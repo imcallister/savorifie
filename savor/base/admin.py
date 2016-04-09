@@ -34,10 +34,11 @@ class UnmatchedExpense(SimpleListFilter):
             return (('MATCHED','MATCHED'),('UNMATCHED','UNMATCHED'))
 
     def queryset(self, request, qs):
+        unalloc_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
         if self.value()=='UNMATCHED':
-            return qs.filter(stub=True)
+            return qs.filter(account_id=unalloc_account)
         if self.value()=='MATCHED':
-            return qs.exclude(stub=False)
+            return qs.exclude(account_id=unalloc_account)
 
 
 class CashflowAdmin(SimpleHistoryAdmin):
@@ -48,16 +49,19 @@ class CashflowAdmin(SimpleHistoryAdmin):
     actions = ['make_expense_stubs']
 
     def make_expense_stubs(self, request, queryset):
+        today = datetime.datetime.now().date()
         stub_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
+        unallocated_employee = accountifie.environment.api.variable({'name': 'UNALLOCATED_EMPLOYEE_ID'})
         new_stubs = 0
         from_AP = queryset.filter(trans_type__id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
         for cf in from_AP.all():
             if Expense.objects.filter(from_cf=cf).count()==0:
                 new_stubs += 1
                 Expense(comment=cf.description, counterparty=cf.counterparty, account_id=stub_account, from_cf=cf,
-                        expense_date=cf.post_date, start_date=cf.post_date, amount=-cf.amount, stub=True).save()
+                        expense_date=cf.post_date, start_date=cf.post_date, amount=-cf.amount, stub=False,
+                        paid_from=cf.trans_type, process_date=today, employee_id=unallocated_employee).save()
         self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (new_stubs, from_AP.count()-new_stubs))
-        
+        return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
 
 admin.site.register(Cashflow, CashflowAdmin)   
 

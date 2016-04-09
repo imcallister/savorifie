@@ -43,7 +43,7 @@
                     <thead>
                         <th>Counterparty</th>
                         <th>Amount</th>
-                        <th></th>
+                        <th>Make expenses</th>
                     </thead>
                     <tbody>
                     {% for row in creditor_rows %}
@@ -53,7 +53,7 @@
                                 <a href="{{row.2}}">{{row.1}}</a>
                             </td>
                             <td class="align-right">
-                                <a href="{{row.3}}">Make expense from CF</a>
+                                <a href="{{row.3}}">Cashflows</a>
                             </td>
                         </tr>    
                     {% endfor %}
