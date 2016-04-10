@@ -4,10 +4,10 @@ from django.db import models
 from django.http import HttpResponseRedirect
 
 from simple_history.models import HistoricalRecords
-
 import accountifie.gl.bmo
 
 DZERO = Decimal('0')
+
 
 class CashflowAllocation(models.Model):
     cashflow = models.ForeignKey('base.Cashflow')

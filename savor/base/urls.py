@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     url(r'api/base/(?P<resource>[_a-zA-Z0-9]+)/$', 'savor.base.views.get_resource'),
 
     
-    url(r'^base/upload/(?P<file_type>.*)/$', views.upload_file, name='upload_file'),    
+    url(r'^base/upload/(?P<file_type>.*)/$', views.upload_file, name='upload_file'),
     
-    
+    url(r'^base/bulk_expense_stubs/$', views.bulk_expense_stubs),
 )

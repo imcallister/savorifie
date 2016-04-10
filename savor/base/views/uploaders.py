@@ -2,8 +2,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 
 import base.importers
+from base.models import Cashflow, make_expense_stubs
 from accountifie.toolkit.forms import FileForm
 import accountifie.toolkit
 
@@ -38,3 +41,16 @@ def upload_file(request, file_type, check=False):
         context = {'form': form, 'file_type': file_type}
         return render_to_response('base/upload_csv.html', context,
                               context_instance=RequestContext(request))
+
+@login_required
+def bulk_expense_stubs(request):
+    if request.method == 'POST':
+        cps = [x[7:] for x in request.POST if x[:7]=='create_']
+        qs = list(Cashflow.objects.filter(counterparty_id__in=cps).values())
+        rslts = make_expense_stubs(qs)
+
+        messages.info(request, "%d new stub expenses created. %d duplicates found and not created" % (rslts['new'], rslts['duplicates']))
+        return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
+    else:
+        raise ValueError("This resource requires a POST request")
+

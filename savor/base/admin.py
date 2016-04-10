@@ -2,7 +2,7 @@ from django.contrib import admin
 import django.dispatch
 from django import forms
 from django.contrib.admin import SimpleListFilter
-
+from django.http import HttpResponseRedirect
 
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -46,21 +46,11 @@ class CashflowAdmin(SimpleHistoryAdmin):
     list_filter = ('ext_account', UnmatchedCashflows)
     list_editable = ('counterparty', 'trans_type',)
     search_fields = ('counterparty__id',)
-    actions = ['make_expense_stubs']
+    actions = ['expense_stubs_from_cashflows']
 
-    def make_expense_stubs(self, request, queryset):
-        today = datetime.datetime.now().date()
-        stub_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
-        unallocated_employee = accountifie.environment.api.variable({'name': 'UNALLOCATED_EMPLOYEE_ID'})
-        new_stubs = 0
-        from_AP = queryset.filter(trans_type__id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
-        for cf in from_AP.all():
-            if Expense.objects.filter(from_cf=cf).count()==0:
-                new_stubs += 1
-                Expense(comment=cf.description, counterparty=cf.counterparty, account_id=stub_account, from_cf=cf,
-                        expense_date=cf.post_date, start_date=cf.post_date, amount=-cf.amount, stub=False,
-                        paid_from=cf.trans_type, process_date=today, employee_id=unallocated_employee).save()
-        self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (new_stubs, from_AP.count()-new_stubs))
+    def expense_stubs_from_cashflows(self, request, queryset):
+        rslts = make_expense_stubs(queryset.values())
+        self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (rslts['new'], rslts['duplicates']))
         return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
 
 admin.site.register(Cashflow, CashflowAdmin)   

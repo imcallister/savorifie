@@ -15,13 +15,39 @@ from accountifie.gl.bmo import BusinessModelObject
 import accountifie.gl.models
 import accountifie.environment.api
 import accountifie._utils
+from accountifie.common.api import api_func
 
 logger = logging.getLogger('default')
 
 DZERO = Decimal('0')
-
-
 EASTERN = pytz.timezone('US/Eastern')
+
+
+
+
+def make_expense_stubs(cf_data):
+    """
+    given a list of cashflows create expenses
+    from those cashflows which have not already had an expense created from them
+    where the cashflows were booked versus Accounts Payable
+    """
+    today = datetime.datetime.now().date()
+    stub_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
+    unallocated_employee = api_func('environment', 'variable', 'UNALLOCATED_EMPLOYEE_ID')
+    ap_account = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
+
+    new_stubs = 0
+    from_AP = [cf for cf in cf_data if cf['trans_type_id']==ap_account]
+    for cf in from_AP:
+        if Expense.objects.filter(from_cf_id=cf['id']).count()==0:
+            new_stubs += 1
+            Expense(comment=cf['description'], counterparty_id=cf['counterparty_id'], account_id=stub_account, from_cf_id=cf['id'],
+                    expense_date=cf['post_date'], start_date=cf['post_date'], amount=-cf['amount'], stub=False,
+                    paid_from_id=cf['trans_type_id'], process_date=today, employee_id=unallocated_employee).save()
+    
+    return {'new': new_stubs, 'duplicates': len(from_AP)-new_stubs}
+    
+
 
 def get_changed(dt):
     cutoff = datetime.datetime(dt.year, dt.month, dt.day, tzinfo=EASTERN)
