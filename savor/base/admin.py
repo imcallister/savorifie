@@ -87,7 +87,7 @@ class ExpenseAdmin(SimpleHistoryAdmin):
     actions = ['delete_model']
     list_display = ('id', 'account','expense_date','paid_from', 'comment', 'counterparty', 'employee','currency','amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
-    search_fields = ['expense_category', 'reason', 'employee__employee_name','id','counterparty__id']
+    search_fields = ['id','counterparty__id', 'account__id']
     list_editable = ('employee', 'account', 'paid_from', 'comment')
     #inlines = [McardExpenseInline]  - wrong, or needs Django 1.7?
 
