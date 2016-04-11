@@ -8,8 +8,9 @@ from django.http import HttpResponse
 
 
 from accountifie.gl.models import Company
-import accountifie.gl.api
 import accountifie.toolkit.utils as utils
+from accountifie.common.api import api_func
+
 
 import base.apiv1
 
@@ -39,7 +40,7 @@ def company_context(request):
     company_id = utils.get_company(request)
     data = {'company_id': company_id, 'logo': settings.LOGO, 'site_title': settings.SITE_TITLE}
     data['admin_site_title'] = settings.SITE_TITLE
-    data['company_color'] = accountifie.gl.api.get_company_color({'company_id': company_id})
+    data['company_color'] = api_func('gl', 'company', company_id)['color_code']
     
     data['menu_items'] = OrderedDict([('Reports', "/reports/"),
                                      ('Daily', "/daily/"),
@@ -48,7 +49,7 @@ def company_context(request):
                                      ('Snapshots', '/snapshot/glsnapshots')
                                     ])
 
-    data['company_list'] = [x['id'] for x in accountifie.gl.api.companies({})]
+    data['company_list'] = [x['id'] for x in api_func('gl', 'company')]
     
     if company_id:
         try:
