@@ -13,8 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 from accountifie.gl.bmo import BusinessModelObject
 import accountifie.gl.models
-import accountifie.environment.api
-import accountifie._utils
+import accountifie.common.utils import get_default_company
 from accountifie.common.api import api_func
 
 logger = logging.getLogger('default')
@@ -77,7 +76,7 @@ class ExpenseAllocation(models.Model):
 
 class Expense(models.Model, BusinessModelObject):
     
-    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=get_default_company)
     
     employee = models.ForeignKey('gl.Employee', null=True)
     account = models.ForeignKey('gl.Account')
@@ -180,9 +179,9 @@ class Expense(models.Model, BusinessModelObject):
         """
 
         capitalize_it, debit, acc_asset_dep, months  = self._capitalize(self.account)
-        ACCTS_PAYABLE = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
-        PREPAID_EXP = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_PREPAID_EXP'}))
-        ACCRUED_LIAB = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCRUED_LIAB'}))
+        ACCTS_PAYABLE = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE'))
+        PREPAID_EXP = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_PREPAID_EXP'))
+        ACCRUED_LIAB = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCRUED_LIAB'))
         
         trans = []
 

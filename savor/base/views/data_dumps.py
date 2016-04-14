@@ -5,7 +5,6 @@ import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-import accountifie.gl.api
 from accountifie.query.query_manager import QueryManager
 
 @login_required

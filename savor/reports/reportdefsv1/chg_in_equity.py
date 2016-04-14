@@ -7,8 +7,8 @@ import numpy as np
 
 from accountifie.reporting.models import Report, BasicBand, TextBand
 import accountifie.gl.models
-from _utils import DZERO, fmt
-import _utils as utils
+from accountifie.toolkit.utils import DZERO, fmt
+import accountifie.toolkit.utils as utils
 import reports.stock_tables as stock_tables
 
 

@@ -10,7 +10,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from simple_history.models import HistoricalRecords
 
 from accountifie.gl.bmo import BusinessModelObject
-import accountifie._utils
+from accountifie.toolkit.utils import get_default_company
 
 
 EASTERN = pytz.timezone('US/Eastern')
@@ -47,7 +47,7 @@ class NominalTransaction(models.Model, BusinessModelObject):
     the legacy data into these.
     
     """
-    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=get_default_company)
     date = models.DateField(db_index=True)
     date_end = models.DateField(db_index=True, blank=True, null=True)
 

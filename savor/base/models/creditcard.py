@@ -5,13 +5,14 @@ from simple_history.models import HistoricalRecords
 
 import accountifie.gl.models
 from accountifie.gl.bmo import BusinessModelObject
-import accountifie._utils
-import accountifie.environment.api
+from accountifie.toolkit.utils import get_default_company
+from accountifie.common.api import api_func
+
 
 
 class Mcard(models.Model, BusinessModelObject):
     # note that this is only for charges, not for payments
-    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=get_default_company)
 
     trans_date = models.DateField()
     post_date = models.DateField()
@@ -53,7 +54,7 @@ class Mcard(models.Model, BusinessModelObject):
             cp = mcard
             comment = 'Mastercard Fees'
         else:
-            credit = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
+            credit = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE'))
             cp = self.counterparty
             comment= "MasterCard ending #%s trans #%s: %s" % (self.card_number, self.id, cp)
 
@@ -76,7 +77,7 @@ class Mcard(models.Model, BusinessModelObject):
 
 class AMEX(models.Model, BusinessModelObject):
     # note that this is only for charges, not for payments
-    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=get_default_company)
 
     date = models.DateField()
     amount = models.FloatField(null=True)
@@ -107,7 +108,7 @@ class AMEX(models.Model, BusinessModelObject):
 
     def get_gl_transactions(self):
         debit = accountifie.gl.models.Account.objects.get(display_name='Amex')
-        credit = accountifie.gl.models.Account.objects.get(id=accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_PAYABLE'}))
+        credit = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE'))
         amex = accountifie.gl.models.Counterparty.objects.get(id='amex')
 
         trans = []

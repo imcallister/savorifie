@@ -4,10 +4,10 @@ from dateutil.parser import parse
 
 
 from accountifie.reporting.models import Report, BasicBand, TextBand
-from accountifie._utils import DZERO
-from query.query_manager import QueryManager
-import accountifie.gl.api
-import accountifie._utils as utils
+from accountifie.toolkit.utils import DZERO
+from accountifie.common.api import api_func
+from accountifie.query.query_manager import QueryManager
+import accountifie.toolkit.utils as utils
 
 
 class RecBalances(Report):
@@ -50,8 +50,7 @@ class RecBalances(Report):
         bals['diff'] = bals['current'] - bals['snapshot']
         bals.loc['Total'] = bals.apply(sum, axis=0)
         
-        accts = accountifie.gl.api.accounts({})
-
+        accts = api_func('gl', 'account')
         acct_map = dict((a['id'], a['display_name']) for a in accts)
         label_map = lambda x: x + ': ' + acct_map[x] if x in acct_map else x
         

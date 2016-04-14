@@ -6,10 +6,10 @@ from dateutil.parser import parse
 from django.conf import settings
 
 from accountifie.reporting.models import Report, BasicBand, TextBand
-from _utils import DZERO
+from accountifie.toolkit.utils import DZERO
 from query.query_manager import QueryManager
-import accountifie.gl.api
-import accountifie._utils as utils
+from accountifie.common.api import api_func
+import accountifie.toolkit.utils as utils
 
 import logging
 
@@ -68,7 +68,7 @@ class SnapshotRec(Report):
             bals[col] = bals[col].map(lambda x: Decimal(x))
         bals['diff'] = bals['snapshot'] - bals['current']
         
-        accts = accountifie.gl.api.accounts({})
+        accts = api_func('gl', 'account')
 
         acct_map = dict((a['id'], a['display_name']) for a in accts)
         

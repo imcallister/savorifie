@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 from django.conf import settings
 import django.db.models.deletion
-import accountifie._utils.gl_helpers
+import accountifie.toolkit.utils.gl_helpers
 import accountifie.gl.bmo
 
 
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('date', models.DateField()),
                 ('amount', models.FloatField(null=True)),
                 ('description', models.CharField(max_length=200, null=True, blank=True)),
-                ('company', models.ForeignKey(default=accountifie._utils.gl_helpers.get_default_company, to='gl.Company')),
+                ('company', models.ForeignKey(default=accountifie.toolkit.utils.gl_helpers.get_default_company, to='gl.Company')),
                 ('counterparty', models.ForeignKey(blank=True, to='gl.Counterparty', help_text=b'We need to match this up', null=True)),
             ],
             options={
@@ -80,7 +80,7 @@ class Migration(migrations.Migration):
                 ('stub', models.BooleanField(default=False, help_text=b'incomplete, created from cashflow')),
                 ('comment', models.CharField(help_text=b'Details of any modifications/notes added in Django', max_length=200, null=True, blank=True)),
                 ('account', models.ForeignKey(to='gl.Account')),
-                ('company', models.ForeignKey(default=accountifie._utils.gl_helpers.get_default_company, to='gl.Company')),
+                ('company', models.ForeignKey(default=accountifie.toolkit.utils.gl_helpers.get_default_company, to='gl.Company')),
                 ('counterparty', models.ForeignKey(blank=True, to='gl.Counterparty', help_text=b'We need to match this up', null=True)),
                 ('employee', models.ForeignKey(to='gl.Employee', null=True)),
                 ('from_cf', models.ForeignKey(blank=True, to='base.Cashflow', help_text=b'created from cashflow', null=True)),
@@ -294,7 +294,7 @@ class Migration(migrations.Migration):
                 ('amount', models.FloatField(null=True)),
                 ('description', models.TextField(max_length=200, null=True, blank=True)),
                 ('card_number', models.CharField(max_length=20, null=True, blank=True)),
-                ('company', models.ForeignKey(default=accountifie._utils.gl_helpers.get_default_company, to='gl.Company')),
+                ('company', models.ForeignKey(default=accountifie.toolkit.utils.gl_helpers.get_default_company, to='gl.Company')),
                 ('counterparty', models.ForeignKey(blank=True, to='gl.Counterparty', help_text=b'We need to match this up', null=True)),
             ],
             options={
@@ -324,7 +324,7 @@ class Migration(migrations.Migration):
                 ('date_end', models.DateField(db_index=True, null=True, blank=True)),
                 ('object_id', models.PositiveIntegerField(null=True, blank=True)),
                 ('comment', models.CharField(default=b'None', max_length=200)),
-                ('company', models.ForeignKey(default=accountifie._utils.gl_helpers.get_default_company, to='gl.Company')),
+                ('company', models.ForeignKey(default=accountifie.toolkit.utils.gl_helpers.get_default_company, to='gl.Company')),
                 ('content_type', models.ForeignKey(blank=True, to='contenttypes.ContentType', null=True)),
             ],
             options={
@@ -356,7 +356,7 @@ class Migration(migrations.Migration):
                 ('customer_code', models.CharField(max_length=100)),
                 ('memo', models.CharField(max_length=200, null=True)),
                 ('fulfill_status', models.CharField(max_length=25, choices=[[b'unfulfilled', b'Unfulfilled'], [b'fulfilled', b'Fulfilled']])),
-                ('company', models.ForeignKey(default=accountifie._utils.gl_helpers.get_default_company, to='gl.Company')),
+                ('company', models.ForeignKey(default=accountifie.toolkit.utils.gl_helpers.get_default_company, to='gl.Company')),
             ],
             options={
                 'db_table': 'base_sale',

@@ -5,6 +5,8 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 import accountifie.gl.bmo
+from accountifie.toolkit.utils import get_default_company
+from accountifie.common.api import api_func
 
 DZERO = Decimal('0')
 
@@ -67,7 +69,7 @@ class SalesTax(models.Model):
 
 
 class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
-    company = models.ForeignKey('gl.Company', default=accountifie._utils.get_default_company)
+    company = models.ForeignKey('gl.Company', default=get_default_company)
 
     sale_date = models.DateField()
     external_ref = models.CharField(max_length=50, null=True)
@@ -179,7 +181,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         tran = []
 
-        accts_rec = accountifie.environment.api.variable({'name': 'GL_ACCOUNTS_RECEIVABLE'})
+        accts_rec = api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
         
         tran = dict(company=self.company,
                     date=self.sale_date,
@@ -193,17 +195,17 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         tran['lines'].append((accts_rec, total_amount, 'retail_buyer', []))
 
         # SHIPPING
-        shipping_acct = accountifie.gl.api.account({'path': 'liabilities.curr.accrued.shipping'})['id']
+        shipping_acct = api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
         tran['lines'].append((shipping_acct, -self.shipping, 'retail_buyer', []))
 
         # TAXES
-        sales_tax_acct = accountifie.gl.api.account({'path': 'liabilities.curr.accrued.salestax'})['id']
+        sales_tax_acct = api_func('gl', 'account', 'liabilities.curr.accrued.salestax')['id']
         for entity in tax_amts:
             tran['lines'].append((sales_tax_acct, -tax_amts[entity], entity, []))
 
         # book to pre-sales
         for product in sale_amts:
-            presale_acct = accountifie.gl.api.account({'path': 'liabilities.curr.presold.%s' % product})['id']
+            presale_acct = api_func('gl', 'account', 'liabilities.curr.presold.%s' % product)['id']
             tran['lines'].append((presale_acct, -sale_amts[product], 'retail_buyer', []))
 
         return [tran]

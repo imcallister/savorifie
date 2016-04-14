@@ -7,8 +7,7 @@ from django.contrib import messages
 
 from accountifie.gl.models import ExternalBalance, ExternalAccount
 from accountifie.query.query_manager import QueryManager
-import accountifie._utils
-import accountifie.environment.api
+from accountifie.toolkit.utils import extractDateRange, get_company
 
 from base.models import Expense, Mcard, Cashflow
 
@@ -25,9 +24,8 @@ def reports(request):
 
 @login_required
 def home(request):
-    from_date, to_date = accountifie._utils.extractDateRange(request)
-    company_id = accountifie._utils.get_company(request)
-    expenses = Expense.objects.filter(company_id=company_id)
+    from_date, to_date = extractDateRange(request)
+    company_id = get_company(request)
     
     context = dict(
         company_id = company_id
@@ -38,8 +36,8 @@ def home(request):
 @login_required
 def daily(request):
     today = datetime.datetime.now().date()
-    bank_accts = accountifie.environment.api.variable_list({'name': 'BANK_ACCOUNTS'})
-    unalloc_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
+    bank_accts = api_func('environment', 'variable_list', 'BANK_ACCOUNTS')
+    unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
 
     missing_bank_bals = []
 
@@ -47,8 +45,8 @@ def daily(request):
         if ExternalBalance.objects.filter(account=acct).filter(date=today).count() == 0:
             missing_bank_bals.append(acct)
 
-    company_id = accountifie._utils.get_company(request)
-    from_date, to_date = accountifie._utils.extractDateRange(request)
+    company_id = get_company(request)
+    from_date, to_date = extractDateRange(request)
     
     # new style
     gl_strategy = request.GET.get('gl_strategy', None)

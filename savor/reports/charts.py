@@ -5,13 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 from accountifie.query.query_manager import QueryManager
+from accountifie.common.api import api_func
 import accountifie.reporting.models
-import accountifie.environment.api
-from accountifie._utils import monthrange
+from accountifie.toolkit.utils import monthrange
 
 
 def display_name(path):
-    display_name = accountifie.environment.api.alias({'name': path})
+    display_name = api_func('environment', 'alias', path)
     if display_name:
         return display_name['display_as']
     else:

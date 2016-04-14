@@ -8,7 +8,7 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from .models import *
 from accountifie.gl.bmo import on_bmo_save
-from accountifie.gl.models import Account
+from accountifie.common.api import api_func
 
 
 
@@ -34,7 +34,7 @@ class UnmatchedExpense(SimpleListFilter):
             return (('MATCHED','MATCHED'),('UNMATCHED','UNMATCHED'))
 
     def queryset(self, request, qs):
-        unalloc_account = accountifie.environment.api.variable({'name': 'UNALLOCATED_ACCT'})
+        unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
         if self.value()=='UNMATCHED':
             return qs.filter(account_id=unalloc_account)
         if self.value()=='MATCHED':
