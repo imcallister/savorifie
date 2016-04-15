@@ -10,17 +10,6 @@ from accountifie.common.api import api_func
 
 DZERO = Decimal('0')
 
-class Product(models.Model):
-    description = models.CharField(max_length=50)
-    short_code = models.CharField(max_length=20)
-
-    def __unicode__(self):
-        return self.short_code
-
-    class Meta:
-        app_label = 'base'
-        db_table = 'base_product'
-
 
 class TaxCollector(models.Model):
     entity = models.CharField(max_length=100)
@@ -44,7 +33,7 @@ CHANNELS = [
 
 class UnitSale(models.Model):
     sale = models.ForeignKey('base.Sale')
-    product = models.ForeignKey('base.Product')
+    sku = models.ForeignKey('inventory.SKU', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
     

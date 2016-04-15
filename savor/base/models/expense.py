@@ -13,7 +13,7 @@ from dateutil.relativedelta import relativedelta
 
 from accountifie.gl.bmo import BusinessModelObject
 import accountifie.gl.models
-import accountifie.common.utils import get_default_company
+from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 
 logger = logging.getLogger('default')

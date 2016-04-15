@@ -8,6 +8,7 @@ from django.contrib import messages
 from accountifie.gl.models import ExternalBalance, ExternalAccount
 from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company
+from accountifie.common.api import api_func
 
 from base.models import Expense, Mcard, Cashflow
 

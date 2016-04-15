@@ -171,11 +171,6 @@ class NominalTransactionAdmin(SimpleHistoryAdmin):
 admin.site.register(NominalTransaction, NominalTransactionAdmin)
 
 
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ('short_code', 'description')
-    search_fields = ('short_code',)
-
-
 
 class TaxCollectorAdmin(admin.ModelAdmin):
     list_display = ('entity',)
@@ -185,7 +180,6 @@ class TaxCollectorAdmin(admin.ModelAdmin):
 
 
 admin.site.register(TaxCollector, TaxCollectorAdmin)
-admin.site.register(Product, ProductAdmin)
 
 
 #special signal as normal GL update doesn't work with NominalTransaction

@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 
-from savor.base.models import Sale, SalesTax, Product, UnitSale, TaxCollector
+from savor.base.models import Sale, SalesTax, UnitSale, TaxCollector
 import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
 
