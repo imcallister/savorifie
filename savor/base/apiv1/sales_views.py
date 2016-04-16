@@ -3,6 +3,7 @@ import datetime
 from django.conf import settings
 from django.forms.models import model_to_dict
 
+from accountifie.common.api import api_func
 from savor.base.models import Sale, UnitSale
 
 def get_model_data(instance, flds):
@@ -25,27 +26,16 @@ def sales(qstring):
 
 def summary_sales_stats(qstring):
     
-    start_date = qstring.get('from_date', settings.DATE_EARLY)
-    end_date = qstring.get('to_date', datetime.datetime.now().date())
-
-    if type(start_date) != datetime.date:
-        start_date = parse(start_date).date()
-    if type(end_date) != datetime.date:
-        end_date = parse(end_date).date()
-
-    all_unit_sales = UnitSale.objects.filter(sale__sale_date__gte=start_date, sale__sale_date__lte=end_date)
+    unit_sales_info = unit_sales(qstring)
     
-    stats = {}
-    stats['BYE_sold'] = len([x for x in all_unit_sales if x.product.short_code=='BYE'])
-    stats['SYE_sold'] = len([x for x in all_unit_sales if x.product.short_code=='SYE'])
-
-    stats['BYE_unfulfilled'] = len([x for x in all_unit_sales if x.product.short_code=='BYE' and x.sale.fulfill_status=='unfulfilled'])
-    stats['SYE_unfulfilled'] = len([x for x in all_unit_sales if x.product.short_code=='SYE' and x.sale.fulfill_status=='unfulfilled'])
-
+    inventory_items = api_func('inventory', 'inventoryitem')
+    for item in inventory_items:
+        item['sold'] = len([x for x in unit_sales_info if x['inventory item']==item['short_code']])
+    
+    stats = dict((item['short_code'], item['sold']) for item in inventory_items)
     return stats
 
 
-"""
 def unit_sales(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
@@ -56,15 +46,20 @@ def unit_sales(qstring):
         end_date = parse(end_date).date()
 
     all_unit_sales = UnitSale.objects.filter(sale__sale_date__gte=start_date, sale__sale_date__lte=end_date)
-    u_sale_flds = ['product', 'quantity', 'unit_price']
+    
+    
+    u_sale_flds = ['sku', 'quantity', 'unit_price']
     sale_flds = ['customer_code', 'memo',"fulfill_status",'sale_date',"channel","external_ref"]
 
     output_data = []
     for u_sale in all_unit_sales:
-        data = get_model_data(u_sale, u_sale_flds)
-        data.update(get_model_data(u_sale.sale, sale_flds))
-        data['sale_link'] = u_sale.sale.id_link
-        output_data.append(data)
+        inventory_items = u_sale.get_inventory_items()
+        for item in inventory_items:
+            data = get_model_data(u_sale, u_sale_flds)
+            data['inventory item'] = item
+            data['quantity'] = inventory_items[item]
+            data.update(get_model_data(u_sale.sale, sale_flds))
+            data['sale_link'] = u_sale.sale.id_link
+            output_data.append(data)
 
     return output_data
-"""

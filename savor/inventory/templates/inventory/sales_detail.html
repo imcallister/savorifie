@@ -16,24 +16,14 @@
 
     
     <div>
-        <h3>Stats</h3>
+        <h3>Total Item Sales</h3>
         <ul class="list-group .col-md-4">
-            <li class="list-group-item">
-                <span class="badge">{{BYE_sold}}</span>
-                BYE sold
-            </li>
-            <li class="list-group-item">
-                <span class="badge">{{SYE_sold}}</span>
-                BYE sold
-            </li>
-            <li class="list-group-item">
-                <span class="badge">{{BYE_unfulfilled}}</span>
-                BYE unfulfilled
-            </li>
-            <li class="list-group-item">
-                <span class="badge">{{SYE_unfulfilled}}</span>
-                SYE unfulfilled
-            </li>
+            {% for key, value in stats.items %}
+                <li class="list-group-item">
+                    <span class="badge">{{value}}</span>
+                    {{key}}
+                </li>
+            {% endfor %}
         </ul>
     </div>
 

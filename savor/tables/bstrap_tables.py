@@ -24,7 +24,7 @@ def unit_sales():
     data_url = "/api/base/unit_sales"
     row_defs = [{'data_field': 'sale_link', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
-                {'data_field': 'product', 'value': 'Product code', 'formatter': 'nameFormatter'},
+                {'data_field': 'sku', 'value': 'SKU', 'formatter': 'nameFormatter'},
                 {'data_field': 'fulfill_status', 'value': 'Fulfill status', 'formatter': 'nameFormatter'},
                 {'data_field': 'unit_price', 'value': 'Unit Price', 'formatter': 'nameFormatter'},
                 {'data_field': 'quantity', 'value': 'Quantity', 'formatter': 'nameFormatter'},

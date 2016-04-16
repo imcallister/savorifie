@@ -17,12 +17,7 @@ def sales_detail(request):
     context['unit_sales'] = get_table('unit_sales')()
 
     stats = api_func('base', 'summary_sales_stats')
-    stat_flds = ['BYE_sold', 'SYE_sold', 'BYE_unfulfilled', 'SYE_unfulfilled']
-
-    for stat in stat_flds:
-        context[stat] = stats[stat]
-
-
+    context['stats'] = stats.copy()
     return render_to_response('inventory/sales_detail.html', context, context_instance = RequestContext(request))
 
 
