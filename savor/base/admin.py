@@ -209,6 +209,7 @@ class SaleAdmin(SimpleHistoryAdmin):
     list_filter = ('channel','fulfill_status',)
     search_fields = ('external_ref', 'channel','fulfill_status',)
     save_as = True
+    actions = ['delete_model']
     inlines = [
         UnitSaleInline,
         SalesTaxInline
@@ -228,5 +229,20 @@ class SaleAdmin(SimpleHistoryAdmin):
         "They added a new nom tran - send signal"
         sale_saved.send(obj)
         return admin.ModelAdmin.response_add(self, request, obj)
+
+
+    def get_actions(self, request):
+        actions = super(SaleAdmin, self).get_actions(request)
+        del actions['delete_selected']
+        return actions
+
+    def delete_model(self, request, obj):
+        try:
+            for o in obj.all():
+                o.delete()
+        except:
+            obj.delete()
+    
+    delete_model.short_description = 'Delete sales and related GL entries'
 
 admin.site.register(Sale, SaleAdmin)

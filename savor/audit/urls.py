@@ -7,7 +7,7 @@ urlpatterns = patterns('',
     url(r'audit/^$', views.tasks, name='audit_index'),
     url(r'audit/tasks/$', views.tasks, name='tasks'),
 
-    url(r'api/(?P<api_view>[_a-zA-Z0-9]+)/$', views.api),
+    #url(r'api/(?P<api_view>[_a-zA-Z0-9]+)/$', views.api),
 
     url(r'audit/audit_trail/$', views.audit_trail, name='audit_trail'),
     url(r'audit/task/add/$', views.TaskCreate.as_view(), name="task_form"),

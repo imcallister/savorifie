@@ -42,7 +42,10 @@ class UnitSale(models.Model):
         db_table = 'base_unitsale'
 
     def __unicode__(self):
-        return '%s: %s' % (self.sale, self.product)
+        return '%s: %s' % (self.sale, self.sku)
+
+    def get_inventory_items(self):
+        return dict((u.inventory_item.short_code, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
 
 class SalesTax(models.Model):
     sale = models.ForeignKey('base.Sale')
@@ -140,17 +143,19 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         # for starters implement only for pre-sale
 
         unit_sales = self.unitsale_set.all()
-        products = list(set([x.product.short_code for x in unit_sales]))
-        sale_amts = dict((p,0) for p in products)
+        skus = list(set([x.sku for x in unit_sales]))
+
+        sale_amts = dict((s,0) for s in skus)
         for s in unit_sales:
-            sale_amts[s.product.short_code] += s.quantity * s.unit_price
+            sale_amts[s.sku] += s.quantity * s.unit_price
         
         # apply discount
         if self.discount > 0:
             total_sale = sum([v for k,v in sale_amts.iteritems()])
-            for p in products:
-                sale_amts[p] -= self.discount * sale_amts[p] / total_sale
+            for s in skus:
+                sale_amts[s] -= self.discount * sale_amts[s] / total_sale
 
+        
         # now get sales_taxes
         sales_taxes = self.salestax_set.all()
         tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
@@ -193,8 +198,13 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             tran['lines'].append((sales_tax_acct, -tax_amts[entity], entity, []))
 
         # book to pre-sales
-        for product in sale_amts:
-            presale_acct = api_func('gl', 'account', 'liabilities.curr.presold.%s' % product)['id']
-            tran['lines'].append((presale_acct, -sale_amts[product], 'retail_buyer', []))
+        for sku in sale_amts:
+            # now loop through the sku unit in the sku
+            sku_items = sku.skuunit_set.all()
+            for sku_item in sku_items:
+                product_line = sku_item.inventory_item.product_line.short_code
+                rev_percent = Decimal(sku_item.rev_percent)/Decimal(100)
+                presale_acct = api_func('gl', 'account', 'liabilities.curr.presold.%s' % product_line)['id']
+                tran['lines'].append((presale_acct, -sale_amts[sku] * rev_percent, 'retail_buyer', []))
 
         return [tran]

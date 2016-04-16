@@ -9,6 +9,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from savor.base.models import Sale, SalesTax, UnitSale, TaxCollector
+import inventory.models
 import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
 
@@ -16,18 +17,20 @@ DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'da
 INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
 PROCESSED_ROOT = os.path.join(DATA_ROOT, 'processed')
 
-
+"""
 def get_product(sku):
     return 'BYE' if sku[:2] == 'BE' else 'SYE'
+"""
+
 
 def get_unitsale(row):
     quantity = int(row['Lineitem quantity'])
     unit_price = row['Lineitem price']
-    product_code = get_product(row['Lineitem sku'])
-    product_id = Product.objects.get(short_code=product_code).id
+    sku_code = row['Lineitem sku']
+    sku_id = inventory.models.SKU.objects.get(short_code=sku_code).id
     
-    if quantity != '' and unit_price != '' and product_id != '':
-        return {'quantity': quantity, 'unit_price': unit_price, 'product_id': product_id}
+    if quantity != '' and unit_price != '' and sku_id != '':
+        return {'quantity': quantity, 'unit_price': unit_price, 'sku_id': sku_id}
     else:
         return None
 

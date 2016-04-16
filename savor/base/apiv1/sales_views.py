@@ -44,6 +44,8 @@ def summary_sales_stats(qstring):
 
     return stats
 
+
+"""
 def unit_sales(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
@@ -65,3 +67,4 @@ def unit_sales(qstring):
         output_data.append(data)
 
     return output_data
+"""
