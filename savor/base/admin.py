@@ -205,9 +205,9 @@ class SalesTaxInline(admin.TabularInline):
     extra = 0
 
 class SaleAdmin(SimpleHistoryAdmin):
-    list_display=('external_ref', 'sale_date', 'channel', 'customer_code',  'fulfill_status', 'discount_code',)
-    list_filter = ('channel','fulfill_status',)
-    search_fields = ('external_ref', 'channel','fulfill_status',)
+    list_display=('external_ref', 'sale_date', 'channel', 'customer_code', 'discount_code',)
+    list_filter = ('channel',)
+    search_fields = ('external_ref', 'channel',)
     save_as = True
     actions = ['delete_model']
     inlines = [

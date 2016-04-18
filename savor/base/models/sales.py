@@ -72,10 +72,12 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     channel = models.CharField(choices=CHANNELS, max_length=25)
     customer_code = models.CharField(max_length=100)
     memo = models.CharField(max_length=200, null=True)
-    fulfill_status = models.CharField(choices=FULFILL_STATUS, max_length=25)
     
     history = HistoricalRecords()
     short_code = 'SALE'
+
+    def __unicode__(self):
+        return '%s: %s' % (self.channel, self.external_ref)
 
     class Meta:
         app_label = 'base'
