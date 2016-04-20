@@ -22,7 +22,7 @@ def upload_file(request, file_type, check=False):
                           value_cleaner=base.importers.clean_expense_values,
                           exclude=base.importers.exclude_expense(),
                           post_process=None)
-        elif file_type == 'frbchecking':
+        elif file_type == 'frbchecking_old':
             config = dict(file_type=file_type,
                           model='base.Cashflow', 
                           unique=base.importers.unique_frbchecking, 
@@ -30,6 +30,8 @@ def upload_file(request, file_type, check=False):
                           value_cleaner=base.importers.clean_frbchecking_values,
                           exclude=[],
                           post_process=None)
+        elif file_type == 'frbchecking':
+          return base.importers.frbchecking.order_upload(request)
         elif file_type == 'shopify':
           return base.importers.shopify.order_upload(request)
         else:
