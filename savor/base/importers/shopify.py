@@ -74,6 +74,17 @@ def process_shopify(file_name):
     for k, v in sales.groupby('Name'):
         sale_info = {}
         v.fillna('', inplace=True)
+
+        # set default values
+        sale_info['gift_wrapping'] = False
+        sale_info['gift_wrap_fee'] = Decimal('0')
+        
+        # check for giftwrap option
+        for idx in v.index:
+            if v.loc[idx, 'Lineitem name'] == 'Gift Wrap - Custom':
+                sale_info['gift_wrapping'] = True
+                sale_info['gift_wrap_fee'] = v.loc[idx, 'Lineitem price']
+
         sale_info['company_id'] = 'SAV'
         sale_info['external_ref'] = str(v.iloc[0]['Name'])
         sale_info['shipping'] = Decimal(str(v.iloc[0]['Shipping']))
@@ -86,12 +97,15 @@ def process_shopify(file_name):
         sale_info['channel'] = 'shopify'
         sale_info['customer_code'] = v.iloc[0]['Email']
         sale_info['memo'] = ''
+
+        """
         sale_info['fulfill_status'] = v.iloc[0]['Lineitem fulfillment status']
         if sale_info['fulfill_status'] == 'pending':
             sale_info['fulfill_status'] = 'unfulfilled'
         else:
             sale_info['fulfill_status'] = 'fulfilled'
-            
+        """
+
         sales_items.append(sale_info)
         
         sale_obj = Sale.objects.filter(external_ref=sale_info['external_ref']).first()
@@ -120,11 +134,13 @@ def process_shopify(file_name):
                 tax_obj.save()
 
             for idx in v.index:
-                obj_data = get_unitsale(v.loc[idx].to_dict())
-                obj_data['sale_id'] = sale_obj.id
+                # check whether it is gift wrapping or not
+                if v.loc[idx, 'Lineitem name'] != 'Gift Wrap - Custom':
+                    obj_data = get_unitsale(v.loc[idx].to_dict())
+                    obj_data['sale_id'] = sale_obj.id
 
-                unitsale_obj = UnitSale(**obj_data)
-                unitsale_obj.save()
+                    unitsale_obj = UnitSale(**obj_data)
+                    unitsale_obj.save()
 
             sale_obj.save()
     return exist_sales_ctr, new_sales_ctr

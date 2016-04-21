@@ -72,6 +72,9 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     channel = models.CharField(choices=CHANNELS, max_length=25)
     customer_code = models.CharField(max_length=100)
     memo = models.CharField(max_length=200, null=True)
+
+    gift_wrapping = models.BooleanField(default=False)
+    gift_wrap_fee = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0'))
     
     history = HistoricalRecords()
     short_code = 'SALE'
@@ -84,8 +87,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         db_table = 'base_sale'
 
     def save(self):
-        models.Model.save(self)
         self.update_gl()
+        models.Model.save(self)
         
     def delete(self):
         self.delete_from_gl()
@@ -149,13 +152,13 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         sale_amts = dict((s,0) for s in skus)
         for s in unit_sales:
-            sale_amts[s.sku] += s.quantity * s.unit_price
+            sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
         
         # apply discount
         if self.discount > 0:
             total_sale = sum([v for k,v in sale_amts.iteritems()])
             for s in skus:
-                sale_amts[s] -= self.discount * sale_amts[s] / total_sale
+                sale_amts[s] -= Decimal(self.discount) * Decimal(sale_amts[s]) / Decimal(total_sale)
 
         
         # now get sales_taxes
@@ -163,10 +166,10 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
         tax_amts = dict((p,0) for p in tax_collectors)
         for t in sales_taxes:
-            tax_amts[t.collector.entity] += t.tax
+            tax_amts[t.collector.entity] += Decimal(t.tax)
         
         # calculate total cash = shipping + discount + sum over product x qty + sum of taxes
-        total_amount = self.shipping + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()])
+        total_amount = Decimal(self.shipping) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
 
         # while pre-sale
         # ---------------
@@ -193,6 +196,10 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         # SHIPPING
         shipping_acct = api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
         tran['lines'].append((shipping_acct, -self.shipping, 'retail_buyer', []))
+
+        # GIFT-WRAPPING
+        giftwrap_acct = api_func('gl', 'account', 'equity.retearnings.sales.extra.giftwrap')['id']
+        tran['lines'].append((giftwrap_acct, -self.gift_wrap_fee, 'retail_buyer', []))
 
         # TAXES
         sales_tax_acct = api_func('gl', 'account', 'liabilities.curr.accrued.salestax')['id']
