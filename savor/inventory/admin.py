@@ -42,10 +42,12 @@ class ProductAdmin(admin.ModelAdmin):
 admin.site.register(Product, ProductAdmin)   
 
 
-#special signal as normal GL update doesn't work with Shipments
+# special signal as normal GL update doesn't work with Shipments
+
+"""
 shipment_saved = django.dispatch.Signal(providing_args=[])
 shipment_saved.connect(on_bmo_save)
-
+"""
 
 class ShipmentLineInline(admin.TabularInline):
     model = ShipmentLine
@@ -59,6 +61,7 @@ class ShipmentAdmin(admin.ModelAdmin):
 
     inlines = [ShipmentLineInline]
 
+    """
     def response_change(self, request, new_object):
         "They saved a change - send signal"
         shipment_saved.send(new_object)
@@ -68,13 +71,13 @@ class ShipmentAdmin(admin.ModelAdmin):
         "They added a new shipment - send signal"
         shipment_saved.send(obj)
         return admin.ModelAdmin.response_add(self, request, obj)
-
+    """
 admin.site.register(Shipment, ShipmentAdmin)   
 
 
 #special signal as normal GL update doesn't work with Transfers
-transfer_saved = django.dispatch.Signal(providing_args=[])
-transfer_saved.connect(on_bmo_save)
+#transfer_saved = django.dispatch.Signal(providing_args=[])
+#transfer_saved.connect(on_bmo_save)
 
 
 class TransferLineInline(admin.TabularInline):
@@ -87,6 +90,7 @@ class InventoryTransferAdmin(admin.ModelAdmin):
     list_display = ('transfer_date', 'location', 'destination',)
     inlines = [TransferLineInline]
 
+    """
     def response_change(self, request, new_object):
         "They saved a change - send signal"
         transfer_saved.send(new_object)
@@ -96,6 +100,7 @@ class InventoryTransferAdmin(admin.ModelAdmin):
         "They added a new transfer - send signal"
         transfer_saved.send(obj)
         return admin.ModelAdmin.response_add(self, request, obj)
+    """
 
 admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 
