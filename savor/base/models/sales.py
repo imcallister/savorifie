@@ -22,21 +22,23 @@ class TaxCollector(models.Model):
         db_table = 'base_taxcollector'
 
 
-FULFILL_STATUS = [
-    ['unfulfilled', "Unfulfilled"],
-    ['fulfilled', "Fulfilled"],
-]
+class Channel(models.Model):
+    counterparty = models.ForeignKey('gl.Counterparty')
+
+    def __unicode__(self):
+        return self.counterparty.name
 
 CHANNELS = [
     ['shopify', "Shopify"],
 ]
 
+
 class UnitSale(models.Model):
     sale = models.ForeignKey('base.Sale')
-    sku = models.ForeignKey('inventory.SKU', null=True, blank=True)
+    sku = models.ForeignKey('inventory.Product', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
-    
+
     class Meta:
         app_label = 'base'
         db_table = 'base_unitsale'
@@ -63,24 +65,46 @@ class SalesTax(models.Model):
 class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
 
+    channel = models.ForeignKey(Channel, blank=True, null=True)
     sale_date = models.DateField()
+    external_channel_id = models.CharField(max_length=50, null=True)
     external_ref = models.CharField(max_length=50, null=True)
-    shipping = models.DecimalField(max_digits=11, decimal_places=2)
+    external_routing_id = models.CharField(max_length=50, null=True)
+
+    shipping_charge = models.DecimalField(max_digits=11, decimal_places=2)
     discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
     discount_code = models.CharField(max_length=50, blank=True, null=True)
 
-    channel = models.CharField(choices=CHANNELS, max_length=25)
-    customer_code = models.CharField(max_length=100)
+    customer_code = models.ForeignKey('gl.Counterparty', blank=True, null=True)
+    notification_email = models.EmailField(max_length=254, blank=True, null=True)
     memo = models.CharField(max_length=200, null=True)
 
     gift_wrapping = models.BooleanField(default=False)
     gift_wrap_fee = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0'))
-    
+    gift_message = models.CharField(max_length=200, null=True)
+
+    shipping_name = models.CharField(max_length=100, blank=True, null=True)
+    shipping_company = models.CharField(max_length=100, blank=True, null=True)
+    shipping_address1 = models.CharField(max_length=100, blank=True, null=True)
+    shipping_address2 = models.CharField(max_length=100, blank=True, null=True)
+    shipping_city = models.CharField(max_length=50, blank=True, null=True)
+    shipping_zip = models.CharField(max_length=20, blank=True, null=True)
+    shipping_province = models.CharField(max_length=30, blank=True, null=True)
+    shipping_country = models.CharField(max_length=30, blank=True, null=True)
+    shipping_phone = models.CharField(max_length=30, blank=True, null=True)
+
     history = HistoricalRecords()
     short_code = 'SALE'
 
     def __unicode__(self):
-        return '%s: %s' % (self.channel, self.external_ref)
+        if self.external_channel_id:
+            sale_id = self.external_channel_id
+        elif self.external_ref:
+            sale_id = self.external_ref
+        else:
+            sale_id = self.id
+
+        return '%s: %s' % (self.channel.counterparty.id, sale_id)
 
     class Meta:
         app_label = 'base'
@@ -169,7 +193,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             tax_amts[t.collector.entity] += Decimal(t.tax)
         
         # calculate total cash = shipping + discount + sum over product x qty + sum of taxes
-        total_amount = Decimal(self.shipping) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
+        total_amount = Decimal(self.shipping_charge) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
 
         # while pre-sale
         # ---------------
@@ -195,7 +219,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         # SHIPPING
         shipping_acct = api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
-        tran['lines'].append((shipping_acct, -self.shipping, 'retail_buyer', []))
+        tran['lines'].append((shipping_acct, - self.shipping_charge, 'retail_buyer', []))
 
         # GIFT-WRAPPING
         giftwrap_acct = api_func('gl', 'account', 'equity.retearnings.sales.extra.giftwrap')['id']

@@ -10,6 +10,7 @@
 *.iml
 /bin/
 /data/
+/htdocs/
 /include/
 /lib/
 /man/
@@ -17,3 +18,5 @@
 /src/
 /share/
 savor/localsettings.py
+load_data.sh
+load_fixtures
