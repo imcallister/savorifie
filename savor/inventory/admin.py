@@ -121,6 +121,7 @@ class FulfillmentAdmin(admin.ModelAdmin):
     list_display = ('request_date', 'warehouse', 'order',)
     inlines = [FulfillLineInline, FulfillUpdateInline]
 
+    """
     def response_change(self, request, new_object):
         "They saved a change - send signal"
         fulfill_saved.send(new_object)
@@ -130,6 +131,7 @@ class FulfillmentAdmin(admin.ModelAdmin):
         "They added a new transfer - send signal"
         fulfill_saved.send(obj)
         return admin.ModelAdmin.response_add(self, request, obj)
+    """
 
 admin.site.register(Fulfillment, FulfillmentAdmin)
 
