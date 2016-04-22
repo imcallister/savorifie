@@ -105,7 +105,6 @@ class StockEntryAdmin(SimpleHistoryAdmin):
 admin.site.register(StockEntry, StockEntryAdmin)
 
 
-
 # special signal as normal GL update doesn't work with NominalTransaction
 nom_tran_saved = django.dispatch.Signal(providing_args=[])
 nom_tran_saved.connect(on_bmo_save)
@@ -209,7 +208,7 @@ class SaleAdmin(SimpleHistoryAdmin):
 
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',), ('customer_code', 'memo'),)}),
-        ('External IDs', {'fields': ('external_ref', 'external_routing_id'), 'classes': ('collapse',)}),
+        ('External IDs', {'fields': (('external_ref', 'external_routing_id'), ('external_channel_id',)), 'classes': ('collapse',)}),
         ('Discount', {'fields': ('discount', 'discount_code',), 'classes': ('collapse',)}),
         ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee',), 'gift_message',), 'classes': ('collapse',)}),
         ('Shipping Details', {'fields': (('shipping_charge',), ('shipping_name',), ('shipping_company',),

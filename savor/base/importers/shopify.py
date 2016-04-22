@@ -107,7 +107,7 @@ def process_shopify(file_name):
         if company != '':
             if api_func('gl', 'counterparty', company):
                 # it exists
-                sale_info['customer_code_id']  = company
+                sale_info['customer_code__name']  = company
             else:
                 unknown_cp_ctr += 1
                 sale_info['customer_code_id']  = 'unknown'
