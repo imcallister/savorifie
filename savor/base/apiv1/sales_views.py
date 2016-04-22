@@ -49,7 +49,7 @@ def unit_sales(qstring):
     
     
     u_sale_flds = ['sku', 'quantity', 'unit_price']
-    sale_flds = ['customer_code', 'memo',"fulfill_status",'sale_date',"channel","external_ref"]
+    sale_flds = ['customer_code', 'memo','sale_date',"channel","external_ref"]
 
     output_data = []
     for u_sale in all_unit_sales:
