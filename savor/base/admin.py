@@ -171,6 +171,12 @@ class NominalTransactionAdmin(SimpleHistoryAdmin):
 admin.site.register(NominalTransaction, NominalTransactionAdmin)
 
 
+class ChannelAdmin(admin.ModelAdmin):
+    list_display = ('counterparty',)
+    list_filter = ('counterparty',)
+
+admin.site.register(Channel, ChannelAdmin)
+
 
 class TaxCollectorAdmin(admin.ModelAdmin):
     list_display = ('entity',)
@@ -216,8 +222,15 @@ class SaleAdmin(SimpleHistoryAdmin):
         ]
 
     fieldsets = (
-        ('Order Details', {'fields': (('channel', 'sale_date'), ('customer_code', 'external_ref',), ('memo', 'gift_wrapping', 'gift_wrap_fee'), ('shipping', ))}),
-        ('Discount', {'fields': (('discount', 'discount_code',), )}),
+        ('Details', {'fields': (('channel', 'sale_date',), ('customer_code',), ('memo',),), 'classes': ('wide',)}),
+        ('External IDs', {'fields': ('external_ref', 'external_routing_id'), 'classes': ('wide',)}),
+        ('Discount', {'fields': (('discount', 'discount_code',),), 'classes': ('wide', 'extrapretty', 'collapse')}),
+        ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee', 'gift_message',),), 'classes': ('wide', 'extrapretty', 'collapse')}),
+        ('Shipping Details', {'fields': (('shipping',), ('shipping_name',), ('shipping_company',),
+                                         ('shipping_address1'), ('shipping_address2'),
+                                         ('shipping_city'), ('shipping_province', 'shipping_zip'),
+                                         ('shipping_country'), ('shipping_phone', 'notification_email',)),
+                            'classes': ('extra_wide')})
     )
 
     def response_change(self, request, new_object):

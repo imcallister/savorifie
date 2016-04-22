@@ -25,6 +25,8 @@ class TaxCollector(models.Model):
 class Channel(models.Model):
     counterparty = models.ForeignKey('gl.Counterparty')
 
+    def __unicode__(self):
+        return self.counterparty.name
 
 CHANNELS = [
     ['shopify', "Shopify"],
