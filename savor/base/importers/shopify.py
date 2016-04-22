@@ -28,7 +28,7 @@ def get_unitsale(row):
     quantity = int(row['Lineitem quantity'])
     unit_price = row['Lineitem price']
     sku_code = row['Lineitem sku']
-    sku_id = inventory.models.SKU.objects.get(short_code=sku_code).id
+    sku_id = inventory.models.Product.objects.get(short_code=sku_code).id
 
     if quantity != '' and unit_price != '' and sku_id != '':
         return {'quantity': quantity, 'unit_price': unit_price, 'sku_id': sku_id}
@@ -94,7 +94,7 @@ def process_shopify(file_name):
 
         sale_info['company_id'] = 'SAV'
         sale_info['external_channel_id'] = str(v.iloc[0]['Name'])
-        sale_info['shipping'] = Decimal(str(v.iloc[0]['Shipping']))
+        sale_info['shipping_charge'] = Decimal(str(v.iloc[0]['Shipping']))
         sale_info['discount_code'] = str(v.iloc[0]['Discount Code'])
         if sale_info['discount_code']=='':
             sale_info['discount_code'] = None
