@@ -101,8 +101,8 @@ admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 
 
 #special signal as normal GL update doesn't work with Transfers
-fulfill_saved = django.dispatch.Signal(providing_args=[])
-fulfill_saved.connect(on_bmo_save)
+#fulfill_saved = django.dispatch.Signal(providing_args=[])
+#fulfill_saved.connect(on_bmo_save)
 
 
 class FulfillLineInline(admin.TabularInline):

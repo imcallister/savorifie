@@ -77,7 +77,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     customer_code = models.ForeignKey('gl.Counterparty', blank=True, null=True)
     notification_email = models.EmailField(max_length=254, blank=True, null=True)
-    memo = models.CharField(max_length=200, null=True)
+    memo = models.CharField(max_length=200, null=True, blank=True)
 
     gift_wrapping = models.BooleanField(default=False)
     gift_wrap_fee = models.DecimalField(max_digits=6, decimal_places=2, default=Decimal('0'))
