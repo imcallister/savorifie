@@ -6,6 +6,7 @@ from django.forms.models import model_to_dict
 from accountifie.common.api import api_func
 from savor.base.models import Sale, UnitSale
 
+
 def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
@@ -25,15 +26,18 @@ def sales(qstring):
 
 
 def summary_sales_stats(qstring):
-    
     unit_sales_info = unit_sales(qstring)
-    
     inventory_items = api_func('inventory', 'inventoryitem')
     for item in inventory_items:
         item['sold'] = len([x for x in unit_sales_info if x['inventory item']==item['short_code']])
-    
+
     stats = dict((item['short_code'], item['sold']) for item in inventory_items)
     return stats
+
+
+def missing_cps(qstring):
+    missing_cp_sales = Sale.objects.filter(customer_code__id='unknown')
+    return [model_to_dict(sale, fields=[field.name for field in sale._meta.fields]) for sale in missing_cp_sales]
 
 
 def unit_sales(qstring):
@@ -46,8 +50,7 @@ def unit_sales(qstring):
         end_date = parse(end_date).date()
 
     all_unit_sales = UnitSale.objects.filter(sale__sale_date__gte=start_date, sale__sale_date__lte=end_date)
-    
-    
+
     u_sale_flds = ['sku', 'quantity', 'unit_price']
     sale_flds = ['customer_code', 'memo','sale_date',"channel","external_ref"]
 

@@ -27,7 +27,7 @@ class InventoryItem(models.Model):
         db_table = 'inventory_inventoryitem'
 
 
-class SKU(models.Model):
+class Product(models.Model):
     description = models.CharField(max_length=200)
     short_code = models.CharField(max_length=20)
 
@@ -36,13 +36,13 @@ class SKU(models.Model):
 
     class Meta:
         app_label = 'inventory'
-        db_table = 'inventory_sku'
+        db_table = 'inventory_product'
 
 
 class SKUUnit(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     inventory_item = models.ForeignKey(InventoryItem, blank=True, null=True)
-    sku = models.ForeignKey(SKU, blank=True, null=True)
+    sku = models.ForeignKey(Product, blank=True, null=True)
     rev_percent = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):

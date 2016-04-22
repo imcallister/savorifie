@@ -33,13 +33,13 @@ class SKUUnitInline(admin.TabularInline):
     extra = 0
 
 
-class SKUAdmin(admin.ModelAdmin):
+class ProductAdmin(admin.ModelAdmin):
     list_display = ('description', 'short_code',)
     search_fields = ('short_code', 'description',)
 
     inlines = [SKUUnitInline]
 
-admin.site.register(SKU, SKUAdmin)   
+admin.site.register(Product, ProductAdmin)   
 
 
 #special signal as normal GL update doesn't work with Shipments

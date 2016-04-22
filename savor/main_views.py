@@ -10,7 +10,7 @@ from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company
 from accountifie.common.api import api_func
 
-from base.models import Expense, Mcard, Cashflow
+from base.models import Expense, Cashflow, Sale
 
 
 @login_required
@@ -27,11 +27,7 @@ def reports(request):
 def home(request):
     from_date, to_date = extractDateRange(request)
     company_id = get_company(request)
-    
-    context = dict(
-        company_id = company_id
-        )
-
+    context = dict(company_id=company_id)
     return render_to_response('main_views/home.html', context, RequestContext(request))
 
 @login_required
@@ -48,7 +44,7 @@ def daily(request):
 
     company_id = get_company(request)
     from_date, to_date = extractDateRange(request)
-    
+
     # new style
     gl_strategy = request.GET.get('gl_strategy', None)
 
@@ -59,10 +55,10 @@ def daily(request):
 
     chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
-    
+
     stub_expenses = Expense.objects.filter(account_id=unalloc_account).count()
     incomplete_cashflows = cashflows.filter(counterparty=None).count()
-
+    incomplete_shopify_sales = Sale.objects.filter(customer_code='unknown').count()
 
     ap_rows = []
     for i in ap_table.index:
@@ -85,7 +81,7 @@ def daily(request):
     incomplete_rows = []
     incomplete_rows.append(['Expenses', stub_expenses, '/admin/base/expense/?unmatched=UNMATCHED'])
     incomplete_rows.append(['Payments -- 1001', incomplete_cashflows, '/admin/base/cashflow/?unmatched=UNMATCHED'])
-
+    incomplete_shopify = [['Missing CPs', incomplete_shopify_sales, '/admin/base/sale/?customer_code=unknown']]
 
     gl_strategy = request.GET.get('gl_strategy', None)
     query_manager = QueryManager(gl_strategy=gl_strategy)
@@ -98,7 +94,7 @@ def daily(request):
             missing_exp = '/admin/base/cashflow/?q=%s' %i
             creditor_rows.append([i, ap_table.loc[i], drilldown, missing_exp])
 
-    #gather some info on what we have in the database
+    # gather some info on what we have in the database
     expenses = Expense.objects.filter(company_id=company_id)
     expense_count = expenses.count()
     if expense_count:
@@ -110,14 +106,12 @@ def daily(request):
         messages.info(request, 'Missing external account balances: %s' % ','.join(missing_bank_bals))
 
     context = dict(
-        expense_count = expense_count,
-        expense_latest = expense_latest,
-        creditor_rows = creditor_rows,
-        prepaid_rows = prepaid_rows,
-        al_rows = al_rows,
-        incomplete_rows = incomplete_rows
-        )
-
+        expense_count=expense_count,
+        expense_latest=expense_latest,
+        creditor_rows=creditor_rows,
+        prepaid_rows=prepaid_rows,
+        al_rows=al_rows,
+        incomplete_rows=incomplete_rows,
+        incomplete_shopify=incomplete_shopify)
 
     return render_to_response('main_views/daily.html', RequestContext(request, context))
-

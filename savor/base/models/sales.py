@@ -35,7 +35,7 @@ CHANNELS = [
 
 class UnitSale(models.Model):
     sale = models.ForeignKey('base.Sale')
-    sku = models.ForeignKey('inventory.SKU', null=True, blank=True)
+    sku = models.ForeignKey('inventory.Product', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
 
@@ -67,10 +67,11 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     channel = models.ForeignKey(Channel, blank=True, null=True)
     sale_date = models.DateField()
+    external_channel_id = models.CharField(max_length=50, null=True)
     external_ref = models.CharField(max_length=50, null=True)
     external_routing_id = models.CharField(max_length=50, null=True)
 
-    shipping = models.DecimalField(max_digits=11, decimal_places=2)
+    shipping_charge = models.DecimalField(max_digits=11, decimal_places=2)
     discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
     discount_code = models.CharField(max_length=50, blank=True, null=True)
 
@@ -96,7 +97,14 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     short_code = 'SALE'
 
     def __unicode__(self):
-        return '%s: %s' % (self.channel, self.external_ref)
+        if self.external_channel_id:
+            sale_id = self.external_channel_id
+        elif self.external_ref:
+            sale_id = self.external_ref
+        else:
+            sale_id = self.id
+
+        return '%s: %s' % (self.channel.counterparty.id, sale_id)
 
     class Meta:
         app_label = 'base'
@@ -185,7 +193,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             tax_amts[t.collector.entity] += Decimal(t.tax)
         
         # calculate total cash = shipping + discount + sum over product x qty + sum of taxes
-        total_amount = Decimal(self.shipping) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
+        total_amount = Decimal(self.shipping_charge) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
 
         # while pre-sale
         # ---------------
@@ -211,7 +219,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         # SHIPPING
         shipping_acct = api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
-        tran['lines'].append((shipping_acct, -self.shipping, 'retail_buyer', []))
+        tran['lines'].append((shipping_acct, - self.shipping_charge, 'retail_buyer', []))
 
         # GIFT-WRAPPING
         giftwrap_acct = api_func('gl', 'account', 'equity.retearnings.sales.extra.giftwrap')['id']

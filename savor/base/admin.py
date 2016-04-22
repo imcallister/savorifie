@@ -11,20 +11,19 @@ from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 
 
-
-
 class UnmatchedCashflows(SimpleListFilter):
     title = 'unmatched'
     parameter_name = 'unmatched'
 
     def lookups(self, request, model_admin):
-            return (('MATCHED','MATCHED'),('UNMATCHED','UNMATCHED'))
+            return (('MATCHED', 'MATCHED'), ('UNMATCHED', 'UNMATCHED'))
 
     def queryset(self, request, qs):
-        if self.value()=='UNMATCHED':
+        if self.value() == 'UNMATCHED':
             return qs.filter(counterparty=None)
-        if self.value()=='MATCHED':
+        if self.value() == 'MATCHED':
             return qs.exclude(counterparty=None)
+
 
 class UnmatchedExpense(SimpleListFilter):
     title = 'unmatched'
@@ -53,15 +52,8 @@ class CashflowAdmin(SimpleHistoryAdmin):
         self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (rslts['new'], rslts['duplicates']))
         return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
 
-admin.site.register(Cashflow, CashflowAdmin)   
+admin.site.register(Cashflow, CashflowAdmin)
 
-
-"""
-class MastercardPaysExpenseAdmin(admin.ModelAdmin):
-    list_display = ['id', 'expense', 'carditem', 'amount']
-    ordering = ['expense__expense_date']
-admin.site.register(McardPaysExpense, MastercardPaysExpenseAdmin)
-"""
 
 class McardExpenseInline(admin.TabularInline):
     model = Expense
@@ -71,15 +63,13 @@ class McardExpenseInline(admin.TabularInline):
 class McardAdmin(SimpleHistoryAdmin):
     list_display = ('company', 'id','counterparty', 'card_number', 'type', 'description', 'amount', 'post_date', 'trans_date')
     list_filter = ('type',)
-    #inlines = [McardExpenseInline]  - wrong, or needs Django 1.7?
 
 admin.site.register(Mcard, McardAdmin)
 
+
 class AMEXAdmin(SimpleHistoryAdmin):
     list_display = ('company', 'id','counterparty', 'description', 'amount', 'date',)
-    #inlines = [McardExpenseInline]  - wrong, or needs Django 1.7?
 admin.site.register(AMEX, AMEXAdmin)
-
 
 
 class ExpenseAdmin(SimpleHistoryAdmin):
@@ -89,7 +79,7 @@ class ExpenseAdmin(SimpleHistoryAdmin):
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['id','counterparty__id', 'account__id']
     list_editable = ('employee', 'account', 'paid_from', 'comment')
-    #inlines = [McardExpenseInline]  - wrong, or needs Django 1.7?
+
 
     def get_actions(self, request):
         actions = super(ExpenseAdmin, self).get_actions(request)
@@ -105,19 +95,18 @@ class ExpenseAdmin(SimpleHistoryAdmin):
     delete_model.short_description = 'Delete expense and related GL entries'
 
 
-
 admin.site.register(Expense, ExpenseAdmin)
 
 class StockEntryAdmin(SimpleHistoryAdmin):
     list_display = ('date', 'quantity','share_class', 'gl_acct',)
     list_filter = ('share_class', 'gl_acct',)
     search_fields = ('date', 'quantity','share_class', 'gl_acct',)
-    
+
 admin.site.register(StockEntry, StockEntryAdmin)
 
 
 
-#special signal as normal GL update doesn't work with NominalTransaction
+# special signal as normal GL update doesn't work with NominalTransaction
 nom_tran_saved = django.dispatch.Signal(providing_args=[])
 nom_tran_saved.connect(on_bmo_save)
 
@@ -156,7 +145,7 @@ class NominalTransactionAdmin(SimpleHistoryAdmin):
     save_on_top = True
     inlines = [
         NominalTranLineInline,
-        ]
+    ]
 
     def response_change(self, request, new_object):
         "They saved a change - send signal"
@@ -184,11 +173,10 @@ class TaxCollectorAdmin(admin.ModelAdmin):
     search_fields = ('entity',)
 
 
-
 admin.site.register(TaxCollector, TaxCollectorAdmin)
 
 
-#special signal as normal GL update doesn't work with NominalTransaction
+# special signal as normal GL update doesn't work with NominalTransaction
 sale_saved = django.dispatch.Signal(providing_args=[])
 sale_saved.connect(on_bmo_save)
 
@@ -201,36 +189,34 @@ class UnitSaleInline(admin.TabularInline):
     model = UnitSale
     can_delete = True
     extra = 0
-    #formset = UnitSaleInlineFormset
-    
-     
-    
+
+
 class SalesTaxInline(admin.TabularInline):
     model = SalesTax
     can_delete = True
     extra = 0
 
 class SaleAdmin(SimpleHistoryAdmin):
-    list_display=('external_ref', 'sale_date', 'channel', 'customer_code', 'discount_code',)
+    list_display=('external_channel_id', 'sale_date', 'channel', 'customer_code', 'discount_code',)
     list_filter = ('channel',)
-    search_fields = ('external_ref', 'channel',)
+    search_fields = ('external_channel_id', 'channel',)
     save_as = True
     actions = ['delete_model']
     inlines = [
         UnitSaleInline,
         SalesTaxInline
-        ]
+    ]
 
     fieldsets = (
-        ('Details', {'fields': (('channel', 'sale_date',), ('customer_code',), ('memo',),), 'classes': ('wide',)}),
-        ('External IDs', {'fields': ('external_ref', 'external_routing_id'), 'classes': ('wide',)}),
-        ('Discount', {'fields': (('discount', 'discount_code',),), 'classes': ('wide', 'extrapretty', 'collapse')}),
-        ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee', 'gift_message',),), 'classes': ('wide', 'extrapretty', 'collapse')}),
-        ('Shipping Details', {'fields': (('shipping',), ('shipping_name',), ('shipping_company',),
+        ('Details', {'fields': (('channel', 'sale_date',), ('customer_code', 'memo'),)}),
+        ('External IDs', {'fields': ('external_ref', 'external_routing_id'), 'classes': ('collapse',)}),
+        ('Discount', {'fields': (('discount', 'discount_code',),), 'classes': ('collapse')}),
+        ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee',), 'gift_message',), 'classes': ('collapse')}),
+        ('Shipping Details', {'fields': (('shipping_charge',), ('shipping_name',), ('shipping_company',),
                                          ('shipping_address1'), ('shipping_address2'),
-                                         ('shipping_city'), ('shipping_province', 'shipping_zip'),
-                                         ('shipping_country'), ('shipping_phone', 'notification_email',)),
-                            'classes': ('extra_wide')})
+                                         ('shipping_city', 'shipping_country'), ('shipping_province', 'shipping_zip'),
+                                         ('shipping_phone', 'notification_email',)),
+                              'classes': ('extra_wide')})
     )
 
     def response_change(self, request, new_object):
