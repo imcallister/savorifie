@@ -2,7 +2,7 @@ from django.contrib import admin
 import django.dispatch
 
 from .models import *
-from accountifie.gl.bmo import on_bmo_save
+#from accountifie.gl.bmo import on_bmo_save
 
 
 class WarehouseAdmin(admin.ModelAdmin):

@@ -21,6 +21,9 @@ class Shipment(models.Model, accountifie.gl.bmo.BusinessModelObject):
     short_code = models.CharField(max_length=20)
     destination = models.ForeignKey('inventory.Warehouse', blank=True, null=True)
 
+    def __unicode__(self):
+        return self.short_code
+
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_shipment'
@@ -33,7 +36,7 @@ class ShipmentLine(models.Model):
     shipment = models.ForeignKey(Shipment)
     
     def __unicode__(self):
-        return self.shipment
+        return '%s:%s' % (self.shipment, self.id)
 
     class Meta:
         app_label = 'inventory'
