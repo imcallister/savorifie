@@ -2,12 +2,13 @@ from multipledispatch import dispatch
 
 from django.forms.models import model_to_dict
 
-from inventory.models import SKU, InventoryItem, ProductLine
+from accountifie.common.api import api_func
+from inventory.models import Product, InventoryItem, ProductLine, Shipment, ShipmentLine
 
 
 @dispatch(dict)
-def sku(qstring):
-    all_skus = SKU.objects.all()
+def product(qstring):
+    all_skus = Product.objects.all()
     data = []
     for sku in all_skus:
         d = model_to_dict(sku)
@@ -23,8 +24,8 @@ def sku(qstring):
 
 
 @dispatch(str, dict)
-def sku(short_code, qstring):
-    sku = SKU.objects.get(short_code=short_code)
+def product(short_code, qstring):
+    sku = Product.objects.get(short_code=short_code)
 
     d = model_to_dict(sku)
     sku_items = list(sku.skuunit_set.all().values())
@@ -36,6 +37,14 @@ def sku(short_code, qstring):
 
     return d
 
+def inventorycount(qstring):
+    all_shipments = {}
+    for item in inventoryitem({}):
+        all_shipments[item['short_code']] = sum([sl.quantity for sl in ShipmentLine.objects.filter(inventory_item_id=item['id'])])
+
+    return all_shipments
+
+
 @dispatch(dict)
 def inventoryitem(qstring):
     items = InventoryItem.objects.all()
@@ -45,23 +54,21 @@ def inventoryitem(qstring):
         product_line = item.product_line
         item_data = model_to_dict(item)
         product_line_data = dict(('Product Line %s' %k, v) for k,v in model_to_dict(product_line).iteritems())
-        
+
         data = item_data
         data.update(product_line_data)
         all_data.append(data)
 
     return all_data
-    
+
 
 @dispatch(str, dict)
 def inventoryitem(short_code, qstring):
     item = InventoryItem.objects.get(short_code=short_code)
     product_line = item.product_line
-
     item_data = model_to_dict(item)
     product_line_data = dict(('Product Line %s' %k, v) for k,v in model_to_dict(product_line).iteritems())
-    
+
     data = item_data
     data.update(product_line_data)
     return data
-

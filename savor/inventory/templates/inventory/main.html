@@ -11,7 +11,7 @@
 
 {% block content %}
 
-
+<link href="/static/base/css/dashboard_styles.css" rel="stylesheet">
 <!--
 This is where bootstrap starts to get a bit demented.   Surely not all
 these divs are needed.
@@ -19,20 +19,170 @@ these divs are needed.
 
 -->
 
+<h2>Order 1</h2>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title"><a href="/gl/">Reports</a></h3>
+<div class="container-fluid" id="wrapper">
+
+    <div class="row">
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-plum panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{SYE1_count}}</div>
+                        <div class="text-muted">SYE1</div>
+                    </div>
+                </div>
             </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-ocean panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked male-user"><use xlink:href="#stroked-male-user"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{SYE2_count}}</div>
+                        <div class="text-muted">SYE2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-slate panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{SYE3_count}}</div>
+                        <div class="text-muted">SYE3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-plum panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{BE1_count}}</div>
+                        <div class="text-muted">BE1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-ocean panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked male-user"><use xlink:href="#stroked-male-user"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{BE2_count}}</div>
+                        <div class="text-muted">BE2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-slate panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{BE3_count}}</div>
+                        <div class="text-muted">BE3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--/.row-->
 
-            <div class="panel-body">
+</div>
+    
+<h2>Sold</h2>
 
-                <ul>
-                    <li><a href="/inventory/sales_history">Full History</a></li>
-                </ul>
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+            <div class="col-xs-4 col-md-2">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>SYE1</h4>
+                        <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_sold}}" ><span class="percent">{{SYE1_sold}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-2">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>SYE2</h4>
+                        <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_sold}}" ><span class="percent">{{SYE2_sold}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-2">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>SYE3</h4>
+                        <div class="easypiechart" id="easypiechart-SYE3" data-percent="{{SYE3_sold}}" ><span class="percent">{{SYE3_sold}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-2">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>BE1</h4>
+                        <div class="easypiechart" id="easypiechart-BE1" data-percent="{{BE1_sold}}" ><span class="percent">{{BE1_sold}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-2">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>BE2</h4>
+                        <div class="easypiechart" id="easypiechart-BE2" data-percent="{{BE2_sold}}" ><span class="percent">{{BE2_sold}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-2">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>BE3</h4>
+                        <div class="easypiechart" id="easypiechart-BE3" data-percent="{{BE3_sold}}" ><span class="percent">{{BE3_sold}}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!--/.row-->
+</div>
 
+<h2>Reports</h2>
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><a href="/gl/">Reports</a></h3>
+                </div>
+
+                <div class="panel-body">
+
+                    <ul>
+                        <li><a href="/inventory/sales_history">Full History</a></li>
+                    </ul>
+
+                </div>
             </div>
         </div>
     </div>
@@ -44,11 +194,57 @@ these divs are needed.
     <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
     <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
     <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
+    <script src="{{ STATIC_URL }}base/js/easypiechart.js"></script>
+    
 
     <script type="text/javascript">
     
     $(document).ready(cash_bals_chart("{% url 'cash_balances' %}", 'cash_bals_panel'));
     $(document).ready(expense_trends("{% url 'expense_trends' %}", 'expense_trends_panel'));
+
+    
+    $(function() {
+        $('#easypiechart-BE1').easyPieChart({
+            scaleColor: false,
+            barColor: '#8E4585'
+        });
+    });
+
+    $(function() {
+        $('#easypiechart-BE2').easyPieChart({
+            scaleColor: false,
+            barColor: '#229CE4'
+        });
+    });
+
+    $(function() {
+       $('#easypiechart-BE3').easyPieChart({
+           scaleColor: false,
+           barColor: '#778899'
+       });
+    });
+
+    $(function() {
+        $('#easypiechart-SYE1').easyPieChart({
+            scaleColor: false,
+            barColor: '#8E4585'
+        });
+    });
+
+    $(function() {
+        $('#easypiechart-SYE2').easyPieChart({
+            scaleColor: false,
+            barColor: '#229CE4'
+        });
+    });
+
+    $(function() {
+       $('#easypiechart-SYE3').easyPieChart({
+           scaleColor: false,
+           barColor: '#778899'
+       });
+    });
+
     
     </script>
 

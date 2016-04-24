@@ -40,6 +40,20 @@ def missing_cps(qstring):
     return [model_to_dict(sale, fields=[field.name for field in sale._meta.fields]) for sale in missing_cp_sales]
 
 
+def sales_counts(qstring):
+    all_skus = api_func('inventory', 'inventoryitem')
+    all_sales = UnitSale.objects.all()
+
+    sales_counts = dict((k['short_code'],0) for k in all_skus)
+
+    for u_sale in all_sales:
+        u_sale_counts = u_sale.get_inventory_items()
+        for sku in u_sale_counts:
+            sales_counts[sku] += u_sale_counts[sku]
+
+    return sales_counts
+
+
 def unit_sales(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
