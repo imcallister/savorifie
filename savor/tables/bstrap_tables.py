@@ -107,3 +107,12 @@ def task_audit(task_id):
             ]
     return get_bstrap_table(data_url, row_defs)
 
+def unfulfilled():
+    data_url = "/api/inventory/unfulfilled/"
+    row_defs = [{'data_field': 'customer_code', 'value': 'Customer', 'formatter': 'nameFormatter'},
+                {'data_field': 'memo', 'value': 'memo', 'formatter': 'nameFormatter'},
+                {'data_field': 'external_channel_id', 'value': 'external_id', 'formatter': 'nameFormatter'},
+                {'data_field': 'gift_wrapping', 'value': 'Gift Wrapping', 'formatter': 'nameFormatter'},
+                {'data_field': 'gift_message', 'value': 'Gift Message', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)

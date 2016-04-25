@@ -1,4 +1,5 @@
 import datetime
+from multipledispatch import dispatch
 
 from django.conf import settings
 from django.forms.models import model_to_dict
@@ -11,7 +12,8 @@ def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
 
-def sales(qstring):
+@dispatch(dict)
+def sale(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
 
@@ -21,8 +23,16 @@ def sales(qstring):
         end_date = parse(end_date).date()
 
     all_sales = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date)
+    fields=[field.name for field in all_sales[0]._meta.fields]
 
-    return [model_to_dict(sale, fields=[field.name for field in sale._meta.fields]) for sale in all_sales]
+    return [get_model_data(sale_obj, fields) for sale_obj in all_sales]
+
+
+@dispatch(unicode, dict)
+def sale(id, qstring):
+    sale_obj = Sale.objects.get(id=id)
+    fields=[field.name for field in sale_obj._meta.fields]
+    return get_model_data(sale_obj, fields)
 
 
 def summary_sales_stats(qstring):
@@ -53,7 +63,21 @@ def sales_counts(qstring):
 
     return sales_counts
 
+@dispatch(unicode, dict)
+def unit_sales(sale_id, qstring):
+    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
+    u_sale_flds = ['sku', 'quantity', 'unit_price']
+    return [get_model_data(u_sale, u_sale_flds) for u_sale in unit_sales]
 
+
+@dispatch(str, dict)
+def unit_sales(sale_id, qstring):
+    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
+    u_sale_flds = ['sku', 'quantity', 'unit_price']
+    return [get_model_data(u_sale, u_sale_flds) for u_sale in unit_sales]
+
+
+@dispatch(dict)
 def unit_sales(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())

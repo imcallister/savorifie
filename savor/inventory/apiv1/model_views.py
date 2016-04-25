@@ -3,7 +3,12 @@ from multipledispatch import dispatch
 from django.forms.models import model_to_dict
 
 from accountifie.common.api import api_func
-from inventory.models import Product, InventoryItem, ProductLine, Shipment, ShipmentLine
+from inventory.models import *
+
+
+def get_model_data(instance, flds):
+    data = dict((fld, str(getattr(instance, fld))) for fld in flds)
+    return data
 
 
 @dispatch(dict)
@@ -36,6 +41,22 @@ def product(short_code, qstring):
     d['sku_items'] = sku_items
 
     return d
+
+
+@dispatch(dict)
+def channelshipmenttype(qstring):
+    flds = ['short_code', 'channel', 'ship_type', 'bill_to']
+    all_types = list(ChannelShipmentType.objects.all())
+    return [get_model_data(t, flds) for t in all_types]
+
+
+@dispatch(str, dict)
+def channelshipmenttype(short_code, qstring):
+    flds = ['short_code', 'channel', 'ship_type', 'bill_to']
+    ship_info = ChannelShipmentType.objects.get(short_code=short_code)
+    return get_model_data(ship_info, flds)
+
+
 
 def inventorycount(qstring):
     all_shipments = {}

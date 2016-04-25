@@ -49,6 +49,24 @@ shipment_saved = django.dispatch.Signal(providing_args=[])
 shipment_saved.connect(on_bmo_save)
 """
 
+class ShipperAdmin(admin.ModelAdmin):
+    list_display = ('company',)
+
+
+class ShippingTypeAdmin(admin.ModelAdmin):
+    list_display = ('shipper', 'short_code', 'description',)
+    list_filter = ('shipper',)
+
+
+class ChannelShipmentTypeAdmin(admin.ModelAdmin):
+    list_display = ('channel', 'short_code', 'ship_type', 'bill_to',)
+    list_filter = ('channel',)
+
+admin.site.register(Shipper, ShipperAdmin)
+admin.site.register(ShippingType, ShippingTypeAdmin)
+admin.site.register(ChannelShipmentType, ChannelShipmentTypeAdmin)
+
+
 class ShipmentLineInline(admin.TabularInline):
     model = ShipmentLine
     can_delete = True
@@ -72,7 +90,7 @@ class ShipmentAdmin(admin.ModelAdmin):
         shipment_saved.send(obj)
         return admin.ModelAdmin.response_add(self, request, obj)
     """
-admin.site.register(Shipment, ShipmentAdmin)   
+admin.site.register(Shipment, ShipmentAdmin)
 
 
 #special signal as normal GL update doesn't work with Transfers

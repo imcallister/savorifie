@@ -167,8 +167,16 @@ these divs are needed.
         </div><!--/.row-->
 </div>
 
+
 <h2>Reports</h2>
 <div class="container-fluid" id="wrapper">
+
+    <div class="accordion" id="accordion">
+        {% include "accordion_cmpnt.html" with title="Unfulfilled" content=unfulfilled tag="unfulfilled" parent="accordion" %}
+    </div>
+
+
+
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
@@ -196,6 +204,10 @@ these divs are needed.
     <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
     <script src="{{ STATIC_URL }}base/js/easypiechart.js"></script>
     
+    <script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
+
 
     <script type="text/javascript">
     

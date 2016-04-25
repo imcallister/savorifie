@@ -122,6 +122,9 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def id_link(self):
         return mark_safe('<a href="/admin/base/sale/%s">%s</a>' % (self.id, self.id))
 
+    @property
+    def channel_name(self):
+        return str(self.channel)
 
     def _get_unitsales(self):
         unitsales = self.unitsale_set.all()

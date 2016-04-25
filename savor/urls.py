@@ -23,7 +23,7 @@ urlpatterns = patterns('',
     url(r'', include('audit.urls')),
     url(r'', include('base.urls')),
     url(r'^reports/', include('reports.urls')),
-    url(r'^inventory/', include('inventory.urls')),
+    url(r'', include('inventory.urls')),
 
     # general accountifie urls
     url (r'', include('accountifie.urls'))

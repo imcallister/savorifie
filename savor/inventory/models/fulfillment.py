@@ -14,6 +14,19 @@ class Warehouse(models.Model):
         db_table = 'inventory_warehouse'
 
 
+class Shipper(models.Model):
+    company = models.ForeignKey('gl.Counterparty')
+
+    def __unicode__(self):
+        return str(self.company)
+
+class ShippingType(models.Model):
+    shipper = models.ForeignKey(Shipper)
+    short_code = models.CharField(max_length=20)
+    description = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return '%s - %s'  % (self.shipper.company.id, self.short_code)
 
 class Shipment(models.Model, accountifie.gl.bmo.BusinessModelObject):
     arrival_date = models.DateField()
@@ -34,7 +47,7 @@ class ShipmentLine(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     shipment = models.ForeignKey(Shipment)
-    
+
     def __unicode__(self):
         return '%s:%s' % (self.shipment, self.id)
 
@@ -42,6 +55,11 @@ class ShipmentLine(models.Model):
         app_label = 'inventory'
         db_table = 'inventory_shipmentline'
 
+class ChannelShipmentType(models.Model):
+    short_code = models.CharField(max_length=30)
+    channel = models.ForeignKey('base.Channel')
+    ship_type = models.ForeignKey(ShippingType)
+    bill_to = models.CharField(max_length=100)
 
 
 FULFILL_CHOICES = (
@@ -55,7 +73,9 @@ class Fulfillment(models.Model):
     request_date = models.DateField()
     warehouse = models.ForeignKey('inventory.Warehouse')
     order = models.ForeignKey('base.Sale')
-    
+    ship_type = models.ForeignKey(ShippingType, blank=True, null=True)
+    bill_to = models.CharField(max_length=100, default='missing')
+
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_fulfillment'
