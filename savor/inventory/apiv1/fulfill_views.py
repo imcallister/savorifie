@@ -18,7 +18,7 @@ def unfulfilled(qstring):
     all_sale_ids = [x['id'] for x in all_sales]
 
     all_fulfills = fulfillment({})
-    all_fulfill_ids = [x.order['id'] for x in all_fulfills]
+    all_fulfill_ids = [x['order_id'] for x in all_fulfills]
 
     flds = ['channel', 'id', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
             'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
