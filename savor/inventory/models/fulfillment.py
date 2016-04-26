@@ -85,6 +85,8 @@ class FulfillUpdate(models.Model):
     update_date = models.DateField()
     comment = models.CharField(max_length=200, blank=True, null=True)
     status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
+    shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
+    tracking_number = models.CharField(max_length=100, blank=True, null=True)
     fulfillment = models.ForeignKey(Fulfillment)
 
     class Meta:

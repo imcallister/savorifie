@@ -7,6 +7,17 @@ from django.http import HttpResponse
 
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
+from .models import Fulfillment, FulfillLine, Warehouse, ChannelShipmentType, InventoryItem
+
+import datetime
+import pytz
+
+UTC = pytz.timezone('UTC')
+EASTERN = pytz.timezone('US/Eastern')
+
+def get_today():
+    return datetime.datetime.utcnow().replace(tzinfo=UTC).astimezone(EASTERN).date()
+
 
 
 @login_required
@@ -43,23 +54,67 @@ def output_shopify_no_wrap(request):
     writer = csv.writer(response)
 
     data = api_func('inventory', 'shopify_no_wrap_request')
+    # want to create fill requests for each
+
+    inventory_names = dict((inv_item['short_code'], inv_item['description']) for inv_item in api_func('inventory', 'inventoryitem'))
+
+    header_order = ['id', 'channel', 'shipping_name','shipping_company', 'external_routing_id',
+                    'shipping_address1', 'shipping_address2',
+                    'shipping_city', 'shipping_zip', 'shipping_province',
+                    'shipping_country', 'shipping_phone',
+                    'notification_email', 'ship_type',
+                    'bill_to', 'gift_message']
+
 
     headers = {'id': 'SAVOR ID', 'channel': 'Channel Shipping Name', 'shipping_company': 'Shipping Company',
                 'shipping_address1': 'Shipping Address1', 'shipping_address2': 'Shipping Address2',
                 'shipping_city': 'Shipping City', 'shipping_zip': 'Shipping Zip', 'shipping_province': 'Shipping Province',
                 'shipping_country': 'Shipping Country', 'shipping_phone': 'Shipping Phone',
-                'notification_email': 'Email', 'shipping_company': 'Shipping Company', 'shipping_type': 'Shipping Type',
+                'notification_email': 'Email', 'shipping_company': 'Shipping Company', 'ship_type': 'Shipping Type',
                 'bill_to': 'Bill To', 'gift_message': 'Gift Message', 'skus:sku': 'Lineitem sku',
-                'skus:name': 'Lineitem name', 'skus:quantity': 'Lineitem quantity'}
-    
-    header_row = [unicode(headers[x]).encode('utf-8') for x in headers]
+                'skus:name': 'Lineitem name', 'skus:quantity': 'Lineitem quantity', 'external_routing_id': 'Customer Reference',
+                'shipping_name': 'Name'}
 
+    header_row = [unicode(headers[x]).encode('utf-8') for x in header_order]
+    header_row += [u'Item', u'Item Name', u'Quantity']
     writer.writerow(header_row)
-    """
-    for ex in all_expenses:
-        line = [unicode(x).encode('utf-8') for x in ex.__dict__.values()]
+
+    today = get_today()
+    warehouse = Warehouse.objects.get(short_code='MICH')
+    ship_type_id = ChannelShipmentType.objects.get(short_code='SHOP_STANDARD').ship_type.id
+    for f_req in data:
+        fulfill_info = {}
+        fulfill_info['request_date'] = today
+        fulfill_info['warehouse_id'] = warehouse.id
+        fulfill_info['order_id'] = str(f_req['id'])
+        fulfill_info['bill_to'] = f_req['bill_to']
+        fulfill_info['ship_type_id'] = ship_type_id
+        fulfill_obj = Fulfillment(**fulfill_info)
+        fulfill_obj.save()
+
+        for sku in f_req['skus']:
+            fline_info = {}
+            fline_info['inventory_item_id'] = InventoryItem.objects.get(short_code=sku).id
+            fline_info['quantity'] = f_req['skus'][sku]
+            fline_info['fulfillment_id'] = fulfill_obj.id
+            fline_obj = FulfillLine(**fline_info)
+            fline_obj.save()
+
+        line = [unicode(f_req.get(d, '')).encode('utf-8') for d in header_order]
+        skus = f_req['skus'].keys()
+        sku = skus[0]
+        line += [sku, inventory_names[sku], f_req['skus'][sku]]
         writer.writerow(line)
-    """
+
+        # if more than 1 sku..
+        for i in range(1, len(skus)):
+            sku = skus[i]
+            line = [''] * len(header_order)
+            line += [sku, inventory_names[sku], f_req['skus'][sku]]
+            writer.writerow(line)
+
+        writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3))
+
     return response
 
 

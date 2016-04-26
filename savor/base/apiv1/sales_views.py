@@ -63,6 +63,37 @@ def sales_counts(qstring):
 
     return sales_counts
 
+
+@dispatch(unicode, dict)
+def sale_skus(sale_id, qstring):
+    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
+
+    skus_list = {}
+    for u_sale in unit_sales:
+        inv_items = u_sale.get_inventory_items()
+        for i in inv_items:
+            if i in skus_list:
+                skus_list[i] += inv_items[i]
+            else:
+                skus_list[i] = inv_items[i]
+    return skus_list
+
+
+@dispatch(str, dict)
+def sale_skus(sale_id, qstring):
+    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
+
+    skus_list = {}
+    for u_sale in unit_sales:
+        inv_items = u_sale.get_inventory_items()
+        for i in inv_items:
+            if i in skus_list:
+                skus_list[i] += inv_items[i]
+            else:
+                skus_list[i] = inv_items[i]
+    return skus_list
+
+
 @dispatch(unicode, dict)
 def unit_sales(sale_id, qstring):
     unit_sales = UnitSale.objects.filter(sale_id=sale_id)
