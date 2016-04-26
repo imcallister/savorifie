@@ -66,7 +66,7 @@ def output_shopify_no_wrap(request):
                     'bill_to', 'gift_message']
 
 
-    headers = {'id': 'SAVOR ID', 'channel': 'Channel Shipping Name', 'shipping_company': 'Shipping Company',
+    headers = {'id': 'SAVOR ID', 'channel': 'Channel', 'shipping_company': 'Shipping Company',
                 'shipping_address1': 'Shipping Address1', 'shipping_address2': 'Shipping Address2',
                 'shipping_city': 'Shipping City', 'shipping_zip': 'Shipping Zip', 'shipping_province': 'Shipping Province',
                 'shipping_country': 'Shipping Country', 'shipping_phone': 'Shipping Phone',
