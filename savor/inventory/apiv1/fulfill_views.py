@@ -18,7 +18,7 @@ def unfulfilled(qstring):
     all_sale_ids = [x['id'] for x in all_sales]
 
     all_fulfills = fulfillment({})
-    all_fulfill_ids = [x['order_id'] for x in all_fulfills]
+    all_fulfill_ids = [str(x['order_id']) for x in all_fulfills]
 
     flds = ['channel', 'id', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
             'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
@@ -27,12 +27,12 @@ def unfulfilled(qstring):
     def get_info(d, flds):
         return dict((k, v) for k, v in d.iteritems() if k in flds)
 
-    return [get_info(x, flds) for x in all_sales if x['id'] not in all_fulfill_ids]
+    return [get_info(x, flds) for x in all_sales if str(x['id']) not in all_fulfill_ids]
 
 
 def shopify_no_wrap_request(qstring):
     unfulfilled = api_func('inventory', 'unfulfilled')
-    shopify_no_wrap = [odr for odr in unfulfilled if odr['gift_wrapping'] == 'False' and odr['channel']=='Shopify']
+    shopify_no_wrap = [odr for odr in unfulfilled if odr['gift_wrapping'] == 'False' and odr['channel']=='Shopify' and odr['customer_code']!='unknown']
 
     shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
     for odr in shopify_no_wrap:
