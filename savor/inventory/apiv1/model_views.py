@@ -29,8 +29,8 @@ def product(qstring):
 
 
 @dispatch(str, dict)
-def product(short_code, qstring):
-    sku = Product.objects.get(short_code=short_code)
+def product(label, qstring):
+    sku = Product.objects.get(label=label)
 
     d = model_to_dict(sku)
     sku_items = list(sku.skuunit_set.all().values())
@@ -45,15 +45,15 @@ def product(short_code, qstring):
 
 @dispatch(dict)
 def channelshipmenttype(qstring):
-    flds = ['short_code', 'channel', 'ship_type', 'bill_to']
+    flds = ['label', 'channel', 'ship_type', 'bill_to']
     all_types = list(ChannelShipmentType.objects.all())
     return [get_model_data(t, flds) for t in all_types]
 
 
 @dispatch(str, dict)
-def channelshipmenttype(short_code, qstring):
-    flds = ['short_code', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
-    ship_info = ChannelShipmentType.objects.get(short_code=short_code)
+def channelshipmenttype(label, qstring):
+    flds = ['label', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
+    ship_info = ChannelShipmentType.objects.get(label=label)
     return get_model_data(ship_info, flds)
 
 
@@ -61,7 +61,7 @@ def channelshipmenttype(short_code, qstring):
 def inventorycount(qstring):
     all_shipments = {}
     for item in inventoryitem({}):
-        all_shipments[item['short_code']] = sum([sl.quantity for sl in ShipmentLine.objects.filter(inventory_item_id=item['id'])])
+        all_shipments[item['label']] = sum([sl.quantity for sl in ShipmentLine.objects.filter(inventory_item_id=item['id'])])
 
     return all_shipments
 
@@ -70,16 +70,52 @@ def locationinventory(qstring):
     all_shipments = {}
 
     for shpmnt in Shipment.objects.all():
-        location = shpmnt.destination.short_code
+        location = shpmnt.destination.label
         if location not in all_shipments:
             all_shipments[location] = {}
 
-        amounts = dict((sl.inventory_item.short_code, sl.quantity) for sl in shpmnt.shipmentline_set.all())
+        amounts = dict((sl.inventory_item.label, sl.quantity) for sl in shpmnt.shipmentline_set.all())
         for item in amounts:
             if item not in all_shipments[location]:
                 all_shipments[location][item] = amounts[item]
             else:
                 all_shipments[location][item] += amounts[item]
+
+    # now subtract out any outgoing transfers and add incoming transfers
+    for transfer in InventoryTransfer.objects.all():
+        outgoing = transfer.location.label
+        incoming = transfer.destination.label
+
+        if outgoing not in all_shipments:
+            all_shipments[outgoing] = {}
+
+        if incoming not in all_shipments:
+            all_shipments[incoming] = {}
+
+        amounts = dict((tl.inventory_item.label, tl.quantity) for tl in transfer.transferline_set.all())
+        for item in amounts:
+            if item not in all_shipments[incoming]:
+                all_shipments[incoming][item] = amounts[item]
+            else:
+                all_shipments[incoming][item] += amounts[item]
+
+            if item not in all_shipments[outgoing]:
+                all_shipments[outgoing][item] = -amounts[item]
+            else:
+                all_shipments[outgoing][item] -= amounts[item]
+
+    # now remove fulfilled
+    for fulfill in Fulfillment.objects.all():
+        location = fulfill.warehouse.label
+        if location not in all_shipments:
+            all_shipments[location] = {}
+
+        amounts = dict((fl.inventory_item.label, fl.quantity) for fl in fulfill.fulfillline_set.all())
+        for item in amounts:
+            if item not in all_shipments[location]:
+                all_shipments[location][item] = -amounts[item]
+            else:
+                all_shipments[location][item] -= amounts[item]
 
     return all_shipments
 
@@ -102,8 +138,8 @@ def inventoryitem(qstring):
 
 
 @dispatch(str, dict)
-def inventoryitem(short_code, qstring):
-    item = InventoryItem.objects.get(short_code=short_code)
+def inventoryitem(label, qstring):
+    item = InventoryItem.objects.get(label=label)
     product_line = item.product_line
     item_data = model_to_dict(item)
     product_line_data = dict(('Product Line %s' %k, v) for k,v in model_to_dict(product_line).iteritems())

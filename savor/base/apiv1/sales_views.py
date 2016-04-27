@@ -43,9 +43,9 @@ def summary_sales_stats(qstring):
     unit_sales_info = unit_sales(qstring)
     inventory_items = api_func('inventory', 'inventoryitem')
     for item in inventory_items:
-        item['sold'] = len([x for x in unit_sales_info if x['inventory item']==item['short_code']])
+        item['sold'] = len([x for x in unit_sales_info if x['inventory item']==item['label']])
 
-    stats = dict((item['short_code'], item['sold']) for item in inventory_items)
+    stats = dict((item['label'], item['sold']) for item in inventory_items)
     return stats
 
 
@@ -58,7 +58,7 @@ def sales_counts(qstring):
     all_skus = api_func('inventory', 'inventoryitem')
     all_sales = UnitSale.objects.all()
 
-    sales_counts = dict((k['short_code'],0) for k in all_skus)
+    sales_counts = dict((k['label'],0) for k in all_skus)
 
     for u_sale in all_sales:
         u_sale_counts = u_sale.get_inventory_items()

@@ -47,11 +47,11 @@ class UnitSale(models.Model):
         return '%s: %s' % (self.sale, self.sku)
 
     def get_inventory_items(self):
-        return dict((u.inventory_item.short_code, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
+        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
 
     @property
     def items_string(self):
-        return ','.join(['%s %s' % (u.quantity * self.quantity, u.inventory_item.short_code) for u in self.sku.skuunit_set.all()])
+        return ','.join(['%s %s' % (u.quantity * self.quantity, u.inventory_item.label) for u in self.sku.skuunit_set.all()])
 
 
 class SalesTax(models.Model):
@@ -252,7 +252,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             # now loop through the sku unit in the sku
             sku_items = sku.skuunit_set.all()
             for sku_item in sku_items:
-                product_line = sku_item.inventory_item.product_line.short_code
+                product_line = sku_item.inventory_item.product_line.label
                 rev_percent = Decimal(sku_item.rev_percent)/Decimal(100)
                 presale_acct = api_func('gl', 'account', 'liabilities.curr.presold.%s' % product_line)['id']
                 tran['lines'].append((presale_acct, -sale_amts[sku] * rev_percent, 'retail_buyer', []))

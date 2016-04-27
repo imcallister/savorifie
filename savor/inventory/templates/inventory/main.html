@@ -234,7 +234,12 @@ these divs are needed.
     </div><!--/.row-->
 </div>
 
-<h2>Reports</h2>
+<h2>Reports
+<span class="glyphicon glyphicon-question-sign" 
+    data-toggle="tooltip" 
+    title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
+    data-placement="right" aria-hidden="true">
+</span>
 <div class="container-fluid" id="wrapper">
 
     <div class="accordion" id="accordion">
@@ -331,7 +336,9 @@ these divs are needed.
        });
     });
 
-    
+    $(function () {
+      $('[data-toggle="tooltip"]').tooltip()
+    })
     </script>
 
 {% endblock %}
