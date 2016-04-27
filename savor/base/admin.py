@@ -198,7 +198,7 @@ class SalesTaxInline(admin.TabularInline):
 class SaleAdmin(SimpleHistoryAdmin):
     list_display=('external_channel_id', 'sale_date', 'channel', 'customer_code', 'discount_code',)
     list_filter = ('channel',)
-    search_fields = ('external_channel_id', 'channel',)
+    search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
     actions = ['delete_model']
     inlines = [

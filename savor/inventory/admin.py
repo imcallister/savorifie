@@ -6,23 +6,23 @@ from .models import *
 
 
 class WarehouseAdmin(admin.ModelAdmin):
-    list_display = ('description', 'short_code',)
-    search_fields = ('short_code', 'description',)
+    list_display = ('description', 'label',)
+    search_fields = ('label', 'description',)
 
 admin.site.register(Warehouse, WarehouseAdmin)   
 
 
 class ProductLineAdmin(admin.ModelAdmin):
-    list_display = ('description', 'short_code',)
-    search_fields = ('short_code', 'description',)
+    list_display = ('description', 'label',)
+    search_fields = ('label', 'description',)
 
 admin.site.register(ProductLine, ProductLineAdmin)   
 
 
 class InventoryItemAdmin(admin.ModelAdmin):
-    list_display = ('description', 'short_code', 'product_line',)
+    list_display = ('description', 'label', 'product_line',)
     list_filter = ('product_line', )
-    search_fields = ('short_code', 'description', 'product_line',)
+    search_fields = ('label', 'description', 'product_line',)
 
 admin.site.register(InventoryItem, InventoryItemAdmin)   
 
@@ -34,8 +34,8 @@ class SKUUnitInline(admin.TabularInline):
 
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('description', 'short_code',)
-    search_fields = ('short_code', 'description',)
+    list_display = ('description', 'label',)
+    search_fields = ('label', 'description',)
 
     inlines = [SKUUnitInline]
 
@@ -54,12 +54,12 @@ class ShipperAdmin(admin.ModelAdmin):
 
 
 class ShippingTypeAdmin(admin.ModelAdmin):
-    list_display = ('shipper', 'short_code', 'description',)
+    list_display = ('shipper', 'label', 'description',)
     list_filter = ('shipper',)
 
 
 class ChannelShipmentTypeAdmin(admin.ModelAdmin):
-    list_display = ('channel', 'short_code', 'ship_type', 'bill_to',)
+    list_display = ('channel', 'label', 'ship_type', 'bill_to',)
     list_filter = ('channel',)
 
 admin.site.register(Shipper, ShipperAdmin)
@@ -74,8 +74,8 @@ class ShipmentLineInline(admin.TabularInline):
 
 
 class ShipmentAdmin(admin.ModelAdmin):
-    list_display = ('description', 'short_code',)
-    search_fields = ('short_code', 'description',)
+    list_display = ('description', 'label',)
+    search_fields = ('label', 'description',)
 
     inlines = [ShipmentLineInline]
 
@@ -93,34 +93,8 @@ class ShipmentAdmin(admin.ModelAdmin):
 admin.site.register(Shipment, ShipmentAdmin)
 
 
-#special signal as normal GL update doesn't work with Transfers
-#transfer_saved = django.dispatch.Signal(providing_args=[])
-#transfer_saved.connect(on_bmo_save)
 
 
-class TransferLineInline(admin.TabularInline):
-    model = TransferLine
-    can_delete = True
-    extra = 0
-
-
-class InventoryTransferAdmin(admin.ModelAdmin):
-    list_display = ('transfer_date', 'location', 'destination',)
-    inlines = [TransferLineInline]
-
-    """
-    def response_change(self, request, new_object):
-        "They saved a change - send signal"
-        transfer_saved.send(new_object)
-        return admin.ModelAdmin.response_change(self, request, new_object)
-
-    def response_add(self, request, obj):
-        "They added a new transfer - send signal"
-        transfer_saved.send(obj)
-        return admin.ModelAdmin.response_add(self, request, obj)
-    """
-
-admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 
 
 #special signal as normal GL update doesn't work with Transfers
@@ -158,4 +132,39 @@ class FulfillmentAdmin(admin.ModelAdmin):
 
 admin.site.register(Fulfillment, FulfillmentAdmin)
 
+
+#special signal as normal GL update doesn't work with Transfers
+#fulfill_saved = django.dispatch.Signal(providing_args=[])
+#fulfill_saved.connect(on_bmo_save)
+
+
+class TransferLineInline(admin.TabularInline):
+    model = TransferLine
+    can_delete = True
+    extra = 0
+
+
+class TransferUpdateInline(admin.TabularInline):
+    model = TransferUpdate
+    can_delete = True
+    extra = 0
+
+
+class InventoryTransferAdmin(admin.ModelAdmin):
+    list_display = ('transfer_date', 'location', 'destination',)
+    inlines = [TransferLineInline, TransferUpdateInline]
+
+    """
+    def response_change(self, request, new_object):
+        "They saved a change - send signal"
+        fulfill_saved.send(new_object)
+        return admin.ModelAdmin.response_change(self, request, new_object)
+
+    def response_add(self, request, obj):
+        "They added a new transfer - send signal"
+        fulfill_saved.send(obj)
+        return admin.ModelAdmin.response_add(self, request, obj)
+    """
+
+admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 

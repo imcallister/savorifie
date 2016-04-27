@@ -3,10 +3,10 @@ from django.db import models
 
 class ProductLine(models.Model):
     description = models.CharField(max_length=200)
-    short_code = models.CharField(max_length=20)
+    label = models.CharField(max_length=20)
 
     def __unicode__(self):
-        return self.short_code
+        return self.label
 
     class Meta:
         app_label = 'inventory'
@@ -15,12 +15,12 @@ class ProductLine(models.Model):
 
 class InventoryItem(models.Model):
     description = models.CharField(max_length=200)
-    short_code = models.CharField(max_length=20)
+    label = models.CharField(max_length=20)
     master_sku = models.CharField(max_length=20, blank=True, null=True)
     product_line = models.ForeignKey('inventory.ProductLine')
 
     def __unicode__(self):
-        return self.short_code
+        return self.label
 
     class Meta:
         app_label = 'inventory'
@@ -29,10 +29,10 @@ class InventoryItem(models.Model):
 
 class Product(models.Model):
     description = models.CharField(max_length=200)
-    short_code = models.CharField(max_length=20)
+    label = models.CharField(max_length=20)
 
     def __unicode__(self):
-        return self.short_code
+        return self.label
 
     class Meta:
         app_label = 'inventory'

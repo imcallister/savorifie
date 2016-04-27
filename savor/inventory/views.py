@@ -68,7 +68,7 @@ def output_shopify_no_wrap(request):
     data = api_func('inventory', 'shopify_no_wrap_request')
     # want to create fill requests for each
 
-    inventory_names = dict((inv_item['short_code'], inv_item['description']) for inv_item in api_func('inventory', 'inventoryitem'))
+    inventory_names = dict((inv_item['label'], inv_item['description']) for inv_item in api_func('inventory', 'inventoryitem'))
 
     header_order = ['id', 'channel', 'shipping_name','shipping_company', 'external_routing_id',
                     'shipping_address1', 'shipping_address2',
@@ -92,8 +92,8 @@ def output_shopify_no_wrap(request):
     writer.writerow(header_row)
 
     today = get_today()
-    warehouse = Warehouse.objects.get(short_code='MICH')
-    ship_type_id = ChannelShipmentType.objects.get(short_code='SHOP_STANDARD').ship_type.id
+    warehouse = Warehouse.objects.get(label='MICH')
+    ship_type_id = ChannelShipmentType.objects.get(label='SHOP_STANDARD').ship_type.id
 
     for f_req in data:
 
@@ -108,7 +108,7 @@ def output_shopify_no_wrap(request):
 
         for sku in f_req['skus']:
             fline_info = {}
-            fline_info['inventory_item_id'] = InventoryItem.objects.get(short_code=sku).id
+            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=sku).id
             fline_info['quantity'] = f_req['skus'][sku]
             fline_info['fulfillment_id'] = fulfill_obj.id
             fline_obj = FulfillLine(**fline_info)

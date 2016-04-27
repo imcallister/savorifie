@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+{% load i18n %}{% load admin_static bootstrapped_goodies_tags %}
+
+{% block extrahead %}
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/base.css" />
+{% endblock %}
+
+{% block title %}{{admin_site_title}}{% endblock %}
+
+{% block branding %}
+<a class="navbar-brand" href="/"><img src="/static/{{logo}}" height="25" /></a>
+{% endblock %}
+
+{% block welcome-msg %}{% endblock %}
+
+{% block logs %}
+{% endblock %}
+
+
+
+{% block nav-global %}
+    <li><a class="btn-sm" type="button" href="/reports/">Reports</a></li>
+    <li><a class="btn-sm" type="button" href="/daily/">Daily</a></li>
+    <li><a class="btn-sm" type="button" href="/inventory">Inventory</a></li>
+    <li><a class="btn-sm" type="button" href="/forecasts">Forecasting</a></li>
+    <li><a class="btn-sm" type="button" href="/snapshot/glsnapshots">Snapshots</a></li>
+    {% if user.is_superuser %}
+        <li class="btn-group">
+            <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span> POWER USERS <span class="caret"></span></a>
+          <ul class="dropdown-menu" role="menu">
+            <li><a class="btn-sm" type="button" href="/admin/">Admin</a></li>
+            <li><a class="btn-sm" type="button" href="/maintenance/">Maintenance</a></li>
+            <li><a class="btn-sm" type="button" href="/dashboard/">Dashboard</a></li>
+          </ul>
+        </li>
+    {% endif %}
+    {% if user.username %}
+      <li class="btn-group"><a class="btn dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> <strong>{% firstof user.get_full_name user.username user.email %}</strong> <span class="caret"></span></a>
+      <ul class="dropdown-menu" role="menu">
+          {% block loggedin_options %}{% endblock%}
+          {% if HAS_PROFILE %}<li><a href="{% url 'accounts_profile' %}">My profile</a></li>{% endif %}
+          <li><a href='/accounts/change_password/'>Change Password</a></li>
+          <li><a href='{% url 'accounts_logout' %}'>Logout YO</a></li>
+      </ul>
+      </li>
+    {% else %}
+          <li><a href="{% url 'accounts_login'%}">Login</a></li>
+    {% endif %}
+    
+
+{% endblock %}
+
