@@ -49,6 +49,11 @@ class UnitSale(models.Model):
     def get_inventory_items(self):
         return dict((u.inventory_item.short_code, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
 
+    @property
+    def items_string(self):
+        return ','.join(['%s %s' % (u.quantity * self.quantity, u.inventory_item.short_code) for u in self.sku.skuunit_set.all()])
+
+
 class SalesTax(models.Model):
     sale = models.ForeignKey('base.Sale')
     collector = models.ForeignKey('base.TaxCollector')
@@ -126,9 +131,19 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def channel_name(self):
         return str(self.channel)
 
+    @property
+    def items_string(self):
+        return ','.join([u.items_string for u in self.unitsale_set.all()])
+
+
+    @property
+    def label(self):
+        return str(self)
+
+
     def _get_unitsales(self):
         unitsales = self.unitsale_set.all()
-        
+
         unitsale_lines = []
         for unit in unitsales:
             unit
@@ -146,12 +161,12 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         if abs(Decimal(self.amount) - running_total) >= Decimal('0.005'):
             alloc_lines.append((self.ext_account.gl_account, DZERO - (Decimal(self.amount) - running_total), None, []))
-        
+
         return alloc_lines
 
     def _get_salestaxes(self):
         allocations = self.salestax_set.all()
-        
+
         alloc_lines = []
         running_total = DZERO
         if len(allocations) > 0:
@@ -166,7 +181,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         if abs(Decimal(self.amount) - running_total) >= Decimal('0.005'):
             alloc_lines.append((self.ext_account.gl_account, DZERO - (Decimal(self.amount) - running_total), None, []))
-        
+
         return alloc_lines
 
 
@@ -180,21 +195,20 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         sale_amts = dict((s,0) for s in skus)
         for s in unit_sales:
             sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
-        
+
         # apply discount
         if self.discount > 0:
             total_sale = sum([v for k,v in sale_amts.iteritems()])
             for s in skus:
                 sale_amts[s] -= Decimal(self.discount) * Decimal(sale_amts[s]) / Decimal(total_sale)
 
-        
         # now get sales_taxes
         sales_taxes = self.salestax_set.all()
         tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
         tax_amts = dict((p,0) for p in tax_collectors)
         for t in sales_taxes:
             tax_amts[t.collector.entity] += Decimal(t.tax)
-        
+
         # calculate total cash = shipping + discount + sum over product x qty + sum of taxes
         total_amount = Decimal(self.shipping_charge) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
 

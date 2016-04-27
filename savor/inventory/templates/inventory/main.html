@@ -106,7 +106,7 @@ these divs are needed.
 
 </div>
     
-<h2>Sold</h2>
+<h2>Units Sold</h2>
 
 <div class="container-fluid" id="wrapper">
     <div class="row">
@@ -114,7 +114,7 @@ these divs are needed.
                 <div class="panel panel-default">
                     <div class="panel-body easypiechart-panel">
                         <h4>SYE1</h4>
-                        <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_sold}}" ><span class="percent">{{SYE1_sold}}%</span>
+                        <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_percent_sold}}" ><span class="percent">{{SYE1_sold}}</span>
                         </div>
                     </div>
                 </div>
@@ -123,7 +123,7 @@ these divs are needed.
                 <div class="panel panel-default">
                     <div class="panel-body easypiechart-panel">
                         <h4>SYE2</h4>
-                        <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_sold}}" ><span class="percent">{{SYE2_sold}}%</span>
+                        <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_percent_sold}}" ><span class="percent">{{SYE2_sold}}</span>
                         </div>
                     </div>
                 </div>
@@ -132,7 +132,7 @@ these divs are needed.
                 <div class="panel panel-default">
                     <div class="panel-body easypiechart-panel">
                         <h4>SYE3</h4>
-                        <div class="easypiechart" id="easypiechart-SYE3" data-percent="{{SYE3_sold}}" ><span class="percent">{{SYE3_sold}}%</span>
+                        <div class="easypiechart" id="easypiechart-SYE3" data-percent="{{SYE3_percent_sold}}" ><span class="percent">{{SYE3_sold}}</span>
                         </div>
                     </div>
                 </div>
@@ -141,7 +141,7 @@ these divs are needed.
                 <div class="panel panel-default">
                     <div class="panel-body easypiechart-panel">
                         <h4>BE1</h4>
-                        <div class="easypiechart" id="easypiechart-BE1" data-percent="{{BE1_sold}}" ><span class="percent">{{BE1_sold}}%</span>
+                        <div class="easypiechart" id="easypiechart-BE1" data-percent="{{BE1_percent_sold}}" ><span class="percent">{{BE1_sold}}</span>
                         </div>
                     </div>
                 </div>
@@ -150,7 +150,7 @@ these divs are needed.
                 <div class="panel panel-default">
                     <div class="panel-body easypiechart-panel">
                         <h4>BE2</h4>
-                        <div class="easypiechart" id="easypiechart-BE2" data-percent="{{BE2_sold}}" ><span class="percent">{{BE2_sold}}%</span>
+                        <div class="easypiechart" id="easypiechart-BE2" data-percent="{{BE2_percent_sold}}" ><span class="percent">{{BE2_sold}}</span>
                         </div>
                     </div>
                 </div>
@@ -159,7 +159,7 @@ these divs are needed.
                 <div class="panel panel-default">
                     <div class="panel-body easypiechart-panel">
                         <h4>BE3</h4>
-                        <div class="easypiechart" id="easypiechart-BE3" data-percent="{{BE3_sold}}" ><span class="percent">{{BE3_sold}}%</span>
+                        <div class="easypiechart" id="easypiechart-BE3" data-percent="{{BE3_percent_sold}}" ><span class="percent">{{BE3_sold}}</span>
                         </div>
                     </div>
                 </div>
@@ -167,6 +167,72 @@ these divs are needed.
         </div><!--/.row-->
 </div>
 
+
+
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Fulfillment</h2>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>Requested</h4>
+                        <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_percent_sold}}" ><span class="percent"><a href="/api/inventory/requested">{{requested_count}}</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>Confirmed</h4>
+                        <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_percent_sold}}" ><span class="percent"><a href="/api/inventory/fulfilled">{{completed_count}}</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>Unfulfilled</h4>
+                        <div class="easypiechart" id="easypiechart-SYE3" data-percent="{{SYE3_percent_sold}}" ><span class="percent"><a href='/api/inventory/unfulfilled'>{{unfulfilled_count}}</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h2>Inventory Locations</h2>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>Michigan</h4>
+                        <div class="easypiechart"><span class="percent"><a href="/api/inventory/locationinventory/">{{MICH}}</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>152 Franklin</h4>
+                        <div class="easypiechart"><span class="percent"><a href="/api/inventory/locationinventory/">{{152Frank}}</a></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>Other</h4>
+                        <div class="easypiechart"><span class="percent">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--/.row-->
+</div>
 
 <h2>Reports</h2>
 <div class="container-fluid" id="wrapper">

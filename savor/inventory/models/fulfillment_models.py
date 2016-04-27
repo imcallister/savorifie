@@ -1,3 +1,5 @@
+import operator
+
 from django.db import models
 
 import accountifie.gl.bmo
@@ -60,6 +62,8 @@ class ChannelShipmentType(models.Model):
     channel = models.ForeignKey('base.Channel')
     ship_type = models.ForeignKey(ShippingType)
     bill_to = models.CharField(max_length=100)
+    use_pdf = models.BooleanField(default=False)
+
 
 
 FULFILL_CHOICES = (
@@ -79,6 +83,14 @@ class Fulfillment(models.Model):
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_fulfillment'
+
+    @property
+    def latest_status(self):
+        updates = dict((u.update_date, u.status) for u in self.fulfillupdate_set.all())
+        if len(updates)==0:
+            return 'requested'
+        else:
+            return max(updates.iteritems(), key=operator.itemgetter(0))[1]
 
 
 class FulfillUpdate(models.Model):
