@@ -69,6 +69,9 @@ def process_shopify(file_name):
     with open(incoming_name, 'U') as f:
         sales = pd.read_csv(incoming_name)
 
+    # any pre-formatting of data here
+    sales['Shipping Zip'] = sales['Shipping Zip'].map(lambda x: str(x).replace("'",""))
+
     new_sales_ctr = 0
     exist_sales_ctr = 0
     unknown_cp_ctr = 0

@@ -66,6 +66,24 @@ def inventorycount(qstring):
     return all_shipments
 
 
+def locationinventory(qstring):
+    all_shipments = {}
+
+    for shpmnt in Shipment.objects.all():
+        location = shpmnt.destination.short_code
+        if location not in all_shipments:
+            all_shipments[location] = {}
+
+        amounts = dict((sl.inventory_item.short_code, sl.quantity) for sl in shpmnt.shipmentline_set.all())
+        for item in amounts:
+            if item not in all_shipments[location]:
+                all_shipments[location][item] = amounts[item]
+            else:
+                all_shipments[location][item] += amounts[item]
+
+    return all_shipments
+
+
 @dispatch(dict)
 def inventoryitem(qstring):
     items = InventoryItem.objects.all()

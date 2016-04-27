@@ -12,6 +12,7 @@ def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
 
+
 @dispatch(dict)
 def sale(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
@@ -24,7 +25,8 @@ def sale(qstring):
 
     all_sales = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date)
     fields=[field.name for field in all_sales[0]._meta.fields]
-
+    fields.append('items_string')
+    fields.append('label')
     return [get_model_data(sale_obj, fields) for sale_obj in all_sales]
 
 
@@ -32,6 +34,8 @@ def sale(qstring):
 def sale(id, qstring):
     sale_obj = Sale.objects.get(id=id)
     fields=[field.name for field in sale_obj._meta.fields]
+    fields.append('items_string')
+    fields.append('label')
     return get_model_data(sale_obj, fields)
 
 

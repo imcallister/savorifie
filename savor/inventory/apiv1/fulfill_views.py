@@ -1,13 +1,54 @@
 import csv
+from multipledispatch import dispatch
 
 from accountifie.common.api import api_func
 from inventory.models import *
 
+def get_model_data(instance, flds):
+    data = dict((fld, str(getattr(instance, fld))) for fld in flds)
+    return data
 
 
-
+@dispatch(dict)
 def fulfillment(qstring):
-    return list(Fulfillment.objects.all().values())
+    flds = ['id', 'request_date', 'warehouse', 'order', 'ship_type', 'bill_to', 'latest_status']
+    return [get_model_data(f, flds) for f in Fulfillment.objects.all()]
+
+
+def requested(qstring):
+    """
+    find all sale objects for which there is a fulfillment record with latest status==completed
+    """
+    all_sales = api_func('base', 'sale')
+    all_fulfills = fulfillment({})
+    all_fulfill_ids = [str(x['order']) for x in all_fulfills if x['latest_status']!='completed']
+
+    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
+            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
+            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
+
+    def get_info(d, flds):
+        return dict((k, v) for k, v in d.iteritems() if k in flds)
+
+    return [get_info(x, flds) for x in all_sales if x['label'] in all_fulfill_ids]
+
+
+def fulfilled(qstring):
+    """
+    find all sale objects for which there is a fulfillment record with latest status==completed
+    """
+    all_sales = api_func('base', 'sale')
+    all_fulfills = fulfillment({})
+    all_fulfill_ids = [str(x['order']) for x in all_fulfills if x['latest_status']=='completed']
+
+    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
+            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
+            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
+
+    def get_info(d, flds):
+        return dict((k, v) for k, v in d.iteritems() if k in flds)
+
+    return [get_info(x, flds) for x in all_sales if x['label'] in all_fulfill_ids]
 
 
 def unfulfilled(qstring):
@@ -15,12 +56,30 @@ def unfulfilled(qstring):
     find all sale objects for which there is no fulfillment record
     """
     all_sales = api_func('base', 'sale')
+    all_fulfills = fulfillment({})
+    all_fulfill_ids = [str(x['order']) for x in all_fulfills]
+
+    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
+            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
+            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
+
+    def get_info(d, flds):
+        return dict((k, v) for k, v in d.iteritems() if k in flds)
+
+    return [get_info(x, flds) for x in all_sales if x['label'] not in all_fulfill_ids]
+
+
+def fulfill_requested(qstring):
+    """
+    find all sale objects for which there is a fulfillment record but no completion
+    """
+    all_sales = api_func('base', 'sale')
     all_sale_ids = [x['id'] for x in all_sales]
 
     all_fulfills = fulfillment({})
     all_fulfill_ids = [str(x['order_id']) for x in all_fulfills]
 
-    flds = ['channel', 'id', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
+    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
             'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
             'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
 

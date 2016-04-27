@@ -1,2 +1,2 @@
-from inventory import *
-from fulfillment import *
+from inventory_models import *
+from fulfillment_models import *
