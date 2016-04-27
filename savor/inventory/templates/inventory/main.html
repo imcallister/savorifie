@@ -264,6 +264,14 @@ these divs are needed.
 
 {% endblock %}
 
+{% block sidebar %}
+    <div class="container-fluid" id="wrapper">
+        </br>
+        <a class="btn btn-primary" href="/inventory/output_shopify_no_wrap/" role="button">Create Shopify Picking List</a>
+    </div>
+{% endblock %}
+
+
 {% block extrajs %}
     <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
     <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>

@@ -57,13 +57,19 @@ class ShipmentLine(models.Model):
         app_label = 'inventory'
         db_table = 'inventory_shipmentline'
 
+
+PACKING_TYPES = (
+    ('box', 'box'),
+    ('pouch', 'pouch'),
+)
+
 class ChannelShipmentType(models.Model):
     short_code = models.CharField(max_length=30)
     channel = models.ForeignKey('base.Channel')
     ship_type = models.ForeignKey(ShippingType)
     bill_to = models.CharField(max_length=100)
     use_pdf = models.BooleanField(default=False)
-
+    packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
 
 
 FULFILL_CHOICES = (
@@ -116,8 +122,6 @@ class FulfillLine(models.Model):
         db_table = 'inventory_fulfillline'
 
 
-
-
 class InventoryTransfer(models.Model):
     transfer_date = models.DateField()
     location = models.ForeignKey('inventory.Warehouse', related_name='location')
@@ -132,8 +136,4 @@ class TransferLine(models.Model):
 
     def __unicode__(self):
         return '%d %s at %.2f' % (self.quantity, self.inventory_item.short_code, self.cost )
-    
-
-
-
 

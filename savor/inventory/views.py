@@ -75,7 +75,7 @@ def output_shopify_no_wrap(request):
                     'shipping_city', 'shipping_zip', 'shipping_province',
                     'shipping_country', 'shipping_phone',
                     'notification_email', 'ship_type',
-                    'bill_to', 'gift_message']
+                    'bill_to', 'gift_message', 'use_pdf', 'packing_type']
 
 
     headers = {'id': 'SAVOR ID', 'channel': 'Channel', 'shipping_company': 'Shipping Company',
@@ -85,7 +85,7 @@ def output_shopify_no_wrap(request):
                 'notification_email': 'Email', 'shipping_company': 'Shipping Company', 'ship_type': 'Shipping Type',
                 'bill_to': 'Bill To', 'gift_message': 'Gift Message', 'skus:sku': 'Lineitem sku',
                 'skus:name': 'Lineitem name', 'skus:quantity': 'Lineitem quantity', 'external_routing_id': 'Customer Reference',
-                'shipping_name': 'Name'}
+                'shipping_name': 'Name', 'use_pdf': 'Use PDF?', 'packing_type': 'Picking Slip Location'}
 
     header_row = [unicode(headers[x]).encode('utf-8') for x in header_order]
     header_row += [u'Item', u'Item Name', u'Quantity']
@@ -94,7 +94,9 @@ def output_shopify_no_wrap(request):
     today = get_today()
     warehouse = Warehouse.objects.get(short_code='MICH')
     ship_type_id = ChannelShipmentType.objects.get(short_code='SHOP_STANDARD').ship_type.id
+
     for f_req in data:
+
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
