@@ -17,9 +17,10 @@ urlpatterns = patterns('',
     url(r'^maintenance/', main_views.maintenance, name='maintenance'),
     url(r'^daily/', main_views.daily, name='daily'),
     url(r'^reports/$', main_views.reports, name='reports'),
+    url(r'^analysis/$', main_views.analysis, name='analysis'),
 
     url(r'^admin/', include(admin.site.urls)),
-    
+
     url(r'', include('audit.urls')),
     url(r'', include('base.urls')),
     url(r'^reports/', include('reports.urls')),
@@ -27,5 +28,4 @@ urlpatterns = patterns('',
 
     # general accountifie urls
     url (r'', include('accountifie.urls'))
-    
 )
