@@ -168,3 +168,29 @@ class InventoryTransferAdmin(admin.ModelAdmin):
 
 admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 
+
+
+class WarehouseFulfillLineInline(admin.TabularInline):
+    model = WarehouseFulfillLine
+    can_delete = True
+    extra = 0
+
+
+
+class WarehouseFulfillAdmin(admin.ModelAdmin):
+    list_display = ('savor_order', 'savor_transfer', 'warehouse', 'warehouse_pack_id', 'ship_date', 'shipping_code', 'tracking_number',)
+    inlines = [WarehouseFulfillLineInline,]
+
+    """
+    def response_change(self, request, new_object):
+        "They saved a change - send signal"
+        fulfill_saved.send(new_object)
+        return admin.ModelAdmin.response_change(self, request, new_object)
+
+    def response_add(self, request, obj):
+        "They added a new transfer - send signal"
+        fulfill_saved.send(obj)
+        return admin.ModelAdmin.response_add(self, request, obj)
+    """
+
+admin.site.register(WarehouseFulfill, WarehouseFulfillAdmin)

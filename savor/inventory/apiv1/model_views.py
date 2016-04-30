@@ -10,6 +10,19 @@ def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
 
+@dispatch(dict)
+def warehouse(qstring):
+    all_warehouses = Warehouse.objects.all()
+    flds = ['id', 'label','description']
+    return [get_model_data(obj, flds) for obj in all_warehouses]
+
+
+@dispatch(str, dict)
+def warehouse(label, qstring):
+    warehouse = Warehouse.objects.get(label=label)
+    flds = ['id', 'label','description']
+    return get_model_data(warehouse, flds)
+
 
 @dispatch(dict)
 def product(qstring):

@@ -11,7 +11,9 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
+from accountifie.toolkit.forms import FileForm
 from .models import Fulfillment, FulfillLine, Warehouse, ChannelShipmentType, InventoryItem
+import inventory.importers
 
 import datetime
 import pytz
@@ -172,6 +174,25 @@ def output_shopify_no_wrap(request):
         writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3))
 
     return response
+
+
+@login_required
+def upload_file(request, file_type, check=False):
+
+    if request.method == 'POST':
+        if file_type == 'thoroughbred':
+          return inventory.importers.thoroughbred.order_upload(request)
+        else:
+            raise ValueError("Unexpected file type; know about thoroughbred")
+
+        return accountifie.toolkit.uploader.upload_file(request, **config)
+    else:
+        form = FileForm()
+        context = {'form': form, 'file_type': file_type}
+        return render_to_response('base/upload_csv.html', context,
+                              context_instance=RequestContext(request))
+
+
 
 @login_required
 def fulfill_request(request):
