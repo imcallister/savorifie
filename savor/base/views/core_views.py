@@ -36,30 +36,25 @@ def company_context(request):
 
     This is not a view.
     """
-    
+
     company_id = utils.get_company(request)
     data = {'company_id': company_id, 'logo': settings.LOGO, 'site_title': settings.SITE_TITLE}
     data['admin_site_title'] = settings.SITE_TITLE
     data['company_color'] = api_func('gl', 'company', company_id)['color_code']
-    
+
     data['menu_items'] = OrderedDict([('Reports', "/reports/"),
                                      ('Daily', "/daily/"),
                                      ('Inventory', '/inventory'),
-                                     ('Forecasting', '/forecasts'),
+                                     ('Analysis', '/analysis'),
                                      ('Snapshots', '/snapshot/glsnapshots')
                                     ])
 
     data['company_list'] = [x['id'] for x in api_func('gl', 'company')]
-    
+
     if company_id:
         try:
             company = Company.objects.get(pk=company_id)
             data.update({'company':company})
         except Company.DoesNotExist:
-            pass 
+            pass
     return data
-
-
-
-
-    

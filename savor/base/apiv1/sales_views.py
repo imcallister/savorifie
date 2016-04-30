@@ -30,6 +30,15 @@ def sale(qstring):
     return [get_model_data(sale_obj, fields) for sale_obj in all_sales]
 
 
+@dispatch(str, dict)
+def sale(id, qstring):
+    sale_obj = Sale.objects.get(id=id)
+    fields=[field.name for field in sale_obj._meta.fields]
+    fields.append('items_string')
+    fields.append('label')
+    return get_model_data(sale_obj, fields)
+
+
 @dispatch(unicode, dict)
 def sale(id, qstring):
     sale_obj = Sale.objects.get(id=id)

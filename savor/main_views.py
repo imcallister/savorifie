@@ -24,6 +24,12 @@ def reports(request):
 
 
 @login_required
+def analysis(request):
+    d = {}
+    return render_to_response('main_views/analysis.html', RequestContext(request, d))
+
+
+@login_required
 def home(request):
     from_date, to_date = extractDateRange(request)
     company_id = get_company(request)

@@ -195,9 +195,27 @@ class SalesTaxInline(admin.TabularInline):
     can_delete = True
     extra = 0
 
+
+
+
+class FulfillRequested(SimpleListFilter):
+    title = 'requested'
+    parameter_name = 'requested'
+
+    def lookups(self, request, model_admin):
+            return (('requested', 'Fulfill Requested'), ('unrequested', 'Not Fulfill Requested'))
+
+    def queryset(self, request, qs):
+        fulfillment_ids = [x['order_id'] for x in api_func('inventory', 'fulfillment')]
+        if self.value() == 'requested':
+            return qs.filter(id__in=fulfillment_ids)
+        if self.value() == 'unrequested':
+            return qs.exclude(id__in=fulfillment_ids)
+
+
 class SaleAdmin(SimpleHistoryAdmin):
     list_display=('external_channel_id', 'sale_date', 'channel', 'customer_code', 'discount_code',)
-    list_filter = ('channel',)
+    list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
     actions = ['delete_model']

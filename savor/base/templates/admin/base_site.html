@@ -19,11 +19,10 @@
 
 
 {% block nav-global %}
-    <li><a class="btn-sm" type="button" href="/reports/">Reports</a></li>
-    <li><a class="btn-sm" type="button" href="/daily/">Daily</a></li>
-    <li><a class="btn-sm" type="button" href="/inventory">Inventory</a></li>
-    <li><a class="btn-sm" type="button" href="/forecasts">Forecasting</a></li>
-    <li><a class="btn-sm" type="button" href="/snapshot/glsnapshots">Snapshots</a></li>
+{% for key, value in menu_items.items %} 
+      <li><a class="btn-sm" type="button" href={{value}}>{{key}}</a></li>
+    {% endfor %}
+
     {% if user.is_superuser %}
         <li class="btn-group">
             <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-wrench"></span> POWER USERS <span class="caret"></span></a>
