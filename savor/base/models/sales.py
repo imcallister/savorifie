@@ -124,6 +124,17 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         models.Model.delete(self)
 
     @property
+    def fulfill_requested(self):
+        fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
+        order_label = api_func('base', 'sale', unicode(order_id))['label']
+
+        if order_label in fulfillment_labels:
+            return True
+        else:
+            return False
+
+
+    @property
     def id_link(self):
         return mark_safe('<a href="/admin/base/sale/%s">%s</a>' % (self.id, self.id))
 

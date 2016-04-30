@@ -2,9 +2,12 @@ import csv
 from collections import Counter
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.http import HttpResponse
+from django.contrib import messages
+from django.utils.safestring import mark_safe
+
 
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
@@ -19,6 +22,45 @@ EASTERN = pytz.timezone('US/Eastern')
 def get_today():
     return datetime.datetime.utcnow().replace(tzinfo=UTC).astimezone(EASTERN).date()
 
+
+@login_required
+def request_fulfill(request, order_id):
+    # check that it has not been requested already
+    fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
+    order_label = api_func('base', 'sale', unicode(order_id))['label']
+
+    if order_label in fulfillment_labels:
+        messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
+        return redirect('/admin/base/sale/?requested=unrequested')
+    else:
+        # now create a fulfillment request
+        today = get_today()
+        warehouse = Warehouse.objects.get(label='MICH')
+        ship_type_id = ChannelShipmentType.objects.get(label='SHOP_STANDARD').ship_type.id
+        shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
+
+        fulfill_info = {}
+        fulfill_info['request_date'] = today
+        fulfill_info['warehouse_id'] = warehouse.id
+        fulfill_info['order_id'] = str(order_id)
+        fulfill_info['bill_to'] = shopify_standard['bill_to']
+        fulfill_info['ship_type_id'] = ship_type_id
+        fulfill_obj = Fulfillment(**fulfill_info)
+        fulfill_obj.save()
+
+        skus = api_func('base', 'sale_skus', str(order_id))
+        for sku in skus:
+            fline_info = {}
+            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=sku).id
+            fline_info['quantity'] = skus[sku]
+            fline_info['fulfillment_id'] = fulfill_obj.id
+            fline_obj = FulfillLine(**fline_info)
+            fline_obj.save()
+
+        url = '/admin/inventory/fulfillment/%s/' % fulfill_obj.id
+        msg = 'A fulfillment has been created for order %s. View <a href=%s>here</a>' % (order_label, url)
+        messages.success(request, mark_safe(msg))
+        return redirect('/admin/base/sale/?requested=unrequested')
 
 
 @login_required
@@ -130,7 +172,6 @@ def output_shopify_no_wrap(request):
         writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3))
 
     return response
-
 
 @login_required
 def fulfill_request(request):

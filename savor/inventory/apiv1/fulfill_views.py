@@ -11,7 +11,7 @@ def get_model_data(instance, flds):
 
 @dispatch(dict)
 def fulfillment(qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'ship_type', 'bill_to', 'latest_status']
+    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
     return [get_model_data(f, flds) for f in Fulfillment.objects.all()]
 
 
