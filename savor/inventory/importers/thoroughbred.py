@@ -9,7 +9,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from savor.base.models import Sale, SalesTax, UnitSale, TaxCollector
-from inventory.models import WarehouseFulfill
+from inventory.models import WarehouseFulfill, WarehouseFulfillLine
 import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
 from accountifie.common.api import api_func
@@ -94,8 +94,9 @@ def process_thoroughbred(file_name):
             for idx in v.index:
                 pack_line = {}
                 pack_line['quantity'] = v.loc[idx, 'QTY_ORDER']
-                pack_line['inventory_item'] = api_func('inventory', 'inventoryitem', v.loc[idx, 'ITEM_NO'])['id']
+                pack_line['inventory_item_id'] = api_func('inventory', 'inventoryitem', v.loc[idx, 'ITEM_NO'])['id']
                 pack_line['warehouse_fulfill'] = pack_obj
-                pack_line.save()
+                line_obj = WarehouseFulfillLine(**pack_line)
+                line_obj.save()
 
     return exist_recs_ctr, new_recs_ctr
