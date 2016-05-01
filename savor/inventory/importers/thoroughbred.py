@@ -27,8 +27,9 @@ def order_upload(request):
         upload = request.FILES.values()[0]
         file_name = upload._name
         file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
-        dupes, new_packs = process_thoroughbred(file_name_with_timestamp)
+        dupes, new_packs, missing_ship_codes = process_thoroughbred(file_name_with_timestamp)
         messages.success(request, 'Loaded thoroughbred file: %d new records and %d duplicate records' % (new_packs, dupes))
+        messages.error(request, 'Missing shippint types: %d ' % (missing_ship_codes))
         context = {}
         return render_to_response('base/uploaded.html', context, context_instance=RequestContext(request))
     else:
@@ -44,6 +45,7 @@ def process_thoroughbred(file_name):
 
     new_recs_ctr = 0
     exist_recs_ctr = 0
+    missing_ship_codes = 0
 
     # any pre-formatting of data here
 
@@ -78,9 +80,15 @@ def process_thoroughbred(file_name):
         pack_info['shipping_country'] = top_row['SHIP_COUNTRY']
         pack_info['shipping_phone'] = top_row['SHIPTO_RECIP_PHONE']
         
-        pack_info['shipping_code'] = top_row['SHIPVIA_DESC']
         pack_info['ship_email'] = top_row['EMAIL']
         pack_info['tracking_number'] = top_row['TRACK_NO']
+        
+        ship_code = top_row['SHIPVIA_CD']
+        SHIP_MAP = {'R02': 'FEDEX_GROUND'}
+        if ship_code not in SHIP_MAP:
+            missing_ship_codes += 1
+        else:
+            pack_info['shipping_type_id'] = api_func('inventory', 'shippingtype', SHIP_MAP[ship_code])['id']
         
         pack_obj = WarehouseFulfill.objects.filter(warehouse_pack_id=pack_info['warehouse_pack_id']).first()
         if pack_obj:
@@ -99,4 +107,4 @@ def process_thoroughbred(file_name):
                 line_obj = WarehouseFulfillLine(**pack_line)
                 line_obj.save()
 
-    return exist_recs_ctr, new_recs_ctr
+    return exist_recs_ctr, new_recs_ctr, missing_ship_codes

@@ -29,7 +29,7 @@ class ShippingType(models.Model):
     description = models.CharField(max_length=100)
 
     def __unicode__(self):
-        return '%s - %s'  % (self.shipper.company.id, self.label)
+        return self.label
 
 class Shipment(models.Model, accountifie.gl.bmo.BusinessModelObject):
     arrival_date = models.DateField()
@@ -171,11 +171,18 @@ class WarehouseFulfill(models.Model):
     shipping_phone = models.CharField(max_length=30, blank=True, null=True)
 
     ship_email = models.EmailField(max_length=254, blank=True, null=True)
-    shipping_code = models.CharField(max_length=100, blank=True, null=True)
+    shipping_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
+
+    def __unicode__(self):
+        return 'Fill %s' % self.warehouse_pack_id
 
 
 class WarehouseFulfillLine(models.Model):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     warehouse_fulfill = models.ForeignKey(WarehouseFulfill)
+
+    def __unicode__(self):
+        return '%s: %d %s' % (str(self.warehouse_fulfill), self.quantity, str(self.inventory_item))
+

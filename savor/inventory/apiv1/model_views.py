@@ -69,6 +69,19 @@ def channelshipmenttype(label, qstring):
     ship_info = ChannelShipmentType.objects.get(label=label)
     return get_model_data(ship_info, flds)
 
+@dispatch(dict)
+def shippingtype(qstring):
+    flds = ['shipper', 'label', 'description', 'id']
+    all_types = list(ShippingType.objects.all())
+    return [get_model_data(t, flds) for t in all_types]
+
+
+@dispatch(str, dict)
+def shippingtype(label, qstring):
+    flds = ['shipper', 'shipper_id', 'label', 'description', 'id']
+    ship_info = ShippingType.objects.get(label=label)
+    return get_model_data(ship_info, flds)
+
 
 
 def inventorycount(qstring):
