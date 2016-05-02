@@ -11,7 +11,9 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
-from .models import Fulfillment, FulfillLine, Warehouse, ChannelShipmentType, InventoryItem
+from accountifie.toolkit.forms import FileForm
+from inventory.models import Fulfillment, FulfillLine, Warehouse, ChannelShipmentType, InventoryItem, FulfillUpdate
+import inventory.importers
 
 import datetime
 import pytz
@@ -22,6 +24,10 @@ EASTERN = pytz.timezone('US/Eastern')
 def get_today():
     return datetime.datetime.utcnow().replace(tzinfo=UTC).astimezone(EASTERN).date()
 
+
+def post_fulfill_update(data):
+    FulfillUpdate(**data).save()
+    return
 
 @login_required
 def request_fulfill(request, order_id):
@@ -62,32 +68,6 @@ def request_fulfill(request, order_id):
         messages.success(request, mark_safe(msg))
         return redirect('/admin/base/sale/?requested=unrequested')
 
-
-@login_required
-def main(request):
-    user = request.user
-    context = {}
-
-    inventory_count = api_func('inventory', 'inventorycount')
-    context = dict(('%s_count' % k, v) for k,v in inventory_count.iteritems())
-
-    sales_counts = api_func('base', 'sales_counts')
-    for sku in sales_counts:
-        context['%s_percent_sold' % sku] = int(100.0 * float(sales_counts[sku]) / float(inventory_count[sku]))
-        context['%s_sold' % sku] = sales_counts[sku]
-
-    fulfillments = api_func('inventory', 'fulfillment')
-    statuses = [x['latest_status'] for x in fulfillments]
-    status_counter = dict(('%s_count' %k, v) for k,v in Counter(statuses).iteritems())
-    context.update(status_counter)
-    context['unfulfilled_count'] = len(api_func('inventory', 'unfulfilled'))
-
-    location_counts = api_func('inventory', 'locationinventory')
-    context['MICH'] = sum(location_counts.get('MICH', {}).values())
-    context['152Frank'] = sum(location_counts.get('152Frank', {}).values())
-    
-    context['unfulfilled'] = get_table('unfulfilled')
-    return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))
 
 
 @login_required
@@ -172,6 +152,10 @@ def output_shopify_no_wrap(request):
         writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3))
 
     return response
+
+
+
+
 
 @login_required
 def fulfill_request(request):

@@ -140,25 +140,25 @@ def process_shopify(file_name):
             new_sales_ctr += 1
             sale_obj = Sale(**sale_info)
             sale_obj.save()
-        
+
             all_taxes = []
             for idx in v.index:
                 all_taxes += get_taxes(v.loc[idx].to_dict())
 
-            # create tax objects    
+            # create tax objects
             for t in all_taxes:
                 obj_data = {
                     'collector_id': TaxCollector.objects.get(entity=t[0]).id,
                     'tax': t[1],
                     'sale_id' : sale_obj.id
-                    }
+                }
 
                 tax_obj = SalesTax(**obj_data)
                 tax_obj.save()
 
             for idx in v.index:
                 # check whether it is gift wrapping or not
-                if v.loc[idx, 'Lineitem name'] != 'Gift Wrap - Custom':
+                if v.loc[idx, 'Lineitem sku'] != 'GW001':
                     obj_data = get_unitsale(v.loc[idx].to_dict())
                     obj_data['sale_id'] = sale_obj.id
 

@@ -10,9 +10,84 @@ def get_model_data(instance, flds):
 
 
 @dispatch(dict)
+def warehousefulfill(qstring):
+    flds = ['savor_order', 'savor_order_id', 'savor_transfer', 'warehouse',
+            'warehouse_pack_id', 'order_date', 'request_date',
+            'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',
+            'shipping_address2', 'shipping_address3', 'shipping_city',
+            'shipping_zip', 'shipping_province', 'shipping_country',
+            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type_id','tracking_number']
+
+    data = []
+    wf_objs = WarehouseFulfill.objects.all()
+
+    for obj in wf_objs:
+        obj_data = get_model_data(obj, flds)
+        lines = obj.warehousefulfillline_set.all()
+
+        obj_data['skus'] = {}
+        for l in lines:
+            obj_data['skus'][str(l.inventory_item)] = l.quantity
+
+        data.append(obj_data)
+
+    return data
+
+
+@dispatch(str, dict)
+def warehousefulfill(warehouse_pack_id, qstring):
+    flds = ['savor_order', 'savor_order_id', 'savor_transfer', 'warehouse',
+            'warehouse_pack_id', 'order_date', 'request_date',
+            'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',
+            'shipping_address2', 'shipping_address3', 'shipping_city',
+            'shipping_zip', 'shipping_province', 'shipping_country',
+            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type_label', 'tracking_number']
+
+    obj = WarehouseFulfill.objects.get(warehouse_pack_id=warehouse_pack_id)
+    obj_data = get_model_data(obj, flds)
+    
+    lines = obj.warehousefulfillline_set.all()
+    obj_data['skus'] = {}
+    for l in lines:
+        obj_data['skus'][str(l.inventory_item)] = l.quantity
+
+    return obj_data
+
+
+@dispatch(dict)
 def fulfillment(qstring):
     flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
-    return [get_model_data(f, flds) for f in Fulfillment.objects.all()]
+    fulfill_objs = Fulfillment.objects.all()
+    
+    all_fulfill = []
+    for obj in fulfill_objs:
+        data = get_model_data(obj, flds)
+
+        lines = obj.fulfillline_set.all()
+        data['skus'] = {}
+        for l in lines:
+            data['skus'][str(l.inventory_item)] = l.quantity
+
+        all_fulfill.append(data)
+
+    if 'status' in qstring:
+        return [req for req in all_fulfill if req['latest_status'] == qstring['status']]
+    else:
+        return all_fulfill
+
+
+@dispatch(str, dict)
+def fulfillment(id, qstring):
+    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
+    obj = Fulfillment.objects.get(id=id)
+    data = get_model_data(obj, flds)
+
+    lines = obj.fulfillline_set.all()
+    data['skus'] = {}
+    for l in lines:
+        data['skus'][str(l.inventory_item)] = l.quantity
+
+    return data
 
 
 def requested(qstring):
@@ -23,7 +98,7 @@ def requested(qstring):
     all_fulfills = fulfillment({})
     all_fulfill_ids = [str(x['order']) for x in all_fulfills if x['latest_status']!='completed']
 
-    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
+    flds = ['channel', 'id', 'order_id','items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
             'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
             'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
 
@@ -41,7 +116,7 @@ def fulfilled(qstring):
     all_fulfills = fulfillment({})
     all_fulfill_ids = [str(x['order']) for x in all_fulfills if x['latest_status']=='completed']
 
-    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
+    flds = ['channel', 'id', 'order_id','items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
             'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
             'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
 

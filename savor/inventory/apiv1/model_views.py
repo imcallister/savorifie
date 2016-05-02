@@ -10,6 +10,19 @@ def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
 
+@dispatch(dict)
+def warehouse(qstring):
+    all_warehouses = Warehouse.objects.all()
+    flds = ['id', 'label','description']
+    return [get_model_data(obj, flds) for obj in all_warehouses]
+
+
+@dispatch(str, dict)
+def warehouse(label, qstring):
+    warehouse = Warehouse.objects.get(label=label)
+    flds = ['id', 'label','description']
+    return get_model_data(warehouse, flds)
+
 
 @dispatch(dict)
 def product(qstring):
@@ -54,6 +67,19 @@ def channelshipmenttype(qstring):
 def channelshipmenttype(label, qstring):
     flds = ['label', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
     ship_info = ChannelShipmentType.objects.get(label=label)
+    return get_model_data(ship_info, flds)
+
+@dispatch(dict)
+def shippingtype(qstring):
+    flds = ['shipper', 'label', 'description', 'id']
+    all_types = list(ShippingType.objects.all())
+    return [get_model_data(t, flds) for t in all_types]
+
+
+@dispatch(str, dict)
+def shippingtype(label, qstring):
+    flds = ['shipper', 'shipper_id', 'label', 'description', 'id']
+    ship_info = ShippingType.objects.get(label=label)
     return get_model_data(ship_info, flds)
 
 

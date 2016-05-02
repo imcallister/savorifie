@@ -240,6 +240,8 @@ these divs are needed.
     title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
     data-placement="right" aria-hidden="true">
 </span>
+</h2>
+
 <div class="container-fluid" id="wrapper">
 
     <div class="accordion" id="accordion">
@@ -270,10 +272,14 @@ these divs are needed.
 {% endblock %}
 
 {% block sidebar %}
-    <div class="container-fluid" id="wrapper">
-        </br>
+<div class="container-fluid" id="wrapper">
+</br>
+</br>
+    <div class="btn-group-vertical" role="group">
         <a class="btn btn-primary" href="/inventory/output_shopify_no_wrap/" role="button">Create Shopify Picking List</a>
+        <a class="btn btn-primary" href="/inventory/reconcile_warehouse/" role="button">Reconcile warehouse info</a>
     </div>
+</div>
 {% endblock %}
 
 
