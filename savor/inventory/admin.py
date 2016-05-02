@@ -2,6 +2,7 @@ from django.contrib import admin
 import django.dispatch
 
 from .models import *
+from .views import shopify_pick_list
 #from accountifie.gl.bmo import on_bmo_save
 
 
@@ -117,6 +118,10 @@ class FulfillUpdateInline(admin.TabularInline):
 class FulfillmentAdmin(admin.ModelAdmin):
     list_display = ('request_date', 'warehouse', 'order',)
     inlines = [FulfillLineInline, FulfillUpdateInline]
+    actions = ['output_to_picklist']
+
+    def output_to_picklist(self, request, queryset):
+        return shopify_pick_list(request, queryset.values())
 
     """
     def response_change(self, request, new_object):
