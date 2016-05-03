@@ -107,6 +107,33 @@ def task_audit(task_id):
             ]
     return get_bstrap_table(data_url, row_defs)
 
+def fulfill_requested():
+    data_url = "/api/inventory/requested/"
+    row_defs = [{'data_field': 'id', 'value': 'Request ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
+                {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+                {'data_field': 'external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'gift_wrapping', 'value': 'Gift Wrapping', 'formatter': 'nameFormatter'},
+                {'data_field': 'items_string', 'value': 'Items', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
+
+def fulfill_confirmed():
+    data_url = "/api/inventory/fulfilled/"
+    row_defs = [{'data_field': 'id', 'value': 'Request ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
+                {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+                {'data_field': 'external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'gift_wrapping', 'value': 'Gift Wrapping', 'formatter': 'nameFormatter'},
+                {'data_field': 'items_string', 'value': 'Items', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
 def unfulfilled():
     data_url = "/api/inventory/unfulfilled/"
     row_defs = [{'data_field': 'shipping_name', 'value': 'Name', 'formatter': 'nameFormatter'},

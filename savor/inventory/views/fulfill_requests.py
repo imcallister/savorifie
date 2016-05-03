@@ -129,64 +129,47 @@ def shopify_pick_list(request, data):
     warehouse = Warehouse.objects.get(label='MICH')
     ship_type_id = ChannelShipmentType.objects.get(label='SHOP_STANDARD').ship_type.id
 
+    hack_list = ['channel', 'shipping_name', 'shipping_company',
+                 'shipping_address1', 'shipping_address2',
+                 'shipping_city', 'shipping_zip', 'shipping_province',
+                 'shipping_country', 'shipping_phone',
+                 'notification_email', 'external_routing_id',
+                 'gift_message']
+
     for f_req in data:
-
-        """
-        fulfill_info = {}
-        fulfill_info['request_date'] = today
-        fulfill_info['warehouse_id'] = warehouse.id
-        fulfill_info['order_id'] = str(f_req['id'])
-        fulfill_info['bill_to'] = f_req['bill_to']
-        fulfill_info['ship_type_id'] = ship_type_id
-        fulfill_obj = Fulfillment(**fulfill_info)
-        fulfill_obj.save()
-
-        for sku in f_req['skus']:
-            fline_info = {}
-            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=sku).id
-            fline_info['quantity'] = f_req['skus'][sku]
-            fline_info['fulfillment_id'] = fulfill_obj.id
-            fline_obj = FulfillLine(**fline_info)
-            fline_obj.save()
-        """
         sale_info = api_func('base', 'sale', f_req['order_id'])
 
-        hack_list = ['channel', 'shipping_name', 'shipping_company',
-                    'shipping_address1', 'shipping_address2',
-                    'shipping_city', 'shipping_zip', 'shipping_province',
-                    'shipping_country', 'shipping_phone',
-                    'notification_email', 'external_routing_id',
-                    'gift_message']
-        for fld in hack_list:
-            f_req[fld] = sale_info[fld]
+        if sale_info['gift_wrapping'] == 'False' and sale_info['channel']=='Shopify' and sale_info['customer_code']!='unknown':
+            for fld in hack_list:
+                f_req[fld] = sale_info[fld]
 
-        if f_req['external_routing_id'] is None:
-            f_req['external_routing_id'] = ''
+            if f_req['external_routing_id'] is None:
+                f_req['external_routing_id'] = ''
 
-        if f_req['gift_message'] == '':
-            f_req['gift_message'] = None
+            if f_req['gift_message'] == '':
+                f_req['gift_message'] = None
 
-        f_req['ship_type'] = shopify_standard['ship_type']
-        f_req['bill_to'] = shopify_standard['bill_to']
-        f_req['use_pdf'] = shopify_standard['use_pdf']
-        f_req['packing_type'] = shopify_standard['packing_type']
-        f_req['skus'] = api_func('base', 'sale_skus', f_req['order_id'])
-        f_req['id'] = 'SAL.' + str(f_req['id'])
+            f_req['ship_type'] = shopify_standard['ship_type']
+            f_req['bill_to'] = shopify_standard['bill_to']
+            f_req['use_pdf'] = shopify_standard['use_pdf']
+            f_req['packing_type'] = shopify_standard['packing_type']
+            f_req['skus'] = api_func('base', 'sale_skus', f_req['order_id'])
+            f_req['id'] = 'SAL.' + str(f_req['id'])
 
-        line = [unicode(f_req.get(d, '')).encode('utf-8') for d in header_order]
-        skus = f_req['skus'].keys()
-        sku = skus[0]
-        line += [sku, inventory_names[sku], f_req['skus'][sku]]
-        writer.writerow(line)
-
-        # if more than 1 sku..
-        for i in range(1, len(skus)):
-            sku = skus[i]
-            line = [''] * len(header_order)
+            line = [unicode(f_req.get(d, '')).encode('utf-8') for d in header_order]
+            skus = f_req['skus'].keys()
+            sku = skus[0]
             line += [sku, inventory_names[sku], f_req['skus'][sku]]
             writer.writerow(line)
 
-        writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3))
+            # if more than 1 sku..
+            for i in range(1, len(skus)):
+                sku = skus[i]
+                line = [''] * len(header_order)
+                line += [sku, inventory_names[sku], f_req['skus'][sku]]
+                writer.writerow(line)
+
+            writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3))
 
     return response
 

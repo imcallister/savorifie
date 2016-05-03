@@ -90,6 +90,24 @@ def fulfillment(id, qstring):
     return data
 
 
+def ungiftwrapped(qstring):
+    """
+    find all sale objects with gift wraps for which there either no fulfillment record or latest status!=completed
+    """
+    all_sales = api_func('base', 'sale')
+    all_fulfills = fulfillment({})
+    completed_ids = [str(x['order']) for x in all_fulfills if x['latest_status']=='completed']
+
+    flds = ['channel', 'id', 'order_id','items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
+            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
+            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
+
+    def get_info(d, flds):
+        return dict((k, v) for k, v in d.iteritems() if k in flds)
+
+    return [get_info(x, flds) for x in all_sales if x['label'] not in completed_ids and x['gift_wrapping']=='True']
+
+
 def requested(qstring):
     """
     find all sale objects for which there is a fulfillment record with latest status==completed
