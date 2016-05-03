@@ -135,7 +135,7 @@ class TransferLine(models.Model):
     transfer = models.ForeignKey(InventoryTransfer)
 
     def __unicode__(self):
-        return '%d %s at %.2f' % (self.quantity, self.inventory_item.label, self.cost)
+        return '%d %s' % (self.quantity, self.inventory_item.label)
 
 
 class TransferUpdate(models.Model):
