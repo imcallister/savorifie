@@ -147,8 +147,9 @@ def process_shopify(file_name):
 
             # create tax objects
             for t in all_taxes:
+                tax_collector, created = TaxCollector.objects.get_or_create(entity=t[0])
                 obj_data = {
-                    'collector_id': TaxCollector.objects.get(entity=t[0]).id,
+                    'collector_id': tax_collector.id,
                     'tax': t[1],
                     'sale_id' : sale_obj.id
                 }
