@@ -155,6 +155,7 @@ def shopify_pick_list(request, data):
             f_req['packing_type'] = shopify_standard['packing_type']
             f_req['skus'] = api_func('base', 'sale_skus', f_req['order_id'])
             f_req['id'] = 'SAL.' + str(f_req['id'])
+            f_req['shipping_zip'] = str("'" + f_req['shipping_zip'])
 
             line = [unicode(f_req.get(d, '')).encode('utf-8') for d in header_order]
             skus = f_req['skus'].keys()
