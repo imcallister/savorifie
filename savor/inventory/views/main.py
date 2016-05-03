@@ -30,5 +30,15 @@ def main(request):
     context['MICH'] = sum(location_counts.get('MICH', {}).values())
     context['152Frank'] = sum(location_counts.get('152Frank', {}).values())
 
+    channel_counts = api_func('base', 'channel_counts')
+    context['shopify_total_orders'] = channel_counts.get('Shopify',0)
+    context['grommet_total_orders'] = channel_counts.get('The Grommet',0)
+    context['other_orders'] = sum(channel_counts.values()) - context['shopify_total_orders'] - context['grommet_total_orders']
+
+    context['ungiftwrapped'] = len(api_func('inventory', 'ungiftwrapped'))
+
+    context['fulfill_requested'] = get_table('fulfill_requested')
+    context['fulfill_confirmed'] = get_table('fulfill_confirmed')
+
     context['unfulfilled'] = get_table('unfulfilled')
     return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))

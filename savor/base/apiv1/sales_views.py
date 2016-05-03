@@ -5,7 +5,7 @@ from django.conf import settings
 from django.forms.models import model_to_dict
 
 from accountifie.common.api import api_func
-from savor.base.models import Sale, UnitSale
+from savor.base.models import Sale, UnitSale, Channel
 
 
 def get_model_data(instance, flds):
@@ -61,6 +61,11 @@ def summary_sales_stats(qstring):
 def missing_cps(qstring):
     missing_cp_sales = Sale.objects.filter(customer_code__id='unknown')
     return [model_to_dict(sale, fields=[field.name for field in sale._meta.fields]) for sale in missing_cp_sales]
+
+
+def channel_counts(qstring):
+    channels = Channel.objects.all()
+    return dict((str(channel), Sale.objects.filter(channel=channel).count()) for channel in channels)
 
 
 def sales_counts(qstring):

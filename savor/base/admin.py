@@ -214,7 +214,7 @@ class FulfillRequested(SimpleListFilter):
 
 
 class SaleAdmin(SimpleHistoryAdmin):
-    list_display=('external_channel_id', 'sale_date', 'channel', 'customer_code', 'discount_code',)
+    list_display=('external_channel_id', 'sale_date', 'channel', 'customer_code', 'shipping_name',)
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
