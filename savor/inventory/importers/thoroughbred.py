@@ -84,7 +84,7 @@ def process_thoroughbred(file_name):
         pack_info['tracking_number'] = top_row['TRACK_NO']
         
         ship_code = top_row['SHIPVIA_CD']
-        SHIP_MAP = {'R02': 'FEDEX_GROUND'}
+        SHIP_MAP = {'R02': 'FEDEX_GROUND', 'U11': 'UPS_GROUND'}
         if ship_code not in SHIP_MAP:
             missing_ship_codes += 1
         else:
