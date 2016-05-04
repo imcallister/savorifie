@@ -38,7 +38,7 @@ def reconcile_warehouse(request):
 
             if whouse_record['skus'] == unfld['skus'] and order_data['shipping_zip'] == whouse_record['shipping_zip']:
                 new_fulfilled += 1
-                # how to set it to fulfilled.... 
+                # how to set it to fulfilled....
                 post_data = {}
                 post_data['update_date'] = whouse_record['ship_date']
                 post_data['comment'] = 'auto-update from reconcile_warehouse'
