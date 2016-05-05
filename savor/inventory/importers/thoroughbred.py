@@ -57,9 +57,9 @@ def process_thoroughbred(file_name):
         # have our orders be of form 'SAL.xxxx' or 'TRF.xxxx'
         # for most packs we are using first row
         top_row = v.iloc[0]
-        savor_id = top_row['CUST_PO']
-        if savor_id[:3] == 'SAL':
-            pack_info['savor_order_id'] = savor_id[4:]
+        savor_request_id = top_row['CUST_PO']
+        if savor_request_id[:3] == 'SAL':
+            pack_info['savor_order_id'] = api_func('inventory', 'fulfillment', savor_request_id[4:])['order_id']
         else:
             pack_info['savor_transfer_id'] = savor_id[4:]
 
@@ -68,7 +68,6 @@ def process_thoroughbred(file_name):
         pack_info['order_date'] = parse(top_row['ORDER_DATE']).date()
         pack_info['request_date'] = parse(top_row['REQUEST_DT']).date()
         pack_info['ship_date'] = parse(top_row['SHIP_DT']).date()
-        
         pack_info['shipping_name'] = top_row['SHIP_NAME']
         pack_info['shipping_attn'] = top_row['SHIP_ATTN']
         pack_info['shipping_address1'] = top_row['SHIP_ADDR1']
