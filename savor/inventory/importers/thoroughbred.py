@@ -14,6 +14,10 @@ import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
 from accountifie.common.api import api_func
 
+import logging
+logger = logging.getLogger('default')
+
+
 DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'data'))
 INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
 PROCESSED_ROOT = os.path.join(DATA_ROOT, 'processed')
@@ -58,52 +62,56 @@ def process_thoroughbred(file_name):
         # for most packs we are using first row
         top_row = v.iloc[0]
         savor_request_id = top_row['CUST_PO']
-        if savor_request_id[:3] == 'SAL':
-            pack_info['savor_order_id'] = api_func('inventory', 'fulfillment', savor_request_id[4:])['order_id']
-        else:
-            pack_info['savor_transfer_id'] = savor_id[4:]
 
-        # set default values
-        pack_info['warehouse_pack_id'] = k
-        pack_info['order_date'] = parse(top_row['ORDER_DATE']).date()
-        pack_info['request_date'] = parse(top_row['REQUEST_DT']).date()
-        pack_info['ship_date'] = parse(top_row['SHIP_DT']).date()
-        pack_info['shipping_name'] = top_row['SHIP_NAME']
-        pack_info['shipping_attn'] = top_row['SHIP_ATTN']
-        pack_info['shipping_address1'] = top_row['SHIP_ADDR1']
-        pack_info['shipping_address2'] = top_row['SHIP_ADDR2']
-        pack_info['shipping_address3'] = top_row['SHIP_ADDR3']
-        pack_info['shipping_city'] = top_row['SHIP_CITY']
-        pack_info['shipping_province'] = top_row['SHIP_STATE']
-        pack_info['shipping_zip'] = top_row['SHIP_ZIPCODE']
-        pack_info['shipping_country'] = top_row['SHIP_COUNTRY']
-        pack_info['shipping_phone'] = top_row['SHIPTO_RECIP_PHONE']
-        
-        pack_info['ship_email'] = top_row['EMAIL']
-        pack_info['tracking_number'] = top_row['TRACK_NO']
-        
-        ship_code = top_row['SHIPVIA_CD']
-        SHIP_MAP = {'R02': 'FEDEX_GROUND', 'U11': 'UPS_GROUND'}
-        if ship_code not in SHIP_MAP:
-            missing_ship_codes += 1
-        else:
-            pack_info['shipping_type_id'] = api_func('inventory', 'shippingtype', SHIP_MAP[ship_code])['id']
-        
-        pack_obj = WarehouseFulfill.objects.filter(warehouse_pack_id=pack_info['warehouse_pack_id']).first()
-        if pack_obj:
-            # if warehose fulfill object already exists ... skip to next one
-            exist_recs_ctr += 1
-        else:
-            new_recs_ctr += 1
-            pack_obj = WarehouseFulfill(**pack_info)
-            pack_obj.save()
+        try:
+            if savor_request_id[:3] == 'SAL':
+                pack_info['savor_order_id'] = api_func('inventory', 'fulfillment', savor_request_id[4:])['order_id']
+            else:
+                pack_info['savor_transfer_id'] = savor_id[4:]
 
-            for idx in v.index:
-                pack_line = {}
-                pack_line['quantity'] = v.loc[idx, 'QTY_ORDER']
-                pack_line['inventory_item_id'] = api_func('inventory', 'inventoryitem', v.loc[idx, 'ITEM_NO'])['id']
-                pack_line['warehouse_fulfill'] = pack_obj
-                line_obj = WarehouseFulfillLine(**pack_line)
-                line_obj.save()
+            # set default values
+            pack_info['warehouse_pack_id'] = k
+            pack_info['order_date'] = parse(top_row['ORDER_DATE']).date()
+            pack_info['request_date'] = parse(top_row['REQUEST_DT']).date()
+            pack_info['ship_date'] = parse(top_row['SHIP_DT']).date()
+            pack_info['shipping_name'] = top_row['SHIP_NAME']
+            pack_info['shipping_attn'] = top_row['SHIP_ATTN']
+            pack_info['shipping_address1'] = top_row['SHIP_ADDR1']
+            pack_info['shipping_address2'] = top_row['SHIP_ADDR2']
+            pack_info['shipping_address3'] = top_row['SHIP_ADDR3']
+            pack_info['shipping_city'] = top_row['SHIP_CITY']
+            pack_info['shipping_province'] = top_row['SHIP_STATE']
+            pack_info['shipping_zip'] = top_row['SHIP_ZIPCODE']
+            pack_info['shipping_country'] = top_row['SHIP_COUNTRY']
+            pack_info['shipping_phone'] = top_row['SHIPTO_RECIP_PHONE']
+
+            pack_info['ship_email'] = top_row['EMAIL']
+            pack_info['tracking_number'] = top_row['TRACK_NO']
+
+            ship_code = top_row['SHIPVIA_CD']
+            SHIP_MAP = {'R02': 'FEDEX_GROUND', 'U11': 'UPS_GROUND'}
+            if ship_code not in SHIP_MAP:
+                missing_ship_codes += 1
+            else:
+                pack_info['shipping_type_id'] = api_func('inventory', 'shippingtype', SHIP_MAP[ship_code])['id']
+
+            pack_obj = WarehouseFulfill.objects.filter(warehouse_pack_id=pack_info['warehouse_pack_id']).first()
+            if pack_obj:
+                # if warehose fulfill object already exists ... skip to next one
+                exist_recs_ctr += 1
+            else:
+                new_recs_ctr += 1
+                pack_obj = WarehouseFulfill(**pack_info)
+                pack_obj.save()
+
+                for idx in v.index:
+                    pack_line = {}
+                    pack_line['quantity'] = v.loc[idx, 'QTY_ORDER']
+                    pack_line['inventory_item_id'] = api_func('inventory', 'inventoryitem', v.loc[idx, 'ITEM_NO'])['id']
+                    pack_line['warehouse_fulfill'] = pack_obj
+                    line_obj = WarehouseFulfillLine(**pack_line)
+                    line_obj.save()
+        except:
+            logger.error('failed to load %s' % savor_request_id)
 
     return exist_recs_ctr, new_recs_ctr, missing_ship_codes
