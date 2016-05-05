@@ -176,31 +176,6 @@ these divs are needed.
             <div class="col-xs-4 col-md-4">
                 <div class="panel panel-default">
                     <div class="panel-body easypiechart-panel">
-                        <h4>Requested</h4>
-                        <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_percent_sold}}" >
-                            <span class="percent">
-                                <a data-toggle="modal" href="#fulfill_requested" type="submit" name="comment">{{requested_count}}</a>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
-                        <h4>Confirmed</h4>
-                        <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_percent_sold}}" >
-                            <span class="percent">
-                                <a data-toggle="modal" href="#fulfill_confirmed" type="submit" name="comment">
-                                {{completed_count}}</a>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
                         <h4>Unfulfilled</h4>
                         <div class="easypiechart" id="easypiechart-SYE3" data-percent="{{SYE3_percent_sold}}" >
                             <span class="percent">
@@ -211,6 +186,32 @@ these divs are needed.
                     </div>
                 </div>
             </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>Requested MICH</h4>
+                        <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_percent_sold}}" >
+                            <span class="percent">
+                                <a data-toggle="modal" href="#fulfill_requested" type="submit" name="comment">{{MICH_requested_count}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-body easypiechart-panel">
+                        <h4>Requested 152</h4>
+                        <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_percent_sold}}" >
+                            <span class="percent">
+                                <a data-toggle="modal" href="#fulfill_confirmed" type="submit" name="comment">
+                                {{152Frank_requested_count}}</a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </div>
         <div class="col-md-6">
             <h2>Inventory Locations</h2>
@@ -258,35 +259,6 @@ these divs are needed.
     {{unfulfilled}}
 </div>
 
-<h2>Reports
-<span class="glyphicon glyphicon-info-sign" 
-    data-toggle="tooltip" 
-    title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
-    data-placement="right" aria-hidden="true">
-</span>
-</h2>
-
-<div class="container-fluid" id="wrapper">
-
-    
-    <div class="row">
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><a href="/gl/">Reports</a></h3>
-                </div>
-
-                <div class="panel-body">
-
-                    <ul>
-                        <li><a href="/inventory/sales_history">Full History</a></li>
-                    </ul>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 {% endblock %}
 
@@ -319,6 +291,10 @@ these divs are needed.
     <tr>
         <td>Unfulfilled gift-wrapped</td>
         <td>{{ungiftwrapped}}</td>
+    </tr>
+    <tr>
+        <td>Completed Orders</td>
+        <td>{{completed_count}}</td>
     </tr>
 </table>
 
@@ -391,9 +367,6 @@ these divs are needed.
        });
     });
 
-    $(function () {
-      $('[data-toggle="tooltip"]').tooltip()
-    })
     </script>
 
 {% endblock %}
