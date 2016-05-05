@@ -109,7 +109,7 @@ def task_audit(task_id):
 
 def fulfill_requested():
     data_url = "/api/inventory/requested/"
-    row_defs = [{'data_field': 'id', 'value': 'Request ID', 'formatter': 'nameFormatter'},
+    row_defs = [{'data_field': 'id', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
                 {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},

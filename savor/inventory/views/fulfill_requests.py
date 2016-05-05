@@ -127,7 +127,9 @@ def shopify_pick_list(request, data):
 
     today = get_today()
     warehouse = Warehouse.objects.get(label='MICH')
-    ship_type_id = ChannelShipmentType.objects.get(label='SHOP_STANDARD').ship_type.id
+
+    shipping_types = dict((st['id'], st) for st in api_func('inventory', 'shippingtype'))
+    #ship_type_id = ChannelShipmentType.objects.get(label='SHOP_STANDARD').ship_type.id
 
     hack_list = ['channel', 'shipping_name', 'shipping_company',
                  'shipping_address1', 'shipping_address2',
@@ -139,7 +141,7 @@ def shopify_pick_list(request, data):
     for f_req in data:
         sale_info = api_func('base', 'sale', f_req['order_id'])
 
-        if sale_info['gift_wrapping'] == 'False' and sale_info['channel']=='Shopify' and sale_info['customer_code']!='unknown':
+        if sale_info['gift_wrapping'] == 'False' and sale_info['customer_code']!='unknown':
             for fld in hack_list:
                 f_req[fld] = sale_info[fld]
 
@@ -149,8 +151,7 @@ def shopify_pick_list(request, data):
             if f_req['gift_message'] == '':
                 f_req['gift_message'] = None
 
-            f_req['ship_type'] = shopify_standard['ship_type']
-            f_req['bill_to'] = shopify_standard['bill_to']
+            f_req['ship_type'] = shipping_types[str(f_req['ship_type_id'])]['label']
             f_req['use_pdf'] = shopify_standard['use_pdf']
             f_req['packing_type'] = shopify_standard['packing_type']
             f_req['skus'] = api_func('base', 'sale_skus', f_req['order_id'])

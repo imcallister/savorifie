@@ -116,7 +116,7 @@ class FulfillUpdateInline(admin.TabularInline):
 
 
 class FulfillmentAdmin(admin.ModelAdmin):
-    list_display = ('request_date', 'warehouse', 'order',)
+    list_display = ('id', 'request_date', 'warehouse', 'order', 'ship_type', 'bill_to',)
     inlines = [FulfillLineInline, FulfillUpdateInline]
     actions = ['output_to_picklist']
 

@@ -7,5 +7,5 @@ urlpatterns = patterns('',
     url(r'inventory/request_fulfill/(?P<order_id>[_a-zA-Z0-9]+)/$', 'inventory.views.request_fulfill'),
     url(r'^inventory/upload/(?P<file_type>.*)/$', 'inventory.views.upload_file', name='upload_file'),
 
-    url(r'inventory/$', 'inventory.views.main'),
+    url(r'^inventory/$', 'inventory.views.main'),
 )

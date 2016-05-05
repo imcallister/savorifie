@@ -24,7 +24,11 @@ def main(request):
     statuses = [x['latest_status'] for x in fulfillments]
     status_counter = dict(('%s_count' %k, v) for k,v in Counter(statuses).iteritems())
     context.update(status_counter)
-    context['unfulfilled_count'] = len(api_func('inventory', 'unfulfilled'))
+
+    requested = [x for x in fulfillments if x['latest_status']=='requested']
+    requested_warehouses = [x['warehouse'] for x in requested]
+    requested_counter = dict(('%s_requested_count' %k, v) for k,v in Counter(requested_warehouses).iteritems())
+    context.update(requested_counter)
 
     location_counts = api_func('inventory', 'locationinventory')
     context['MICH'] = sum(location_counts.get('MICH', {}).values())
@@ -37,8 +41,10 @@ def main(request):
 
     context['ungiftwrapped'] = len(api_func('inventory', 'ungiftwrapped'))
 
+    context['unfulfilled_count'] = len(api_func('inventory', 'unfulfilled'))
+    context['unfulfilled'] = get_table('unfulfilled')
+
     context['fulfill_requested'] = get_table('fulfill_requested')
     context['fulfill_confirmed'] = get_table('fulfill_confirmed')
 
-    context['unfulfilled'] = get_table('unfulfilled')
     return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))
