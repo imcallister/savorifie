@@ -159,20 +159,19 @@ class InventoryTransferAdmin(admin.ModelAdmin):
     list_display = ('transfer_date', 'location', 'destination',)
     inlines = [TransferLineInline, TransferUpdateInline]
 
-    """
-    def response_change(self, request, new_object):
-        "They saved a change - send signal"
-        fulfill_saved.send(new_object)
-        return admin.ModelAdmin.response_change(self, request, new_object)
-
     def response_add(self, request, obj):
-        "They added a new transfer - send signal"
-        fulfill_saved.send(obj)
-        return admin.ModelAdmin.response_add(self, request, obj)
-    """
-
+        if "next" in request.GET:
+            return HttpResponseRedirect(request.GET['next'])
+        else:
+            return admin.ModelAdmin.response_add(self, request, obj)
+    
 admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 
+
+class BatchRequestAdmin(admin.ModelAdmin):
+    list_display = ('id',)
+    filter_horizontal = ('fulfillments',)
+admin.site.register(BatchRequest, BatchRequestAdmin)
 
 
 class WarehouseFulfillLineInline(admin.TabularInline):
