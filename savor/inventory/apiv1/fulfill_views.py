@@ -1,5 +1,6 @@
 import csv
 from multipledispatch import dispatch
+import itertools
 
 from accountifie.common.api import api_func
 from inventory.models import *
@@ -7,6 +8,18 @@ from inventory.models import *
 def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
+
+
+def batched_fulfillments(qstring):
+    batches = BatchRequest.objects.all()
+    fulfillments = [[str(f) for f in b.fulfillments.all()] for b in batches]
+    return [f for flist in fulfillments for f in flist]
+
+
+def unbatched_fulfillments(qstring):
+    fulfillments = [{'label': str(f), 'id': f.id, 'warehouse': str(f.warehouse)} for f in Fulfillment.objects.all()]
+    unbatched = [f for f in fulfillments if f['label'] not in batched_fulfillments(qstring)]
+    return unbatched
 
 
 @dispatch(dict)

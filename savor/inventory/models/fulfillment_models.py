@@ -87,6 +87,9 @@ class Fulfillment(models.Model):
     ship_type = models.ForeignKey(ShippingType, blank=True, null=True)
     bill_to = models.CharField(max_length=100, default='missing')
 
+    def __unicode__(self):
+        return '%s:%s' % (str(self.order), self.order.shipping_name)
+
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_fulfillment'
@@ -142,6 +145,7 @@ class BatchRequest(models.Model):
     created_date = models.DateField()
     location = models.ForeignKey('inventory.Warehouse')
     fulfillments = models.ManyToManyField(Fulfillment, blank=True)
+    comment = models.TextField(blank=True, null=True)
 
     class Meta:
         app_label = 'inventory'

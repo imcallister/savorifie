@@ -1,5 +1,8 @@
 from django.contrib import admin
 import django.dispatch
+from django.shortcuts import redirect
+from django.contrib import messages
+
 
 from .models import *
 from .views import shopify_pick_list
@@ -171,6 +174,16 @@ admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 class BatchRequestAdmin(admin.ModelAdmin):
     list_display = ('id',)
     filter_horizontal = ('fulfillments',)
+    actions = ['output_to_picklist']
+
+    def output_to_picklist(self, request, queryset):
+        if len(queryset) > 1:
+            messages.error('Can only output for single batch')
+            return HttpResponseRedirect('/admin/inventory/batchrequest/')
+        else:
+            batch = queryset[0].fulfillments.all()
+            return shopify_pick_list(request, batch.values())
+
 admin.site.register(BatchRequest, BatchRequestAdmin)
 
 

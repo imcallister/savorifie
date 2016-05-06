@@ -13,5 +13,6 @@ def management(request):
     context['incomplete_shopify'] = base.models.Sale.objects.filter(customer_code='unknown').count()
     context['to_be_queued'] = len(api_func('inventory', 'unfulfilled'))
     context['thoroughbred_mismatches'] = len(api_func('inventory', 'thoroughbred_mismatch'))
+    context['unbatched_fulfillments'] = len(api_func('inventory', 'unbatched_fulfillments'))
 
     return render_to_response('inventory/management.html', context, context_instance = RequestContext(request))

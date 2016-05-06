@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
-from inventory.models import Fulfillment, FulfillLine, Warehouse, ChannelShipmentType, InventoryItem, FulfillUpdate
+from inventory.models import *
 import inventory.importers
 
 import datetime
@@ -176,7 +176,28 @@ def shopify_pick_list(request, data):
     return response
 
 
+@login_required
+def make_batch(request, warehouse):
+    warehouse_obj = Warehouse.objects.filter(label=warehouse).first()
+    if not warehouse_obj:
+        messages.error(request, 'No warehouse found matching %s' % warehouse)
+        return redirect('/inventory/management/')
+    else:
+        # get all unbatched
+        unbatched = api_func('inventory', 'unbatched_fulfillments')
+        to_batch = [f for f in unbatched if f['warehouse'] == warehouse]
 
+        batch_info = {}
+        batch_info['created_date'] = datetime.datetime.now().date()
+        batch_info['location_id'] = warehouse_obj.id
+        batch = BatchRequest(**batch_info)
+        batch.save()
+        for f in to_batch:
+            batch.fulfillments.add(f['id'])
+        batch.save()
+
+        messages.success(request, '%d fulfillments added to new batch %s' % (len(to_batch), str(batch)))
+        return redirect('/inventory/management/')
 
 
 @login_required
