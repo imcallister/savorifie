@@ -8,11 +8,16 @@ import inventory.importers
 
 
 @login_required
+def thoroughbred_upload(request):
+    return inventory.importers.thoroughbred.order_upload(request)
+
+
+@login_required
 def upload_file(request, file_type, check=False):
 
     if request.method == 'POST':
         if file_type == 'thoroughbred':
-          return inventory.importers.thoroughbred.order_upload(request)
+            return inventory.importers.thoroughbred.order_upload(request)
         else:
             raise ValueError("Unexpected file type; know about thoroughbred")
 
@@ -21,4 +26,4 @@ def upload_file(request, file_type, check=False):
         form = FileForm()
         context = {'form': form, 'file_type': file_type}
         return render_to_response('base/upload_csv.html', context,
-                                   context_instance=RequestContext(request))
+                                  context_instance=RequestContext(request))

@@ -138,6 +138,17 @@ class TransferLine(models.Model):
         return '%d %s' % (self.quantity, self.inventory_item.label)
 
 
+class BatchRequest(models.Model):
+    created_date = models.DateField()
+    location = models.ForeignKey('inventory.Warehouse')
+    fulfillments = models.ManyToManyField(Fulfillment, blank=True)
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_batchrequest'
+
+
+
 class TransferUpdate(models.Model):
     update_date = models.DateField()
     comment = models.CharField(max_length=200, blank=True, null=True)

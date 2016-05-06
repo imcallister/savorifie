@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.http import HttpResponseRedirect
 
 from accountifie.common.api import api_func
 from fulfill_requests import post_fulfill_update
@@ -54,4 +55,4 @@ def reconcile_warehouse(request):
     messages.info(request, 'Start fulfill: %d. New fulfilled: %d. New mismatches: %d' % (start_unfulfill, new_fulfilled, mismatch_fulfills))
     if len(mismatched) > 0:
         messages.error(request, '')
-    return redirect('/inventory/')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))

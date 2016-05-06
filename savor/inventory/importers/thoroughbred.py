@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.http import HttpResponseRedirect
 
 from savor.base.models import Sale, SalesTax, UnitSale, TaxCollector
 from inventory.models import WarehouseFulfill, WarehouseFulfillLine
@@ -35,7 +36,8 @@ def order_upload(request):
         messages.success(request, 'Loaded thoroughbred file: %d new records and %d duplicate records' % (new_packs, dupes))
         messages.error(request, 'Missing shippint types: %d ' % (missing_ship_codes))
         context = {}
-        return render_to_response('base/uploaded.html', context, context_instance=RequestContext(request))
+        #return render_to_response('base/uploaded.html', context, context_instance=RequestContext(request))
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the shopify file provided, please see below')

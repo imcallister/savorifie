@@ -10,6 +10,12 @@ from base.models import Cashflow, make_expense_stubs
 from accountifie.toolkit.forms import FileForm
 import accountifie.toolkit
 
+
+@login_required
+def shopify_upload(request):
+    return base.importers.shopify.order_upload(request)
+
+
 @login_required
 def upload_file(request, file_type, check=False):
 
@@ -31,9 +37,9 @@ def upload_file(request, file_type, check=False):
                           exclude=[],
                           post_process=None)
         elif file_type == 'frbchecking':
-          return base.importers.frbchecking.order_upload(request)
+            return base.importers.frbchecking.order_upload(request)
         elif file_type == 'shopify':
-          return base.importers.shopify.order_upload(request)
+            return base.importers.shopify.order_upload(request)
         else:
             raise ValueError("Unexpected file type; know about expense, checking, saving, mcard")
 
@@ -42,7 +48,8 @@ def upload_file(request, file_type, check=False):
         form = FileForm()
         context = {'form': form, 'file_type': file_type}
         return render_to_response('base/upload_csv.html', context,
-                              context_instance=RequestContext(request))
+                                  context_instance=RequestContext(request))
+
 
 @login_required
 def bulk_expense_stubs(request):

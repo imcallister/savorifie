@@ -243,8 +243,11 @@ class SaleAdmin(SimpleHistoryAdmin):
 
     def response_add(self, request, obj):
         "They added a new nom tran - send signal"
-        sale_saved.send(obj)
-        return admin.ModelAdmin.response_add(self, request, obj)
+        res = admin.ModelAdmin.response_add(self, request, obj)
+        if "next" in request.GET:
+            return HttpResponseRedirect(request.GET['next'])
+        else:
+            return res
 
 
     def get_actions(self, request):
