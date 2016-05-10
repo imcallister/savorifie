@@ -97,7 +97,7 @@ class Fulfillment(models.Model):
     @property
     def latest_status(self):
         updates = dict((u.update_date, u.status) for u in self.fulfillupdate_set.all())
-        if len(updates)==0:
+        if len(updates) == 0:
             return 'requested'
         else:
             return max(updates.iteritems(), key=operator.itemgetter(0))[1]
