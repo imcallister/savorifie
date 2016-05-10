@@ -18,7 +18,8 @@ def batched_fulfillments(qstring):
 
 def unbatched_fulfillments(qstring):
     fulfillments = [{'label': str(f), 'id': f.id, 'warehouse': str(f.warehouse)} for f in Fulfillment.objects.all()]
-    unbatched = [f for f in fulfillments if f['label'] not in batched_fulfillments(qstring)]
+    batched_fulmts = batched_fulfillments(qstring)
+    unbatched = [f for f in fulfillments if f['label'] not in batched_fulmts]
     return unbatched
 
 

@@ -100,6 +100,9 @@ def process_shopify(file_name):
         sale_info['company_id'] = 'SAV'
         sale_info['external_channel_id'] = str(v.iloc[0]['Name'])
         sale_info['shipping_charge'] = Decimal(str(v.iloc[0]['Shipping']))
+
+        shipping_code_string = v.iloc[0]['Shipping Method']
+        sale_info['shipping_code'] = 'standard' if shipping_code_string.lower() == 'standard shipping' else 'custom'
         sale_info['discount_code'] = str(v.iloc[0]['Discount Code'])
         if sale_info['discount_code']=='':
             sale_info['discount_code'] = None

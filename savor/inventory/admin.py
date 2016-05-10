@@ -167,7 +167,7 @@ class InventoryTransferAdmin(admin.ModelAdmin):
             return HttpResponseRedirect(request.GET['next'])
         else:
             return admin.ModelAdmin.response_add(self, request, obj)
-    
+
 admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 
 
