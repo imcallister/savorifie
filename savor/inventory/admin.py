@@ -172,7 +172,7 @@ admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 
 
 class BatchRequestAdmin(admin.ModelAdmin):
-    list_display = ('id',)
+    list_display = ('id', 'created_date', 'location', )
     filter_horizontal = ('fulfillments',)
     actions = ['output_to_picklist']
 
