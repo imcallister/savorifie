@@ -151,6 +151,9 @@ class BatchRequest(models.Model):
         app_label = 'inventory'
         db_table = 'inventory_batchrequest'
 
+    @property
+    def fulfillment_count(self):
+        return self.fulfillments.all().count()
 
 
 class TransferUpdate(models.Model):

@@ -34,6 +34,10 @@
                         
                         <li><a class="btn btn-primary" href="/inventory/reconcile_warehouse/" role="button">Reconcile warehouse reports</a></li>
 
+                      </br>
+                        <li><a class="btn btn-primary" data-toggle="modal" data-target="#showBatches">Show Batches</a></li>
+                        
+
                     </ul>
 
                 </div>    
@@ -113,6 +117,24 @@
             <a href='/' class="btn btn-default">Cancel</a>
         </form>
 
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="showBatches" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title">Recent Batches</h4>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid" id="wrapper">
+          {% include "splashdict.html" with columns=batch_columns rows=batch_rows %}
+        </div>
       </div>
       
     </div>
