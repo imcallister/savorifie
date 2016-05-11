@@ -107,8 +107,13 @@ def task_audit(task_id):
             ]
     return get_bstrap_table(data_url, row_defs)
 
-def fulfill_requested():
-    data_url = "/api/inventory/requested/"
+
+def fulfill_requested(warehouse=None):
+    if warehouse:
+        data_url = "/api/inventory/requested/?warehouse=%s" % warehouse
+    else:
+        data_url = "/api/inventory/requested/"
+
     row_defs = [{'data_field': 'id', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},

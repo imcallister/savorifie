@@ -100,14 +100,14 @@ def _shopify_pick_info(pick_requests):
 def thoroughbred_list(request, batch_id):
     batch = BatchRequest.objects.get(id=batch_id)
     pick_list = batch.fulfillments.all()
-    return shopify_pick_list(request, pick_list.values())
+    return shopify_pick_list(request, pick_list.values(), label='thoroughbred_batch_%s' % str(batch_id))
 
 
 @login_required
-def shopify_pick_list(request, data):
+def shopify_pick_list(request, data, label='shopify_pick_list'):
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="shopify_no_wrap.csv"'
+    response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
     #data = api_func('inventory', 'shopify_no_wrap_request')

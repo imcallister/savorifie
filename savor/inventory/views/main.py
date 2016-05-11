@@ -44,7 +44,9 @@ def main(request):
     context['unfulfilled_count'] = len(api_func('inventory', 'unfulfilled'))
     context['unfulfilled'] = get_table('unfulfilled')
 
-    context['fulfill_requested'] = get_table('fulfill_requested')
+    context['fulfill_requested_MICH'] = get_table('fulfill_requested')(warehouse='MICH')
+    context['fulfill_requested_152'] = get_table('fulfill_requested')(warehouse='152Frank')
+    print context['fulfill_requested_152']
     context['fulfill_confirmed'] = get_table('fulfill_confirmed')
 
     return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))

@@ -66,7 +66,6 @@ def warehousefulfill(warehouse_pack_id, qstring):
 
     obj = WarehouseFulfill.objects.get(warehouse_pack_id=warehouse_pack_id)
     obj_data = get_model_data(obj, flds)
-    
     lines = obj.warehousefulfillline_set.all()
     obj_data['skus'] = {}
     for l in lines:
@@ -78,7 +77,11 @@ def warehousefulfill(warehouse_pack_id, qstring):
 @dispatch(dict)
 def fulfillment(qstring):
     flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
-    fulfill_objs = Fulfillment.objects.all()
+    
+    if qstring.get('warehouse'):
+        fulfill_objs = Fulfillment.objects.filter(warehouse__label=qstring.get('warehouse'))
+    else:    
+        fulfill_objs = Fulfillment.objects.all()
     
     all_fulfill = []
     for obj in fulfill_objs:
@@ -134,7 +137,7 @@ def requested(qstring):
     find all sale objects for which there is a fulfillment record with latest status==completed
     """
     all_sales = api_func('base', 'sale')
-    all_fulfills = fulfillment({})
+    all_fulfills = fulfillment(qstring)
     all_fulfill_ids = [str(x['order']) for x in all_fulfills if x['latest_status']!='completed']
 
     flds = ['channel', 'id', 'order_id','items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
