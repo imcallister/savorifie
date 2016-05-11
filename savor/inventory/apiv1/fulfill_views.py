@@ -10,6 +10,13 @@ def get_model_data(instance, flds):
     return data
 
 
+def batchrequest(qstring):
+    batches = BatchRequest.objects.all()
+    flds = ['id', 'created_date', 'location', 'comment', 'fulfillment_count']
+    return [get_model_data(obj, flds) for obj in batches]
+
+
+
 def batched_fulfillments(qstring):
     batches = BatchRequest.objects.all()
     fulfillments = [[str(f) for f in b.fulfillments.all()] for b in batches]

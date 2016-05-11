@@ -84,6 +84,7 @@ def sales_detail(request):
     return render_to_response('inventory/sales_detail.html', context, context_instance = RequestContext(request))
 
 
+
 def _shopify_pick_info(pick_requests):
     shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
     for odr in pick_requests:
@@ -94,6 +95,12 @@ def _shopify_pick_info(pick_requests):
         odr['skus'] = api_func('base', 'sale_skus', odr['id'])
     return pick_requests
 
+
+@login_required
+def thoroughbred_list(request, batch_id):
+    batch = BatchRequest.objects.get(id=batch_id)
+    pick_list = batch.fulfillments.all()
+    return shopify_pick_list(request, pick_list.values())
 
 
 @login_required
