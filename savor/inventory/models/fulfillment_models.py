@@ -31,6 +31,11 @@ class ShippingType(models.Model):
     def __unicode__(self):
         return self.label
 
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_shippingtype'
+
+
 class Shipment(models.Model, accountifie.gl.bmo.BusinessModelObject):
     arrival_date = models.DateField()
     description = models.CharField(max_length=200)

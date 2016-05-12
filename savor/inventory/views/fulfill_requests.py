@@ -34,13 +34,17 @@ def request_fulfill(request, warehouse, order_id):
     # check that it has not been requested already
     fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
     warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
-    order_label = api_func('base', 'sale', unicode(order_id))['label']
+    order = api_func('base', 'sale', unicode(order_id))
+    order_label = order['label']
 
     if order_label in fulfillment_labels:
         messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
         return redirect('/admin/base/sale/?requested=unrequested')
     elif warehouse not in warehouse_labels:
         messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
+        return redirect('/admin/base/sale/?requested=unrequested')
+    elif order['shipping_type'] is None:
+        messages.error(request, 'Please choose a shipping type')
         return redirect('/admin/base/sale/?requested=unrequested')
     else:
         # now create a fulfillment request

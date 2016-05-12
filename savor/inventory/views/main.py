@@ -46,7 +46,6 @@ def main(request):
 
     context['fulfill_requested_MICH'] = get_table('fulfill_requested')(warehouse='MICH')
     context['fulfill_requested_152'] = get_table('fulfill_requested')(warehouse='152Frank')
-    print context['fulfill_requested_152']
     context['fulfill_confirmed'] = get_table('fulfill_confirmed')
 
     return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))

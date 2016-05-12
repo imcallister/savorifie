@@ -13,86 +13,130 @@
 
 <div class="container-fluid" id="wrapper">
 
-    <div class="row">
-        <div class="col-md-4">
+    
+    <div row>
+        <div class="col-md-12">    
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Actions</h3>
+                    <h3 class="panel-title">Load and Process Orders</h3>
                 </div>
                 <div class="panel-body">
-                    <ul class="nav nav-pills nav-stacked">
-                        <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadShopify">Load Shopify</a></li>
-                        <li><a class="btn btn-primary" href="/admin/base/sale/add?next=/inventory/management/" role="button">Create Grommet order</a></li>
+                    <div class="col-md-4">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadShopify">Load Shopify</a></li>
+                            <li><a class="btn btn-primary" href="/admin/base/sale/add?next=/inventory/management/" role="button">Create Manual order</a></li>
+                        </ul>
+                    </div>
+                
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="panel panel-danger">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">INCOMPLETE ORDERS</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20"><a href='/admin/base/sale/?customer_code=unknown'>{{incomplete_shopify}}</a></font>
+                                    </div>
+                                </div>
+                            </div>
 
-                        </br>
-                        <li><a class="btn btn-primary" href="/admin/inventory/inventorytransfer/add?next=/inventory/management/" role="button">Create inventory transfer</a></li>
-                        <li><a class="btn btn-primary" href="/admin/base/sale/?requested=unrequested" role="button">Create warehouse requests</a></li>
-                        <li><a class="btn btn-primary" href="/inventory/make_batch/MICH/" role="button">Create Michigan batch</a></li>
-                        <li><a class="btn btn-primary" href="/inventory/make_batch/152Frank/" role="button">Create 152 Franklin batch</a></li>
-                        </br>
-                        <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadThoroughbred">Load Thoroughbred</a></li>
-                        
-                        <li><a class="btn btn-primary" href="/inventory/reconcile_warehouse/" role="button">Reconcile warehouse reports</a></li>
-
-                      </br>
-                        <li><a class="btn btn-primary" data-toggle="modal" data-target="#showBatches">Show Batches</a></li>
-                        
-
-                    </ul>
-
-                </div>    
+                            <div class="col-md-6">
+                                <div class="panel panel-warning">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">ORDERS TO BE QUEUED</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20"><a href='/admin/base/sale/?requested=unrequested'>{{to_be_queued}}</a></font>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-8">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="panel panel-danger">
-                <div class="panel-heading text-center">
-                  <h3 class="panel-title">INCOMPLETE ORDERS</h3>
+    <div row>
+        <div class="col-md-12">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Make fulfillment batches</h3>
                 </div>
-                <div class="panel-body text-center">
-                    <font size="20"><a href='/admin/base/sale/?customer_code=unknown'>{{incomplete_shopify}}</a></font>
+                <div class="panel-body">
+                    <div class="col-md-4">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a class="btn btn-primary" href="/admin/inventory/inventorytransfer/add?next=/inventory/management/" role="button">Create inventory transfer</a></li>
+                            <li><a class="btn btn-primary" href="/inventory/make_batch/MICH/" role="button">Create Michigan batch</a></li>
+                            <li><a class="btn btn-primary" href="/inventory/make_batch/152Frank/" role="button">Create 152 Franklin batch</a></li>
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#showBatches">Download Batches</a></li>
+                        </ul>
+                    </div>
+                
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="panel panel-success">
+                                <div class="panel-heading text-center">
+                                  <h3 class="panel-title">UNBATCHED FULFILLS</h3>
+                                </div>
+                                <div class="panel-body text-center">
+                                    <font size="20"><a href='/api/inventory/unbatched_fulfillments/'>{{unbatched_fulfillments}}</a></font>
+                                </div>
+                              </div>
+                            </div>                            
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-
-            <div class="col-md-6">
-              <div class="panel panel-warning">
-                <div class="panel-heading text-center">
-                  <h3 class="panel-title">ORDERS TO BE QUEUED</h3>
-                </div>
-                <div class="panel-body text-center">
-                    <font size="20"><a href='/admin/base/sale/?requested=unrequested'>{{to_be_queued}}</a></font>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <div class="panel panel-info">
-                <div class="panel-heading text-center">
-                  <h3 class="panel-title">WAREHOUSE MISMATCHES</h3>
-                </div>
-                <div class="panel-body text-center">
-                    <font size="20"><a href='/api/inventory/thoroughbred_mismatch/'>{{thoroughbred_mismatches}}</a></font>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-6">
-              <div class="panel panel-success">
-                <div class="panel-heading text-center">
-                  <h3 class="panel-title">UNBATCHED FULFILLS</h3>
-                </div>
-                <div class="panel-body text-center">
-                    <font size="20"><a href='/api/inventory/unbatched_fulfillments/'>{{unbatched_fulfillments}}</a></font>
-                </div>
-              </div>
-            </div>
-          </div>  
         </div>
+    </div>
 
+    <div row>
+        <div class="col-md-12">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Post fulfillment</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-4">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadThoroughbred">Load Thoroughbred</a></li>                    
+                            <li><a class="btn btn-primary" href="/inventory/reconcile_warehouse/" role="button">Reconcile warehouse reports</a></li>
 
+                        </ul>
+                    </div>
+                
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="panel panel-danger">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">UNRECONCILED</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20">
+                                            <a data-toggle="modal" href="#unreconciled" type="submit" name="unreconciled">{{unreconciled_count}}</a>
+                                        </font>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="panel panel-info">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">WAREHOUSE MISMATCHES</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20"><a href='/api/inventory/thoroughbred_mismatch/'>{{thoroughbred_mismatches}}</a></font>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -204,6 +248,13 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="unreconciled" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-content">
+        {{unreconciled}}
+    </div>
+</div>
+
 
 {% endblock %}
 
