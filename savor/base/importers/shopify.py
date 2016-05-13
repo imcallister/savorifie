@@ -74,6 +74,10 @@ def process_shopify(file_name):
     # any pre-formatting of data here
     sales['Shipping Zip'] = sales['Shipping Zip'].map(lambda x: str(x).replace("'",""))
 
+    channel_ship_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')['ship_type']
+    standard_shipping = api_func('inventory', 'shippingtype', channel_ship_standard)['id']
+
+
     new_sales_ctr = 0
     exist_sales_ctr = 0
     unknown_cp_ctr = 0
@@ -93,7 +97,7 @@ def process_shopify(file_name):
 
         # check for giftwrap option
         for idx in v.index:
-            if v.loc[idx, 'Lineitem name'] == 'Gift Wrap - Custom':
+            if v.loc[idx, 'Lineitem sku'].lower() == 'gw001':
                 sale_info['gift_wrapping'] = True
                 sale_info['gift_wrap_fee'] = v.loc[idx, 'Lineitem price']
 
@@ -103,6 +107,9 @@ def process_shopify(file_name):
 
         shipping_code_string = v.iloc[0]['Shipping Method']
         sale_info['shipping_code'] = 'standard' if shipping_code_string.lower() == 'standard shipping' else 'custom'
+        if sale_info['shipping_code'] == 'standard':
+            sale_info['shipping_type_id'] = standard_shipping
+
         sale_info['discount_code'] = str(v.iloc[0]['Discount Code'])
         if sale_info['discount_code']=='':
             sale_info['discount_code'] = None

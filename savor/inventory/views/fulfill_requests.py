@@ -34,13 +34,19 @@ def request_fulfill(request, warehouse, order_id):
     # check that it has not been requested already
     fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
     warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
-    order_label = api_func('base', 'sale', unicode(order_id))['label']
+    order = api_func('base', 'sale', unicode(order_id))
+    order_label = order['label']
 
     if order_label in fulfillment_labels:
         messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
         return redirect('/admin/base/sale/?requested=unrequested')
     elif warehouse not in warehouse_labels:
         messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
+        return redirect('/admin/base/sale/?requested=unrequested')
+    elif order['shipping_type'] == 'None':
+        messages.error(request, 'Please choose a shipping type')
+        messages.error(request, '=' * 40)
+        messages.error(request, mark_safe('<a href=/admin/base/sale/%s>View here</a>' % order_id))
         return redirect('/admin/base/sale/?requested=unrequested')
     else:
         # now create a fulfillment request
@@ -100,14 +106,14 @@ def _shopify_pick_info(pick_requests):
 def thoroughbred_list(request, batch_id):
     batch = BatchRequest.objects.get(id=batch_id)
     pick_list = batch.fulfillments.all()
-    return shopify_pick_list(request, pick_list.values())
+    return shopify_pick_list(request, pick_list.values(), label='thoroughbred_batch_%s' % str(batch_id))
 
 
 @login_required
-def shopify_pick_list(request, data):
+def shopify_pick_list(request, data, label='shopify_pick_list'):
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="shopify_no_wrap.csv"'
+    response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
     #data = api_func('inventory', 'shopify_no_wrap_request')
