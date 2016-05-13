@@ -76,7 +76,8 @@ def warehousefulfill(warehouse_pack_id, qstring):
 
 @dispatch(dict)
 def fulfillment(qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
+    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
+             'bill_to', 'latest_status', 'ship_info']
     
     if qstring.get('warehouse'):
         fulfill_objs = Fulfillment.objects.filter(warehouse__label=qstring.get('warehouse'))
@@ -102,7 +103,8 @@ def fulfillment(qstring):
 
 @dispatch(str, dict)
 def fulfillment(id, qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
+    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
+             'bill_to', 'latest_status', 'ship_info']
     obj = Fulfillment.objects.get(id=id)
     data = get_model_data(obj, flds)
 

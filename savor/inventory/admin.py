@@ -2,10 +2,12 @@ from django.contrib import admin
 import django.dispatch
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.contrib.admin import SimpleListFilter
 
 
 from .models import *
 from .views import shopify_pick_list
+from accountifie.common.api import api_func
 #from accountifie.gl.bmo import on_bmo_save
 
 
@@ -105,6 +107,18 @@ admin.site.register(Shipment, ShipmentAdmin)
 #fulfill_saved = django.dispatch.Signal(providing_args=[])
 #fulfill_saved.connect(on_bmo_save)
 
+class ShippingMissing(SimpleListFilter):
+    title = 'shipping_missing'
+    parameter_name = 'shipping_missing'
+
+    def lookups(self, request, model_admin):
+            return (('complete', 'Shipping Info Complete'), ('incomplete', 'Shipping Info Incomplete'))
+
+    def queryset(self, request, qs):
+        fulfillment_ids = [x['id'] for x in api_func('inventory', 'fulfillment') 
+                           if x['ship_info'] == self.value()]
+        return qs.filter(id__in=fulfillment_ids)
+
 
 class FulfillLineInline(admin.TabularInline):
     model = FulfillLine
@@ -120,6 +134,7 @@ class FulfillUpdateInline(admin.TabularInline):
 
 class FulfillmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'request_date', 'warehouse', 'order', 'ship_type', 'bill_to',)
+    list_filter = (ShippingMissing,)
     inlines = [FulfillLineInline, FulfillUpdateInline]
     actions = ['output_to_picklist']
 

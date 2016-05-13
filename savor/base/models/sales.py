@@ -76,8 +76,10 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     external_ref = models.CharField(max_length=50, blank=True, null=True)
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
 
-    shipping_code = models.CharField(max_length=50, blank=True, null=True)
-    shipping_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
+    #shipping_code = models.CharField(max_length=50, blank=True, null=True)
+    #shipping_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
+    ship_type = models.ForeignKey('inventory.ChannelShipmentType', blank=True, null=True, default=None)
+    
     shipping_charge = models.DecimalField(max_digits=11, decimal_places=2)
 
     discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
