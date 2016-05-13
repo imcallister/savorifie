@@ -43,8 +43,10 @@ def request_fulfill(request, warehouse, order_id):
     elif warehouse not in warehouse_labels:
         messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
         return redirect('/admin/base/sale/?requested=unrequested')
-    elif order['shipping_type'] is None:
+    elif order['shipping_type'] == 'None':
         messages.error(request, 'Please choose a shipping type')
+        messages.error(request, '=' * 40)
+        messages.error(request, mark_safe('<a href=/admin/base/sale/%s>View here</a>' % order_id))
         return redirect('/admin/base/sale/?requested=unrequested')
     else:
         # now create a fulfillment request
