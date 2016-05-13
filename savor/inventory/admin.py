@@ -115,9 +115,10 @@ class ShippingMissing(SimpleListFilter):
             return (('complete', 'Shipping Info Complete'), ('incomplete', 'Shipping Info Incomplete'))
 
     def queryset(self, request, qs):
-        fulfillment_ids = [x['id'] for x in api_func('inventory', 'fulfillment') 
-                           if x['ship_info'] == self.value()]
-        return qs.filter(id__in=fulfillment_ids)
+        if self.value():
+            fulfillment_ids = [x['id'] for x in api_func('inventory', 'fulfillment')
+                               if x['ship_info'] == self.value()]
+            return qs.filter(id__in=fulfillment_ids)
 
 
 class FulfillLineInline(admin.TabularInline):
@@ -134,7 +135,7 @@ class FulfillUpdateInline(admin.TabularInline):
 
 class FulfillmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'request_date', 'warehouse', 'order', 'ship_type', 'bill_to',)
-    list_filter = (ShippingMissing,)
+    list_filter = ('warehouse', ShippingMissing,)
     inlines = [FulfillLineInline, FulfillUpdateInline]
     actions = ['output_to_picklist']
 

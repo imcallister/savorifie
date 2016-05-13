@@ -65,7 +65,7 @@ def channelshipmenttype(qstring):
 
 @dispatch(str, dict)
 def channelshipmenttype(label, qstring):
-    flds = ['label', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
+    flds = ['id', 'label', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
     ship_info = ChannelShipmentType.objects.get(label=label)
     return get_model_data(ship_info, flds)
 
