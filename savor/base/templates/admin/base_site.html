@@ -3,6 +3,7 @@
 
 {% block extrahead %}
 <link rel="stylesheet" href="{{STATIC_URL}}base/css/base.css" />
+<script src="https://use.fontawesome.com/8c74e39a46.js"></script>
 {% endblock %}
 
 {% block title %}{{admin_site_title}}{% endblock %}
@@ -19,9 +20,27 @@
 
 
 {% block nav-global %}
-{% for key, value in menu_items.items %} 
-      <li><a class="btn-sm" type="button" href={{value}}>{{key}}</a></li>
-    {% endfor %}
+  <li class="btn-group">
+        <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown">
+            <span><i class="fa fa-usd fa-lg" aria-hidden="true"></i></span> Finances 
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu" role="menu">
+            <li><a class="btn-sm" type="button" href="/reports/">Reporting</a></li>
+            <li><a class="btn-sm" type="button" href="/daily/">Daily</a></li>
+        </ul>
+    </li>
+    
+    <li class="btn-group">
+        <a class="btn btn-sm dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-shopping-cart"></span> Inventory <span class="caret"></span></a>
+      <ul class="dropdown-menu" role="menu">
+        <li><a class="btn-sm" type="button" href="/inventory/">Stocks</a></li>
+        <li><a class="btn-sm" type="button" href="/inventory/management/">Fulfillment</a></li>
+      </ul>
+    </li>
+    <li><a class="btn-sm" type="button" href="/analysis/">Analysis</a></li>
+    <li><a class="btn-sm" type="button" href="/snapshot/glsnapshots">Snapshots</a></li>
+    
 
     {% if user.is_superuser %}
         <li class="btn-group">
@@ -30,6 +49,7 @@
             <li><a class="btn-sm" type="button" href="/admin/">Admin</a></li>
             <li><a class="btn-sm" type="button" href="/maintenance/">Maintenance</a></li>
             <li><a class="btn-sm" type="button" href="/dashboard/">Dashboard</a></li>
+            <li><a class="btn-sm" type="button" href="/dashboard/logs">Logs</a></li>
           </ul>
         </li>
     {% endif %}

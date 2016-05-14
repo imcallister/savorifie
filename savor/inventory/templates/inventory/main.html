@@ -192,7 +192,7 @@ these divs are needed.
                         <h4>Requested MICH</h4>
                         <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_percent_sold}}" >
                             <span class="percent">
-                                <a data-toggle="modal" href="#fulfill_requested" type="submit" name="comment">{{MICH_requested_count}}</a>
+                                <a data-toggle="modal" href="#fulfill_requested_MICH" type="submit" name="comment">{{MICH_requested_count}}</a>
                             </span>
                         </div>
                     </div>
@@ -204,7 +204,7 @@ these divs are needed.
                         <h4>Requested 152</h4>
                         <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_percent_sold}}" >
                             <span class="percent">
-                                <a data-toggle="modal" href="#fulfill_confirmed" type="submit" name="comment">
+                                <a data-toggle="modal" href="#fulfill_requested_152" type="submit" name="comment">
                                 {{152Frank_requested_count}}</a>
                             </span>
                         </div>
@@ -247,8 +247,13 @@ these divs are needed.
 </div>
 
 
-<div class="modal fade" id="fulfill_requested" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    {{fulfill_requested}}
+<div class="modal fade" id="fulfill_requested_MICH" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="
+true">
+    {{fulfill_requested_MICH}}
+</div>
+
+<div class="modal fade" id="fulfill_requested_152" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    {{fulfill_requested_152}}
 </div>
 
 <div class="modal fade" id="fulfill_confirmed" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">

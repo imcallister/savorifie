@@ -58,14 +58,14 @@ def product(label, qstring):
 
 @dispatch(dict)
 def channelshipmenttype(qstring):
-    flds = ['label', 'channel', 'ship_type', 'bill_to']
+    flds = ['id', 'label', 'channel', 'ship_type', 'bill_to']
     all_types = list(ChannelShipmentType.objects.all())
     return [get_model_data(t, flds) for t in all_types]
 
 
 @dispatch(str, dict)
 def channelshipmenttype(label, qstring):
-    flds = ['label', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
+    flds = ['id', 'label', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
     ship_info = ChannelShipmentType.objects.get(label=label)
     return get_model_data(ship_info, flds)
 

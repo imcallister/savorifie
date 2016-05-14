@@ -30,27 +30,36 @@ def post_fulfill_update(data):
     return
 
 @login_required
-def request_fulfill(request, order_id):
+def request_fulfill(request, warehouse, order_id):
     # check that it has not been requested already
     fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
-    order_label = api_func('base', 'sale', unicode(order_id))['label']
+    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
+    order = api_func('base', 'sale', unicode(order_id))
+    order_label = order['label']
 
     if order_label in fulfillment_labels:
         messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
         return redirect('/admin/base/sale/?requested=unrequested')
+    elif warehouse not in warehouse_labels:
+        messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
+        return redirect('/admin/base/sale/?requested=unrequested')
     else:
         # now create a fulfillment request
         today = get_today()
-        warehouse = Warehouse.objects.get(label='MICH')
-        ship_type_id = ChannelShipmentType.objects.get(label='SHOP_STANDARD').ship_type.id
-        shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
+        warehouse = Warehouse.objects.get(label=warehouse)
+        ship_type = ChannelShipmentType.objects.filter(label=order['ship_type']).first()
+
+        shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
 
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
-        fulfill_info['bill_to'] = shopify_standard['bill_to']
-        fulfill_info['ship_type_id'] = ship_type_id
+
+        if ship_type:
+            fulfill_info['bill_to'] = ship_type.bill_to
+            fulfill_info['ship_type_id'] = ship_type.id
+
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
@@ -80,8 +89,9 @@ def sales_detail(request):
     return render_to_response('inventory/sales_detail.html', context, context_instance = RequestContext(request))
 
 
+
 def _shopify_pick_info(pick_requests):
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
+    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
     for odr in pick_requests:
         odr['ship_type'] = shopify_standard['ship_type']
         odr['bill_to'] = shopify_standard['bill_to']
@@ -91,17 +101,23 @@ def _shopify_pick_info(pick_requests):
     return pick_requests
 
 
+@login_required
+def thoroughbred_list(request, batch_id):
+    batch = BatchRequest.objects.get(id=batch_id)
+    pick_list = batch.fulfillments.all()
+    return shopify_pick_list(request, pick_list.values(), label='thoroughbred_batch_%s' % str(batch_id))
+
 
 @login_required
-def shopify_pick_list(request, data):
+def shopify_pick_list(request, data, label='shopify_pick_list'):
 
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="shopify_no_wrap.csv"'
+    response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
     #data = api_func('inventory', 'shopify_no_wrap_request')
     # want to create fill requests for each
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
+    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
     inventory_names = dict((inv_item['label'], inv_item['description']) for inv_item in api_func('inventory', 'inventoryitem'))
 
     header_order = ['id', 'channel', 'shipping_name','shipping_company', 'external_routing_id',
@@ -129,7 +145,6 @@ def shopify_pick_list(request, data):
     warehouse = Warehouse.objects.get(label='MICH')
 
     shipping_types = dict((st['id'], st) for st in api_func('inventory', 'shippingtype'))
-    #ship_type_id = ChannelShipmentType.objects.get(label='SHOP_STANDARD').ship_type.id
 
     hack_list = ['channel', 'shipping_name', 'shipping_company',
                  'shipping_address1', 'shipping_address2',
@@ -214,7 +229,7 @@ def fulfill_request(request):
     # 3 get shipping info
     # shopify no wrap shipping
 
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
+    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
     for odr in shopify_no_wrap:
         odr['ship_type'] = shopify_standard['ship_type']
         odr['bill_to'] = shopify_standard['bill_to']
