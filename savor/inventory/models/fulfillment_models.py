@@ -94,6 +94,8 @@ class Fulfillment(models.Model):
     order = models.ForeignKey('base.Sale')
     ship_type = models.ForeignKey(ShippingType, blank=True, null=True)
     bill_to = models.CharField(max_length=100, blank=True, null=True)
+    use_pdf = models.BooleanField(default=False)
+    packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
 
     def __unicode__(self):
         return '%s:%s' % (str(self.order), self.order.shipping_name)
