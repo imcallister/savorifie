@@ -19,6 +19,7 @@ def management(request):
     context['unreconciled'] = get_table('fulfill_requested')
     context['unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') if x['latest_status']=='requested'])
 
+    context['missing_shipping'] = len(api_func('inventory', 'fulfillment', qstring={'missing_shipping': 'true'}))
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
     batch_requests = api_func('inventory', 'batchrequest')
     for batch in batch_requests:

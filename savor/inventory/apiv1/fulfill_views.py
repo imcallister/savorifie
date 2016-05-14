@@ -76,13 +76,17 @@ def warehousefulfill(warehouse_pack_id, qstring):
 
 @dispatch(dict)
 def fulfillment(qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
-    
+    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
+             'bill_to', 'latest_status', 'ship_info']
+
     if qstring.get('warehouse'):
         fulfill_objs = Fulfillment.objects.filter(warehouse__label=qstring.get('warehouse'))
     else:    
         fulfill_objs = Fulfillment.objects.all()
-    
+
+    if qstring.get('missing_shipping', '').lower() == 'true':
+        fulfill_objs = [x for x in fulfill_objs if x.ship_info == 'incomplete']
+
     all_fulfill = []
     for obj in fulfill_objs:
         data = get_model_data(obj, flds)
@@ -102,7 +106,8 @@ def fulfillment(qstring):
 
 @dispatch(str, dict)
 def fulfillment(id, qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type', 'bill_to', 'latest_status']
+    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
+             'bill_to', 'latest_status', 'ship_info']
     obj = Fulfillment.objects.get(id=id)
     data = get_model_data(obj, flds)
 
@@ -209,7 +214,7 @@ def fulfill_requested(qstring):
 def shopify_no_wrap_request(qstring):
     unfulfilled = api_func('inventory', 'unfulfilled')
     shopify_no_wrap = [odr for odr in unfulfilled if odr['gift_wrapping'] == 'False' and odr['channel']=='Shopify' and odr['customer_code']!='unknown']
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOP_STANDARD')
+    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
     for odr in shopify_no_wrap:
         odr['ship_type'] = shopify_standard['ship_type']
         odr['bill_to'] = shopify_standard['bill_to']
