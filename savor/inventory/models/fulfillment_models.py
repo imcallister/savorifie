@@ -99,7 +99,7 @@ class Fulfillment(accountifie.common.models.McModel):
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
 
-    properties = ['updates']
+    properties = ['updates', 'fulfilllines', 'ship_info']
 
     def __unicode__(self):
         return '%s:%s' % (str(self.order), self.order.shipping_name)
@@ -118,6 +118,10 @@ class Fulfillment(accountifie.common.models.McModel):
     @property
     def updates(self):
         return [u.to_json() for u in self.fulfillupdate_set.all()]
+
+    @property
+    def fulfilllines(self):
+        return [u.to_json() for u in self.fulfillline_set.all()]
 
     @property
     def latest_status(self):

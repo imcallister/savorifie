@@ -2,6 +2,8 @@ import csv
 from multipledispatch import dispatch
 import itertools
 
+from django.db.models import Prefetch
+
 from accountifie.common.api import api_func
 from inventory.models import *
 
@@ -73,6 +75,34 @@ def warehousefulfill(warehouse_pack_id, qstring):
 
     return obj_data
 
+
+@dispatch(dict)
+def fulfillment2(qstring):
+    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
+            'bill_to', 'latest_status', 'ship_info']
+
+    if qstring.get('warehouse'):
+        fulfill_objs = Fulfillment.objects \
+                        .filter(warehouse__label=qstring.get('warehouse')) \
+                        .prefetch_related(Prefetch('fulfillline_set'),
+                                          Prefetch('fulfillupdate_set')) \
+                        .select_related('warehouse', 'order', 'ship_type')
+    else:
+        fulfill_objs = Fulfillment.objects \
+                                  .all() \
+                                  .prefetch_related(Prefetch('fulfillline_set'),
+                                                    Prefetch('fulfillupdate_set')) \
+                                  .select_related('warehouse', 'order', 'ship_type')
+
+    fulfill_data = [obj.to_json(expand=True) for obj in fulfill_objs]
+
+    if qstring.get('missing_shipping', '').lower() == 'true':
+        fulfill_data = [x for x in fulfill_data if x.get('ship_info') == 'incomplete']
+
+    if 'status' in qstring:
+        fulfill_data = [x for x in fulfill_data if qstring['status'] in [u['status'] for u in x['updates']]]
+
+    return fulfill_data
 
 @dispatch(dict)
 def fulfillment(qstring):
