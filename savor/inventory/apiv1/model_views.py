@@ -1,9 +1,16 @@
 from multipledispatch import dispatch
 
 from django.forms.models import model_to_dict
+from django.db.models import Prefetch
 
 from accountifie.common.api import api_func
 from inventory.models import *
+
+
+def get_fields_and_properties(model, instance):
+    field_names = [f.name for f in model._meta.fields]
+    property_names = [name for name in dir(model) if isinstance(getattr(model, name), property)]
+    return dict((name, getattr(instance, name)) for name in field_names + property_names)
 
 
 def get_model_data(instance, flds):
@@ -13,60 +20,54 @@ def get_model_data(instance, flds):
 @dispatch(dict)
 def warehouse(qstring):
     all_warehouses = Warehouse.objects.all()
-    flds = ['id', 'label','description']
-    return [get_model_data(obj, flds) for obj in all_warehouses]
+    return [get_model_data(obj, get_fields_and_properties(Warehouse, obj)) for obj in all_warehouses]
 
 
 @dispatch(str, dict)
 def warehouse(label, qstring):
-    warehouse = Warehouse.objects.get(label=label)
-    flds = ['id', 'label','description']
-    return get_model_data(warehouse, flds)
+    obj = Warehouse.objects.get(label=label)
+    return get_model_data(obj, get_fields_and_properties(Warehouse, obj))
 
 
 @dispatch(dict)
 def product(qstring):
-    all_skus = Product.objects.all()
+    all_skus = Product.objects.all().prefetch_related(Prefetch('skuunit_set', to_attr='skuunit'))
+    skuunit_flds = get_fields_and_properties(SKUUnit, all_skus[0].skuunit[0])
+    product_flds = get_fields_and_properties(Product, all_skus[0])
+
     data = []
     for sku in all_skus:
-        d = model_to_dict(sku)
-        sku_items = list(sku.skuunit_set.all().values())
+        skuunit_data = [get_model_data(unit, skuunit_flds) for unit in sku.skuunit]
+        product_data = get_model_data(sku, product_flds)
+        product_data.update({'sku_items': skuunit_data})
+        data.append(product_data)
 
-        for item in sku_items:
-            inv_item = model_to_dict(InventoryItem.objects.get(id=item['inventory_item_id']))
-            item.update(inv_item)
-
-        d['sku_items'] = sku_items
-        data.append(d)
     return data
 
 
 @dispatch(str, dict)
 def product(label, qstring):
-    sku = Product.objects.get(label=label)
+    sku = Product.objects.filter(label=label).prefetch_related(Prefetch('skuunit_set', to_attr='skuunit')).first()
+    skuunit_flds = get_fields_and_properties(SKUUnit, sku.skuunit[0])
+    product_flds = get_fields_and_properties(Product, sku)
 
-    d = model_to_dict(sku)
-    sku_items = list(sku.skuunit_set.all().values())
-
-    for item in sku_items:
-        inv_item = model_to_dict(InventoryItem.objects.get(id=item['inventory_item_id']))
-        item.update(inv_item)
-    d['sku_items'] = sku_items
-
-    return d
+    skuunit_data = [get_model_data(unit, skuunit_flds) for unit in sku.skuunit]
+    product_data = get_model_data(sku, product_flds)
+    product_data.update({'sku_items': skuunit_data})
+    return product_data
 
 
 @dispatch(dict)
 def channelshipmenttype(qstring):
-    flds = ['id', 'label', 'channel', 'ship_type', 'bill_to']
     all_types = list(ChannelShipmentType.objects.all())
+    flds = get_fields_and_properties(ChannelShipmentType, all_types[0])
     return [get_model_data(t, flds) for t in all_types]
 
 
 @dispatch(str, dict)
 def channelshipmenttype(label, qstring):
-    flds = ['id', 'label', 'channel', 'ship_type', 'bill_to', 'use_pdf', 'packing_type']
     ship_info = ChannelShipmentType.objects.get(label=label)
+    flds = get_fields_and_properties(ChannelShipmentType, ship_info)
     return get_model_data(ship_info, flds)
 
 @dispatch(dict)
