@@ -14,21 +14,21 @@ def get_model_data(instance, flds):
 
 def batchrequest(qstring):
     batches = BatchRequest.objects.all()
-    flds = ['id', 'created_date', 'location', 'comment', 'fulfillment_count']
-    return [get_model_data(obj, flds) for obj in batches]
-
+    return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
 
 
 def batched_fulfillments(qstring):
-    batches = BatchRequest.objects.all()
-    fulfillments = [[str(f) for f in b.fulfillments.all()] for b in batches]
-    return [f for flist in fulfillments for f in flist]
+    qs = BatchRequest.objects.prefetch_related('fulfillments').all()
+    batches = [batch.to_json(expand=['fulfillments_list']) for batch in qs]
+    batched_f = [[str(f['id']) for f in b['fulfillments_list']] for b in batches]
+    return list(itertools.chain(*batched_f))
 
 
 def unbatched_fulfillments(qstring):
-    fulfillments = [{'label': str(f), 'id': f.id, 'warehouse': str(f.warehouse)} for f in Fulfillment.objects.all()]
     batched_fulmts = batched_fulfillments(qstring)
-    unbatched = [f for f in fulfillments if f['label'] not in batched_fulmts]
+    unbatched = Fulfillment.objects.exclude(id__in=batched_fulmts)
+    fulfillments = [{'label': str(f), 'id': f.id, 'warehouse': str(f.warehouse)} for f in unbatched]
+    unbatched = [f for f in fulfillments if str(f['id']) not in batched_fulmts]
     return unbatched
 
 
@@ -94,7 +94,7 @@ def fulfillment2(qstring):
                                                     Prefetch('fulfillupdate_set')) \
                                   .select_related('warehouse', 'order', 'ship_type')
 
-    fulfill_data = [obj.to_json(expand=True) for obj in fulfill_objs]
+    fulfill_data = [obj.to_json(expand=['fulfilllines', 'latest_status']) for obj in fulfill_objs]
 
     if qstring.get('missing_shipping', '').lower() == 'true':
         fulfill_data = [x for x in fulfill_data if x.get('ship_info') == 'incomplete']
@@ -103,6 +103,7 @@ def fulfillment2(qstring):
         fulfill_data = [x for x in fulfill_data if qstring['status'] in [u['status'] for u in x['updates']]]
 
     return fulfill_data
+
 
 @dispatch(dict)
 def fulfillment(qstring):

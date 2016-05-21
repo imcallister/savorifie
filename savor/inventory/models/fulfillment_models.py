@@ -99,7 +99,7 @@ class Fulfillment(accountifie.common.models.McModel):
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
 
-    properties = ['updates', 'fulfilllines', 'ship_info']
+    properties = ['updates', 'fulfilllines', 'ship_info', 'latest_status']
 
     def __unicode__(self):
         return '%s:%s' % (str(self.order), self.order.shipping_name)
@@ -118,6 +118,7 @@ class Fulfillment(accountifie.common.models.McModel):
     @property
     def updates(self):
         return [u.to_json() for u in self.fulfillupdate_set.all()]
+
 
     @property
     def fulfilllines(self):
@@ -176,6 +177,7 @@ class BatchRequest(accountifie.common.models.McModel):
     fulfillments = models.ManyToManyField(Fulfillment, blank=True)
     comment = models.TextField(blank=True, null=True)
 
+    properties = ['fulfillment_count', 'fulfillments_list']
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_batchrequest'
@@ -183,6 +185,12 @@ class BatchRequest(accountifie.common.models.McModel):
     @property
     def fulfillment_count(self):
         return self.fulfillments.all().count()
+
+
+    @property
+    def fulfillments_list(self):
+        return [u.to_json() for u in self.fulfillments.all()]
+
 
 
 class TransferUpdate(accountifie.common.models.McModel):

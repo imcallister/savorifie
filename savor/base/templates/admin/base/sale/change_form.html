@@ -106,10 +106,13 @@
 
         <div class="row">
             <div class="col-md-6">
-                <ul class="nav nav-pills nav-stacked">
-                    <li><a class="btn btn-success" href="/inventory/request_fulfill/MICH/{{original.id}}">Queue {{original}} for  fulfillment from Michigan</a></li>
-                    <li><a class="btn btn-warning" href="/inventory/request_fulfill/152Frank/{{original.id}}">Queue {{original}} for fulfillment from NYC</a></li>
-                </ul>
+                <form action="/inventory/request_fulfill/152Frank/{{original.id}}" method="post">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a class="btn btn-success" href="/inventory/request_fulfill/MICH/{{original.id}}">Queue {{original}} for  fulfillment from Michigan</a></li>
+                        <li><a class="btn btn-warning" href="/inventory/request_fulfill/152Frank/{{original.id}}">Queue {{original}} for fulfillment from NYC</a></li>
+                        <li><input class="btn btn-warning" type="submit" value="Save" name="_save"></li>
+                    </ul>
+                </form>
             </div>
         </div>
         </br>

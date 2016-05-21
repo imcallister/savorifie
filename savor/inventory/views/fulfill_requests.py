@@ -31,51 +31,56 @@ def post_fulfill_update(data):
 
 @login_required
 def request_fulfill(request, warehouse, order_id):
-    # check that it has not been requested already
-    fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
-    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
-    order = api_func('base', 'sale', unicode(order_id))
-    order_label = order['label']
-
-    if order_label in fulfillment_labels:
-        messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
-        return redirect('/admin/base/sale/?requested=unrequested')
-    elif warehouse not in warehouse_labels:
-        messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
-        return redirect('/admin/base/sale/?requested=unrequested')
+    print request.method
+    if True:
+    #if request.method=='POST':
+        print 'HELLLO'
     else:
-        # now create a fulfillment request
-        today = get_today()
-        warehouse = Warehouse.objects.get(label=warehouse)
-        ship_type = ChannelShipmentType.objects.filter(label=order['ship_type']).first()
+        # check that it has not been requested already
+        fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
+        warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
+        order = api_func('base', 'sale', unicode(order_id))
+        order_label = order['label']
 
-        shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
+        if order_label in fulfillment_labels:
+            messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
+            return redirect('/admin/base/sale/?requested=unrequested')
+        elif warehouse not in warehouse_labels:
+            messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
+            return redirect('/admin/base/sale/?requested=unrequested')
+        else:
+            # now create a fulfillment request
+            today = get_today()
+            warehouse = Warehouse.objects.get(label=warehouse)
+            ship_type = ChannelShipmentType.objects.filter(label=order['ship_type']).first()
 
-        fulfill_info = {}
-        fulfill_info['request_date'] = today
-        fulfill_info['warehouse_id'] = warehouse.id
-        fulfill_info['order_id'] = str(order_id)
+            shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
 
-        if ship_type:
-            fulfill_info['bill_to'] = ship_type.bill_to
-            fulfill_info['ship_type_id'] = ship_type.id
+            fulfill_info = {}
+            fulfill_info['request_date'] = today
+            fulfill_info['warehouse_id'] = warehouse.id
+            fulfill_info['order_id'] = str(order_id)
 
-        fulfill_obj = Fulfillment(**fulfill_info)
-        fulfill_obj.save()
+            if ship_type:
+                fulfill_info['bill_to'] = ship_type.bill_to
+                fulfill_info['ship_type_id'] = ship_type.id
 
-        skus = api_func('base', 'sale_skus', str(order_id))
-        for sku in skus:
-            fline_info = {}
-            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=sku).id
-            fline_info['quantity'] = skus[sku]
-            fline_info['fulfillment_id'] = fulfill_obj.id
-            fline_obj = FulfillLine(**fline_info)
-            fline_obj.save()
+            fulfill_obj = Fulfillment(**fulfill_info)
+            fulfill_obj.save()
 
-        url = '/admin/inventory/fulfillment/%s/' % fulfill_obj.id
-        msg = 'A fulfillment has been created for order %s. View <a href=%s>here</a>' % (order_label, url)
-        messages.success(request, mark_safe(msg))
-        return redirect('/admin/base/sale/?requested=unrequested')
+            skus = api_func('base', 'sale_skus', str(order_id))
+            for sku in skus:
+                fline_info = {}
+                fline_info['inventory_item_id'] = InventoryItem.objects.get(label=sku).id
+                fline_info['quantity'] = skus[sku]
+                fline_info['fulfillment_id'] = fulfill_obj.id
+                fline_obj = FulfillLine(**fline_info)
+                fline_obj.save()
+
+            url = '/admin/inventory/fulfillment/%s/' % fulfill_obj.id
+            msg = 'A fulfillment has been created for order %s. View <a href=%s>here</a>' % (order_label, url)
+            messages.success(request, mark_safe(msg))
+            return redirect('/admin/base/sale/?requested=unrequested')
 
 
 

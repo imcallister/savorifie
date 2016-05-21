@@ -16,6 +16,10 @@ def thoroughbred_mismatch(qstring):
         whouse_recs = [r for r in warehouse_recds if r['savor_order_id']==order_id]
         if len(whouse_recs)>0:
             whouse_record = whouse_recs[0]
+            print '=' * 20
+            print whouse_record['skus']
+            print unfld
+            print '=' * 20
             if whouse_record['skus'] != unfld['skus'] or order_data['shipping_zip'] != whouse_record['shipping_zip']:
                 mismatched.append({'savor': order_data, 'thoroughbred': whouse_recs})
 
