@@ -178,6 +178,7 @@ class BatchRequest(accountifie.common.models.McModel):
     comment = models.TextField(blank=True, null=True)
 
     properties = ['fulfillment_count', 'fulfillments_list']
+
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_batchrequest'
@@ -186,11 +187,9 @@ class BatchRequest(accountifie.common.models.McModel):
     def fulfillment_count(self):
         return self.fulfillments.all().count()
 
-
     @property
     def fulfillments_list(self):
         return [u.to_json() for u in self.fulfillments.all()]
-
 
 
 class TransferUpdate(accountifie.common.models.McModel):

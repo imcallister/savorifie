@@ -6,6 +6,8 @@ from django.db.models import Prefetch
 
 from accountifie.common.api import api_func
 from inventory.models import *
+from base.models import *
+
 
 def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
@@ -18,9 +20,8 @@ def batchrequest(qstring):
 
 
 def batched_fulfillments(qstring):
-    qs = BatchRequest.objects.prefetch_related('fulfillments').all()
-    batches = [batch.to_json(expand=['fulfillments_list']) for batch in qs]
-    batched_f = [[str(f['id']) for f in b['fulfillments_list']] for b in batches]
+    qs = BatchRequest.objects.all().prefetch_related('fulfillments')
+    batched_f = [[str(x.id) for x in batch.fulfillments.all()] for batch in qs]
     return list(itertools.chain(*batched_f))
 
 
@@ -42,7 +43,11 @@ def warehousefulfill(qstring):
             'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type_id','tracking_number']
 
     data = []
-    wf_objs = WarehouseFulfill.objects.all()
+    wf_objs = WarehouseFulfill.objects.all() \
+                .prefetch_related(Prefetch('warehousefulfillline_set__inventory_item')) \
+                .select_related('warehouse', 'savor_order', 'shipping_type',
+                                'savor_transfer', 'savor_order__channel',
+                                'savor_order__channel__counterparty')
 
     for obj in wf_objs:
         obj_data = get_model_data(obj, flds)
@@ -111,9 +116,21 @@ def fulfillment(qstring):
              'bill_to', 'latest_status', 'ship_info']
 
     if qstring.get('warehouse'):
-        fulfill_objs = Fulfillment.objects.filter(warehouse__label=qstring.get('warehouse'))
-    else:    
-        fulfill_objs = Fulfillment.objects.all()
+        fulfill_objs = Fulfillment.objects \
+                        .filter(warehouse__label=qstring.get('warehouse')) \
+                        .prefetch_related(Prefetch('fulfillline_set__inventory_item'),
+                                          Prefetch('fulfillupdate_set')) \
+                        .select_related('warehouse', 'order', 'ship_type', 
+                                        'order__channel',
+                                        'order__channel__counterparty')
+    else:
+        fulfill_objs = Fulfillment.objects \
+                          .all() \
+                          .prefetch_related(Prefetch('fulfillline_set__inventory_item'),
+                                            Prefetch('fulfillupdate_set')) \
+                          .select_related('warehouse', 'order', 'ship_type', 
+                                        'order__channel',
+                                        'order__channel__counterparty')
 
     if qstring.get('missing_shipping', '').lower() == 'true':
         fulfill_objs = [x for x in fulfill_objs if x.ship_info == 'incomplete']
@@ -208,9 +225,8 @@ def unfulfilled(qstring):
     """
     find all sale objects for which there is no fulfillment record
     """
-    all_sales = api_func('base', 'sale')
-    all_fulfills = fulfillment({})
-    all_fulfill_ids = [str(x['order']) for x in all_fulfills]
+    sales_qs = Sale.objects.all().prefetch_related(Prefetch('fulfillment_set'))
+    unfulfilled_sales = [x for x in sales_qs if x.fulfillment_set.count()==0]
 
     flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
             'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
@@ -219,7 +235,7 @@ def unfulfilled(qstring):
     def get_info(d, flds):
         return dict((k, v) for k, v in d.iteritems() if k in flds)
 
-    return [get_info(x, flds) for x in all_sales if x['label'] not in all_fulfill_ids]
+    return [get_info(x, flds) for x in unfulfilled_sales]
 
 
 def fulfill_requested(qstring):
