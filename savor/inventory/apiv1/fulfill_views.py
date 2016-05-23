@@ -235,27 +235,25 @@ def unfulfilled(qstring):
     def get_info(d, flds):
         return dict((k, v) for k, v in d.iteritems() if k in flds)
 
-    return [get_info(x, flds) for x in unfulfilled_sales]
+    return [get_info(x.to_json(), flds) for x in unfulfilled_sales]
 
 
 def fulfill_requested(qstring):
     """
     find all sale objects for which there is a fulfillment record but no completion
     """
-    all_sales = api_func('base', 'sale')
-    all_sale_ids = [x['id'] for x in all_sales]
-
-    all_fulfills = fulfillment({})
-    all_fulfill_ids = [str(x['order_id']) for x in all_fulfills]
+    completed = [u.fulfillment.id for u in FulfillUpdate.objects.filter(status='completed')]
+    incomplete = Fulfillment.objects.exclude(id__in=completed)
+    incomplete_sales = [f.order for f in incomplete]
 
     flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
             'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
-            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
+            'gift_message', 'gift_wrapping', 'memo', 'external_channel_id', 'external_routing_id']
 
     def get_info(d, flds):
         return dict((k, v) for k, v in d.iteritems() if k in flds)
 
-    return [get_info(x, flds) for x in all_sales if str(x['id']) not in all_fulfill_ids]
+    return [get_info(x.to_json(), flds) for x in incomplete_sales]
 
 
 def shopify_no_wrap_request(qstring):

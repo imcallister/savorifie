@@ -112,6 +112,8 @@ class Fulfillment(accountifie.common.models.McModel):
     def ship_info(self):
         if self.ship_type and self.bill_to:
             return 'complete'
+        elif self.ship_type and self.ship_type.label=='BY_HAND':
+            return 'complete'
         else:
             return 'incomplete'
 
@@ -190,6 +192,7 @@ class BatchRequest(accountifie.common.models.McModel):
     @property
     def fulfillments_list(self):
         return [u.to_json() for u in self.fulfillments.all()]
+
 
 
 class TransferUpdate(accountifie.common.models.McModel):
