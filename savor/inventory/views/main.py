@@ -20,32 +20,11 @@ def main(request):
         context['%s_percent_sold' % sku] = int(100.0 * float(sales_counts[sku]) / float(inventory_count[sku]))
         context['%s_sold' % sku] = sales_counts[sku]
 
-    fulfillments = api_func('inventory', 'fulfillment')
-    statuses = [x['latest_status'] for x in fulfillments]
-    status_counter = dict(('%s_count' %k, v) for k,v in Counter(statuses).iteritems())
-    context.update(status_counter)
-
-    requested = [x for x in fulfillments if x['latest_status']=='requested']
-    requested_warehouses = [x['warehouse'] for x in requested]
-    requested_counter = dict(('%s_requested_count' %k, v) for k,v in Counter(requested_warehouses).iteritems())
-    context.update(requested_counter)
-
-    location_counts = api_func('inventory', 'locationinventory')
-    context['MICH'] = sum(location_counts.get('MICH', {}).values())
-    context['152Frank'] = sum(location_counts.get('152Frank', {}).values())
+    context['location_counts'] = api_func('inventory', 'locationinventory')
 
     channel_counts = api_func('base', 'channel_counts')
     context['shopify_total_orders'] = channel_counts.get('Shopify',0)
     context['grommet_total_orders'] = channel_counts.get('The Grommet',0)
     context['other_orders'] = sum(channel_counts.values()) - context['shopify_total_orders'] - context['grommet_total_orders']
-
-    context['ungiftwrapped'] = len(api_func('inventory', 'ungiftwrapped'))
-
-    context['unfulfilled_count'] = len(api_func('inventory', 'unfulfilled'))
-    context['unfulfilled'] = get_table('unfulfilled')
-
-    context['fulfill_requested_MICH'] = get_table('fulfill_requested')(warehouse='MICH')
-    context['fulfill_requested_152'] = get_table('fulfill_requested')(warehouse='152Frank')
-    context['fulfill_confirmed'] = get_table('fulfill_confirmed')
 
     return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))

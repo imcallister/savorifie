@@ -15,7 +15,8 @@ def get_model_data(instance, flds):
 
 
 def batchrequest(qstring):
-    batches = BatchRequest.objects.all()
+    batches = BatchRequest.objects.all() \
+                                  .select_related('location')
     return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
 
 
@@ -242,12 +243,22 @@ def fulfill_requested(qstring):
     """
     find all sale objects for which there is a fulfillment record but no completion
     """
-    completed = [u.fulfillment.id for u in FulfillUpdate.objects.filter(status='completed')]
-    incomplete = Fulfillment.objects.exclude(id__in=completed)
+    update_qs = FulfillUpdate.objects.filter(status='completed') \
+                                     .prefetch_related(Prefetch('fulfillment'))
+    completed = [u.fulfillment.id for u in update_qs]
+    incomplete = Fulfillment.objects.exclude(id__in=completed) \
+                                    .select_related('order',
+                                                    'warehouse', 
+                                                    'ship_type',
+                                                    'order__company',
+                                                    'order__channel__counterparty',
+                                                    'order__ship_type',
+                                                    'order__customer_code')
     incomplete_sales = [f.order for f in incomplete]
 
-    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
-            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
+    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 
+            'shipping_address1', 'shipping_address2', 'shipping_city', 'shipping_province',
+            'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
             'gift_message', 'gift_wrapping', 'memo', 'external_channel_id', 'external_routing_id']
 
     def get_info(d, flds):

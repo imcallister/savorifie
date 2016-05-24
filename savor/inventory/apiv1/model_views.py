@@ -96,7 +96,10 @@ def inventorycount(qstring):
 def locationinventory(qstring):
     all_shipments = {}
 
-    for shpmnt in Shipment.objects.all():
+    shipment_qs = Shipment.objects.all() \
+                                  .select_related('destination') \
+                                  .prefetch_related(Prefetch('shipmentline_set__inventory_item'))
+    for shpmnt in shipment_qs:
         location = shpmnt.destination.label
         if location not in all_shipments:
             all_shipments[location] = {}
@@ -109,7 +112,9 @@ def locationinventory(qstring):
                 all_shipments[location][item] += amounts[item]
 
     # now subtract out any outgoing transfers and add incoming transfers
-    for transfer in InventoryTransfer.objects.all():
+    transfer_qs = InventoryTransfer.objects.all() \
+                                           .prefetch_related(Prefetch('transferline_set__inventory_item'))
+    for transfer in transfer_qs:
         outgoing = transfer.location.label
         incoming = transfer.destination.label
 
@@ -132,7 +137,10 @@ def locationinventory(qstring):
                 all_shipments[outgoing][item] -= amounts[item]
 
     # now remove fulfilled
-    for fulfill in Fulfillment.objects.all():
+    fulfill_qs = Fulfillment.objects.all() \
+                                    .select_related('warehouse') \
+                                    .prefetch_related(Prefetch('fulfillline_set__inventory_item'))
+    for fulfill in fulfill_qs:
         location = fulfill.warehouse.label
         if location not in all_shipments:
             all_shipments[location] = {}
@@ -149,7 +157,7 @@ def locationinventory(qstring):
 
 @dispatch(dict)
 def inventoryitem(qstring):
-    items = InventoryItem.objects.all()
+    items = InventoryItem.objects.all().select_related('product_line')
     all_data = []
 
     for item in items:

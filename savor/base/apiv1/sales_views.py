@@ -3,6 +3,7 @@ from multipledispatch import dispatch
 
 from django.conf import settings
 from django.forms.models import model_to_dict
+from django.db.models import Prefetch
 
 from accountifie.common.api import api_func
 from savor.base.models import Sale, UnitSale, Channel
@@ -23,7 +24,10 @@ def sale(qstring):
     if type(end_date) != datetime.date:
         end_date = parse(end_date).date()
 
-    all_sales = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date)
+    all_sales = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date) \
+                            .select_related('company', 'channel__counterparty', 'customer_code', 'ship_type') \
+                            .prefetch_related(Prefetch('unitsale_set__sku__skuunit_set__inventory_item'))
+
     fields=[field.name for field in all_sales[0]._meta.fields]
     fields.append('items_string')
     fields.append('label')
@@ -70,7 +74,8 @@ def channel_counts(qstring):
 
 def sales_counts(qstring):
     all_skus = api_func('inventory', 'inventoryitem')
-    all_sales = UnitSale.objects.all()
+    all_sales = UnitSale.objects.all() \
+                                .prefetch_related(Prefetch('sku__skuunit_set__inventory_item'))
 
     sales_counts = dict((k['label'],0) for k in all_skus)
 
