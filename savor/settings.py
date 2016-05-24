@@ -217,6 +217,10 @@ INSTALLED_APPS = (
     
     'django_admin_bootstrapped',
     'django.contrib.admin',
+    'django_graphiql',
+    'graphene.contrib.django',
+
+    'debug_toolbar',
     
     
 )

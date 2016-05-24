@@ -1,7 +1,8 @@
 from django.db import models
 
+import accountifie.common.models
 
-class ProductLine(models.Model):
+class ProductLine(accountifie.common.models.McModel):
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
 
@@ -13,7 +14,7 @@ class ProductLine(models.Model):
         db_table = 'inventory_productline'
 
 
-class InventoryItem(models.Model):
+class InventoryItem(accountifie.common.models.McModel):
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
     master_sku = models.CharField(max_length=20, blank=True, null=True)
@@ -27,7 +28,7 @@ class InventoryItem(models.Model):
         db_table = 'inventory_inventoryitem'
 
 
-class Product(models.Model):
+class Product(accountifie.common.models.McModel):
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
 
@@ -39,7 +40,7 @@ class Product(models.Model):
         db_table = 'inventory_product'
 
 
-class SKUUnit(models.Model):
+class SKUUnit(accountifie.common.models.McModel):
     quantity = models.PositiveIntegerField(default=0)
     inventory_item = models.ForeignKey(InventoryItem, blank=True, null=True)
     sku = models.ForeignKey(Product, blank=True, null=True)

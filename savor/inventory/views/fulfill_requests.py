@@ -31,7 +31,7 @@ def post_fulfill_update(data):
 
 @login_required
 def request_fulfill(request, warehouse, order_id):
-    # check that it has not been requested already
+        # check that it has not been requested already
     fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
     warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
     order = api_func('base', 'sale', unicode(order_id))
@@ -47,18 +47,19 @@ def request_fulfill(request, warehouse, order_id):
         # now create a fulfillment request
         today = get_today()
         warehouse = Warehouse.objects.get(label=warehouse)
-        ship_type = ChannelShipmentType.objects.filter(label=order['ship_type']).first()
 
-        shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
+        ch_ship_type = ChannelShipmentType.objects \
+                                          .filter(label=order['ship_type']) \
+                                          .first() \
 
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
 
-        if ship_type:
-            fulfill_info['bill_to'] = ship_type.bill_to
-            fulfill_info['ship_type_id'] = ship_type.id
+        if ch_ship_type:
+            fulfill_info['bill_to'] = ch_ship_type.bill_to
+            fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
 
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()

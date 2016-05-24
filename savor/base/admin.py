@@ -236,6 +236,16 @@ class SaleAdmin(SimpleHistoryAdmin):
                               'classes': ('collapse',)})
     )
 
+    
+    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+
+        print '=' * 20
+        print "OVER-RIDING changeform_view"
+        print '=' * 20
+        return super(SaleAdmin, self).changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
+    
+
+
     def response_change(self, request, new_object):
         "They saved a change - send signal"
         sale_saved.send(new_object)
