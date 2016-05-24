@@ -7,11 +7,12 @@ from simple_history.models import HistoricalRecords
 import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
+import accountifie.common.models
 
 DZERO = Decimal('0')
 
 
-class TaxCollector(models.Model):
+class TaxCollector(accountifie.common.models.McModel):
     entity = models.CharField(max_length=100)
 
     def __unicode__(self):
@@ -33,7 +34,7 @@ CHANNELS = [
 ]
 
 
-class UnitSale(models.Model):
+class UnitSale(accountifie.common.models.McModel):
     sale = models.ForeignKey('base.Sale')
     sku = models.ForeignKey('inventory.Product', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
@@ -54,7 +55,7 @@ class UnitSale(models.Model):
         return ','.join(['%s %s' % (u.quantity * self.quantity, u.inventory_item.label) for u in self.sku.skuunit_set.all()])
 
 
-class SalesTax(models.Model):
+class SalesTax(accountifie.common.models.McModel):
     sale = models.ForeignKey('base.Sale')
     collector = models.ForeignKey('base.TaxCollector')
     tax = models.DecimalField(max_digits=11, decimal_places=2)
@@ -67,7 +68,7 @@ class SalesTax(models.Model):
         return '%s: %s' % (self.sale, self.collector)
 
 
-class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
+class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
 
     channel = models.ForeignKey(Channel, blank=True, null=True)

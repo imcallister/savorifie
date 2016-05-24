@@ -168,101 +168,181 @@ these divs are needed.
 </div>
 
 
+<h2>MICH inventory</h2>
 
 <div class="container-fluid" id="wrapper">
+
     <div class="row">
-        <div class="col-md-6">
-            <h2>Fulfillment</h2>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
-                        <h4>Unfulfilled</h4>
-                        <div class="easypiechart" id="easypiechart-SYE3" data-percent="{{SYE3_percent_sold}}" >
-                            <span class="percent">
-                                <a data-toggle="modal" href="#unfulfilled" type="submit" name="comment">
-                                {{unfulfilled_count}}</a>
-                            </span>
-                        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-plum panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.MICH.SYE1}}</div>
+                        <div class="text-muted">SYE1</div>
                     </div>
                 </div>
             </div>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
-                        <h4>Requested MICH</h4>
-                        <div class="easypiechart" id="easypiechart-SYE1" data-percent="{{SYE1_percent_sold}}" >
-                            <span class="percent">
-                                <a data-toggle="modal" href="#fulfill_requested_MICH" type="submit" name="comment">{{MICH_requested_count}}</a>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
-                        <h4>Requested 152</h4>
-                        <div class="easypiechart" id="easypiechart-SYE2" data-percent="{{SYE2_percent_sold}}" >
-                            <span class="percent">
-                                <a data-toggle="modal" href="#fulfill_requested_152" type="submit" name="comment">
-                                {{152Frank_requested_count}}</a>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
         </div>
-        <div class="col-md-6">
-            <h2>Inventory Locations</h2>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
-                        <h4>Michigan</h4>
-                        <div class="easypiechart"><span class="percent"><a href="/api/inventory/locationinventory/">{{MICH}}</a></span>
-                        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-ocean panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked male-user"><use xlink:href="#stroked-male-user"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.MICH.SYE2}}</div>
+                        <div class="text-muted">SYE2</div>
                     </div>
                 </div>
             </div>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
-                        <h4>152 Franklin</h4>
-                        <div class="easypiechart"><span class="percent"><a href="/api/inventory/locationinventory/">{{152Frank}}</a></span>
-                        </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-slate panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.MICH.SYE3}}</div>
+                        <div class="text-muted">SYE3</div>
                     </div>
                 </div>
             </div>
-            <div class="col-xs-4 col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-body easypiechart-panel">
-                        <h4>Other</h4>
-                        <div class="easypiechart"><span class="percent">0</span>
-                        </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-plum panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.MICH.BE1}}</div>
+                        <div class="text-muted">BE1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-ocean panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked male-user"><use xlink:href="#stroked-male-user"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.MICH.BE2}}</div>
+                        <div class="text-muted">BE2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-slate panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.MICH.BE3}}</div>
+                        <div class="text-muted">BE3</div>
                     </div>
                 </div>
             </div>
         </div>
     </div><!--/.row-->
+
 </div>
 
 
-<div class="modal fade" id="fulfill_requested_MICH" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="
-true">
-    {{fulfill_requested_MICH}}
+<h2>152 Franklin inventory</h2>
+
+<div class="container-fluid" id="wrapper">
+
+    <div class="row">
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-plum panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.152Frank.SYE1}}</div>
+                        <div class="text-muted">SYE1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-ocean panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked male-user"><use xlink:href="#stroked-male-user"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.152Frank.SYE2}}</div>
+                        <div class="text-muted">SYE2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-slate panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.152Frank.SYE3}}</div>
+                        <div class="text-muted">SYE3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-plum panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.152Frank.BE1}}</div>
+                        <div class="text-muted">BE1</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-ocean panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked male-user"><use xlink:href="#stroked-male-user"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.152Frank.BE2}}</div>
+                        <div class="text-muted">BE2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-md-6 col-lg-2">
+            <div class="panel panel-slate panel-widget">
+                <div class="row no-padding">
+                    <div class="col-sm-3 col-lg-5 widget-left">
+                        <svg class="glyph stroked app-window-with-content"><use xlink:href="#stroked-app-window-with-content"></use></svg>
+                    </div>
+                    <div class="col-sm-9 col-lg-7 widget-right">
+                        <div class="large">{{location_counts.152Frank.BE3}}</div>
+                        <div class="text-muted">BE3</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!--/.row-->
+
 </div>
 
-<div class="modal fade" id="fulfill_requested_152" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    {{fulfill_requested_152}}
-</div>
-
-<div class="modal fade" id="fulfill_confirmed" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    {{fulfill_confirmed}}
-</div>
-    
-<div class="modal fade" id="unfulfilled" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    {{unfulfilled}}
-</div>
 
 
 {% endblock %}
@@ -293,14 +373,7 @@ true">
         <td></td>
         <td></td>
     </tr>
-    <tr>
-        <td>Unfulfilled gift-wrapped</td>
-        <td>{{ungiftwrapped}}</td>
-    </tr>
-    <tr>
-        <td>Completed Orders</td>
-        <td>{{completed_count}}</td>
-    </tr>
+    
 </table>
 
 {% endblock %}

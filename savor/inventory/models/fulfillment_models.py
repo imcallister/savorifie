@@ -3,9 +3,10 @@ import operator
 from django.db import models
 
 import accountifie.gl.bmo
+import accountifie.common.models
 
 
-class Warehouse(models.Model):
+class Warehouse(accountifie.common.models.McModel):
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
 
@@ -17,13 +18,14 @@ class Warehouse(models.Model):
         db_table = 'inventory_warehouse'
 
 
-class Shipper(models.Model):
+class Shipper(accountifie.common.models.McModel):
     company = models.ForeignKey('gl.Counterparty')
 
     def __unicode__(self):
         return str(self.company)
 
-class ShippingType(models.Model):
+
+class ShippingType(accountifie.common.models.McModel):
     shipper = models.ForeignKey(Shipper)
     label = models.CharField(max_length=20)
     description = models.CharField(max_length=100)
@@ -36,7 +38,7 @@ class ShippingType(models.Model):
         db_table = 'inventory_shippingtype'
 
 
-class Shipment(models.Model, accountifie.gl.bmo.BusinessModelObject):
+class Shipment(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
     arrival_date = models.DateField()
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
@@ -50,7 +52,7 @@ class Shipment(models.Model, accountifie.gl.bmo.BusinessModelObject):
         db_table = 'inventory_shipment'
 
 
-class ShipmentLine(models.Model):
+class ShipmentLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
@@ -69,7 +71,7 @@ PACKING_TYPES = (
     ('pouch', 'pouch'),
 )
 
-class ChannelShipmentType(models.Model):
+class ChannelShipmentType(accountifie.common.models.McModel):
     label = models.CharField(max_length=30)
     channel = models.ForeignKey('base.Channel')
     ship_type = models.ForeignKey(ShippingType)
@@ -88,7 +90,7 @@ FULFILL_CHOICES = (
 )
 
 
-class Fulfillment(models.Model):
+class Fulfillment(accountifie.common.models.McModel):
     request_date = models.DateField()
     warehouse = models.ForeignKey('inventory.Warehouse')
     order = models.ForeignKey('base.Sale')
@@ -96,6 +98,8 @@ class Fulfillment(models.Model):
     bill_to = models.CharField(max_length=100, blank=True, null=True)
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
+
+    properties = ['updates', 'fulfilllines', 'ship_info', 'latest_status']
 
     def __unicode__(self):
         return '%s:%s' % (str(self.order), self.order.shipping_name)
@@ -108,19 +112,30 @@ class Fulfillment(models.Model):
     def ship_info(self):
         if self.ship_type and self.bill_to:
             return 'complete'
+        elif self.ship_type and self.ship_type.label=='BY_HAND':
+            return 'complete'
         else:
             return 'incomplete'
 
     @property
+    def updates(self):
+        return [u.to_json() for u in self.fulfillupdate_set.all()]
+
+
+    @property
+    def fulfilllines(self):
+        return [u.to_json() for u in self.fulfillline_set.all()]
+
+    @property
     def latest_status(self):
         updates = dict((u.update_date, u.status) for u in self.fulfillupdate_set.all())
-        if len(updates)==0:
+        if len(updates) == 0:
             return 'requested'
         else:
             return max(updates.iteritems(), key=operator.itemgetter(0))[1]
 
 
-class FulfillUpdate(models.Model):
+class FulfillUpdate(accountifie.common.models.McModel):
     update_date = models.DateField()
     comment = models.CharField(max_length=200, blank=True, null=True)
     status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
@@ -133,7 +148,7 @@ class FulfillUpdate(models.Model):
         db_table = 'inventory_fulfillupdate'
 
 
-class FulfillLine(models.Model):
+class FulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     fulfillment = models.ForeignKey(Fulfillment)
@@ -143,13 +158,13 @@ class FulfillLine(models.Model):
         db_table = 'inventory_fulfillline'
 
 
-class InventoryTransfer(models.Model):
+class InventoryTransfer(accountifie.common.models.McModel):
     transfer_date = models.DateField()
     location = models.ForeignKey('inventory.Warehouse', related_name='location')
     destination = models.ForeignKey('inventory.Warehouse', related_name='destination')
 
 
-class TransferLine(models.Model):
+class TransferLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     transfer = models.ForeignKey(InventoryTransfer)
@@ -158,11 +173,13 @@ class TransferLine(models.Model):
         return '%d %s' % (self.quantity, self.inventory_item.label)
 
 
-class BatchRequest(models.Model):
+class BatchRequest(accountifie.common.models.McModel):
     created_date = models.DateField()
     location = models.ForeignKey('inventory.Warehouse')
     fulfillments = models.ManyToManyField(Fulfillment, blank=True)
     comment = models.TextField(blank=True, null=True)
+
+    properties = ['fulfillment_count', 'fulfillments_list']
 
     class Meta:
         app_label = 'inventory'
@@ -172,8 +189,13 @@ class BatchRequest(models.Model):
     def fulfillment_count(self):
         return self.fulfillments.all().count()
 
+    @property
+    def fulfillments_list(self):
+        return [u.to_json() for u in self.fulfillments.all()]
 
-class TransferUpdate(models.Model):
+
+
+class TransferUpdate(accountifie.common.models.McModel):
     update_date = models.DateField()
     comment = models.CharField(max_length=200, blank=True, null=True)
     status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
@@ -186,7 +208,7 @@ class TransferUpdate(models.Model):
         db_table = 'inventory_transferupdate'
 
 
-class WarehouseFulfill(models.Model):
+class WarehouseFulfill(accountifie.common.models.McModel):
     savor_order = models.ForeignKey('base.sale', blank=True, null=True)
     savor_transfer = models.ForeignKey('inventory.InventoryTransfer', blank=True, null=True)
     warehouse = models.ForeignKey('inventory.warehouse')
@@ -213,7 +235,7 @@ class WarehouseFulfill(models.Model):
         return 'Fill %s' % self.warehouse_pack_id
 
 
-class WarehouseFulfillLine(models.Model):
+class WarehouseFulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     warehouse_fulfill = models.ForeignKey(WarehouseFulfill)
