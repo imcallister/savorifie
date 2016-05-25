@@ -119,6 +119,7 @@ def fulfill_requested(warehouse=None):
                 {'data_field': 'customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
                 {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+                {'data_field': 'warehouse', 'value': 'Warehouse', 'formatter': 'nameFormatter'},
                 {'data_field': 'external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'gift_wrapping', 'value': 'Gift Wrapping', 'formatter': 'nameFormatter'},
                 {'data_field': 'items_string', 'value': 'Items', 'formatter': 'nameFormatter'},
