@@ -36,7 +36,11 @@ def sale(qstring):
 
 @dispatch(str, dict)
 def sale(id, qstring):
-    sale_obj = Sale.objects.get(id=id)
+    sale_obj = Sale.objects.filter(id=id) \
+                           .select_related('company', 'channel__counterparty', 'customer_code', 'ship_type') \
+                           .prefetch_related(Prefetch('unitsale_set__sku__skuunit_set__inventory_item')) \
+                           .first()
+
     fields=[field.name for field in sale_obj._meta.fields]
     fields.append('items_string')
     fields.append('label')

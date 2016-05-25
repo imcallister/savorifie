@@ -29,20 +29,17 @@ def post_fulfill_update(data):
     FulfillUpdate(**data).save()
     return
 
-@login_required
-def request_fulfill(request, warehouse, order_id):
-        # check that it has not been requested already
+def create_fulfill_request(warehouse, order_id):
+    # check that it has not been requested already
     fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
     warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
     order = api_func('base', 'sale', unicode(order_id))
     order_label = order['label']
 
     if order_label in fulfillment_labels:
-        messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
-        return redirect('/admin/base/sale/?requested=unrequested')
+        return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
-        messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
-        return redirect('/admin/base/sale/?requested=unrequested')
+        return 'WAREHOUSE_NOT_RECOGNISED'
     else:
         # now create a fulfillment request
         today = get_today()
@@ -73,11 +70,23 @@ def request_fulfill(request, warehouse, order_id):
             fline_obj = FulfillLine(**fline_info)
             fline_obj.save()
 
-        url = '/admin/inventory/fulfillment/%s/' % fulfill_obj.id
-        msg = 'A fulfillment has been created for order %s. View <a href=%s>here</a>' % (order_label, url)
-        messages.success(request, mark_safe(msg))
-        return redirect('/admin/base/sale/?requested=unrequested')
+        return 'FULFILL_REQUESTED'
 
+
+@login_required
+def request_fulfill(request, warehouse, order_id):
+    res = create_fulfill_request(warehouse, order_id)
+    if res == 'FULFILL_ALREADY_REQUESTED':
+        messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
+        return redirect('/admin/base/sale/?requested=unrequested')
+    elif res == 'WAREHOUSE_NOT_RECOGNISED':
+        messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
+        return redirect('/admin/base/sale/?requested=unrequested')
+    elif res == 'FULFILL_REQUESTED':
+        messages.success(request, mark_safe('A fulfillment has been created for order %s.' % (order_label)))
+        return redirect('/admin/base/sale/?requested=unrequested')
+    else:
+        return None
 
 
 @login_required
