@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    <form action="" method="post">
+
+        {{form}}
+        {% csrf_token %}
+        <input type="hidden" name="action" value="queue_for_warehouse">
+
+        <div>
+            <input type="submit" class="default" style="float: none" name="apply" value="Submit">
+        </div>
+
+        
+    </form>
+{% endblock %}

@@ -1,14 +1,18 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 import django.dispatch
 from django import forms
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
+from django.template import RequestContext
+from django.shortcuts import render_to_response
 
 from simple_history.admin import SimpleHistoryAdmin
 
 from .models import *
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
+from inventory.models import Warehouse
+import inventory.views
 
 
 class UnmatchedCashflows(SimpleListFilter):
@@ -75,11 +79,11 @@ admin.site.register(AMEX, AMEXAdmin)
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)
     actions = ['delete_model']
-    list_display = ('id', 'account','expense_date','paid_from', 'comment', 'counterparty', 'employee','currency','amount',)
+    list_display = ('id', 'account', 'expense_date', 'paid_from', 'comment',
+                    'counterparty', 'employee', 'currency', 'amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
-    search_fields = ['id','counterparty__id', 'account__id']
+    search_fields = ['id', 'counterparty__id', 'account__id']
     list_editable = ('employee', 'account', 'paid_from', 'comment')
-
 
     def get_actions(self, request):
         actions = super(ExpenseAdmin, self).get_actions(request)
@@ -96,6 +100,7 @@ class ExpenseAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(Expense, ExpenseAdmin)
+
 
 class StockEntryAdmin(SimpleHistoryAdmin):
     list_display = ('date', 'quantity','share_class', 'gl_acct',)
@@ -196,8 +201,6 @@ class SalesTaxInline(admin.TabularInline):
     extra = 0
 
 
-
-
 class FulfillRequested(SimpleListFilter):
     title = 'requested'
     parameter_name = 'requested'
@@ -218,7 +221,7 @@ class SaleAdmin(SimpleHistoryAdmin):
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
-    actions = ['delete_model']
+    actions = ['delete_model', 'queue_for_warehouse']
     inlines = [
         UnitSaleInline,
         SalesTaxInline
@@ -237,13 +240,10 @@ class SaleAdmin(SimpleHistoryAdmin):
     )
 
     
+    """
     def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-
-        print '=' * 20
-        print "OVER-RIDING changeform_view"
-        print '=' * 20
         return super(SaleAdmin, self).changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
-    
+    """
 
 
     def response_change(self, request, new_object):
@@ -259,7 +259,6 @@ class SaleAdmin(SimpleHistoryAdmin):
         else:
             return res
 
-
     def get_actions(self, request):
         actions = super(SaleAdmin, self).get_actions(request)
         del actions['delete_selected']
@@ -271,7 +270,55 @@ class SaleAdmin(SimpleHistoryAdmin):
                 o.delete()
         except:
             obj.delete()
-    
+
+    class ChooseWarehouseForm(forms.Form):
+        _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
+        warehouse = forms.ModelChoiceField(Warehouse.objects.all())
+
+    def queue_for_warehouse(self, request, queryset):
+        form = None
+        if 'apply' in request.POST:
+            form = self.ChooseWarehouseForm(request.POST)
+            if form.is_valid():
+                warehouse = form.cleaned_data['warehouse']
+                
+                new_fulfills = 0
+                dupe_fulfills = 0
+                bad_warehouse = 0
+                unknown_errors = 0
+
+                for order in queryset:
+                    res = inventory.views.create_fulfill_request(warehouse.label, order.id)
+                    if res == 'FULFILL_REQUESTED':
+                        new_fulfills += 1
+                    elif res == 'FULFILL_ALREADY_REQUESTED':
+                        dupe_fulfills += 1
+                    elif res == 'WAREHOUSE_NOT_RECOGNISED':
+                        bad_warehouse += 1
+                    else:
+                        unknown_errors += 1
+
+                messages.success(request, "Successfully created %d fulfill requests for warehouse %s." % (new_fulfills, warehouse))
+                messages.info(request, "%d dupes were skipped." % dupe_fulfills)
+                messages.warning(request, "%d had unrecognised warehouse." % bad_warehouse)
+                messages.error(request, "%d unknown errors." % unknown_errors)
+
+                return HttpResponseRedirect(request.get_full_path())
+
+        if not form:
+            form = self.ChooseWarehouseForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
+
+        return render_to_response('admin/inventory/choose_warehouse.html',
+                                    {'title': u'Choose warehouse',
+                                     'objects': queryset,
+                                     'form': form,
+                                     'path': request.get_full_path()
+                                     },
+                                    context_instance=RequestContext(request))
+
+
+        
+    queue_for_warehouse.short_description = 'Queue for fulfillment'
     delete_model.short_description = 'Delete sales and related GL entries'
 
 admin.site.register(Sale, SaleAdmin)
