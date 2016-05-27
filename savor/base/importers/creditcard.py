@@ -1,7 +1,23 @@
+import os
+import logging
+
 from ofxparse import OfxParser
 
+from django.conf import settings
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
+
 from accountifie.toolkit.forms import FileForm
+import accountifie.toolkit
 from base.models import CreditCardTrans
+
+
+DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'data'))
+INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
+PROCESSED_ROOT = os.path.join(DATA_ROOT, 'processed')
+
+logger = logging.getLogger('default')
 
 def ccard_upload(request):
     form = FileForm(request.POST, request.FILES)
@@ -22,7 +38,8 @@ def ccard_upload(request):
 
 
 def process_mastercard(file_name):
-    statement = OfxParser.parse(file(file_name)).account
+    incoming_name = os.path.join(INCOMING_ROOT, file_name)
+    statement = OfxParser.parse(file(incoming_name)).account
     card_number = statement.account_id
 
     transactions = statement.statement.transactions
@@ -39,11 +56,9 @@ def process_mastercard(file_name):
         try:
             trans_info = {}
             trans_info['card_company_id'] = 'MCARD'
-            trans_info['counterparty_id'] = 'unknown'
-
             trans_info['trans_date'] = t.date
             trans_info['post_date'] = t.date
-            trans_info['type'] = t.type
+            trans_info['trans_type'] = t.type
             trans_info['trans_id'] = t.id
 
             trans_info['payee'] = t.payee
@@ -57,7 +72,8 @@ def process_mastercard(file_name):
             trans_obj = CreditCardTrans(**trans_info)
             trans_obj.save()
             new_trans_ctr += 1
-        except:
+        except Exception, e:
+            logger.info(str(e))
             error_ctr += 1
 
     return dupes_ctr, new_trans_ctr, error_ctr

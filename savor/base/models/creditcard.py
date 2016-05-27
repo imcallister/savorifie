@@ -12,12 +12,15 @@ from accountifie.common.api import api_func
 class CreditCardTrans(models.Model, BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
     card_company = models.ForeignKey('gl.Counterparty', related_name='card_company')
-    counterparty = models.ForeignKey('gl.Counterparty', related_name='counterparty')
+    counterparty = models.ForeignKey('gl.Counterparty', 
+                                     null=True, 
+                                     blank=True,
+                                     related_name='counterparty')
 
     trans_date = models.DateField()
     post_date = models.DateField()
     trans_type = models.CharField(max_length=20, null=True)
-    trans_id = models.CharField(max_length=50, null=True)
+    trans_id = models.CharField(max_length=50, null=True, unique=True)
 
     amount = models.FloatField(null=True)
     description = models.TextField(max_length=200, null=True, blank=True)

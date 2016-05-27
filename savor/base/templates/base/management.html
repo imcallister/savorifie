@@ -1,0 +1,208 @@
+{% extends base_template %}
+{% load staticfiles %}
+
+
+{% block breadcrumb %}
+<li class="active">Home</li>
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid" id="wrapper">
+    <div row>
+        <div class="col-md-12">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Expenses</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="col-md-4">
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadFirstRepublic">Load First Republic</a></li>
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadMasterCard">Load Mastercard</a></li>
+                        </ul>
+                    </div>
+                
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="panel panel-danger">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">INCOMPLETE</br>EXPENSES</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20"><a href='/admin/base/expense/?unmatched=UNMATCHED'>{{incomplete_expenses}}</a></font>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="panel panel-warning">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">INCOMPLETE</br>BANKING ENTRIES</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20"><a href='/admin/base/cashflow/?unmatched=UNMATCHED'>{{incomplete_banking}}</a></font>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-warning">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">INCOMPLETE</br>CREDIT CARD ENTRIES</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20"><a href='/admin/base/creditcardtrans/?unmatched=UNMATCHED'>{{incomplete_mcard}}</a></font>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal -->
+
+<div class="modal fade" id="createTransfer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload Shopify order file</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+
+        <form role='form' enctype="multipart/form-data" method="post" action="/base/shopify_upload/">{% csrf_token %}
+            <div class="form-group">    
+                {{shopify_upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="showBatches" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title">Recent Batches</h4>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid" id="wrapper">
+          {% include "splashdict.html" with columns=batch_columns rows=batch_rows %}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="loadFirstRepublic" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload First Republic activity</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+
+        <form role='form' enctype="multipart/form-data" method="post" action="/base/upload/frbchecking/">{% csrf_token %}
+            <div class="form-group">    
+                {{upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="loadMasterCard" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload Mastercard activity</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .ofx file</p>
+
+        <form role='form' enctype="multipart/form-data" method="post" action="/base/upload/mastercard/">{% csrf_token %}
+            <div class="form-group">    
+                {{upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="help" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Help</h3>
+      </div>
+      <div class="modal-body">
+        Bunch of help right here
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="unreconciled" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-content">
+        {{unreconciled}}
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block sidebar %}
+  <a class="btn btn-success btn-lg" data-toggle="modal" data-target="#help">
+    <span style="font-size:2em;" class="glyphicon  glyphicon-question-sign" aria-hidden="true"></span>
+  </a>
+{% endblock %}
+
+{% block extrajs %}
+    <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
+    <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
+    <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
+    <script src="{{ STATIC_URL }}base/js/easypiechart.js"></script>
+    
+    <script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
+
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-editable.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
+    <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
+{% endblock %}
