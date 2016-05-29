@@ -65,6 +65,14 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
                     'trans_type', 'amount', 'payee', 'counterparty', 'card_number',)
     list_filter = ('card_number', 'trans_type', 'card_company', 'counterparty', )
     search_fields = ['trans_id', 'counterparty__id',]
+    actions = ['expense_stubs_from_ccard']
+
+    def expense_stubs_from_ccard(self, request, queryset):
+        rslts = make_stubs_from_ccard(queryset.values())
+        self.message_user(request, "%d new stub expenses created. %d duplicates \
+                                   found and not created" % (rslts['new'], rslts['duplicates']))
+        return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
+
 
 admin.site.register(CreditCardTrans, CreditCardTransAdmin)
 

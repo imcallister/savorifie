@@ -12,12 +12,12 @@ from accountifie.toolkit.forms import FileForm
 import accountifie.toolkit
 from base.models import CreditCardTrans
 
-
 DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'data'))
 INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
 PROCESSED_ROOT = os.path.join(DATA_ROOT, 'processed')
 
 logger = logging.getLogger('default')
+
 
 def ccard_upload(request):
     form = FileForm(request.POST, request.FILES)
@@ -41,9 +41,9 @@ def process_mastercard(file_name):
     incoming_name = os.path.join(INCOMING_ROOT, file_name)
     statement = OfxParser.parse(file(incoming_name)).account
     card_number = statement.account_id
+    unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
 
     transactions = statement.statement.transactions
-
 
     trans_ids = [tr.id for tr in transactions]
     dupes = [tr.trans_id for tr in CreditCardTrans.objects.filter(trans_id__in=trans_ids)]
@@ -52,10 +52,16 @@ def process_mastercard(file_name):
     new_trans_ctr = 0
     error_ctr = 0
     for t in [t for t in transactions if tr.id not in dupes]:
+        if 'AUTOPAY' in t.payee:
+            # these will show up in bank cashflow
+            # don't want them double-entered
+            continue
+
         # these should all be new
         try:
             trans_info = {}
             trans_info['card_company_id'] = 'MCARD'
+            trans_info['expense_account_id'] = unalloc_account
             trans_info['trans_date'] = t.date
             trans_info['post_date'] = t.date
             trans_info['trans_type'] = t.type
