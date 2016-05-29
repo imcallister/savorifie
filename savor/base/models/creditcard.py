@@ -15,7 +15,7 @@ class CreditCardTrans(models.Model, BusinessModelObject):
                                      null=True,
                                      blank=True,
                                      related_name='counterparty')
-    expense_account = models.ForeignKey('gl.Account', null=True, blank=True)
+
     trans_date = models.DateField()
     post_date = models.DateField()
     trans_type = models.CharField(max_length=20, null=True)
@@ -41,24 +41,18 @@ class CreditCardTrans(models.Model, BusinessModelObject):
 
     def save(self):
         models.Model.save(self)
-        if self.type in ['Sale', 'Adjustment', 'Fee', 'Return']:
-            self.update_gl()
-        
+        self.update_gl()
+
     def delete(self):
         self.delete_from_gl()
         models.Model.delete(self)
 
     def get_gl_transactions(self):
-        mcard = accountifie.gl.models.Counterparty.objects.get(id='mastercard')
+        mcard = accountifie.gl.models.Counterparty.objects.get(id='MCARD')
         debit = accountifie.gl.models.Account.objects.get(display_name='Mastercard')
-        if self.type == 'Fee':
-            credit = accountifie.gl.models.Account.objects.get(display_name='Banks Fees')
-            cp = mcard
-            comment = 'Mastercard Fees'
-        else:
-            credit = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE'))
-            cp = self.counterparty
-            comment= "MasterCard ending #%s trans #%s: %s" % (self.card_number, self.id, cp)
+        credit = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE'))
+        cp = self.counterparty
+        comment= "MasterCard ending #%s trans #%s: %s" % (self.card_number, self.id, cp)
 
         trans = []
         trans.append(dict(

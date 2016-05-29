@@ -41,8 +41,6 @@ def process_mastercard(file_name):
     incoming_name = os.path.join(INCOMING_ROOT, file_name)
     statement = OfxParser.parse(file(incoming_name)).account
     card_number = statement.account_id
-    unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
-
     transactions = statement.statement.transactions
 
     trans_ids = [tr.id for tr in transactions]
@@ -58,28 +56,27 @@ def process_mastercard(file_name):
             continue
 
         # these should all be new
-        try:
-            trans_info = {}
-            trans_info['card_company_id'] = 'MCARD'
-            trans_info['expense_account_id'] = unalloc_account
-            trans_info['trans_date'] = t.date
-            trans_info['post_date'] = t.date
-            trans_info['trans_type'] = t.type
-            trans_info['trans_id'] = t.id
+        #try:
+        trans_info = {}
+        trans_info['card_company_id'] = 'MCARD'
+        trans_info['trans_date'] = t.date
+        trans_info['post_date'] = t.date
+        trans_info['trans_type'] = t.type
+        trans_info['trans_id'] = t.id
 
-            trans_info['payee'] = t.payee
-            trans_info['amount'] = t.amount
-            trans_info['description'] = t.mcc
-            if t.memo != '':
-                trans_info['description'] += ': %s' % t.memo
+        trans_info['payee'] = t.payee
+        trans_info['amount'] = t.amount
+        trans_info['description'] = t.mcc
+        if t.memo != '':
+            trans_info['description'] += ': %s' % t.memo
 
-            trans_info['card_number'] = card_number
+        trans_info['card_number'] = card_number
 
-            trans_obj = CreditCardTrans(**trans_info)
-            trans_obj.save()
-            new_trans_ctr += 1
-        except Exception, e:
-            logger.info(str(e))
-            error_ctr += 1
+        trans_obj = CreditCardTrans(**trans_info)
+        trans_obj.save()
+        new_trans_ctr += 1
+        #except Exception, e:
+        #    logger.info(str(e))
+        #    error_ctr += 1
 
     return dupes_ctr, new_trans_ctr, error_ctr

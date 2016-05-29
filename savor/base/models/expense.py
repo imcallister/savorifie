@@ -56,16 +56,17 @@ def make_stubs_from_ccard(cc_data):
     today = datetime.datetime.now().date()
     stub_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
     unallocated_employee = api_func('environment', 'variable', 'UNALLOCATED_EMPLOYEE_ID')
-    # TO-DO -- FIX THIS. what if more than one credit card
-    ap_account = accountifie.gl.models.Account.objects.get(display_name='Mastercard')
+    ap_account = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
 
     new_stubs = 0
     for cc in cc_data:
-        if Expense.objects.filter(from_ccard_id=cc_data['id']).count()==0:
+        if Expense.objects.filter(from_ccard_id=cc['id']).count()==0:
             new_stubs += 1
-            Expense(comment=cf['description'], counterparty_id=cf['counterparty_id'], account_id=stub_account, from_cf_id=cf['id'],
-                    expense_date=cf['trans_date'], start_date=cf['post_date'], amount=-cf['amount'], stub=False,
-                    paid_from_id=ap_account.id, process_date=today, employee_id=unallocated_employee).save()
+            Expense(comment=cc['description'], counterparty_id=cc['counterparty_id'],
+                    account_id=stub_account, from_ccard_id=cc['id'],
+                    expense_date=cc['trans_date'], start_date=cc['post_date'],
+                    amount=-cc['amount'], stub=False, paid_from_id=ap_account,
+                    process_date=today, employee_id=unallocated_employee).save()
 
     return {'new': new_stubs, 'duplicates': len(cc_data) - new_stubs}
 
