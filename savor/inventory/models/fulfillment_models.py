@@ -24,6 +24,10 @@ class Shipper(accountifie.common.models.McModel):
     def __unicode__(self):
         return str(self.company)
 
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_shipper'
+
 
 class ShippingType(accountifie.common.models.McModel):
     shipper = models.ForeignKey(Shipper)
@@ -81,6 +85,10 @@ class ChannelShipmentType(accountifie.common.models.McModel):
 
     def __unicode__(self):
         return self.label
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_channelshipmenttype'
 
 
 FULFILL_CHOICES = (
@@ -163,6 +171,10 @@ class InventoryTransfer(accountifie.common.models.McModel):
     location = models.ForeignKey('inventory.Warehouse', related_name='location')
     destination = models.ForeignKey('inventory.Warehouse', related_name='destination')
 
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_inventorytransfer'
+
 
 class TransferLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
@@ -171,6 +183,10 @@ class TransferLine(accountifie.common.models.McModel):
 
     def __unicode__(self):
         return '%d %s' % (self.quantity, self.inventory_item.label)
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_transferline'
 
 
 class BatchRequest(accountifie.common.models.McModel):
@@ -234,6 +250,10 @@ class WarehouseFulfill(accountifie.common.models.McModel):
     def __unicode__(self):
         return 'Fill %s' % self.warehouse_pack_id
 
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_warehousefulfill'
+
 
 class WarehouseFulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
@@ -242,4 +262,8 @@ class WarehouseFulfillLine(accountifie.common.models.McModel):
 
     def __unicode__(self):
         return '%s: %d %s' % (str(self.warehouse_fulfill), self.quantity, str(self.inventory_item))
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_warehousefulfillline'
 

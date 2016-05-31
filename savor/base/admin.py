@@ -59,21 +59,22 @@ class CashflowAdmin(SimpleHistoryAdmin):
 admin.site.register(Cashflow, CashflowAdmin)
 
 
-class McardExpenseInline(admin.TabularInline):
-    model = Expense
-    extra = 1
+class CreditCardTransAdmin(SimpleHistoryAdmin):
+    ordering = ('-trans_date',)
+    list_display = ('trans_id', 'card_company', 'trans_date', 'post_date',
+                    'trans_type', 'amount', 'payee', 'counterparty', 'card_number',)
+    list_filter = ('card_number', 'trans_type', 'card_company', 'counterparty', )
+    search_fields = ['trans_id', 'counterparty__id',]
+    actions = ['expense_stubs_from_ccard']
+
+    def expense_stubs_from_ccard(self, request, queryset):
+        rslts = make_stubs_from_ccard(queryset.values())
+        self.message_user(request, "%d new stub expenses created. %d duplicates \
+                                   found and not created" % (rslts['new'], rslts['duplicates']))
+        return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
 
 
-class McardAdmin(SimpleHistoryAdmin):
-    list_display = ('company', 'id','counterparty', 'card_number', 'type', 'description', 'amount', 'post_date', 'trans_date')
-    list_filter = ('type',)
-
-admin.site.register(Mcard, McardAdmin)
-
-
-class AMEXAdmin(SimpleHistoryAdmin):
-    list_display = ('company', 'id','counterparty', 'description', 'amount', 'date',)
-admin.site.register(AMEX, AMEXAdmin)
+admin.site.register(CreditCardTrans, CreditCardTransAdmin)
 
 
 class ExpenseAdmin(SimpleHistoryAdmin):

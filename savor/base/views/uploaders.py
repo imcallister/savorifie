@@ -40,6 +40,8 @@ def upload_file(request, file_type, check=False):
             return base.importers.frbchecking.order_upload(request)
         elif file_type == 'shopify':
             return base.importers.shopify.order_upload(request)
+        elif file_type == 'mastercard':
+            return base.importers.creditcard.ccard_upload(request)
         else:
             raise ValueError("Unexpected file type; know about expense, checking, saving, mcard")
 
