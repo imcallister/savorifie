@@ -120,7 +120,7 @@ class Expense(models.Model, BusinessModelObject):
     stub = models.BooleanField(default=False, help_text='incomplete, created from cashflow or credit card')
     from_cf = models.ForeignKey('base.Cashflow', null=True, blank=True, 
                                 help_text='created from cashflow')
-    from_ccard = models.ForeignKey('base.CreditCardTrans', null=True, blank=True, 
+    from_ccard = models.ForeignKey('base.CreditCardTrans', null=True, blank=True,
                                    help_text='created from credit card trans')
 
     paid_from = models.ForeignKey('gl.Account', null=True, blank=True,
@@ -163,7 +163,6 @@ class Expense(models.Model, BusinessModelObject):
     @property
     def admin_link(self):
         return mark_safe('<a href="/admin/base/expense/%s">admin %s' %( self.id, self.id))
-
 
     def _capitalize(self, debit):
         # capitalising or not
