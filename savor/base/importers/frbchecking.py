@@ -77,7 +77,7 @@ def order_upload(request):
 def process_frb(file_name):
     incoming_name = os.path.join(INCOMING_ROOT, file_name)
     with open(incoming_name, 'U') as f:
-        entries = pd.read_csv(incoming_name, skiprows=3).fillna(0)
+        entries = pd.read_csv(f, skiprows=3).fillna(0)
 
     entries.rename(columns={'Transaction Number': 'external_id', 'Date': 'post_date', 'Description': 'description'}, inplace=True)
     entries['amount'] = entries['Amount Debit'] + entries['Amount Credit']
