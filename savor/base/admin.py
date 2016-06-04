@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 
+from ajax_select import make_ajax_form
 from simple_history.admin import SimpleHistoryAdmin
 
 from .models import *
@@ -43,6 +44,50 @@ class UnmatchedExpense(SimpleListFilter):
         if self.value()=='MATCHED':
             return qs.exclude(account_id=unalloc_account)
 
+#  TODO    MOVE SOMEWHERE ELSE IF IT WORKS   ####
+
+from dal import autocomplete
+
+import accountifie.gl.models
+from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
+from django.db.models.fields.related import ManyToOneRel
+
+
+class CounterpartyAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated():
+            return accountifie.gl.models.Counterparty.objects.none()
+
+        qs = accountifie.gl.models.Counterparty.objects.all()
+
+        if self.q:
+            qs = qs.filter(name__istartswith=self.q)
+
+        return qs
+
+
+class CashflowDALForm(forms.ModelForm):
+    counterparty = forms.ModelChoiceField(
+        queryset=accountifie.gl.models.Counterparty.objects.all(),
+        widget=autocomplete.ModelSelect2(url='counterparty-autocomplete')
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(CashflowDALForm, self).__init__(*args, **kwargs)
+        #rel = ManyToOneRel(accountifie.gl.models.Counterparty, 'id') 
+        rel = Cashflow._meta.get_field('counterparty').rel
+        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+    
+    class Meta:
+        model = Cashflow
+        fields = ('__all__')
+
+
+
+#  TODO    ############################
 
 class CashflowAdmin(SimpleHistoryAdmin):
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty', 'trans_type', )
@@ -50,6 +95,17 @@ class CashflowAdmin(SimpleHistoryAdmin):
     list_editable = ('counterparty', 'trans_type',)
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
+
+    """
+    form = make_ajax_form(Cashflow, {
+        # fieldname: channel_name
+        'counterparty': 'counterparty'
+    })
+    """
+    form = CashflowDALForm
+
+    def get_changelist_form(self, request, **kwargs):
+        return self.form
 
     def expense_stubs_from_cashflows(self, request, queryset):
         rslts = make_expense_stubs(queryset.values())
@@ -218,7 +274,7 @@ class FulfillRequested(SimpleListFilter):
 
 
 class SaleAdmin(SimpleHistoryAdmin):
-    list_display=('external_channel_id', 'sale_date', 'channel', 'customer_code', 'shipping_name', 'ship_type',)
+    list_display=('external_channel_id', 'external_ref','sale_date', 'channel', 'customer_code', 'shipping_name', 'ship_type',)
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True

@@ -198,6 +198,7 @@ INSTALLED_APPS = (
     'simple_history',
 
     'betterforms',
+    'ajax_select',
     #'json_field',
     
     'base',
@@ -214,7 +215,9 @@ INSTALLED_APPS = (
     'accountifie.tasks',
     'accountifie.cal',
 
-    
+    'dal',
+    'dal_select2',
+
     'django_admin_bootstrapped',
     'django.contrib.admin',
     'django_graphiql',

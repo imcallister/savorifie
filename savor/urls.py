@@ -4,6 +4,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView, TemplateView
 from django.core.urlresolvers import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
+from ajax_select import urls as ajax_select_urls
 #from graphene.contrib.django.views import GraphQLView
 
 from savor.schema import schema
@@ -18,6 +19,8 @@ urlpatterns = patterns('',
     #url(r'^graphql', csrf_exempt(GraphQLView.as_view(schema=schema))),
     #url(r'^graphiql', include('django_graphiql.urls')),
     # main front pages
+    url(r'^ajax_select/', include(ajax_select_urls)),
+
     url(r'^$', main_views.home, name='home'),
     url(r'^maintenance/', main_views.maintenance, name='maintenance'),
     url(r'^daily/', main_views.daily, name='daily'),
