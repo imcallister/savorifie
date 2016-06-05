@@ -1,15 +1,8 @@
 from django.conf.urls import patterns, url
 
 from . import views
-from admin import CounterpartyAutocomplete
 
 urlpatterns = patterns('',
-
-    url(
-        r'^counterparty-autocomplete/$',
-        CounterpartyAutocomplete.as_view(),
-        name='counterparty-autocomplete',
-    ),
 
     url(r'^download_expenses/$', views.output_expenses),
     url(r'^base/shopify_upload/$', views.shopify_upload),
