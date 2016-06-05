@@ -282,7 +282,8 @@ class FulfillRequested(SimpleListFilter):
 
 
 class SaleAdmin(SimpleHistoryAdmin):
-    list_display=('external_channel_id', 'external_ref','sale_date', 'channel', 'customer_code', 'shipping_name', 'ship_type',)
+    list_display=('external_channel_id', 'external_ref', 'sale_date', 'channel',
+                  'customer_code', 'shipping_name', 'ship_type',)
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
@@ -293,8 +294,12 @@ class SaleAdmin(SimpleHistoryAdmin):
     ]
 
     fieldsets = (
-        ('Details', {'fields': (('channel', 'sale_date',), ('customer_code',), ('memo',),)}),
-        ('External IDs', {'fields': (('external_channel_id', 'external_ref',),), 'classes': ('collapse',)}),
+        ('Details', {'fields': (('channel', 'sale_date',),
+                                ('external_channel_id', 'external_ref',),
+                                ('customer_code',),
+                                ('memo',),
+                                )
+        }),
         ('Discount', {'fields': ('discount', 'discount_code',), 'classes': ('collapse',)}),
         ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee',), 'gift_message',), 'classes': ('collapse',)}),
         ('Shipping Details', {'fields': (('shipping_charge',), ('shipping_name',), 

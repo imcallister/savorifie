@@ -110,7 +110,7 @@ class Fulfillment(accountifie.common.models.McModel):
     properties = ['updates', 'fulfilllines', 'ship_info', 'latest_status']
 
     def __unicode__(self):
-        return '%s:%s' % (str(self.order), self.order.shipping_name)
+        return '%s:%s %s' % (self.id, str(self.order), self.order.shipping_name)
 
     class Meta:
         app_label = 'inventory'
