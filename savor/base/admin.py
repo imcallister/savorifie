@@ -81,14 +81,33 @@ class CashflowAdmin(SimpleHistoryAdmin):
 admin.site.register(Cashflow, CashflowAdmin)
 
 
+class CreditCardTransDALForm(forms.ModelForm):
+    counterparty = accountifie.gl.widgets.counterparty_widget()
+
+    def __init__(self, *args, **kwargs):
+        super(CreditCardTransDALForm, self).__init__(*args, **kwargs)
+        rel = CreditCardTrans._meta.get_field('counterparty').rel
+        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+    class Meta:
+        model = CreditCardTrans
+        fields = ('__all__')
+
 
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
+    list_editable = ('counterparty',)
     list_display = ('trans_id', 'card_company', 'trans_date', 'post_date',
                     'trans_type', 'amount', 'payee', 'counterparty', 'card_number',)
     list_filter = ('card_number', 'trans_type', 'card_company', 'counterparty', )
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
+
+    form = CreditCardTransDALForm
+
+    def get_changelist_form(self, request, **kwargs):
+        return self.form
 
     def expense_stubs_from_ccard(self, request, queryset):
         rslts = make_stubs_from_ccard(queryset.values())
