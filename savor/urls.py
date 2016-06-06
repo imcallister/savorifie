@@ -4,7 +4,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView, TemplateView
 from django.core.urlresolvers import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
-from ajax_select import urls as ajax_select_urls
+
 #from graphene.contrib.django.views import GraphQLView
 
 from savor.schema import schema
