@@ -45,7 +45,7 @@ class UnmatchedExpense(SimpleListFilter):
         if self.value()=='MATCHED':
             return qs.exclude(account_id=unalloc_account)
 
-
+"""
 class CashflowDALForm(forms.ModelForm):
     counterparty = accountifie.gl.widgets.counterparty_widget()
 
@@ -59,7 +59,7 @@ class CashflowDALForm(forms.ModelForm):
     class Meta:
         model = Cashflow
         fields = ('__all__')
-
+"""
 
 class CashflowAdmin(SimpleHistoryAdmin):
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty', 'trans_type', )
@@ -68,8 +68,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
 
-    form = CashflowDALForm
-
+    
     def get_changelist_form(self, request, **kwargs):
         return self.form
 
@@ -80,7 +79,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
 
 admin.site.register(Cashflow, CashflowAdmin)
 
-
+"""
 class CreditCardTransDALForm(forms.ModelForm):
     counterparty = accountifie.gl.widgets.counterparty_widget()
 
@@ -94,7 +93,7 @@ class CreditCardTransDALForm(forms.ModelForm):
         model = CreditCardTrans
         fields = ('__all__')
 
-
+"""
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
     list_editable = ('counterparty',)
@@ -104,8 +103,7 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
 
-    form = CreditCardTransDALForm
-
+    
     def get_changelist_form(self, request, **kwargs):
         return self.form
 
@@ -118,7 +116,7 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
 
 admin.site.register(CreditCardTrans, CreditCardTransAdmin)
 
-
+"""
 class ExpenseDALForm(forms.ModelForm):
     account = accountifie.gl.widgets.account_widget()
 
@@ -133,7 +131,7 @@ class ExpenseDALForm(forms.ModelForm):
         model = Expense
         fields = ('__all__')
 
-
+"""
 
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)
@@ -144,8 +142,7 @@ class ExpenseAdmin(SimpleHistoryAdmin):
     search_fields = ['id', 'counterparty__id', 'account__id']
     list_editable = ('employee', 'account', 'paid_from', 'comment')
 
-    form = ExpenseDALForm
-
+    
     def get_changelist_form(self, request, **kwargs):
         return self.form
 
