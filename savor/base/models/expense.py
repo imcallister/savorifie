@@ -43,9 +43,32 @@ def make_expense_stubs(cf_data):
             Expense(comment=cf['description'], counterparty_id=cf['counterparty_id'], account_id=stub_account, from_cf_id=cf['id'],
                     expense_date=cf['post_date'], start_date=cf['post_date'], amount=-cf['amount'], stub=False,
                     paid_from_id=cf['trans_type_id'], process_date=today, employee_id=unallocated_employee).save()
-    
+
     return {'new': new_stubs, 'duplicates': len(from_AP)-new_stubs}
-    
+
+
+def make_stubs_from_ccard(cc_data):
+    """
+    given a list of credit card transactions create expenses
+    from those credit card trans which have not already had 
+    an expense created from them
+    """
+    today = datetime.datetime.now().date()
+    stub_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
+    unallocated_employee = api_func('environment', 'variable', 'UNALLOCATED_EMPLOYEE_ID')
+    ap_account = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
+
+    new_stubs = 0
+    for cc in cc_data:
+        if Expense.objects.filter(from_ccard_id=cc['id']).count()==0:
+            new_stubs += 1
+            Expense(comment=cc['description'], counterparty_id=cc['counterparty_id'],
+                    account_id=stub_account, from_ccard_id=cc['id'],
+                    expense_date=cc['trans_date'], start_date=cc['post_date'],
+                    amount=-cc['amount'], stub=False, paid_from_id=ap_account,
+                    process_date=today, employee_id=unallocated_employee).save()
+
+    return {'new': new_stubs, 'duplicates': len(cc_data) - new_stubs}
 
 
 def get_changed(dt):
@@ -53,9 +76,12 @@ def get_changed(dt):
     qs_list = [exp.history.get_queryset()[0] for exp in Expense.objects.all()]
     history = [exp.__dict__ for exp in qs_list if exp.history_user_id and exp.history_date > cutoff]
 
-    cols = ['comment', 'last_name', 'process_date', 'id',  'first_name', 'employee_id', 'dept_name', 'company_id', 'expense_date', 
-            'history_date', 'start_date', 'department_id', 'glcode', 'expense_report_name', 'vendor', 'end_date', 'history_id', 
-            'approver', 'ccard', 'dept_code', 'expense_category', 'reason', 'history_type', 'reimbursable', 'counterparty_id', 
+    cols = ['comment', 'last_name', 'process_date', 'id', 'first_name',
+            'employee_id', 'dept_name', 'company_id', 'expense_date',
+            'history_date', 'start_date', 'department_id', 'glcode',
+            'expense_report_name', 'vendor', 'end_date', 'history_id',
+            'approver', 'ccard', 'dept_code', 'expense_category', 'reason',
+            'history_type', 'reimbursable', 'counterparty_id',
             'paid_from_id', 'e_mail', 'history_user_id', 'amount', 'processor']
 
     filt_history = [dict((k,str(v)) for k,v in exp.iteritems() if k in cols) for exp in history]
@@ -91,15 +117,16 @@ class Expense(models.Model, BusinessModelObject):
 
     counterparty = models.ForeignKey('gl.Counterparty', null=True, blank=True, help_text="We need to match this up")
     
-    stub = models.BooleanField(default=False, help_text='incomplete, created from cashflow')
-    from_cf = models.ForeignKey('base.Cashflow', null=True, blank=True, help_text='created from cashflow')
+    stub = models.BooleanField(default=False, help_text='incomplete, created from cashflow or credit card')
+    from_cf = models.ForeignKey('base.Cashflow', null=True, blank=True, 
+                                help_text='created from cashflow')
+    from_ccard = models.ForeignKey('base.CreditCardTrans', null=True, blank=True,
+                                   help_text='created from credit card trans')
 
-    paid_from = models.ForeignKey('gl.Account', null=True, blank=True, 
-        help_text="shows the account this was paid from, or is owed to",
-        limit_choices_to={'id__in': [1001, 1002, 1003, 3000, 3010, 3020, 3250, 20100]
-            },
-        related_name='paid_from'
-        )
+    paid_from = models.ForeignKey('gl.Account', null=True, blank=True,
+                                  help_text="shows the account this was paid from, or is owed to",
+                                  limit_choices_to={'id__in': [1001, 1002, 1003, 3000, 3010, 3020, 3250, 20100]},
+                                  related_name='paid_from')
     comment = models.CharField(max_length=200, blank=True, null=True, help_text="Details of any modifications/notes added in Django")    
 
     history = HistoricalRecords()
@@ -136,7 +163,6 @@ class Expense(models.Model, BusinessModelObject):
     @property
     def admin_link(self):
         return mark_safe('<a href="/admin/base/expense/%s">admin %s' %( self.id, self.id))
-
 
     def _capitalize(self, debit):
         # capitalising or not

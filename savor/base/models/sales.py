@@ -73,8 +73,9 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
     channel = models.ForeignKey(Channel, blank=True, null=True)
     sale_date = models.DateField()
-    external_channel_id = models.CharField(max_length=50, blank=True, null=True)
-    external_ref = models.CharField(max_length=50, blank=True, null=True)
+    external_channel_id = models.CharField(max_length=50, unique=True)
+    external_ref = models.CharField(max_length=50, blank=True, null=True,
+                                    help_text='for tracking enduser POs')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
 
     #shipping_code = models.CharField(max_length=50, blank=True, null=True)

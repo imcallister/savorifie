@@ -198,8 +198,6 @@ INSTALLED_APPS = (
     'simple_history',
 
     'betterforms',
-    #'json_field',
-
     'base',
     'inventory',
 
@@ -216,12 +214,12 @@ INSTALLED_APPS = (
     'django_admin_bootstrapped',
     'django.contrib.admin',
     'django_bootstrap_typeahead',
-    'django_graphiql',
-    'graphene.contrib.django',
+    #'django_graphiql',
+    #'graphene.contrib.django',
 
     'debug_toolbar',
     
-    
+
 )
 
 LOGIN_REDIRECT_URL = '/'

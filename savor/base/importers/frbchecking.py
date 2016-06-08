@@ -30,8 +30,6 @@ def unique_frbchecking(instance):
         return instance
 
 
-
-
 def clean_frbchecking_fields(field_name):
     if field_name in ['memo', 'amount_debit', 'amount_credit', 'balance', 'check_number', 'fees__']:
         return None
@@ -57,6 +55,7 @@ def clean_frbchecking_values(name, value):
     else:
         return value
 
+
 def order_upload(request):
 
     form = FileForm(request.POST, request.FILES)
@@ -74,16 +73,16 @@ def order_upload(request):
         messages.error(request, 'Could not process the First Republic file provided, please see below')
         return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
 
+
 def process_frb(file_name):
-    
     incoming_name = os.path.join(INCOMING_ROOT, file_name)
     with open(incoming_name, 'U') as f:
-        entries = pd.read_csv(incoming_name, skiprows=3).fillna(0)
+        entries = pd.read_csv(f, skiprows=3).fillna(0)
 
     entries.rename(columns={'Transaction Number': 'external_id', 'Date': 'post_date', 'Description': 'description'}, inplace=True)
     entries['amount'] = entries['Amount Debit'] + entries['Amount Credit']
     entries['post_date'] = entries['post_date'].map(lambda x: parse(x).date().isoformat())
-    
+
     existing_entry_ctr = 0
     new_entry_ctr = 0
 
@@ -91,7 +90,7 @@ def process_frb(file_name):
     for idx in entries.index:
         checking_info = entries.loc[idx][flds].to_dict()
         checking_obj = Cashflow.objects.filter(external_id=checking_info['external_id']).first()
-        
+
         if checking_obj:
             existing_entry_ctr += 1
         else:
@@ -99,5 +98,5 @@ def process_frb(file_name):
             cashflow_obj = Cashflow(**checking_info)
             cashflow_obj.ext_account = accountifie.gl.models.ExternalAccount.objects.get(gl_account__id='1001')
             cashflow_obj.save()
-        
+
     return existing_entry_ctr, new_entry_ctr

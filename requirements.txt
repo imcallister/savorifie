@@ -29,6 +29,7 @@ preppy==2.3.4
 mock==1.3.0
 requests==2.9.1
 multipledispatch==0.4.8
+ofxparse==0.14
 django-filter==0.13.0
 graphene[django]
 django-graphiql
