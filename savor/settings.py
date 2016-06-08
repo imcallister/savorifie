@@ -192,20 +192,17 @@ INSTALLED_APPS = (
     'djangosecure',
     #'cerberos',
     'accountifie.dashboard',
-    
+
     'django_nose',
     'django_extensions',
     'simple_history',
 
     'betterforms',
-    #'json_field',
-    
     'base',
     'inventory',
 
 
     'accountifie.common',
-        
     'accountifie.forecasts',
     'accountifie.gl',
     'accountifie.snapshot',
@@ -214,15 +211,15 @@ INSTALLED_APPS = (
     'accountifie.tasks',
     'accountifie.cal',
 
-    
     'django_admin_bootstrapped',
     'django.contrib.admin',
-    'django_graphiql',
-    'graphene.contrib.django',
+    'django_bootstrap_typeahead',
+    #'django_graphiql',
+    #'graphene.contrib.django',
 
     'debug_toolbar',
     
-    
+
 )
 
 LOGIN_REDIRECT_URL = '/'

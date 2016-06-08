@@ -5,6 +5,9 @@ from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
+from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
+from django_bootstrap_typeahead.fields import *
+
 
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -38,10 +41,25 @@ class UnmatchedExpense(SimpleListFilter):
 
     def queryset(self, request, qs):
         unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
-        if self.value()=='UNMATCHED':
+        if self.value() == 'UNMATCHED':
             return qs.filter(account_id=unalloc_account)
-        if self.value()=='MATCHED':
+        if self.value() == 'MATCHED':
             return qs.exclude(account_id=unalloc_account)
+
+
+class CashflowTAForm(forms.ModelForm):
+    counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(CashflowTAForm, self).__init__(*args, **kwargs)
+        rel = Cashflow._meta.get_field('counterparty').rel
+        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+    class Meta:
+        model = Cashflow
+        fields = ('__all__')
+
 
 
 class CashflowAdmin(SimpleHistoryAdmin):
@@ -51,6 +69,11 @@ class CashflowAdmin(SimpleHistoryAdmin):
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
 
+    form = CashflowTAForm
+
+    def get_changelist_form(self, request, **kwargs):
+        return self.form
+
     def expense_stubs_from_cashflows(self, request, queryset):
         rslts = make_expense_stubs(queryset.values())
         self.message_user(request, "%d new stub expenses created. %d duplicates found and not created" % (rslts['new'], rslts['duplicates']))
@@ -59,13 +82,32 @@ class CashflowAdmin(SimpleHistoryAdmin):
 admin.site.register(Cashflow, CashflowAdmin)
 
 
+class CreditCardTransTAForm(forms.ModelForm):
+    counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(CreditCardTransTAForm, self).__init__(*args, **kwargs)
+        rel = CreditCardTrans._meta.get_field('counterparty').rel
+        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+    class Meta:
+        model = CreditCardTrans
+        fields = ('__all__')
+
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
+    list_editable = ('counterparty',)
     list_display = ('trans_id', 'card_company', 'trans_date', 'post_date',
                     'trans_type', 'amount', 'payee', 'counterparty', 'card_number',)
     list_filter = ('card_number', 'trans_type', 'card_company', 'counterparty', )
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
+
+    form = CreditCardTransTAForm
+
+    def get_changelist_form(self, request, **kwargs):
+        return self.form
 
     def expense_stubs_from_ccard(self, request, queryset):
         rslts = make_stubs_from_ccard(queryset.values())
@@ -76,15 +118,32 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
 
 admin.site.register(CreditCardTrans, CreditCardTransAdmin)
 
+class ExpenseTAForm(forms.ModelForm):
+    account = TypeaheadField(queryset=accountifie.gl.models.Account.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(ExpenseTAForm, self).__init__(*args, **kwargs)
+        rel = Expense._meta.get_field('account').rel
+        self.fields['account'].widget = RelatedFieldWidgetWrapper(self.fields['account'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+    class Meta:
+        model = Expense
+        fields = ('__all__')
 
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)
     actions = ['delete_model']
-    list_display = ('id', 'account', 'expense_date', 'paid_from', 'comment',
-                    'counterparty', 'employee', 'currency', 'amount',)
+    list_display = ('id', 'account', 'expense_date', 'comment',
+                    'counterparty', 'amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['id', 'counterparty__id', 'account__id']
-    list_editable = ('employee', 'account', 'paid_from', 'comment')
+    list_editable = ('account', 'comment')
+
+    #form = ExpenseTAForm
+
+    def get_changelist_form(self, request, **kwargs):
+        return self.form
 
     def get_actions(self, request):
         actions = super(ExpenseAdmin, self).get_actions(request)
@@ -218,7 +277,8 @@ class FulfillRequested(SimpleListFilter):
 
 
 class SaleAdmin(SimpleHistoryAdmin):
-    list_display=('external_channel_id', 'sale_date', 'channel', 'customer_code', 'shipping_name', 'ship_type',)
+    list_display=('external_channel_id', 'external_ref', 'sale_date', 'channel',
+                  'customer_code', 'shipping_name', 'ship_type',)
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
@@ -229,11 +289,16 @@ class SaleAdmin(SimpleHistoryAdmin):
     ]
 
     fieldsets = (
-        ('Details', {'fields': (('channel', 'sale_date',), ('customer_code',), ('memo',),)}),
-        ('External IDs', {'fields': (('external_ref', 'external_routing_id'), ('external_channel_id',)), 'classes': ('collapse',)}),
+        ('Details', {'fields': (('channel', 'sale_date',),
+                                ('external_channel_id', 'external_ref',),
+                                ('customer_code',),
+                                ('memo',),
+                                )
+        }),
         ('Discount', {'fields': ('discount', 'discount_code',), 'classes': ('collapse',)}),
         ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee',), 'gift_message',), 'classes': ('collapse',)}),
-        ('Shipping Details', {'fields': (('shipping_charge',), ('shipping_name',), ('shipping_company',),
+        ('Shipping Details', {'fields': (('shipping_charge',), ('shipping_name',), 
+                                         ('shipping_company', 'external_routing_id',),
                                          ('shipping_address1'), ('shipping_address2'),
                                          ('shipping_city', 'shipping_country'), ('shipping_province', 'shipping_zip'),
                                          ('shipping_phone', 'notification_email',), ('ship_type',)),
