@@ -6,7 +6,6 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
-from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django_bootstrap_typeahead.fields import *
 
 
@@ -15,7 +14,6 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import *
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
-import accountifie.gl.widgets
 from inventory.models import Warehouse
 import inventory.views
 
@@ -119,23 +117,6 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(CreditCardTrans, CreditCardTransAdmin)
-
-"""
-class ExpenseDALForm(forms.ModelForm):
-    account = accountifie.gl.widgets.account_widget()
-
-    def __init__(self, *args, **kwargs):
-        super(ExpenseDALForm, self).__init__(*args, **kwargs)
-        rel = Expense._meta.get_field('account').rel
-        self.fields['account'].widget = RelatedFieldWidgetWrapper(self.fields['account'].widget, 
-                                                                       rel, 
-                                                                       admin.site)
-
-    class Meta:
-        model = Expense
-        fields = ('__all__')
-
-"""
 
 class ExpenseTAForm(forms.ModelForm):
     account = TypeaheadField(queryset=accountifie.gl.models.Account.objects.all())
