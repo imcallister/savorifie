@@ -6,6 +6,9 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
+from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
+from django_bootstrap_typeahead.fields import *
+
 
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -40,30 +43,11 @@ class UnmatchedExpense(SimpleListFilter):
 
     def queryset(self, request, qs):
         unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
-        if self.value()=='UNMATCHED':
+        if self.value() == 'UNMATCHED':
             return qs.filter(account_id=unalloc_account)
-        if self.value()=='MATCHED':
+        if self.value() == 'MATCHED':
             return qs.exclude(account_id=unalloc_account)
 
-"""
-class CashflowDALForm(forms.ModelForm):
-    counterparty = accountifie.gl.widgets.counterparty_widget()
-
-    def __init__(self, *args, **kwargs):
-        super(CashflowDALForm, self).__init__(*args, **kwargs)
-        rel = Cashflow._meta.get_field('counterparty').rel
-        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
-                                                                       rel, 
-                                                                       admin.site)
-
-    class Meta:
-        model = Cashflow
-        fields = ('__all__')
-"""
-
-# TO DO EPXERIMENTING -- MOVE ELSEWHERE IF IT WORKS
-from django_bootstrap_typeahead.fields import *
-from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 
 class CashflowTAForm(forms.ModelForm):
     counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
@@ -74,7 +58,6 @@ class CashflowTAForm(forms.ModelForm):
         self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
                                                                        rel, 
                                                                        admin.site)
-
     class Meta:
         model = Cashflow
         fields = ('__all__')
@@ -88,7 +71,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
 
-    #form = CashflowTAForm
+    form = CashflowTAForm
 
     def get_changelist_form(self, request, **kwargs):
         return self.form
@@ -100,12 +83,12 @@ class CashflowAdmin(SimpleHistoryAdmin):
 
 admin.site.register(Cashflow, CashflowAdmin)
 
-"""
-class CreditCardTransDALForm(forms.ModelForm):
-    counterparty = accountifie.gl.widgets.counterparty_widget()
+
+class CreditCardTransTAForm(forms.ModelForm):
+    counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
 
     def __init__(self, *args, **kwargs):
-        super(CreditCardTransDALForm, self).__init__(*args, **kwargs)
+        super(CreditCardTransTAForm, self).__init__(*args, **kwargs)
         rel = CreditCardTrans._meta.get_field('counterparty').rel
         self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
                                                                        rel, 
@@ -114,7 +97,6 @@ class CreditCardTransDALForm(forms.ModelForm):
         model = CreditCardTrans
         fields = ('__all__')
 
-"""
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
     list_editable = ('counterparty',)
@@ -124,7 +106,8 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
 
-    
+    form = CreditCardTransTAForm
+
     def get_changelist_form(self, request, **kwargs):
         return self.form
 
@@ -154,19 +137,32 @@ class ExpenseDALForm(forms.ModelForm):
 
 """
 
+class ExpenseTAForm(forms.ModelForm):
+    account = TypeaheadField(queryset=accountifie.gl.models.Account.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(ExpenseTAForm, self).__init__(*args, **kwargs)
+        rel = Expense._meta.get_field('account').rel
+        self.fields['account'].widget = RelatedFieldWidgetWrapper(self.fields['account'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+    class Meta:
+        model = Expense
+        fields = ('__all__')
+
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)
     actions = ['delete_model']
-    list_display = ('id', 'account', 'expense_date', 'paid_from', 'comment',
-                    'counterparty', 'employee', 'currency', 'amount',)
+    list_display = ('id', 'account', 'expense_date', 'comment',
+                    'counterparty', 'amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['id', 'counterparty__id', 'account__id']
-    list_editable = ('employee', 'account', 'paid_from', 'comment')
+    list_editable = ('account', 'comment')
 
-    
+    #form = ExpenseTAForm
+
     def get_changelist_form(self, request, **kwargs):
         return self.form
-
 
     def get_actions(self, request):
         actions = super(ExpenseAdmin, self).get_actions(request)
