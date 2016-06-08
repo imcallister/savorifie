@@ -44,12 +44,37 @@ class UnmatchedExpense(SimpleListFilter):
             return qs.exclude(account_id=unalloc_account)
 
 
+# TO DO EPXERIMENTING -- MOVE ELSEWHERE IF IT WORKS
+from django_bootstrap_typeahead.fields import *
+from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
+
+class CashflowTAForm(forms.ModelForm):
+    counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
+
+    def __init__(self, *args, **kwargs):
+        super(CashflowTAForm, self).__init__(*args, **kwargs)
+        rel = Cashflow._meta.get_field('counterparty').rel
+        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+
+    class Meta:
+        model = Cashflow
+        fields = ('__all__')
+
+
+
 class CashflowAdmin(SimpleHistoryAdmin):
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty', 'trans_type', )
     list_filter = ('ext_account', UnmatchedCashflows)
     list_editable = ('counterparty', 'trans_type',)
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
+
+    #form = CashflowTAForm
+
+    def get_changelist_form(self, request, **kwargs):
+        return self.form
 
     def expense_stubs_from_cashflows(self, request, queryset):
         rslts = make_expense_stubs(queryset.values())
