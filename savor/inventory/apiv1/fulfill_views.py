@@ -16,7 +16,8 @@ def get_model_data(instance, flds):
 
 def batchrequest(qstring):
     batches = BatchRequest.objects.all() \
-                                  .select_related('location')
+                                  .select_related('location') \
+                                  .prefetch_related('fulfillments')
     return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
 
 

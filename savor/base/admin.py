@@ -7,7 +7,8 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django_bootstrap_typeahead.fields import *
-
+from django.db.models import Q
+from django.db.models import Prefetch
 
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -27,9 +28,9 @@ class UnmatchedCashflows(SimpleListFilter):
 
     def queryset(self, request, qs):
         if self.value() == 'UNMATCHED':
-            return qs.filter(counterparty=None)
+            return qs.filter(Q(counterparty=None) | Q(counterparty_id='unknown'))
         if self.value() == 'MATCHED':
-            return qs.exclude(counterparty=None)
+            return qs.exclude(Q(counterparty=None) | Q(counterparty_id='unknown'))
 
 
 class UnmatchedExpense(SimpleListFilter):
@@ -71,6 +72,15 @@ class CashflowAdmin(SimpleHistoryAdmin):
 
     form = CashflowTAForm
 
+    def get_queryset(self, request):
+        return super(CashflowAdmin, self).get_queryset(request)\
+                                         .select_related('company',
+                                                         'ext_account', 
+                                                         'counterparty__name',
+                                                         'trans_type',
+                                                         )
+                                         
+
     def get_changelist_form(self, request, **kwargs):
         return self.form
 
@@ -100,7 +110,7 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
     list_editable = ('counterparty',)
     list_display = ('trans_id', 'card_company', 'trans_date', 'post_date',
                     'trans_type', 'amount', 'payee', 'counterparty', 'card_number',)
-    list_filter = ('card_number', 'trans_type', 'card_company', 'counterparty', )
+    list_filter = ('card_number', 'trans_type', UnmatchedCashflows)
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
 
@@ -287,6 +297,7 @@ class SaleAdmin(SimpleHistoryAdmin):
         UnitSaleInline,
         SalesTaxInline
     ]
+    list_select_related = ('channel__counterparty', 'channel',)
 
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),
