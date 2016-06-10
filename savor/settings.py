@@ -213,14 +213,14 @@ INSTALLED_APPS = (
     'accountifie.tasks',
     'accountifie.cal',
 
-    
-    'django_admin_bootstrapped',
     'dal',
     'dal_select2',
+
+    'django_admin_bootstrapped',
     'django.contrib.admin',
     #'django_graphiql',
     #'graphene.contrib.django',
-
+    
     'debug_toolbar',
     
     
