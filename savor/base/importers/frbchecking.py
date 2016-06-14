@@ -82,6 +82,7 @@ def process_frb(file_name):
     entries.rename(columns={'Transaction Number': 'external_id', 'Date': 'post_date', 'Description': 'description'}, inplace=True)
     entries['amount'] = entries['Amount Debit'] + entries['Amount Credit']
     entries['post_date'] = entries['post_date'].map(lambda x: parse(x).date().isoformat())
+    entries['counterparty'] = 'unknown'
 
     existing_entry_ctr = 0
     new_entry_ctr = 0
