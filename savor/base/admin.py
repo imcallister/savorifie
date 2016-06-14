@@ -6,7 +6,7 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
-from django_bootstrap_typeahead.fields import *
+#from django_bootstrap_typeahead.fields import *
 
 
 from simple_history.admin import SimpleHistoryAdmin
@@ -46,7 +46,7 @@ class UnmatchedExpense(SimpleListFilter):
         if self.value() == 'MATCHED':
             return qs.exclude(account_id=unalloc_account)
 
-
+"""
 class CashflowTAForm(forms.ModelForm):
     counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
 
@@ -61,7 +61,7 @@ class CashflowTAForm(forms.ModelForm):
         fields = ('__all__')
 
 
-
+"""
 class CashflowAdmin(SimpleHistoryAdmin):
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty', 'trans_type', )
     list_filter = ('ext_account', UnmatchedCashflows)
@@ -69,7 +69,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
 
-    form = CashflowTAForm
+    #form = CashflowTAForm
 
     def get_changelist_form(self, request, **kwargs):
         return self.form
@@ -81,7 +81,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
 
 admin.site.register(Cashflow, CashflowAdmin)
 
-
+"""
 class CreditCardTransTAForm(forms.ModelForm):
     counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
 
@@ -95,6 +95,8 @@ class CreditCardTransTAForm(forms.ModelForm):
         model = CreditCardTrans
         fields = ('__all__')
 
+"""
+
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
     list_editable = ('counterparty',)
@@ -104,7 +106,7 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
 
-    form = CreditCardTransTAForm
+    #form = CreditCardTransTAForm
 
     def get_changelist_form(self, request, **kwargs):
         return self.form
@@ -118,6 +120,7 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
 
 admin.site.register(CreditCardTrans, CreditCardTransAdmin)
 
+"""
 class ExpenseTAForm(forms.ModelForm):
     account = TypeaheadField(queryset=accountifie.gl.models.Account.objects.all())
 
@@ -130,6 +133,8 @@ class ExpenseTAForm(forms.ModelForm):
     class Meta:
         model = Expense
         fields = ('__all__')
+
+"""
 
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)
