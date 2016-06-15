@@ -16,6 +16,11 @@ ENVIRON_DIR = os.path.realpath(os.path.join(PROJECT_DIR, '..'))
 
 CLIENT_PROJECT = os.path.split(ENVIRON_DIR)[1]
 
+# can be overrided by setting the accountifie_SVC_URL dyn variable on the /admin/system/variable/ page
+ACCOUNTIFIE_SVC_URL = os.environ.get('ACCOUNTIFIE_SVC_URL', 'http://localhost:5124')
+
+# can be overrided by setting the DEFAULT_GL_STRATEGY dyn variable on the /admin/system/variable/ page
+DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
 
 try:
     from localsettings import LOCAL_DEBUG
@@ -24,14 +29,6 @@ try:
 except ImportError:
     DEBUG = False
     DEVELOP = False
-
-
-
-# can be overrided by setting the accountifie_SVC_URL dyn variable on the /admin/system/variable/ page
-ACCOUNTIFIE_SVC_URL = os.environ.get('ACCOUNTIFIE_SVC_URL', 'http://localhost:5124')
-
-# can be overrided by setting the DEFAULT_GL_STRATEGY dyn variable on the /admin/system/variable/ page
-DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
 
 try:
     from localsettings import DB_NAME
@@ -226,9 +223,15 @@ INSTALLED_APPS = (
 
     'django.contrib.admin',
     'django_bootstrap_typeahead',
+<<<<<<< HEAD
     'django_graphiql',
     'graphene.contrib.django',
 
+=======
+    #'django_graphiql',
+    #'graphene.contrib.django',
+    
+>>>>>>> 1f3d3f846c65296f7b7287838575e79888023154
     'debug_toolbar',
     
 
