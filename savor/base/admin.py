@@ -13,6 +13,7 @@ from django.db.models import Prefetch
 from simple_history.admin import SimpleHistoryAdmin
 
 from .models import *
+import accountifie.gl.widgets
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
@@ -62,6 +63,20 @@ class CashflowTAForm(forms.ModelForm):
         fields = ('__all__')
 
 
+class CashflowDALForm(forms.ModelForm):
+    counterparty = accountifie.gl.widgets.counterparty_widget()
+
+    def __init__(self, *args, **kwargs):
+        super(CashflowDALForm, self).__init__(*args, **kwargs)
+        rel = Cashflow._meta.get_field('counterparty').rel
+        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+
+    class Meta:
+        model = Cashflow
+        fields = ('__all__')
+
 
 class CashflowAdmin(SimpleHistoryAdmin):
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty', 'trans_type', )
@@ -70,7 +85,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
 
-    form = CashflowTAForm
+    form = CashflowDALForm
 
     def get_queryset(self, request):
         return super(CashflowAdmin, self).get_queryset(request)\
@@ -79,7 +94,6 @@ class CashflowAdmin(SimpleHistoryAdmin):
                                                          'counterparty__name',
                                                          'trans_type',
                                                          )
-                                         
 
     def get_changelist_form(self, request, **kwargs):
         return self.form
@@ -105,6 +119,21 @@ class CreditCardTransTAForm(forms.ModelForm):
         model = CreditCardTrans
         fields = ('__all__')
 
+
+class CreditCardTransDALForm(forms.ModelForm):
+    counterparty = accountifie.gl.widgets.counterparty_widget()
+
+    def __init__(self, *args, **kwargs):
+        super(CreditCardTransDALForm, self).__init__(*args, **kwargs)
+        rel = CreditCardTrans._meta.get_field('counterparty').rel
+        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
+                                                                       rel, 
+                                                                       admin.site)
+    class Meta:
+        model = CreditCardTrans
+        fields = ('__all__')
+
+
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
     list_editable = ('counterparty',)
@@ -114,7 +143,7 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
 
-    form = CreditCardTransTAForm
+    form = CreditCardTransDALForm
 
     def get_changelist_form(self, request, **kwargs):
         return self.form
@@ -141,6 +170,22 @@ class ExpenseTAForm(forms.ModelForm):
         model = Expense
         fields = ('__all__')
 
+
+class ExpenseDALForm(forms.ModelForm):
+    account = accountifie.gl.widgets.account_widget()
+
+    def __init__(self, *args, **kwargs):
+        super(ExpenseDALForm, self).__init__(*args, **kwargs)
+        rel = Expense._meta.get_field('account').rel
+        self.fields['account'].widget = RelatedFieldWidgetWrapper(self.fields['account'].widget, 
+                                                                  rel,
+                                                                  admin.site)
+
+    class Meta:
+        model = Expense
+        fields = ('__all__')
+
+
 class ExpenseAdmin(SimpleHistoryAdmin):
     ordering = ('-expense_date',)
     actions = ['delete_model']
@@ -148,9 +193,9 @@ class ExpenseAdmin(SimpleHistoryAdmin):
                     'counterparty', 'amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['id', 'counterparty__id', 'account__id']
-    list_editable = ('account', 'comment')
+    list_editable = ('account', 'comment', 'counterparty', )
 
-    #form = ExpenseTAForm
+    form = ExpenseDALForm
 
     def get_changelist_form(self, request, **kwargs):
         return self.form
