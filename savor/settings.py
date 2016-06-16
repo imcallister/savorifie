@@ -154,7 +154,7 @@ MIDDLEWARE_CLASSES = (
     'accountifie.middleware.docengine.UserFindingMiddleware',
     'djangosecure.middleware.SecurityMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'accountifie.middleware.ssl.SSLRedirect',
+    #'accountifie.middleware.ssl.SSLRedirect',
     'simple_history.middleware.HistoryRequestMiddleware',
     'accountifie.toolkit.error_handling.StandardExceptionMiddleware'
 )

@@ -70,7 +70,7 @@ class CashflowDALForm(forms.ModelForm):
         super(CashflowDALForm, self).__init__(*args, **kwargs)
         rel = Cashflow._meta.get_field('counterparty').rel
         self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
-                                                                       rel, 
+                                                                       rel,
                                                                        admin.site)
 
     class Meta:
