@@ -223,15 +223,9 @@ INSTALLED_APPS = (
 
     'django.contrib.admin',
     'django_bootstrap_typeahead',
-<<<<<<< HEAD
-    'django_graphiql',
-    'graphene.contrib.django',
-
-=======
     #'django_graphiql',
     #'graphene.contrib.django',
     
->>>>>>> 1f3d3f846c65296f7b7287838575e79888023154
     'debug_toolbar',
     
 
