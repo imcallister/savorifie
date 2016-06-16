@@ -61,7 +61,9 @@ ADMINS = (
 MANAGERS = ADMINS
 #Required for Django 1.5+.  Otherwise live servers in non-debug mode complain.
 #It checks host headers against this list.
-ALLOWED_HOSTS = [CLIENT_PROJECT, '.savor.us']
+#ALLOWED_HOSTS = [CLIENT_PROJECT, '.savor.us']
+
+ALLOWED_HOSTS = ['*']
 
 if DEVELOP:
     ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
