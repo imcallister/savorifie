@@ -68,6 +68,13 @@ class SalesTax(accountifie.common.models.McModel):
         return '%s: %s' % (self.sale, self.collector)
 
 
+SPECIAL_SALES = (
+    ('PRESS', 'Press Sample'),
+    ('GIFT', 'Gift/Prize'),
+    ('RET_SAMPLE', 'Returnable Sample'),
+    ('NONRET_SAMPLE', 'Non-returnable Sample')
+)
+
 class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
 
@@ -77,7 +84,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
     external_ref = models.CharField(max_length=50, blank=True, null=True,
                                     help_text='for tracking enduser POs')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
-
+    special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
     #shipping_code = models.CharField(max_length=50, blank=True, null=True)
     #shipping_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     ship_type = models.ForeignKey('inventory.ChannelShipmentType', blank=True, null=True, default=None)

@@ -211,7 +211,9 @@ class WarehouseFulfillLineInline(admin.TabularInline):
 
 
 class WarehouseFulfillAdmin(admin.ModelAdmin):
-    list_display = ('savor_order', 'savor_transfer', 'warehouse', 'warehouse_pack_id', 'ship_date', 'shipping_type', 'tracking_number',)
+    list_display = ('savor_order', 'savor_transfer', 'warehouse',
+                    'warehouse_pack_id', 'ship_date', 'shipping_type',
+                    'tracking_number', 'shipping_zip',)
     inlines = [WarehouseFulfillLineInline,]
 
     """

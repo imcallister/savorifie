@@ -2,13 +2,37 @@ import datetime
 import json
 from dateutil.parser import parse
 import pytz
+from multipledispatch import dispatch
 
-
-from savor.base.models import NominalTransaction, Expense
+from savor.base.models import CreditCardTrans, Cashflow
 
 
 EASTERN = pytz.timezone('US/Eastern')
 
+
+@dispatch(dict)
+def creditcardtrans(qstring):
+    return list(CreditCardTrans.objects.order_by('id').values())
+
+
+@dispatch(str, dict)
+def creditcardtrans(cc_id, qstring):
+    try:
+        return CreditCardTrans.objects.filter(id=cc_id).first().values()
+    except:
+        return None
+
+@dispatch(dict)
+def cashflow(qstring):
+    return list(Cashflow.objects.order_by('id').values())
+
+
+@dispatch(str, dict)
+def cashflow(cf_id, qstring):
+    try:
+        return Cashflow.objects.filter(id=cf_id).first().values()
+    except:
+        return None
 
 
 def get_expense_data(expense, flds):
