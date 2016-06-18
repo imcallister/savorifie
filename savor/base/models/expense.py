@@ -36,11 +36,18 @@ def make_expense_stubs(cf_data):
     ap_account = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
 
     new_stubs = 0
-    from_AP = [cf for cf in cf_data if cf['trans_type_id']==ap_account]
+    from_AP = [cf for cf in cf_data if cf['trans_type_id'] == ap_account]
     for cf in from_AP:
-        if Expense.objects.filter(from_cf_id=cf['id']).count()==0:
+        if Expense.objects.filter(from_cf_id=cf['id']).count() == 0:
             new_stubs += 1
-            Expense(comment=cf['description'], counterparty_id=cf['counterparty_id'], account_id=stub_account, from_cf_id=cf['id'],
+
+            # if expense acct is on the cashflow then use that
+            if cf['expense_acct_id']:
+                account_id = cf['expense_acct_id']
+            else:
+                account_id = stub_account
+
+            Expense(comment=cf['description'], counterparty_id=cf['counterparty_id'], account_id=account_id, from_cf_id=cf['id'],
                     expense_date=cf['post_date'], start_date=cf['post_date'], amount=-cf['amount'], stub=False,
                     paid_from_id=cf['trans_type_id'], process_date=today, employee_id=unallocated_employee).save()
 
@@ -62,6 +69,13 @@ def make_stubs_from_ccard(cc_data):
     for cc in cc_data:
         if Expense.objects.filter(from_ccard_id=cc['id']).count()==0:
             new_stubs += 1
+
+            # if expense acct is on the cashflow then use that
+            if cf['expense_acct_id']:
+                account_id = cc['expense_acct_id']
+            else:
+                account_id = stub_account
+
             Expense(comment=cc['description'], counterparty_id=cc['counterparty_id'],
                     account_id=stub_account, from_ccard_id=cc['id'],
                     expense_date=cc['trans_date'], start_date=cc['post_date'],

@@ -136,9 +136,10 @@ class CreditCardTransDALForm(forms.ModelForm):
 
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
-    list_editable = ('counterparty',)
+    list_editable = ('counterparty', 'expense_acct',)
     list_display = ('trans_id', 'card_company', 'trans_date', 'post_date',
-                    'trans_type', 'amount', 'payee', 'counterparty', 'card_number',)
+                    'trans_type', 'amount', 'payee', 'counterparty', 
+                    'card_number', 'expense_acct',)
     list_filter = ('card_number', 'trans_type', UnmatchedCashflows)
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
@@ -193,7 +194,7 @@ class ExpenseAdmin(SimpleHistoryAdmin):
                     'counterparty', 'amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['id', 'counterparty__id', 'account__id']
-    list_editable = ('account', 'comment', 'counterparty', )
+    list_editable = ('account', 'comment', 'counterparty',)
 
     form = ExpenseDALForm
 
@@ -347,7 +348,7 @@ class SaleAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),
                                 ('external_channel_id', 'external_ref',),
-                                ('customer_code',),
+                                ('customer_code', 'special_sale'),
                                 ('memo',),
                                 )
         }),

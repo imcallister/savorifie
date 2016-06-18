@@ -6,6 +6,16 @@ from django.http import HttpResponseRedirect
 from accountifie.common.api import api_func
 from fulfill_requests import post_fulfill_update
 
+def rec_zip(z1, z2):
+    # deal with the dropped leading zero issue
+    if len(z1)==4 and len(z2)==5 and z2[0]=='0':
+        return (z1 == z2[1:])
+    elif len(z2)==4 and len(z1)==5 and z1[0]=='0':
+        return (z2 == z1[1:])
+    else:
+        return (z2==z1)
+
+
 @login_required
 def reconcile_warehouse(request):
     # for all fulfillments that are not completed
@@ -37,7 +47,8 @@ def reconcile_warehouse(request):
         if len(whouse_recs)>0:
             whouse_record = whouse_recs[0]
 
-            if whouse_record['skus'] == unfld['skus'] and order_data['shipping_zip'] == whouse_record['shipping_zip']:
+            if whouse_record['skus'] == unfld['skus'] and \
+                not rec_zip(order_data['shipping_zip'], whouse_record['shipping_zip']):
                 new_fulfilled += 1
                 # how to set it to fulfilled....
                 post_data = {}
