@@ -210,6 +210,24 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         return alloc_lines
 
 
+    def get_gross_proceeds(self):
+        shipping = Decimal(self.shipping_charge)
+        giftwrap = Decimal(self.gift_wrap_fee)
+
+        unit_sales = self.unitsale_set.all()
+        skus = list(set([x.sku for x in unit_sales]))
+        sale_amts = dict((s,0) for s in skus)
+        for s in unit_sales:
+            sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
+
+        if self.discount > 0:
+            total_sale = sum([v for k,v in sale_amts.iteritems()])
+            for s in skus:
+                sale_amts[s] -= Decimal(self.discount) * Decimal(sale_amts[s]) / Decimal(total_sale)
+
+        return shipping + sum([v for k,v in sale_amts.iteritems()]) + giftwrap
+
+
     def get_gl_transactions(self):
 
         # for starters implement only for pre-sale

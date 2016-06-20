@@ -4,8 +4,10 @@ import pandas as pd
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.db.models import Prefetch
 
 from accountifie.query.query_manager import QueryManager
+from base.models import SalesTax, TaxCollector, Sale
 
 @login_required
 def dump_fixtures(request):
@@ -19,6 +21,66 @@ def dump_fixtures(request):
     file_label = 'fixtures_%s' % datetime.datetime.now().strftime('%d-%b-%Y_%H-%M')
     response = HttpResponse(data, content_type="application/json")
     response['Content-Disposition'] = 'attachment; filename=%s' % file_label
+    return response
+
+
+def __get_salestax_data(obj):
+    d = {}
+    d['tax']  = obj.tax
+    d['order'] = str(obj.sale)
+    d['collector'] = obj.collector.entity
+    d['sale_date'] = obj.sale.sale_date.isoformat()
+    d['gross_proceeds'] = obj.sale.get_gross_proceeds()
+    return d
+
+
+@login_required
+def output_salestax(request):
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="salestax.csv"'
+    writer = csv.writer(response)
+
+    all_st = SalesTax.objects.all() \
+                             .prefetch_related(Prefetch('collector')) \
+                             .prefetch_related(Prefetch('sale'))
+
+    header_row = ['order', 'collector', 'sale_date', 'tax', 'gross_proceeds']
+
+    writer.writerow(header_row)
+    for st in all_st:
+        line = [__get_salestax_data(st).get(c,'') for c in header_row]
+        writer.writerow(line)
+    return response
+
+
+def get_primary_tax_collector(st_list):
+    if len(st_list) == 0:
+        return 'none'
+    elif len(st_list) == 1:
+        return st_list[0].collector.entity
+    elif len(st_list) > 1:
+        all_entities = [x.collector.entity for x in st_list]
+        return [x for x in all_entities if x!='NY State'][0]
+
+
+@login_required
+def output_grosses(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="salestax.csv"'
+    writer = csv.writer(response)
+
+    sales = Sale.objects.all()
+
+    header_row = ['order', 'sale_date', 'proceeds', 'sales_tax', 'primary_collector']
+    writer.writerow(header_row)
+    for s in sales:
+        st_lines = s.salestax_set.all()
+        all_tax = sum([st.tax for st in st_lines])
+        primary_collector = get_primary_tax_collector(st_lines)
+        line = [str(s), s.sale_date.isoformat(), s.get_gross_proceeds(), 
+                all_tax, primary_collector]
+        writer.writerow(line)
     return response
 
 
