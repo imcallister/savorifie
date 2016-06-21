@@ -45,7 +45,36 @@ class UnitSale(accountifie.common.models.McModel):
         db_table = 'base_unitsale'
 
     def __unicode__(self):
-        return '%s: %s' % (self.sale, self.sku)
+        return '%s - %s:%s' % (self.id, self.sale, self.sku)
+
+    def save(self):
+        # need to do FIFO assignment
+        # is sale object fully assigned?
+        self.fifo_check()
+
+        models.Model.save(self)
+
+
+    def fifo_check(self):
+        if self.id:
+            fifos = api_func('inventory', 'fifo_assignment', self.id)
+        else:
+            fifos = []
+
+        # tally the count by SKU
+        # (there may be SKUs assigned to different shipments etc)
+        fifo_skus = list(set([x['sku'] for x in fifos]))
+        fifo_sku_count = dict((s, 0) for s in fifo_skus)
+        for fifo in fifos:
+            fifo_sku_count[fifo['sku']] += fifo['quantity']
+
+        sku_items = self.get_inventory_items()
+        diff = dict((s, sku_items.get(s, 0) - fifo_sku_count.get(s, 0)) for s in sku_items)
+
+        print 'SKU ITEMS TO BE ASSIGNED'
+        print diff
+        print '-' * 20
+        
 
     def get_inventory_items(self):
         return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
@@ -130,6 +159,10 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         db_table = 'base_sale'
 
     def save(self):
+        # fifo check
+        for u in self.unitsale_set.all():
+            u.fifo_check()
+
         self.update_gl()
         models.Model.save(self)
         

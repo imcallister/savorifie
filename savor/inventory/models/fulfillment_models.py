@@ -2,6 +2,7 @@ import operator
 
 from django.db import models
 
+
 import accountifie.gl.bmo
 import accountifie.common.models
 
@@ -56,6 +57,8 @@ class Shipment(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessMod
         db_table = 'inventory_shipment'
 
 
+
+
 class ShipmentLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
@@ -63,7 +66,7 @@ class ShipmentLine(accountifie.common.models.McModel):
     shipment = models.ForeignKey(Shipment)
 
     def __unicode__(self):
-        return '%s:%s' % (self.shipment, self.id)
+        return '%s:%s' % (self.shipment, self.inventory_item)
 
     class Meta:
         app_label = 'inventory'

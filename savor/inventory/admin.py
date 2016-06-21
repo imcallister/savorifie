@@ -99,11 +99,10 @@ class ShipmentAdmin(admin.ModelAdmin):
 admin.site.register(Shipment, ShipmentAdmin)
 
 
-class COGSAssignmentAdmin(admin.ModelAdmin):
-    list_display = ('shipment_line',)
-    filter_horizontal = ('unit_sales',)
+class FIFOAssignmentAdmin(admin.ModelAdmin):
+    list_display = ('shipment_line', 'quantity', 'unit_sale',)
 
-admin.site.register(COGSAssignment, COGSAssignmentAdmin)
+admin.site.register(FIFOAssignment, FIFOAssignmentAdmin)
 
 
 
