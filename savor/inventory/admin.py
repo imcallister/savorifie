@@ -99,13 +99,6 @@ class ShipmentAdmin(admin.ModelAdmin):
 admin.site.register(Shipment, ShipmentAdmin)
 
 
-class FIFOAssignmentAdmin(admin.ModelAdmin):
-    list_display = ('shipment_line', 'quantity', 'unit_sale',)
-
-admin.site.register(FIFOAssignment, FIFOAssignmentAdmin)
-
-
-
 
 #special signal as normal GL update doesn't work with Transfers
 #fulfill_saved = django.dispatch.Signal(providing_args=[])

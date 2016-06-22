@@ -21,6 +21,11 @@ def batchrequest(qstring):
     return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
 
 
+def shipmentline(qstring):
+    shpmts = ShipmentLine.objects.all()
+    return [shpmt.to_json() for shpmt in shpmts]
+
+
 def batched_fulfillments(qstring):
     qs = BatchRequest.objects.all().prefetch_related('fulfillments')
     batched_f = [[str(x.id) for x in batch.fulfillments.all()] for batch in qs]

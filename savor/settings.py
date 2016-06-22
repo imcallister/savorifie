@@ -207,6 +207,7 @@ INSTALLED_APPS = (
     'betterforms',
     'base',
     'inventory',
+    'accounting',
 
 
     'accountifie.common',

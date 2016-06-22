@@ -8,6 +8,7 @@ import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 import accountifie.common.models
+import accounting.models
 
 DZERO = Decimal('0')
 
@@ -49,15 +50,16 @@ class UnitSale(accountifie.common.models.McModel):
 
     def save(self):
         # need to do FIFO assignment
-        # is sale object fully assigned?
-        self.fifo_check()
+        to_be_fifod = self.fifo_check()
+        if len(to_be_fifod) > 0:
+            accounting.models.fifo_assign(self.id, to_be_fifod)
 
         models.Model.save(self)
 
 
     def fifo_check(self):
         if self.id:
-            fifos = api_func('inventory', 'fifo_assignment', self.id)
+            fifos = api_func('accounting', 'fifo_assignment', self.id)
         else:
             fifos = []
 
@@ -70,11 +72,9 @@ class UnitSale(accountifie.common.models.McModel):
 
         sku_items = self.get_inventory_items()
         diff = dict((s, sku_items.get(s, 0) - fifo_sku_count.get(s, 0)) for s in sku_items)
+        diff = dict((k,v) for k,v in diff.iteritems() if v>0)
+        return diff
 
-        print 'SKU ITEMS TO BE ASSIGNED'
-        print diff
-        print '-' * 20
-        
 
     def get_inventory_items(self):
         return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
@@ -161,11 +161,15 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
     def save(self):
         # fifo check
         for u in self.unitsale_set.all():
-            u.fifo_check()
+            to_be_fifod = u.fifo_check()
+            if len(to_be_fifod) > 0:
+                accounting.models.fifo_assign(u.id, to_be_fifod)
+
 
         self.update_gl()
         models.Model.save(self)
-        
+
+
     def delete(self):
         self.delete_from_gl()
         models.Model.delete(self)
