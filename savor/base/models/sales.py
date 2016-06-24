@@ -67,7 +67,12 @@ class UnitSale(accountifie.common.models.McModel):
         # (there may be SKUs assigned to different shipments etc)
         fifo_skus = list(set([x['sku'] for x in fifos]))
         fifo_sku_count = dict((s, 0) for s in fifo_skus)
+
+        print 'starting', fifo_sku_count
+
         for fifo in fifos:
+
+            print 'working on', fifo
             fifo_sku_count[fifo['sku']] += fifo['quantity']
 
         sku_items = self.get_inventory_items()
