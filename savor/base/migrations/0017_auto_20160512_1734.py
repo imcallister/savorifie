@@ -6,7 +6,7 @@ import django.db.models.deletion
 
 from accountifie.common.api import api_func
 
-DEFAULT_SHIPTYPE = api_func('inventory', 'shippingtype', 'UPS_GROUND').get('id')
+DEFAULT_SHIPTYPE = 2
 
 class Migration(migrations.Migration):
 

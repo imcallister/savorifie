@@ -236,9 +236,10 @@ class Expense(models.Model, BusinessModelObject):
                         trans_id='%s.%s.%s' % (self.short_code, self.id, 'CPLZ'),
                         bmo_id='%s.%s' % (self.short_code, self.id),
                         comment= "Capitalized Asset, %s: %s" % (self.id, self.comment),
-                        lines=[
-                            (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                            ]
+                        lines=[(ACCTS_PAYABLE,
+                                DZERO - Decimal(self.amount),
+                                self.counterparty,
+                                [])]
                     )
 
             tran['lines'] += self._get_exp_lines(debit)
@@ -261,8 +262,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "Depreciating asset,  %s: %s" % (self.id, self.comment),
                     lines=[
-                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                        (acc_asset_dep, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty, []),
+                        (acc_asset_dep, Decimal(self.amount), self.counterparty, []),
                         ]
                     ))
 
@@ -279,8 +280,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (PREPAID_EXP, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (PREPAID_EXP, Decimal(self.amount), self.counterparty, []),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),
                         ]
                     ))
 
@@ -292,7 +293,7 @@ class Expense(models.Model, BusinessModelObject):
                             trans_id='%s.%s.%s' % (self.short_code, self.id, 'EXPS'),
                             bmo_id=self.id,
                             comment= "Expensing %s: %s" % (self.id, self.comment),
-                            lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
+                            lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty, []),]
                         )
                 tran['lines'] += self._get_exp_lines(debit)
                 trans.append(tran)
@@ -308,8 +309,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty, []),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),
                         ]
                     ))
 
@@ -321,7 +322,7 @@ class Expense(models.Model, BusinessModelObject):
                             trans_id='%s.%s.%s' % (self.short_code, self.id, 'AL'),
                             bmo_id='%s.%s' % (self.short_code, self.id),
                             comment= "Accruing %s: %s" % (self.id, self.comment),
-                            lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
+                            lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty, []),]
                         )
                 
                 tran['lines'] += self._get_exp_lines(debit)

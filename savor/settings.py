@@ -80,6 +80,9 @@ DATABASES = {
     },
 }
 
+if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
 TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-gb'
 

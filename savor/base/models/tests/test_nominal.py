@@ -3,8 +3,8 @@ import datetime
 from django.conf import settings
 from django.test import TestCase
 from base.models import NominalTransaction, NominalTranLine
-from core.gl.models import Account, Company, Counterparty
-from core.environment.models import Variable
+from accountifie.gl.models import Account, Company, Counterparty
+from accountifie.environment.models import Variable
 
 class NominalTestCase(TestCase):
     def setUp(self):
