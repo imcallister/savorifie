@@ -9,16 +9,16 @@ Background: There are accounts and companies and counterparties in the system
         |    TEST    | Test Co |   ALO     |
 
     And there are accounts:
-        |    id             |   path                        |
-        |    1100           |   assets.curr.receivables     |
-        |    4000           |liabilities.curr.accrued.shipping|
-        |    4001           |equity.retearnings.sales.extra.giftwrap|
-        |    4002           |liabilities.curr.accrued.salestax|
-        |    1200           |   assets.curr.inv.II101       |
-        |    5000           |   equity.sales.gross.II101    |
-        |    5100           |   equity.sales.COGS.II101     |
-        |    5110           |   equity.sales.samples.press  |
-        |    5120           |   equity.sales.discounts      |
+        |    id     |   path                                  |
+        |    1100   |   assets.curr.receivables               |
+        |    1200   |   assets.curr.inventory.II01           |
+        |    4000   | liabilities.curr.accrued.shipping       |
+        |    4001   | equity.retearnings.sales.extra.giftwrap |
+        |    4002   | liabilities.curr.accrued.salestax       |
+        |    5000   |   equity.retearnings.sales.gross.II01  |
+        |    5100   |   equity.retearnings.sales.COGS.II01   |
+        |    5110   |   equity.sales.samples.press            |
+        |    5120   |  equity.retearnings.sales.discounts     |
 
 
     And there are counterparties:
@@ -70,8 +70,8 @@ Background: There are accounts and companies and counterparties in the system
 
 Scenario: Regular Sale GL entries
     Given a new sale:
-        |  id  |  company  |  channel   |  customer_code  | shipping_charge |
-        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |      0          |
+        |  id  |  company  |  channel   |  customer_code  | shipping_charge | sale_date   |
+        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |      0          |  2016-03-20 |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |
         |   1   |    1     |   PR001   |     1      |    80      |
@@ -82,17 +82,17 @@ Scenario: Regular Sale GL entries
     When we calculate the BMO GL entries
     
     Then the lines should be:
-        | account   |   amount  |  counterparty  |
-        |  1100     |   80.0    |    TESTCP      |
-        |  1200     |   -25.0   |    TESTCP      | 
-        |  5000     |   -80     |    TESTCP      |
-        |  5100     |   25.0    |    TESTCP      |
+        | account   |   amount  |  counterparty  |    date    |  date_end |
+        |  1100     |   80.0    |    TESTCP      | 2016-03-20 |           |
+        |  1200     |   -25.0   |    TESTCP      | 2016-03-20 |           |
+        |  5000     |   -80     |    TESTCP      | 2016-03-20 |           |
+        |  5100     |   25.0    |    TESTCP      | 2016-03-20 |           |
 
 
 Scenario: Free sample. Savor pays all shipping costs
     Given a new sale:
-        |  id  |  company  |  channel   |  customer_code | counterparty |  sample | shipping_charge |
-        |   1  |  TEST     |  SHOPIFY   |  press         |     TESTCP   |   True  |       0         |
+        |  id  |  company  |  channel   |  customer_code | counterparty |  sample | shipping_charge | sale_date  |
+        |   1  |  TEST     |  SHOPIFY   |  press         |     TESTCP   |   True  |       0         | 2016-03-20 |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |
         |   1   |    1     |   PR001   |     1      |    80      |
@@ -103,14 +103,14 @@ Scenario: Free sample. Savor pays all shipping costs
     When we calculate the BMO GL entries
     
     Then the lines should be:
-        | account   |   amount  |  counterparty  |
-        |  1200     |   -25.0   |    press       | 
-        |  5110     |   25.0    |    press       |
+        | account   |   amount  |  counterparty  |    date    |  date_end |
+        |  1200     |   -25.0   |    press       | 2016-03-20 |           | 
+        |  5110     |   25.0    |    press       | 2016-03-20 |           |
 
 Scenario: Sale with Discount GL entries
     Given a new sale:
-        |  id  |  company  |  channel   |  customer_code  | counterparty | discount | shipping_charge  |
-        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |     TESTCP   |   10     |       0          |
+        |  id  |  company  |  channel   |  customer_code  | counterparty | discount | shipping_charge  | sale_date  |
+        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |     TESTCP   |   10     |       0          | 2016-03-20 |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |
         |   1   |    1     |   PR001   |     1      |    80      |
@@ -121,11 +121,11 @@ Scenario: Sale with Discount GL entries
     When we calculate the BMO GL entries
     
     Then the lines should be:
-        | account   |   amount  |  counterparty     |
-        |  1100     |   70.0    |    retail_buyer   |
-        |  1200     |   -25.0   |    retail_buyer   | 
-        |  5000     |   -80     |    retail_buyer   |
-        |  5100     |   25.0    |    retail_buyer   |
-        |  6000     |   10      |    retail_buyer   |
+        | account   |   amount  |  counterparty     |    date    |  date_end |
+        |  1100     |   70.0    |    retail_buyer   | 2016-03-20 |           |
+        |  1200     |   -25.0   |    retail_buyer   | 2016-03-20 |           |
+        |  5000     |   -80     |    retail_buyer   | 2016-03-20 |           |
+        |  5100     |   25.0    |    retail_buyer   | 2016-03-20 |           |
+        |  6000     |   10      |    retail_buyer   | 2016-03-20 |           |
 
 

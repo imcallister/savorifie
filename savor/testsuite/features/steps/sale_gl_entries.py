@@ -14,6 +14,7 @@ def impl(context):
     channel = Channel.objects.filter(counterparty_id=row['channel']).first()
     context.bmo = Sale(id=row['id'],
                        company_id=row['company'],
+                       sale_date=row['sale_date'],
                        channel=channel,
                        customer_code_id=row['customer_code'],
                        shipping_charge=Decimal(row['shipping_charge']))

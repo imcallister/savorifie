@@ -1,6 +1,9 @@
 from behave import *
 from decimal import Decimal
 from hamcrest import assert_that, equal_to
+import logging
+
+logger = logging.getLogger('default')
 
 @when(u'we calculate the BMO GL entries')
 def impl(context):

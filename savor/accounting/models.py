@@ -14,13 +14,20 @@ def fifo_assign(unit_sale_id, to_assign):
     for l in ship_lines:
         if l['inventory_item'] not in avail_slines:
             avail_slines[l['inventory_item']] = l['id']
-        
+
     for sku in to_assign:
         fifo_info = {}
         fifo_info['shipment_line_id'] = avail_slines[sku]
         fifo_info['unit_sale_id'] = unit_sale_id
         fifo_info['quantity'] = to_assign[sku]
         COGSAssignment(**fifo_info).save()
+
+
+def total_COGS(u_sale, inv_item_label):
+    assigns = COGSAssignment.objects \
+                            .filter(unit_sale=u_sale) \
+                            .filter(shipment_line__inventory_item__label=inv_item_label)
+    return sum([a.quantity * a.shipment_line.cost for a in assigns])
 
 
 class COGSAssignment(accountifie.common.models.McModel):
