@@ -16,8 +16,10 @@ def impl(context):
                        company_id=row['company'],
                        sale_date=row['sale_date'],
                        channel=channel,
+                       special_sale=row.get('special_sale', None),
                        customer_code_id=row['customer_code'],
-                       shipping_charge=Decimal(row['shipping_charge']))
+                       shipping_charge=Decimal(row['shipping_charge']),
+                       discount=Decimal(row.get('discount', 0)))
 
 
 @given(u'new unitsales')

@@ -17,7 +17,7 @@ Background: There are accounts and companies and counterparties in the system
         |    4002   | liabilities.curr.accrued.salestax       |
         |    5000   |   equity.retearnings.sales.gross.II01  |
         |    5100   |   equity.retearnings.sales.COGS.II01   |
-        |    5110   |   equity.sales.samples.press            |
+        |    5110   |   equity.retearnings.sales.samples.press            |
         |    5120   |  equity.retearnings.sales.discounts     |
 
 
@@ -55,8 +55,8 @@ Background: There are accounts and companies and counterparties in the system
         |  1 |   invitem01 |     II01   |      1        |    msku0001   |
 
     And there are skuunits:
-        |  inv_item  |  sku   | quantity |
-        |    II01    | PR001  |    1     |
+        |  inv_item  |  sku   | quantity | rev_percent |
+        |    II01    | PR001  |    1     |   100       |
 
     And there are shipments:
         | id   |  arrival_date  |  description   |  label | warehouse |
@@ -75,30 +75,24 @@ Scenario: Regular Sale GL entries
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |
         |   1   |    1     |   PR001   |     1      |    80      |
-    And a COGSassignment:
-        | shipment_line | unitsale  | quantity |
-        |     1        |     1     |     1    |
     
     When we calculate the BMO GL entries
     
     Then the lines should be:
         | account   |   amount  |  counterparty  |    date    |  date_end |
-        |  1100     |   80.0    |    TESTCP      | 2016-03-20 |           |
-        |  1200     |   -25.0   |    TESTCP      | 2016-03-20 |           |
-        |  5000     |   -80     |    TESTCP      | 2016-03-20 |           |
-        |  5100     |   25.0    |    TESTCP      | 2016-03-20 |           |
+        |  1100     |   80.0    |    SHOPIFY     | 2016-03-20 |           |
+        |  1200     |   -25.0   | retail_buyer   | 2016-03-20 |           |
+        |  5000     |   -80     | retail_buyer   | 2016-03-20 |           |
+        |  5100     |   25.0    | retail_buyer   | 2016-03-20 |           |
 
 
 Scenario: Free sample. Savor pays all shipping costs
     Given a new sale:
-        |  id  |  company  |  channel   |  customer_code | counterparty |  sample | shipping_charge | sale_date  |
-        |   1  |  TEST     |  SHOPIFY   |  press         |     TESTCP   |   True  |       0         | 2016-03-20 |
+        |  id  |  company  |  channel   |  customer_code | counterparty | special_sale | shipping_charge | sale_date  |
+        |   1  |  TEST     |  SHOPIFY   |  press         |     TESTCP   |   press      |       0         | 2016-03-20 |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |
         |   1   |    1     |   PR001   |     1      |    80      |
-    And a COGSassignment:
-        | shipment_line | unitsale  | quantity |
-        |     1        |     1     |     1    |
     
     When we calculate the BMO GL entries
     
@@ -107,25 +101,23 @@ Scenario: Free sample. Savor pays all shipping costs
         |  1200     |   -25.0   |    press       | 2016-03-20 |           | 
         |  5110     |   25.0    |    press       | 2016-03-20 |           |
 
+
 Scenario: Sale with Discount GL entries
     Given a new sale:
-        |  id  |  company  |  channel   |  customer_code  | counterparty | discount | shipping_charge  | sale_date  |
-        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |     TESTCP   |   10     |       0          | 2016-03-20 |
+        |  id  |  company  |  channel   |  customer_code  | discount | shipping_charge  | sale_date  |
+        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |   10     |       0          | 2016-03-20 |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |
         |   1   |    1     |   PR001   |     1      |    80      |
-    And a COGSassignment:
-        | shipment_line | unitsale  | quantity |
-        |     1    |     1     |     1    |
     
     When we calculate the BMO GL entries
     
     Then the lines should be:
         | account   |   amount  |  counterparty     |    date    |  date_end |
-        |  1100     |   70.0    |    retail_buyer   | 2016-03-20 |           |
+        |  1100     |   70.0    |    SHOPIFY        | 2016-03-20 |           |
         |  1200     |   -25.0   |    retail_buyer   | 2016-03-20 |           |
         |  5000     |   -80     |    retail_buyer   | 2016-03-20 |           |
         |  5100     |   25.0    |    retail_buyer   | 2016-03-20 |           |
-        |  6000     |   10      |    retail_buyer   | 2016-03-20 |           |
+        |  5120     |   10      |    retail_buyer   | 2016-03-20 |           |
 
 

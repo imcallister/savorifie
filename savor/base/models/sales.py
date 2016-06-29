@@ -86,7 +86,9 @@ class UnitSale(accountifie.common.models.McModel):
         return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
 
     def get_gross_sales(self):
-        return dict((u.inventory_item.label, u.quantity * self.quantity * u.quantity * u.rev_percent) for u in self.sku.skuunit_set.all())
+        return dict((u.inventory_item.label, 
+                     u.quantity * self.quantity * self.unit_price * Decimal(u.rev_percent)/Decimal(100)) \
+                    for u in self.sku.skuunit_set.all())
 
     @property
     def items_string(self):
@@ -107,9 +109,9 @@ class SalesTax(accountifie.common.models.McModel):
 
 
 SPECIAL_SALES = (
-    ('PRESS_SAMPLE', 'Press Sample'),
-    ('GIFT', 'Gift/Prize'),
-    ('RETAIL_SAMPLE', 'Retailer Sample'),
+    ('press', 'Press Sample'),
+    ('prize', 'Gift/Prize'),
+    ('retailer', 'Retailer Sample'),
 )
 
 class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
@@ -267,6 +269,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
     def total_receivable(self):
         total = self.gross_sale_proceeds()
+        
         if self.discount:
             total -= Decimal(self.discount)
         if self.shipping_charge:
@@ -285,10 +288,10 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         Get account to book special sale to
         """
         if self.special_sale:
-            return api_func('gl',
-                            'account',
-                            'equity.retearnings.sales.samples.%s'
-                            % self.special_sale)['id']
+            path = 'equity.retearnings.sales.samples.%s' % self.special_sale
+            return Account.objects \
+                          .filter(path=path) \
+                          .first()
         else:
             return None
 
@@ -336,6 +339,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                     inv_acct_path = 'assets.curr.inventory.%s' % ii
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
                     COGS = accounting.models.total_COGS(u_sale, ii)
+                    qty = inv_items[ii]
                     tran['lines'].append((inv_acct, -COGS * qty, self.customer_code, []))
                     tran['lines'].append((sample_exp_acct, COGS * qty, self.customer_code, []))
         else:
@@ -357,7 +361,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
             # DISCOUNTS
             if self.discount and self.discount > 0:
-                tran['lines'].append((discount_acct, -Decimal(self.discount), self.customer_code, []))
+                tran['lines'].append((discount_acct, Decimal(self.discount), self.customer_code, []))
 
             # INVENTORY, GROSS SALES & COGS
             for u_sale in self.__unit_sales:
@@ -375,6 +379,6 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
                     tran['lines'].append((inv_acct, -COGS, self.customer_code, []))
                     tran['lines'].append((COGS_acct, COGS, self.customer_code, []))
-                    tran['lines'].append((gross_sales_acct, inv_items[ii], self.customer_code, []))
+                    tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
         return [tran]

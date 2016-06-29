@@ -33,8 +33,8 @@ def impl(context):
         ii = InventoryItem.objects.filter(label=row['inv_item']).first()
         SKUUnit(quantity=row['quantity'],
                 inventory_item=ii,
-                sku=pr).save()
-
+                sku=pr,
+                rev_percent=Decimal(row['rev_percent'])).save()
 
 @given(u'there are warehouses')
 def impl(context):

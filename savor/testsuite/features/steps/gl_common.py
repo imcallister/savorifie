@@ -32,4 +32,4 @@ def impl(context):
                  row['date'],
                  None if row['date_end']=='' else row['date_end'])
                 for row in context.table]
-    assert_that(set(expected), equal_to(set(context.gl_entries)))
+    assert_that(set(context.gl_entries), equal_to(set(expected)))
