@@ -1,7 +1,11 @@
+import logging
+
 from django.db import models
 
 import accountifie.common.models
 from accountifie.common.api import api_func
+
+logger = logging.getLogger('default')
 
 
 def fifo_assign(unit_sale_id, to_assign):
@@ -10,7 +14,7 @@ def fifo_assign(unit_sale_id, to_assign):
     for l in ship_lines:
         if l['inventory_item'] not in avail_slines:
             avail_slines[l['inventory_item']] = l['id']
-    
+        
     for sku in to_assign:
         fifo_info = {}
         fifo_info['shipment_line_id'] = avail_slines[sku]

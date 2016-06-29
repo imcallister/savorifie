@@ -1,6 +1,7 @@
 import csv
 from multipledispatch import dispatch
 import itertools
+import logging
 
 from django.db.models import Prefetch
 
@@ -8,6 +9,7 @@ from accountifie.common.api import api_func
 from inventory.models import *
 from base.models import *
 
+logger = logging.getLogger('default')
 
 def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)

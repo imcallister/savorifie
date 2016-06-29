@@ -1,5 +1,7 @@
 from django.utils.safestring import mark_safe
 from decimal import Decimal
+import logging
+
 from django.db import models
 
 from simple_history.models import HistoricalRecords
@@ -12,6 +14,7 @@ import accounting.models
 
 DZERO = Decimal('0')
 
+logger = logging.getLogger('default')
 
 class TaxCollector(accountifie.common.models.McModel):
     entity = models.CharField(max_length=100)
@@ -68,11 +71,7 @@ class UnitSale(accountifie.common.models.McModel):
         fifo_skus = list(set([x['sku'] for x in fifos]))
         fifo_sku_count = dict((s, 0) for s in fifo_skus)
 
-        print 'starting', fifo_sku_count
-
         for fifo in fifos:
-
-            print 'working on', fifo
             fifo_sku_count[fifo['sku']] += fifo['quantity']
 
         sku_items = self.get_inventory_items()
@@ -103,10 +102,9 @@ class SalesTax(accountifie.common.models.McModel):
 
 
 SPECIAL_SALES = (
-    ('PRESS', 'Press Sample'),
+    ('PRESS_SAMPLE', 'Press Sample'),
     ('GIFT', 'Gift/Prize'),
-    ('RET_SAMPLE', 'Returnable Sample'),
-    ('NONRET_SAMPLE', 'Non-returnable Sample')
+    ('RETAIL_SAMPLE', 'Retailer Sample'),
 )
 
 class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
@@ -119,8 +117,6 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                                     help_text='for tracking enduser POs')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
-    #shipping_code = models.CharField(max_length=50, blank=True, null=True)
-    #shipping_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     ship_type = models.ForeignKey('inventory.ChannelShipmentType', blank=True, null=True, default=None)
     
     shipping_charge = models.DecimalField(max_digits=11, decimal_places=2)
@@ -252,62 +248,48 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         return alloc_lines
 
 
-    def get_gross_proceeds(self):
-        shipping = Decimal(self.shipping_charge)
-        giftwrap = Decimal(self.gift_wrap_fee)
+    def gross_sale_proceeds(self):
+        return sum([v for k,v in self.__sale_amts.iteritems()])
 
-        unit_sales = self.unitsale_set.all()
-        skus = list(set([x.sku for x in unit_sales]))
-        sale_amts = dict((s,0) for s in skus)
-        for s in unit_sales:
-            sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
 
-        if self.discount > 0:
-            total_sale = sum([v for k,v in sale_amts.iteritems()])
-            for s in skus:
-                sale_amts[s] -= Decimal(self.discount) * Decimal(sale_amts[s]) / Decimal(total_sale)
+    def total_sales_tax(self):
+        return sum([v for k, v in self.__tax_amts.iteritems()])
 
-        return shipping + sum([v for k,v in sale_amts.iteritems()]) + giftwrap
+
+    def total_receivable(self):
+        return self.get_gross_sale_proceeds() \
+               - Decimal(self.discount) \
+               + Decimal(self.shipping_charge) \
+               + Decimal(self.gift_wrap_fee) \
+               + self.total_sales_tax()
+
+    def payee(self):
+        return self.channel.id
+
+
+    def _get_sales_taxes(self):
+        sales_taxes = self.salestax_set.all()
+        tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
+        self.__tax_amts = dict((p,0) for p in tax_collectors)
+        for t in sales_taxes:
+            self.__tax_amts[t.collector.entity] += Decimal(t.tax)
+
+
+    def _get_unit_sales(self):
+        self.__unit_sales = self.unitsale_set.all()
+        skus = list(set([x.sku for x in calc_context['unit_sales']]))
+        self.__sale_amts = dict((s,0) for s in skus)
+        for s in self.__unit_sales:
+            self.__sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
 
 
     def get_gl_transactions(self):
 
-        # for starters implement only for pre-sale
+        # collect all the info first
+        # TO DO have to make sure about order here
+        self._get_unit_sales()
+        self._get_sales_taxes()
 
-        unit_sales = self.unitsale_set.all()
-        skus = list(set([x.sku for x in unit_sales]))
-
-        sale_amts = dict((s,0) for s in skus)
-        for s in unit_sales:
-            sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
-
-        # apply discount
-        if self.discount > 0:
-            total_sale = sum([v for k,v in sale_amts.iteritems()])
-            for s in skus:
-                sale_amts[s] -= Decimal(self.discount) * Decimal(sale_amts[s]) / Decimal(total_sale)
-
-        # now get sales_taxes
-        sales_taxes = self.salestax_set.all()
-        tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
-        tax_amts = dict((p,0) for p in tax_collectors)
-        for t in sales_taxes:
-            tax_amts[t.collector.entity] += Decimal(t.tax)
-
-        # calculate total cash = shipping + discount + sum over product x qty + sum of taxes
-        total_amount = Decimal(self.shipping_charge) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
-
-        # while pre-sale
-        # ---------------
-        # + total cash to AR
-        # each line of taxes goes to sales tax liability account
-        # - shipping goes to shipping liability account  (will this always be the same or do we need to capture shippers?)
-        # - rest goes to a pre-sale
-
-        tran = []
-
-        accts_rec = api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
-        
         tran = dict(company=self.company,
                     date=self.sale_date,
                     comment= "%s: %s" % (self.channel, self.external_ref),
@@ -315,31 +297,51 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[]
                     )
-
-        # ACCOUNTS RECEIVABLE
-        tran['lines'].append((accts_rec, total_amount, 'retail_buyer', []))
-
-        # SHIPPING
+        accts_rec = api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
         shipping_acct = api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
-        tran['lines'].append((shipping_acct, - self.shipping_charge, 'retail_buyer', []))
-
-        # GIFT-WRAPPING
         giftwrap_acct = api_func('gl', 'account', 'equity.retearnings.sales.extra.giftwrap')['id']
-        tran['lines'].append((giftwrap_acct, -self.gift_wrap_fee, 'retail_buyer', []))
-
-        # TAXES
         sales_tax_acct = api_func('gl', 'account', 'liabilities.curr.accrued.salestax')['id']
-        for entity in tax_amts:
-            tran['lines'].append((sales_tax_acct, -tax_amts[entity], entity, []))
+        discount_acct = api_func('gl', 'account', 'equity.retearnings.sales.discounts')['id']
 
-        # book to pre-sales
-        for sku in sale_amts:
-            # now loop through the sku unit in the sku
-            sku_items = sku.skuunit_set.all()
-            for sku_item in sku_items:
-                product_line = sku_item.inventory_item.product_line.label
-                rev_percent = Decimal(sku_item.rev_percent)/Decimal(100)
-                presale_acct = api_func('gl', 'account', 'liabilities.curr.presold.%s' % product_line)['id']
-                tran['lines'].append((presale_acct, -sale_amts[sku] * rev_percent, 'retail_buyer', []))
+        if self.special_sale:
+            special_sale_acct = get_special_sale_acct(self.special_sale)  # TO-DO
+            for u_sale in self.__unit_sales:
+                inv_acct_path = 'assets.curr.inventory.%s' u_sale.product_line  # TO-DO
+                inv_acct = api_func('gl', 'account', inv_acct_path)['id']
+                sample_exp_acct = api_func('gl', 'account', 'equity.retearnings.sales.samples')
+                COGS = get_COGS(u_sale)
+                tran['lines'].append((inv_acct, -COGS * qty, self.customer_code.id, []))
+                tran['lines'].append((sample_exp_acct, COGS * qty, self.customer_code.id, []))
+        else:
+            # ACCOUNTS RECEIVABLE
+            tran['lines'].append((accts_rec, self.total_receivable(), self.payee, []))
+
+            # SHIPPING
+            if self.shipping_charge > 0:
+                tran['lines'].append((shipping_acct, - self.shipping_charge, self.customer_code.id, []))
+
+            # GIFT-WRAPPING
+            if self.gift_wrapping:
+                tran['lines'].append((giftwrap_acct, -self.gift_wrap_fee, self.customer_code.id, []))
+
+            # TAXES
+            if self.total_sales_tax() > 0:
+                for entity in self.__tax_amts:
+                    tran['lines'].append((sales_tax_acct, -self.__tax_amts[entity], entity, []))
+
+            # DISCOUNTS
+            if self.discount and self.discount > 0:
+                tran['lines'].append((discount_acct, -Decimal(self.discount), self.customer_code.id, []))                
+
+            # INVENTORY, GROSS SALES & COGS
+            for s in self.__unit_sales:
+                inv_acct_path = 'assets.curr.inventory.%s' s.product_line  # TO-DO
+                inv_acct = api_func('gl', 'account', inv_acct_path)['id']
+                COGS_acct = api_func('gl', 'account', 'equity.retearnings.sales.COGS.%s' % s.product_line)
+                gross_sales_acct = api_func('gl', 'account', 'equity.retearnings.sales.gross.%s' % s.product_line)
+                COGS = get_COGS(s)
+                tran['lines'].s((inv_acct, -COGS * s.qty, self.customer_code.id, []))
+                tran['lines'].append((COGS_acct, COGS * s.qty, self.customer_code.id, []))
+                tran['lines'].append((gross_sales_acct, s.unit_price * s.qty, self.customer_code.id, []))
 
         return [tran]
