@@ -27,8 +27,6 @@ def total_COGS(u_sale, inv_item_label):
     assigns = COGSAssignment.objects \
                             .filter(unit_sale=u_sale) \
                             .filter(shipment_line__inventory_item__label=inv_item_label)
-    logger.info('#' * 20)
-    logger.info('in total_COGS')
     for a in assigns:
         logger.info('-' * 20)
         logger.info(a.__dict__)

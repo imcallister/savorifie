@@ -86,7 +86,7 @@ class UnitSale(accountifie.common.models.McModel):
         return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
 
     def get_gross_sales(self):
-        return dict((u.inventory_item.label, 
+        return dict((u.inventory_item.label,
                      u.quantity * self.quantity * self.unit_price * Decimal(u.rev_percent)/Decimal(100)) \
                     for u in self.sku.skuunit_set.all())
 
@@ -172,7 +172,6 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
             to_be_fifod = u.fifo_check()
             if len(to_be_fifod) > 0:
                 accounting.models.fifo_assign(u.id, to_be_fifod)
-
 
         self.update_gl()
         models.Model.save(self)
@@ -269,7 +268,6 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
     def total_receivable(self):
         total = self.gross_sale_proceeds()
-        
         if self.discount:
             total -= Decimal(self.discount)
         if self.shipping_charge:
@@ -316,6 +314,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         # TO DO have to make sure about order here
         self._get_unit_sales()
         self._get_sales_taxes()
+        channel_id = self.channel.counterparty.id
 
         tran = dict(company=self.company,
                     date=self.sale_date,
@@ -329,14 +328,18 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         shipping_acct = Account.objects.filter(path='liabilities.curr.accrued.shipping').first()
         giftwrap_acct = Account.objects.filter(path='equity.retearnings.sales.extra.giftwrap').first()
         sales_tax_acct = Account.objects.filter(path='liabilities.curr.accrued.salestax').first()
-        discount_acct = Account.objects.filter(path='equity.retearnings.sales.discounts').first()
+        discount_acct = Account.objects \
+                               .filter(path='equity.retearnings.sales.discounts.%s' \
+                                            % channel_id) \
+                               .first()
 
         if self.special_sale:
             sample_exp_acct = self._get_special_account()
             for u_sale in self.__unit_sales:
                 inv_items = u_sale.get_inventory_items()
                 for ii in inv_items:
-                    inv_acct_path = 'assets.curr.inventory.%s' % ii
+                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
                     COGS = accounting.models.total_COGS(u_sale, ii)
                     qty = inv_items[ii]
@@ -367,14 +370,16 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
             for u_sale in self.__unit_sales:
                 inv_items = u_sale.get_gross_sales()
                 for ii in inv_items:
-                    inv_acct_path = 'assets.curr.inventory.%s' % ii
+                    
+                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
 
-                    COGS_acct_path = 'equity.retearnings.sales.COGS.%s' % ii
+                    COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (channel_id, product_line)
                     COGS_acct = Account.objects.filter(path=COGS_acct_path).first()
                     COGS = accounting.models.total_COGS(u_sale, ii)
 
-                    gross_sales_acct_path = 'equity.retearnings.sales.gross.%s' % ii
+                    gross_sales_acct_path = 'equity.retearnings.sales.gross.%s.%s' % (channel_id, product_line)
                     gross_sales_acct = Account.objects.filter(path=gross_sales_acct_path).first()
 
                     tran['lines'].append((inv_acct, -COGS, self.customer_code, []))

@@ -16,14 +16,14 @@ def impl(context):
         Channel(counterparty_id=row['counterparty']).save()
 
 
-
 @given(u'there are inventoryitems')
 def impl(context):
     for row in context.table:
+        pr_line = ProductLine.objects.filter(label=row['productline']).first()
         InventoryItem(description=row['description'],
                       label=row['label'],
                       master_sku=row['master_sku'],
-                      product_line_id=row['productline']).save()
+                      product_line=pr_line).save()
 
 
 @given(u'there are skuunits')

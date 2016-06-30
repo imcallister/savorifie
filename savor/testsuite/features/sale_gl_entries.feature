@@ -9,16 +9,16 @@ Background: There are accounts and companies and counterparties in the system
         |    TEST    | Test Co |   ALO     |
 
     And there are accounts:
-        |    id     |   path                                  |
-        |    1100   |   assets.curr.receivables               |
-        |    1200   |   assets.curr.inventory.II01           |
-        |    4000   | liabilities.curr.accrued.shipping       |
-        |    4001   | equity.retearnings.sales.extra.giftwrap |
-        |    4002   | liabilities.curr.accrued.salestax       |
-        |    5000   |   equity.retearnings.sales.gross.II01  |
-        |    5100   |   equity.retearnings.sales.COGS.II01   |
-        |    5110   |   equity.retearnings.sales.samples.press            |
-        |    5120   |  equity.retearnings.sales.discounts     |
+        |    id     |           path                                 |
+        |    1100   |   assets.curr.receivables                      |
+        |    1200   |   assets.curr.inventory.PL1.II01               |
+        |    4000   |   liabilities.curr.accrued.shipping            |
+        |    4001   |  equity.retearnings.sales.extra.giftwrap       |
+        |    4002   |    liabilities.curr.accrued.salestax           |
+        |    5000   |   equity.retearnings.sales.gross.SHOPIFY.PL1   |
+        |    5100   |   equity.retearnings.sales.COGS.SHOPIFY.PL1    |
+        |    5110   |   equity.retearnings.sales.samples.press       |
+        |    5120   |   equity.retearnings.sales.discounts.SHOPIFY   |
 
 
     And there are counterparties:
@@ -52,7 +52,7 @@ Background: There are accounts and companies and counterparties in the system
 
     And there are inventoryitems:
         | id | description |    label   |  productline  |   master_sku  |
-        |  1 |   invitem01 |     II01   |      1        |    msku0001   |
+        |  1 |   invitem01 |     II01   |      PL1      |    msku0001   |
 
     And there are skuunits:
         |  inv_item  |  sku   | quantity | rev_percent |
