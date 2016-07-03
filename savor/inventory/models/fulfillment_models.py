@@ -1,10 +1,16 @@
 import operator
+from decimal import Decimal
+import logging
 
 from django.db import models
 
+from accountifie.toolkit.utils import get_default_company
 import accountifie.gl.bmo
+import accountifie.gl.models
 import accountifie.common.models
+from accountifie.common.api import api_func
 
+logger = logging.getLogger('default')
 
 class Warehouse(accountifie.common.models.McModel):
     description = models.CharField(max_length=200)
@@ -30,7 +36,7 @@ class Shipper(accountifie.common.models.McModel):
 
 
 class ShippingType(accountifie.common.models.McModel):
-    shipper = models.ForeignKey(Shipper)
+    shipper = models.ForeignKey('inventory.Shipper')
     label = models.CharField(max_length=20)
     description = models.CharField(max_length=100)
 
@@ -42,8 +48,9 @@ class ShippingType(accountifie.common.models.McModel):
         db_table = 'inventory_shippingtype'
 
 
-class Shipment(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
+class Shipment(accountifie.common.models.McModel):
     arrival_date = models.DateField()
+    sent_by = models.ForeignKey('gl.Counterparty')
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
     destination = models.ForeignKey('inventory.Warehouse', blank=True, null=True)
@@ -56,18 +63,45 @@ class Shipment(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessMod
         db_table = 'inventory_shipment'
 
 
-class ShipmentLine(accountifie.common.models.McModel):
+class ShipmentLine(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
+    company = models.ForeignKey('gl.Company', default=get_default_company)
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    shipment = models.ForeignKey(Shipment)
+    shipment = models.ForeignKey('inventory.Shipment')
+
+    short_code = 'SHPLN'
 
     def __unicode__(self):
-        return '%s:%s' % (self.shipment, self.id)
+        return '%s:%s' % (self.shipment, self.inventory_item)
 
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_shipmentline'
+
+    def get_gl_transactions(self):
+
+        product_line = self.inventory_item.product_line.label
+        inv_item = self.inventory_item.label
+        inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, inv_item)
+        inv_acct = accountifie.gl.models.Account.objects.filter(path=inv_acct_path).first()
+
+        ACCTS_PAYABLE = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
+        ap_acct = accountifie.gl.models.Account.objects.get(id=ACCTS_PAYABLE)
+
+        counterparty = self.shipment.sent_by
+        amount = Decimal(self.cost) * Decimal(self.quantity)
+
+        tran = []
+        tran = dict(company=self.company,
+                    date=self.shipment.arrival_date,
+                    comment="%s" % str(self),
+                    trans_id='%s.%s.LINE' % (self.short_code, self.id),
+                    bmo_id='%s.%s' % (self.short_code, self.id),
+                    lines=[(inv_acct, amount, counterparty, []),
+                           (ap_acct, -amount, counterparty, [])]
+                    )
+        return [tran]
 
 
 PACKING_TYPES = (
@@ -78,7 +112,7 @@ PACKING_TYPES = (
 class ChannelShipmentType(accountifie.common.models.McModel):
     label = models.CharField(max_length=30)
     channel = models.ForeignKey('base.Channel')
-    ship_type = models.ForeignKey(ShippingType)
+    ship_type = models.ForeignKey('inventory.ShippingType')
     bill_to = models.CharField(max_length=100)
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
@@ -102,7 +136,7 @@ class Fulfillment(accountifie.common.models.McModel):
     request_date = models.DateField()
     warehouse = models.ForeignKey('inventory.Warehouse')
     order = models.ForeignKey('base.Sale')
-    ship_type = models.ForeignKey(ShippingType, blank=True, null=True)
+    ship_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     bill_to = models.CharField(max_length=100, blank=True, null=True)
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
@@ -149,7 +183,7 @@ class FulfillUpdate(accountifie.common.models.McModel):
     status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
     shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
-    fulfillment = models.ForeignKey(Fulfillment)
+    fulfillment = models.ForeignKey('inventory.Fulfillment')
 
     class Meta:
         app_label = 'inventory'
@@ -159,7 +193,7 @@ class FulfillUpdate(accountifie.common.models.McModel):
 class FulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
-    fulfillment = models.ForeignKey(Fulfillment)
+    fulfillment = models.ForeignKey('inventory.Fulfillment')
 
     class Meta:
         app_label = 'inventory'
@@ -179,7 +213,7 @@ class InventoryTransfer(accountifie.common.models.McModel):
 class TransferLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
-    transfer = models.ForeignKey(InventoryTransfer)
+    transfer = models.ForeignKey('inventory.InventoryTransfer')
 
     def __unicode__(self):
         return '%d %s' % (self.quantity, self.inventory_item.label)
@@ -192,7 +226,7 @@ class TransferLine(accountifie.common.models.McModel):
 class BatchRequest(accountifie.common.models.McModel):
     created_date = models.DateField()
     location = models.ForeignKey('inventory.Warehouse')
-    fulfillments = models.ManyToManyField(Fulfillment, blank=True)
+    fulfillments = models.ManyToManyField('inventory.Fulfillment', blank=True)
     comment = models.TextField(blank=True, null=True)
 
     properties = ['fulfillment_count', 'fulfillments_list']
@@ -217,7 +251,7 @@ class TransferUpdate(accountifie.common.models.McModel):
     status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
     shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
-    transfer = models.ForeignKey(InventoryTransfer)
+    transfer = models.ForeignKey('inventory.InventoryTransfer')
 
     class Meta:
         app_label = 'inventory'

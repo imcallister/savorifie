@@ -1,6 +1,7 @@
 import csv
 from multipledispatch import dispatch
 import itertools
+import logging
 
 from django.db.models import Prefetch
 
@@ -8,6 +9,7 @@ from accountifie.common.api import api_func
 from inventory.models import *
 from base.models import *
 
+logger = logging.getLogger('default')
 
 def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
@@ -19,6 +21,11 @@ def batchrequest(qstring):
                                   .select_related('location') \
                                   .prefetch_related('fulfillments')
     return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
+
+
+def shipmentline(qstring):
+    shpmts = ShipmentLine.objects.all()
+    return [shpmt.to_json() for shpmt in shpmts]
 
 
 def batched_fulfillments(qstring):

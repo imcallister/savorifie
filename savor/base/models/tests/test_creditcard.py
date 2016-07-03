@@ -2,9 +2,9 @@ import datetime
 
 from django.conf import settings
 from django.test import TestCase
-from base.models import Mcard
-from core.gl.models import Account, Company, Counterparty
-from core.environment.models import Variable
+from base.models import CreditCardTrans
+from accountifie.gl.models import Account, Company, Counterparty
+from accountifie.environment.models import Variable
 
 class McardTestCase(TestCase):
     def setUp(self):
@@ -25,7 +25,11 @@ class McardTestCase(TestCase):
         cp = Counterparty(id='test_cp', name="Test C/P")
         cp.save()
 
-        trans = Mcard(company=self.default_company, trans_date=datetime.date(2015,1,1), type='sale', amount='100', counterparty=cp)
-        transactions = trans.get_gl_transactions()
+        trans = CreditCardTrans(company=self.default_company,
+                                trans_date=datetime.date(2015,1,1),
+                                type='sale',
+                                amount='100',
+                                counterparty=cp)
 
+        transactions = trans.get_gl_transactions()
         self.assertEqual(len(transactions), 1)

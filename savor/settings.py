@@ -80,6 +80,11 @@ DATABASES = {
     },
 }
 
+if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
+TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
+
 TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-gb'
 
@@ -207,6 +212,8 @@ INSTALLED_APPS = (
     'betterforms',
     'base',
     'inventory',
+    'accounting',
+    'testsuite',
 
 
     'accountifie.common',
@@ -221,7 +228,6 @@ INSTALLED_APPS = (
     'dal',
     'dal_select2',
     'django_admin_bootstrapped',
-    
 
     'django.contrib.admin',
     'django_bootstrap_typeahead',
@@ -229,7 +235,7 @@ INSTALLED_APPS = (
     #'graphene.contrib.django',
     
     'debug_toolbar',
-    
+    'django_behave',
 
 )
 
@@ -341,7 +347,6 @@ MESSAGE_TAGS = {
     }
 
 
-    
 DASHBOARD_TITLE = CLIENT_PROJECT + ' Dashboard'
 THUMBNAIL_SIZES = (
     (120,80),

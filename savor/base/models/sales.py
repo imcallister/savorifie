@@ -1,5 +1,7 @@
 from django.utils.safestring import mark_safe
 from decimal import Decimal
+import logging
+
 from django.db import models
 
 from simple_history.models import HistoricalRecords
@@ -8,9 +10,13 @@ import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 import accountifie.common.models
+import accounting.models
+from accountifie.gl.models import Account
+
 
 DZERO = Decimal('0')
 
+logger = logging.getLogger('default')
 
 class TaxCollector(accountifie.common.models.McModel):
     entity = models.CharField(max_length=100)
@@ -45,10 +51,44 @@ class UnitSale(accountifie.common.models.McModel):
         db_table = 'base_unitsale'
 
     def __unicode__(self):
-        return '%s: %s' % (self.sale, self.sku)
+        return '%s - %s:%s' % (self.id, self.sale, self.sku)
+
+    def save(self):
+        # need to do FIFO assignment
+        to_be_fifod = self.fifo_check()
+        if len(to_be_fifod) > 0:
+            accounting.models.fifo_assign(self.id, to_be_fifod)
+
+        models.Model.save(self)
+
+
+    def fifo_check(self):
+        if self.id:
+            fifos = api_func('accounting', 'fifo_assignment', self.id)
+        else:
+            fifos = []
+
+        # tally the count by SKU
+        # (there may be SKUs assigned to different shipments etc)
+        fifo_skus = list(set([x['sku'] for x in fifos]))
+        fifo_sku_count = dict((s, 0) for s in fifo_skus)
+
+        for fifo in fifos:
+            fifo_sku_count[fifo['sku']] += fifo['quantity']
+
+        sku_items = self.get_inventory_items()
+        diff = dict((s, sku_items.get(s, 0) - fifo_sku_count.get(s, 0)) for s in sku_items)
+        diff = dict((k,v) for k,v in diff.iteritems() if v>0)
+        return diff
+
 
     def get_inventory_items(self):
         return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
+
+    def get_gross_sales(self):
+        return dict((u.inventory_item.label,
+                     u.quantity * self.quantity * self.unit_price * Decimal(u.rev_percent)/Decimal(100)) \
+                    for u in self.sku.skuunit_set.all())
 
     @property
     def items_string(self):
@@ -69,10 +109,9 @@ class SalesTax(accountifie.common.models.McModel):
 
 
 SPECIAL_SALES = (
-    ('PRESS', 'Press Sample'),
-    ('GIFT', 'Gift/Prize'),
-    ('RET_SAMPLE', 'Returnable Sample'),
-    ('NONRET_SAMPLE', 'Non-returnable Sample')
+    ('press', 'Press Sample'),
+    ('prize', 'Gift/Prize'),
+    ('retailer', 'Retailer Sample'),
 )
 
 class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
@@ -85,10 +124,8 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                                     help_text='for tracking enduser POs')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
-    #shipping_code = models.CharField(max_length=50, blank=True, null=True)
-    #shipping_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     ship_type = models.ForeignKey('inventory.ChannelShipmentType', blank=True, null=True, default=None)
-    
+
     shipping_charge = models.DecimalField(max_digits=11, decimal_places=2)
 
     discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
@@ -130,9 +167,16 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         db_table = 'base_sale'
 
     def save(self):
+        # fifo check
+        for u in self.unitsale_set.all():
+            to_be_fifod = u.fifo_check()
+            if len(to_be_fifod) > 0:
+                accounting.models.fifo_assign(u.id, to_be_fifod)
+
         self.update_gl()
         models.Model.save(self)
-        
+
+
     def delete(self):
         self.delete_from_gl()
         models.Model.delete(self)
@@ -210,44 +254,68 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         return alloc_lines
 
 
-    def get_gl_transactions(self):
+    def gross_sale_proceeds(self):
+        return sum([v for k,v in self.__sale_amts.iteritems()])
 
-        # for starters implement only for pre-sale
 
-        unit_sales = self.unitsale_set.all()
-        skus = list(set([x.sku for x in unit_sales]))
+    def total_sales_tax(self):
+        sales_tax = sum([v for k, v in self.__tax_amts.iteritems()])
+        if sales_tax:
+            return sales_tax
+        else:
+            return Decimal('0')
 
-        sale_amts = dict((s,0) for s in skus)
-        for s in unit_sales:
-            sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
 
-        # apply discount
-        if self.discount > 0:
-            total_sale = sum([v for k,v in sale_amts.iteritems()])
-            for s in skus:
-                sale_amts[s] -= Decimal(self.discount) * Decimal(sale_amts[s]) / Decimal(total_sale)
+    def total_receivable(self):
+        total = self.gross_sale_proceeds()
+        if self.discount:
+            total -= Decimal(self.discount)
+        if self.shipping_charge:
+            total += Decimal(self.shipping_charge)
+        if self.gift_wrap_fee:
+            total += Decimal(self.gift_wrap_fee)
+        total += self.total_sales_tax()
+        return total
 
-        # now get sales_taxes
+    def payee(self):
+        return self.channel.counterparty
+
+
+    def _get_special_account(self):
+        """
+        Get account to book special sale to
+        """
+        if self.special_sale:
+            path = 'equity.retearnings.sales.samples.%s' % self.special_sale
+            return Account.objects \
+                          .filter(path=path) \
+                          .first()
+        else:
+            return None
+
+    def _get_sales_taxes(self):
         sales_taxes = self.salestax_set.all()
         tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
-        tax_amts = dict((p,0) for p in tax_collectors)
+        self.__tax_amts = dict((p,0) for p in tax_collectors)
         for t in sales_taxes:
-            tax_amts[t.collector.entity] += Decimal(t.tax)
+            self.__tax_amts[t.collector.entity] += Decimal(t.tax)
 
-        # calculate total cash = shipping + discount + sum over product x qty + sum of taxes
-        total_amount = Decimal(self.shipping_charge) + sum([v for k,v in sale_amts.iteritems()]) + sum([v for k,v in tax_amts.iteritems()]) + Decimal(self.gift_wrap_fee)
+    def _get_unit_sales(self):
+        self.__unit_sales = self.unitsale_set.all()
+        skus = list(set([x.sku for x in self.__unit_sales]))
+        self.__sale_amts = dict((s,0) for s in skus)
+        for s in self.__unit_sales:
+            self.__sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
 
-        # while pre-sale
-        # ---------------
-        # + total cash to AR
-        # each line of taxes goes to sales tax liability account
-        # - shipping goes to shipping liability account  (will this always be the same or do we need to capture shippers?)
-        # - rest goes to a pre-sale
 
-        tran = []
+    def get_gl_transactions(self):
 
-        accts_rec = api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
-        
+        # collect all the info first
+        # TO DO have to make sure about order here
+        self._get_unit_sales()
+        self._get_sales_taxes()
+        channel_id = self.channel.counterparty.id
+
         tran = dict(company=self.company,
                     date=self.sale_date,
                     comment= "%s: %s" % (self.channel, self.external_ref),
@@ -255,31 +323,67 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[]
                     )
+        accts_rec = Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE'))
 
-        # ACCOUNTS RECEIVABLE
-        tran['lines'].append((accts_rec, total_amount, 'retail_buyer', []))
+        shipping_acct = Account.objects.filter(path='liabilities.curr.accrued.shipping').first()
+        giftwrap_acct = Account.objects.filter(path='equity.retearnings.sales.extra.giftwrap').first()
+        sales_tax_acct = Account.objects.filter(path='liabilities.curr.accrued.salestax').first()
+        discount_acct = Account.objects \
+                               .filter(path='equity.retearnings.sales.discounts.%s' \
+                                            % channel_id) \
+                               .first()
 
-        # SHIPPING
-        shipping_acct = api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
-        tran['lines'].append((shipping_acct, - self.shipping_charge, 'retail_buyer', []))
+        if self.special_sale:
+            sample_exp_acct = self._get_special_account()
+            for u_sale in self.__unit_sales:
+                inv_items = u_sale.get_inventory_items()
+                for ii in inv_items:
+                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
+                    inv_acct = Account.objects.filter(path=inv_acct_path).first()
+                    COGS = accounting.models.total_COGS(u_sale, ii)
+                    qty = inv_items[ii]
+                    tran['lines'].append((inv_acct, -COGS * qty, self.customer_code, []))
+                    tran['lines'].append((sample_exp_acct, COGS * qty, self.customer_code, []))
+        else:
+            # ACCOUNTS RECEIVABLE
+            tran['lines'].append((accts_rec, self.total_receivable(), self.payee(), []))
 
-        # GIFT-WRAPPING
-        giftwrap_acct = api_func('gl', 'account', 'equity.retearnings.sales.extra.giftwrap')['id']
-        tran['lines'].append((giftwrap_acct, -self.gift_wrap_fee, 'retail_buyer', []))
+            # SHIPPING
+            if self.shipping_charge > 0:
+                tran['lines'].append((shipping_acct, - self.shipping_charge, self.customer_code, []))
 
-        # TAXES
-        sales_tax_acct = api_func('gl', 'account', 'liabilities.curr.accrued.salestax')['id']
-        for entity in tax_amts:
-            tran['lines'].append((sales_tax_acct, -tax_amts[entity], entity, []))
+            # GIFT-WRAPPING
+            if self.gift_wrapping:
+                tran['lines'].append((giftwrap_acct, -self.gift_wrap_fee, self.customer_code, []))
 
-        # book to pre-sales
-        for sku in sale_amts:
-            # now loop through the sku unit in the sku
-            sku_items = sku.skuunit_set.all()
-            for sku_item in sku_items:
-                product_line = sku_item.inventory_item.product_line.label
-                rev_percent = Decimal(sku_item.rev_percent)/Decimal(100)
-                presale_acct = api_func('gl', 'account', 'liabilities.curr.presold.%s' % product_line)['id']
-                tran['lines'].append((presale_acct, -sale_amts[sku] * rev_percent, 'retail_buyer', []))
+            # TAXES
+            if self.total_sales_tax() > 0:
+                for entity in self.__tax_amts:
+                    tran['lines'].append((sales_tax_acct, -self.__tax_amts[entity], entity, []))
+
+            # DISCOUNTS
+            if self.discount and self.discount > 0:
+                tran['lines'].append((discount_acct, Decimal(self.discount), self.customer_code, []))
+
+            # INVENTORY, GROSS SALES & COGS
+            for u_sale in self.__unit_sales:
+                inv_items = u_sale.get_gross_sales()
+                for ii in inv_items:
+
+                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
+                    inv_acct = Account.objects.filter(path=inv_acct_path).first()
+
+                    COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (channel_id, product_line)
+                    COGS_acct = Account.objects.filter(path=COGS_acct_path).first()
+                    COGS = accounting.models.total_COGS(u_sale, ii)
+
+                    gross_sales_acct_path = 'equity.retearnings.sales.gross.%s.%s' % (channel_id, product_line)
+                    gross_sales_acct = Account.objects.filter(path=gross_sales_acct_path).first()
+
+                    tran['lines'].append((inv_acct, -COGS, self.customer_code, []))
+                    tran['lines'].append((COGS_acct, COGS, self.customer_code, []))
+                    tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
         return [tran]
