@@ -12,7 +12,7 @@ def impl(context):
         lines = t.get('lines', [])
         new_lines = []
         for l in lines:
-            new_line = (l[0], l[1], l[2], t['date'], t.get('date_end', None))
+            new_line = (l[0], l[1], l[2], str(t['date']), t.get('date_end', None))
             new_lines.append(new_line)
         gl_entries += new_lines
 

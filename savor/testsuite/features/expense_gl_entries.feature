@@ -24,7 +24,7 @@ Background: There are accounts and companies and counterparties in the system
         |    GL_ACCOUNTS_PAYABLE    |   3000    |
         |    GL_PREPAID_EXP         |   1250    |
         |    GL_ACCRUED_LIAB        |   3110    |
-
+        |     DEFAULT_COMPANY_ID    |   TSTCO   |
         
 
 @expense_gl

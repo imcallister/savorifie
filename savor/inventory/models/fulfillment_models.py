@@ -81,7 +81,6 @@ class ShipmentLine(accountifie.common.models.McModel, accountifie.gl.bmo.Busines
 
     def get_gl_transactions(self):
 
-        logger.info('saving ShipmentLine GL entries')
         product_line = self.inventory_item.product_line.label
         inv_item = self.inventory_item.label
         inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, inv_item)
@@ -102,7 +101,6 @@ class ShipmentLine(accountifie.common.models.McModel, accountifie.gl.bmo.Busines
                     lines=[(inv_acct, amount, counterparty, []),
                            (ap_acct, -amount, counterparty, [])]
                     )
-        logger.info(tran)
         return [tran]
 
 

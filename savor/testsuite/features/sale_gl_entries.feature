@@ -26,6 +26,7 @@ Background: There are accounts and companies and counterparties in the system
         |  SHOPIFY        |    Shopify      |
         |  retail_buyer   |   Retail Buyer  |
         |     press       |     Press       |
+        |     MANUF1      |    Factory1     |
 
     And there are environment variables:
         |    key                    |   value   |
@@ -33,6 +34,7 @@ Background: There are accounts and companies and counterparties in the system
         |    GL_PREPAID_EXP         |   1250    |
         |    GL_ACCRUED_LIAB        |   3110    |
         |   GL_ACCOUNTS_RECEIVABLE  |   1100    |
+        |     DEFAULT_COMPANY_ID    |   TEST    |
     
     And there are channels:
         |    counterparty   |
@@ -59,12 +61,12 @@ Background: There are accounts and companies and counterparties in the system
         |    II01    | PR001  |    1     |   100       |
 
     And there are shipments:
-        | id   |  arrival_date  |  description   |  label | warehouse |
-        |  1   |   2016-01-01   |    first       |   SH1  |    1      |
+        |  arrival_date  |  description   |  label | warehouse |  sent_by   |
+        |   2016-01-01   |    first       |   SH1  |    WH1    |   MANUF1   |
 
     And there are shipmentlines:
-        |   id   | inv_item |  cost   |  quantity | shipment |
-        |  1     |   II01   |    25   |   100     |   SH1    |
+        | inv_item |  cost   |  quantity | shipment |
+        |   II01   |    25   |   100     |   SH1    |
 
 
 
