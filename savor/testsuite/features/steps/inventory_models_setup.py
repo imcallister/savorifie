@@ -2,6 +2,7 @@ from behave import *
 
 from inventory.models import *
 from base.models import *
+from accountifie.gl.models import Counterparty
 
 @given(u'there are productlines')
 def impl(context):
@@ -46,10 +47,13 @@ def impl(context):
 @given(u'there are shipments')
 def impl(context):
     for row in context.table:
+        warehouse = Warehouse.objects.filter(label=row['warehouse']).first()
+        sent_by = Counterparty.objects.filter(id=row['sent_by']).first()
         Shipment(arrival_date=row['arrival_date'],
                  description=row['description'],
                  label=row['label'],
-                 destination_id=row['warehouse']).save()
+                 destination=warehouse,
+                 sent_by=sent_by).save()
 
 
 @given(u'there are shipmentlines')
@@ -61,6 +65,17 @@ def impl(context):
                      quantity=row['quantity'],
                      cost=row['cost'],
                      shipment=shpmt).save()
+
+
+@given(u'a shipmentline is booked')
+def impl(context):
+    row = context.table[0]
+    ii = InventoryItem.objects.filter(label=row['inv_item']).first()
+    shpmt = Shipment.objects.filter(label=row['shipment']).first()
+    context.bmo = ShipmentLine(inventory_item=ii,
+                               quantity=row['quantity'],
+                               cost=row['cost'],
+                               shipment=shpmt)
 
 
 @given(u'there are products')

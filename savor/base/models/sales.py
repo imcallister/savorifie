@@ -370,7 +370,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
             for u_sale in self.__unit_sales:
                 inv_items = u_sale.get_gross_sales()
                 for ii in inv_items:
-                    
+
                     product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
@@ -386,4 +386,5 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                     tran['lines'].append((COGS_acct, COGS, self.customer_code, []))
                     tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
+        logger.info('returning %s' % tran['lines'])
         return [tran]

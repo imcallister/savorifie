@@ -1,11 +1,16 @@
 import operator
+from decimal import Decimal
+import logging
 
 from django.db import models
 
-
+from accountifie.toolkit.utils import get_default_company
 import accountifie.gl.bmo
+import accountifie.gl.models
 import accountifie.common.models
+from accountifie.common.api import api_func
 
+logger = logging.getLogger('default')
 
 class Warehouse(accountifie.common.models.McModel):
     description = models.CharField(max_length=200)
@@ -43,8 +48,9 @@ class ShippingType(accountifie.common.models.McModel):
         db_table = 'inventory_shippingtype'
 
 
-class Shipment(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
+class Shipment(accountifie.common.models.McModel):
     arrival_date = models.DateField()
+    sent_by = models.ForeignKey('gl.Counterparty')
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
     destination = models.ForeignKey('inventory.Warehouse', blank=True, null=True)
@@ -57,13 +63,14 @@ class Shipment(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessMod
         db_table = 'inventory_shipment'
 
 
-
-
-class ShipmentLine(accountifie.common.models.McModel):
+class ShipmentLine(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
+    company = models.ForeignKey('gl.Company', default=get_default_company)
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     shipment = models.ForeignKey('inventory.Shipment')
+
+    short_code = 'SHPLN'
 
     def __unicode__(self):
         return '%s:%s' % (self.shipment, self.inventory_item)
@@ -71,6 +78,32 @@ class ShipmentLine(accountifie.common.models.McModel):
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_shipmentline'
+
+    def get_gl_transactions(self):
+
+        logger.info('saving ShipmentLine GL entries')
+        product_line = self.inventory_item.product_line.label
+        inv_item = self.inventory_item.label
+        inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, inv_item)
+        inv_acct = accountifie.gl.models.Account.objects.filter(path=inv_acct_path).first()
+
+        ACCTS_PAYABLE = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
+        ap_acct = accountifie.gl.models.Account.objects.get(id=ACCTS_PAYABLE)
+
+        counterparty = self.shipment.sent_by
+        amount = Decimal(self.cost) * Decimal(self.quantity)
+
+        tran = []
+        tran = dict(company=self.company,
+                    date=self.shipment.arrival_date,
+                    comment="%s" % str(self),
+                    trans_id='%s.%s.LINE' % (self.short_code, self.id),
+                    bmo_id='%s.%s' % (self.short_code, self.id),
+                    lines=[(inv_acct, amount, counterparty, []),
+                           (ap_acct, -amount, counterparty, [])]
+                    )
+        logger.info(tran)
+        return [tran]
 
 
 PACKING_TYPES = (
