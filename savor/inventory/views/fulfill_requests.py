@@ -53,6 +53,8 @@ def create_fulfill_request(warehouse, order_id):
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
+        fulfill_info['use_pdf'] = ch_ship_type.use_pdf
+        fulfill_info['packing_type'] = ch_ship_type.packing_type
 
         if ch_ship_type:
             fulfill_info['bill_to'] = ch_ship_type.bill_to
