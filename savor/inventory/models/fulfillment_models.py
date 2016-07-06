@@ -116,6 +116,7 @@ class ChannelShipmentType(accountifie.common.models.McModel):
     bill_to = models.CharField(max_length=100)
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
+    ship_from = models.ForeignKey(accountifie.common.models.Address, blank=True, null=True)
 
     def __unicode__(self):
         return self.label
@@ -140,6 +141,7 @@ class Fulfillment(accountifie.common.models.McModel):
     bill_to = models.CharField(max_length=100, blank=True, null=True)
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
+    ship_from = models.ForeignKey(accountifie.common.models.Address, blank=True, null=True)
 
     properties = ['updates', 'fulfilllines', 'ship_info', 'latest_status']
 

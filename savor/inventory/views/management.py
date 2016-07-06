@@ -16,14 +16,6 @@ def management(request):
     context['to_be_queued'] = len(api_func('inventory', 'unfulfilled'))
     context['unbatched_fulfillments'] = len(api_func('inventory', 'unbatched_fulfillments'))
 
-
-    print
-    print '=' * 20
-    for e in [x for x in api_func('inventory', 'fulfillment') if x['latest_status']=='requested']:
-        print e
-        print
-    print
-
     context['unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') if x['latest_status']=='requested'])
 
     context['missing_shipping'] = len(api_func('inventory', 'fulfillment', qstring={'missing_shipping': 'true'}))

@@ -30,10 +30,11 @@ class TaxCollector(accountifie.common.models.McModel):
 
 
 class Channel(models.Model):
+    label = models.CharField(max_length=20)
     counterparty = models.ForeignKey('gl.Counterparty')
 
     def __unicode__(self):
-        return self.counterparty.name
+        return self.label
 
 CHANNELS = [
     ['shopify', "Shopify"],
@@ -54,12 +55,12 @@ class UnitSale(accountifie.common.models.McModel):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)
 
     def save(self):
+        models.Model.save(self)
         # need to do FIFO assignment
         to_be_fifod = self.fifo_check()
         if len(to_be_fifod) > 0:
             accounting.models.fifo_assign(self.id, to_be_fifod)
 
-        models.Model.save(self)
 
 
     def fifo_check(self):

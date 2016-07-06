@@ -281,8 +281,8 @@ admin.site.register(NominalTransaction, NominalTransactionAdmin)
 
 
 class ChannelAdmin(admin.ModelAdmin):
-    list_display = ('counterparty',)
-    list_filter = ('counterparty',)
+    list_display = ('label', 'counterparty',)
+    list_filter = ('label', 'counterparty',)
 
 admin.site.register(Channel, ChannelAdmin)
 
