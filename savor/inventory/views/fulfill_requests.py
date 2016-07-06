@@ -104,17 +104,6 @@ def sales_detail(request):
 
 
 
-def _shopify_pick_info(pick_requests):
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
-    for odr in pick_requests:
-        odr['ship_type'] = shopify_standard['ship_type']
-        odr['bill_to'] = shopify_standard['bill_to']
-        odr['use_pdf'] = shopify_standard['use_pdf']
-        odr['packing_type'] = shopify_standard['packing_type']
-        odr['skus'] = api_func('base', 'sale_skus', odr['id'])
-    return pick_requests
-
-
 @login_required
 def thoroughbred_list(request, batch_id):
     batch = BatchRequest.objects.get(id=batch_id)
@@ -130,7 +119,6 @@ def pick_list(request, data, label='shopify_pick_list'):
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
     inventory_names = dict((inv_item['label'], inv_item['description']) \
                            for inv_item in api_func('inventory', 'inventoryitem'))
 
@@ -247,7 +235,7 @@ def fulfill_request(request):
     # 3 get shipping info
     # shopify no wrap shipping
 
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
+    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SAVOR_STANDARD')
     for odr in shopify_no_wrap:
         odr['ship_type'] = shopify_standard['ship_type']
         odr['bill_to'] = shopify_standard['bill_to']
