@@ -30,10 +30,11 @@ class TaxCollector(accountifie.common.models.McModel):
 
 
 class Channel(models.Model):
+    label = models.CharField(max_length=20)
     counterparty = models.ForeignKey('gl.Counterparty')
 
     def __unicode__(self):
-        return self.counterparty.name
+        return self.label
 
 CHANNELS = [
     ['shopify', "Shopify"],
