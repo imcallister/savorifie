@@ -26,7 +26,11 @@ def management(request):
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
 
-    context['thoroughbred_mismatches'] = len(api_func('inventory', 'thoroughbred_mismatch'))
+    thoroughbred_mismatches = api_func('inventory', 'thoroughbred_mismatch')
+    context['thoroughbred_mismatches'] = len(thoroughbred_mismatches)
     context['unreconciled'] = get_table('fulfill_requested')()
+
+    context['whmismatch_columns'] = ['order_id', 'fail_reason']
+    context['whmismatch_rows'] = thoroughbred_mismatches
 
     return render_to_response('inventory/management.html', context, context_instance = RequestContext(request))

@@ -78,7 +78,7 @@ def warehousefulfill(warehouse_pack_id, qstring):
             'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',
             'shipping_address2', 'shipping_address3', 'shipping_city',
             'shipping_zip', 'shipping_province', 'shipping_country',
-            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type_label', 'tracking_number']
+            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type', 'tracking_number']
 
     obj = WarehouseFulfill.objects.get(warehouse_pack_id=warehouse_pack_id)
     obj_data = get_model_data(obj, flds)

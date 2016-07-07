@@ -1,5 +1,7 @@
+from multipledispatch import dispatch
 
 from accountifie.common.api import api_func
+from inventory.models import WarehouseFulfill, Fulfillment
 
 
 def rec_zip(z1, z2):
@@ -11,9 +13,8 @@ def rec_zip(z1, z2):
     else:
         return (z2==z1)
 
-
+@dispatch(dict)
 def thoroughbred_mismatch(qstring):
-
     unfulfilled = api_func('inventory', 'fulfillment', qstring={'status': 'requested'})
     unfulfilled += api_func('inventory', 'fulfillment', qstring={'status': 'partial'})
     warehouse_recds = api_func('inventory', 'warehousefulfill')
@@ -25,8 +26,44 @@ def thoroughbred_mismatch(qstring):
         whouse_recs = [r for r in warehouse_recds if r['savor_order_id']==order_id]
         if len(whouse_recs)>0:
             whouse_record = whouse_recs[0]
-            if whouse_record['skus'] != unfld['skus'] or \
-               not rec_zip(order_data['shipping_zip'], whouse_record['shipping_zip']):
-                mismatched.append({'savor': order_data, 'thoroughbred': whouse_recs})
+
+            if whouse_record['skus'] != unfld['skus']:
+                mismatched.append({'order_id': order_id,
+                                   'fail_reason': 'SKUS'})
+            elif not rec_zip(order_data['shipping_zip'],
+                             whouse_record['shipping_zip']):
+                mismatched.append({'order_id': order_id,
+                                   'fail_reason': 'ZIP'})
 
     return mismatched
+
+@dispatch(str, dict)
+def thoroughbred_mismatch(order_id, qstring):
+    order_data = api_func('base', 'sale', order_id)
+    # for now assume only ever one fulfill
+    wh_fulfill = WarehouseFulfill.objects \
+                                 .filter(savor_order_id=order_id) \
+                                 .values('warehouse_pack_id')[0]
+
+    req_fulfill = Fulfillment.objects \
+                             .filter(order_id=order_id) \
+                             .values('id')[0]
+
+    req_record = api_func('inventory', 'fulfillment', req_fulfill['id'])
+    req_record['shipping_zip'] = order_data['shipping_zip']
+    req_record['shipping_name'] = order_data['shipping_name']
+    whouse_record = api_func('inventory', 'warehousefulfill', wh_fulfill['warehouse_pack_id'])
+
+    output = []
+    flds = ['shipping_name', 'shipping_zip', 'skus']
+
+    def get_row(fld):
+        return {'field': fld,
+                'savor': str(req_record.get(fld, '')),
+                'thoroughbred': str(whouse_record.get(fld, '')),
+                'mismatch': req_record.get(fld, '') != whouse_record.get(fld, '')}
+
+    for fld in flds:
+        output.append(get_row(fld))
+
+    return output

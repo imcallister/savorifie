@@ -150,3 +150,11 @@ def unfulfilled():
                 {'data_field': 'gift_message', 'value': 'Gift Message', 'formatter': 'nameFormatter'},
             ]
     return get_bstrap_table(data_url, row_defs)
+
+def thoroughbred_mismatch():
+    data_url = "/api/inventory/thoroughbred_mismatch/"
+    row_defs = [{'data_field': 'savor', 'value': 'Savor Details', 'formatter': 'nameFormatter'},
+                {'data_field': 'thoroughbred', 'value': 'Thoroughbred Details', 'formatter': 'nameFormatter'},
+                {'data_field': 'mismatch', 'value': 'Mismatch?', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
