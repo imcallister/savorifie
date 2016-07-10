@@ -142,15 +142,12 @@ def locationinventory(qstring):
                                     .select_related('warehouse') \
                                     .prefetch_related(Prefetch('fulfillline_set__inventory_item'))
 
-    ctr = 0
     for fulfill in fulfill_qs:
         location = fulfill.warehouse.label
         if location not in all_shipments:
             all_shipments[location] = {}
 
         amounts = dict((fl.inventory_item.label, fl.quantity) for fl in fulfill.fulfillline_set.all())
-        if location=='MICH':
-            ctr += amounts.get('BE3',0)
         for item in amounts:
             if item not in all_shipments[location]:
                 all_shipments[location][item] = -amounts[item]

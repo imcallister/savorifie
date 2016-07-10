@@ -51,7 +51,7 @@ def make_expense_stubs(cf_data):
                     expense_date=cf['post_date'], start_date=cf['post_date'], amount=-cf['amount'], stub=False,
                     paid_from_id=cf['trans_type_id'], process_date=today, employee_id=unallocated_employee).save()
 
-    return {'new': new_stubs, 'duplicates': len(from_AP)-new_stubs}
+    return {'new': new_stubs, 'duplicates': len(from_AP) - new_stubs}
 
 
 def make_stubs_from_ccard(cc_data):
@@ -71,7 +71,7 @@ def make_stubs_from_ccard(cc_data):
             new_stubs += 1
 
             # if expense acct is on the cashflow then use that
-            if cf['expense_acct_id']:
+            if cc['expense_acct_id']:
                 account_id = cc['expense_acct_id']
             else:
                 account_id = stub_account
