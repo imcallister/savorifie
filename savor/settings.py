@@ -230,10 +230,9 @@ INSTALLED_APPS = (
     'django_admin_bootstrapped',
 
     'django.contrib.admin',
-    'django_bootstrap_typeahead',
+    #'django_bootstrap_typeahead',
     #'django_graphiql',
-    #'graphene.contrib.django',
-    
+    #'graphene.contrib.django',    
     'debug_toolbar',
     'django_behave',
 

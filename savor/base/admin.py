@@ -6,9 +6,6 @@ from django.http import HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
-from django_bootstrap_typeahead.fields import *
-from django.db.models import Q
-from django.db.models import Prefetch
 
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -49,20 +46,6 @@ class UnmatchedExpense(SimpleListFilter):
             return qs.exclude(account_id=unalloc_account)
 
 
-class CashflowTAForm(forms.ModelForm):
-    counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
-
-    def __init__(self, *args, **kwargs):
-        super(CashflowTAForm, self).__init__(*args, **kwargs)
-        rel = Cashflow._meta.get_field('counterparty').rel
-        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
-                                                                       rel, 
-                                                                       admin.site)
-    class Meta:
-        model = Cashflow
-        fields = ('__all__')
-
-
 class CashflowDALForm(forms.ModelForm):
     counterparty = accountifie.gl.widgets.counterparty_widget()
 
@@ -76,6 +59,7 @@ class CashflowDALForm(forms.ModelForm):
     class Meta:
         model = Cashflow
         fields = ('__all__')
+
 
 
 class CashflowAdmin(SimpleHistoryAdmin):
@@ -104,20 +88,6 @@ class CashflowAdmin(SimpleHistoryAdmin):
         return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
 
 admin.site.register(Cashflow, CashflowAdmin)
-
-
-class CreditCardTransTAForm(forms.ModelForm):
-    counterparty = TypeaheadField(queryset=accountifie.gl.models.Counterparty.objects.all())
-
-    def __init__(self, *args, **kwargs):
-        super(CreditCardTransTAForm, self).__init__(*args, **kwargs)
-        rel = CreditCardTrans._meta.get_field('counterparty').rel
-        self.fields['counterparty'].widget = RelatedFieldWidgetWrapper(self.fields['counterparty'].widget, 
-                                                                       rel, 
-                                                                       admin.site)
-    class Meta:
-        model = CreditCardTrans
-        fields = ('__all__')
 
 
 class CreditCardTransDALForm(forms.ModelForm):
@@ -157,19 +127,6 @@ class CreditCardTransAdmin(SimpleHistoryAdmin):
 
 
 admin.site.register(CreditCardTrans, CreditCardTransAdmin)
-
-class ExpenseTAForm(forms.ModelForm):
-    account = TypeaheadField(queryset=accountifie.gl.models.Account.objects.all())
-
-    def __init__(self, *args, **kwargs):
-        super(ExpenseTAForm, self).__init__(*args, **kwargs)
-        rel = Expense._meta.get_field('account').rel
-        self.fields['account'].widget = RelatedFieldWidgetWrapper(self.fields['account'].widget, 
-                                                                       rel, 
-                                                                       admin.site)
-    class Meta:
-        model = Expense
-        fields = ('__all__')
 
 
 class ExpenseDALForm(forms.ModelForm):
