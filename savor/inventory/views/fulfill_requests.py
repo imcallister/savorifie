@@ -158,7 +158,7 @@ def pick_list(request, data, label='shopify_pick_list'):
     for f_req in data:
         sale_info = api_func('base', 'sale', f_req['order_id'])
 
-        if sale_info['gift_wrapping'] == 'False' and sale_info['customer_code']!='unknown':
+        if sale_info['customer_code']!='unknown':
             for fld in hack_list:
                 f_req[fld] = sale_info[fld]
 

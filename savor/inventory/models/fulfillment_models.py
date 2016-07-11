@@ -80,14 +80,20 @@ class ShipmentLine(accountifie.common.models.McModel, accountifie.gl.bmo.Busines
         db_table = 'inventory_shipmentline'
 
     def get_gl_transactions(self):
+        """
+        Make transfers to inventory accounts.
 
+        Inventory costs are booked to the 'omnibus'.
+        inventory account. This function books transfers
+        to the inventory accounts specific to each SKU.
+        """
         product_line = self.inventory_item.product_line.label
         inv_item = self.inventory_item.label
         inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, inv_item)
         inv_acct = accountifie.gl.models.Account.objects.filter(path=inv_acct_path).first()
 
-        ACCTS_PAYABLE = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
-        ap_acct = accountifie.gl.models.Account.objects.get(id=ACCTS_PAYABLE)
+        GEN_INVENTORY = api_func('environment', 'variable', 'GL_INVENTORY')
+        gen_inv_acct = accountifie.gl.models.Account.objects.get(id=GEN_INVENTORY)
 
         counterparty = self.shipment.sent_by
         amount = Decimal(self.cost) * Decimal(self.quantity)
@@ -99,7 +105,7 @@ class ShipmentLine(accountifie.common.models.McModel, accountifie.gl.bmo.Busines
                     trans_id='%s.%s.LINE' % (self.short_code, self.id),
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[(inv_acct, amount, counterparty, []),
-                           (ap_acct, -amount, counterparty, [])]
+                           (gen_inv_acct, -amount, counterparty, [])]
                     )
         return [tran]
 
