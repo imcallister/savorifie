@@ -37,6 +37,10 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
     external_id = models.CharField(max_length=20, null=True)
     trans_type = models.ForeignKey('gl.Account', null=True, blank=True, help_text="We need to match this up")
     counterparty = models.ForeignKey('gl.Counterparty', null=True, blank=True, help_text="We need to match this up")
+    expense_acct = models.ForeignKey('gl.Account', null=True, blank=True,
+                                     related_name='expense_acct',
+                                     help_text='Optional. For related expense created from Credit Card Trans')
+
     tag = models.CharField(max_length=30, null=True, blank=True)
     
     history = HistoricalRecords()

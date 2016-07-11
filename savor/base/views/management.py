@@ -2,6 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.safestring import mark_safe
+from django.core.management import call_command
+from django.http import HttpResponseRedirect
 
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
@@ -10,6 +12,10 @@ from accountifie.gl.models import ExternalBalance, ExternalAccount
 from base.models import Expense, Cashflow, Sale, CreditCardTrans
 
 
+
+def assign_COGS(request):
+    call_command('calc_COGS')
+    return HttpResponseRedirect("/maintenance")
 
 @login_required
 def management(request):

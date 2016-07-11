@@ -36,15 +36,22 @@ def make_expense_stubs(cf_data):
     ap_account = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
 
     new_stubs = 0
-    from_AP = [cf for cf in cf_data if cf['trans_type_id']==ap_account]
+    from_AP = [cf for cf in cf_data if cf['trans_type_id'] == ap_account]
     for cf in from_AP:
-        if Expense.objects.filter(from_cf_id=cf['id']).count()==0:
+        if Expense.objects.filter(from_cf_id=cf['id']).count() == 0:
             new_stubs += 1
-            Expense(comment=cf['description'], counterparty_id=cf['counterparty_id'], account_id=stub_account, from_cf_id=cf['id'],
+
+            # if expense acct is on the cashflow then use that
+            if cf['expense_acct_id']:
+                account_id = cf['expense_acct_id']
+            else:
+                account_id = stub_account
+
+            Expense(comment=cf['description'], counterparty_id=cf['counterparty_id'], account_id=account_id, from_cf_id=cf['id'],
                     expense_date=cf['post_date'], start_date=cf['post_date'], amount=-cf['amount'], stub=False,
                     paid_from_id=cf['trans_type_id'], process_date=today, employee_id=unallocated_employee).save()
 
-    return {'new': new_stubs, 'duplicates': len(from_AP)-new_stubs}
+    return {'new': new_stubs, 'duplicates': len(from_AP) - new_stubs}
 
 
 def make_stubs_from_ccard(cc_data):
@@ -62,6 +69,13 @@ def make_stubs_from_ccard(cc_data):
     for cc in cc_data:
         if Expense.objects.filter(from_ccard_id=cc['id']).count()==0:
             new_stubs += 1
+
+            # if expense acct is on the cashflow then use that
+            if cc['expense_acct_id']:
+                account_id = cc['expense_acct_id']
+            else:
+                account_id = stub_account
+
             Expense(comment=cc['description'], counterparty_id=cc['counterparty_id'],
                     account_id=stub_account, from_ccard_id=cc['id'],
                     expense_date=cc['trans_date'], start_date=cc['post_date'],
@@ -222,9 +236,10 @@ class Expense(models.Model, BusinessModelObject):
                         trans_id='%s.%s.%s' % (self.short_code, self.id, 'CPLZ'),
                         bmo_id='%s.%s' % (self.short_code, self.id),
                         comment= "Capitalized Asset, %s: %s" % (self.id, self.comment),
-                        lines=[
-                            (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                            ]
+                        lines=[(ACCTS_PAYABLE,
+                                DZERO - Decimal(self.amount),
+                                self.counterparty,
+                                [])]
                     )
 
             tran['lines'] += self._get_exp_lines(debit)
@@ -247,8 +262,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "Depreciating asset,  %s: %s" % (self.id, self.comment),
                     lines=[
-                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                        (acc_asset_dep, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty, []),
+                        (acc_asset_dep, Decimal(self.amount), self.counterparty, []),
                         ]
                     ))
 
@@ -265,8 +280,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (PREPAID_EXP, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (PREPAID_EXP, Decimal(self.amount), self.counterparty, []),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),
                         ]
                     ))
 
@@ -278,7 +293,7 @@ class Expense(models.Model, BusinessModelObject):
                             trans_id='%s.%s.%s' % (self.short_code, self.id, 'EXPS'),
                             bmo_id=self.id,
                             comment= "Expensing %s: %s" % (self.id, self.comment),
-                            lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
+                            lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty, []),]
                         )
                 tran['lines'] += self._get_exp_lines(debit)
                 trans.append(tran)
@@ -294,8 +309,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),
+                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty, []),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),
                         ]
                     ))
 
@@ -307,7 +322,7 @@ class Expense(models.Model, BusinessModelObject):
                             trans_id='%s.%s.%s' % (self.short_code, self.id, 'AL'),
                             bmo_id='%s.%s' % (self.short_code, self.id),
                             comment= "Accruing %s: %s" % (self.id, self.comment),
-                            lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty, ['project_%s' % self.project.id]),]
+                            lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty, []),]
                         )
                 
                 tran['lines'] += self._get_exp_lines(debit)

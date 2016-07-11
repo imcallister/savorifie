@@ -26,6 +26,8 @@ class CreditCardTrans(models.Model, BusinessModelObject):
     payee = models.CharField(max_length=200, null=True, blank=True)
     card_number = models.CharField(max_length=20, null=True, blank=True)
     expense_comment = models.CharField(max_length=200, null=True, blank=True)
+    expense_acct = models.ForeignKey('gl.Account', null=True, blank=True,
+                                     help_text='Optional. For related expense created from Credit Card Trans')
 
     def __unicode__(self):
         return '%s:%s' % (str(self.card_company), self.trans_id)

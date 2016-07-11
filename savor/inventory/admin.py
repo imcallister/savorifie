@@ -6,7 +6,6 @@ from django.contrib.admin import SimpleListFilter
 
 
 from .models import *
-from .views import shopify_pick_list
 from accountifie.common.api import api_func
 #from accountifie.gl.bmo import on_bmo_save
 
@@ -100,9 +99,6 @@ admin.site.register(Shipment, ShipmentAdmin)
 
 
 
-
-
-
 #special signal as normal GL update doesn't work with Transfers
 #fulfill_saved = django.dispatch.Signal(providing_args=[])
 #fulfill_saved.connect(on_bmo_save)
@@ -137,22 +133,6 @@ class FulfillmentAdmin(admin.ModelAdmin):
     list_display = ('__unicode__', 'request_date', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
     list_filter = ('warehouse', ShippingMissing,)
     inlines = [FulfillLineInline, FulfillUpdateInline]
-    actions = ['output_to_picklist']
-
-    def output_to_picklist(self, request, queryset):
-        return shopify_pick_list(request, queryset.values())
-
-    """
-    def response_change(self, request, new_object):
-        "They saved a change - send signal"
-        fulfill_saved.send(new_object)
-        return admin.ModelAdmin.response_change(self, request, new_object)
-
-    def response_add(self, request, obj):
-        "They added a new transfer - send signal"
-        fulfill_saved.send(obj)
-        return admin.ModelAdmin.response_add(self, request, obj)
-    """
 
 admin.site.register(Fulfillment, FulfillmentAdmin)
 
@@ -211,7 +191,9 @@ class WarehouseFulfillLineInline(admin.TabularInline):
 
 
 class WarehouseFulfillAdmin(admin.ModelAdmin):
-    list_display = ('savor_order', 'savor_transfer', 'warehouse', 'warehouse_pack_id', 'ship_date', 'shipping_type', 'tracking_number',)
+    list_display = ('savor_order', 'savor_transfer', 'warehouse',
+                    'warehouse_pack_id', 'ship_date', 'shipping_type',
+                    'tracking_number', 'shipping_zip',)
     inlines = [WarehouseFulfillLineInline,]
 
     """

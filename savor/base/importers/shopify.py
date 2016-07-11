@@ -74,7 +74,7 @@ def process_shopify(file_name):
     # any pre-formatting of data here
     sales['Shipping Zip'] = sales['Shipping Zip'].map(lambda x: str(x).replace("'",""))
 
-    channel_ship_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')['id']
+    channel_ship_standard = api_func('inventory', 'channelshipmenttype', 'SAVOR_STANDARD')['id']
 
     new_sales_ctr = 0
     exist_sales_ctr = 0

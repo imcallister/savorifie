@@ -10,6 +10,7 @@ from django.utils.safestring import mark_safe
 
 
 from accountifie.common.api import api_func
+from accountifie.common.models import Address
 from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
 from inventory.models import *
@@ -47,12 +48,15 @@ def create_fulfill_request(warehouse, order_id):
 
         ch_ship_type = ChannelShipmentType.objects \
                                           .filter(label=order['ship_type']) \
-                                          .first() \
+                                          .first()
 
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
+        fulfill_info['use_pdf'] = ch_ship_type.use_pdf
+        fulfill_info['packing_type'] = ch_ship_type.packing_type
+        fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
 
         if ch_ship_type:
             fulfill_info['bill_to'] = ch_ship_type.bill_to
@@ -100,37 +104,25 @@ def sales_detail(request):
 
 
 
-def _shopify_pick_info(pick_requests):
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
-    for odr in pick_requests:
-        odr['ship_type'] = shopify_standard['ship_type']
-        odr['bill_to'] = shopify_standard['bill_to']
-        odr['use_pdf'] = shopify_standard['use_pdf']
-        odr['packing_type'] = shopify_standard['packing_type']
-        odr['skus'] = api_func('base', 'sale_skus', odr['id'])
-    return pick_requests
-
-
 @login_required
 def thoroughbred_list(request, batch_id):
     batch = BatchRequest.objects.get(id=batch_id)
-    pick_list = batch.fulfillments.all()
-    return shopify_pick_list(request, pick_list.values(), label='thoroughbred_batch_%s' % str(batch_id))
+    fulfill_list = batch.fulfillments.all()
+    return pick_list(request, fulfill_list.values(),
+                     label='thoroughbred_batch_%s' % str(batch_id))
 
 
 @login_required
-def shopify_pick_list(request, data, label='shopify_pick_list'):
+def pick_list(request, data, label='shopify_pick_list'):
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
-    #data = api_func('inventory', 'shopify_no_wrap_request')
-    # want to create fill requests for each
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
-    inventory_names = dict((inv_item['label'], inv_item['description']) for inv_item in api_func('inventory', 'inventoryitem'))
+    inventory_names = dict((inv_item['label'], inv_item['description']) \
+                           for inv_item in api_func('inventory', 'inventoryitem'))
 
-    header_order = ['id', 'channel', 'shipping_name','shipping_company', 'external_routing_id',
+    header_order = ['id', 'channel', 'shipping_name', 'shipping_company', 'external_routing_id',
                     'shipping_address1', 'shipping_address2',
                     'shipping_city', 'shipping_zip', 'shipping_province',
                     'shipping_country', 'shipping_phone',
@@ -149,10 +141,10 @@ def shopify_pick_list(request, data, label='shopify_pick_list'):
 
     header_row = [unicode(headers[x]).encode('utf-8') for x in header_order]
     header_row += [u'Item', u'Item Name', u'Quantity']
+    header_row += ['Ship From Company', 'Ship From Address1',
+                   'Ship From Address2', 'Ship From City',
+                   'Ship From ZIP'] 
     writer.writerow(header_row)
-
-    today = get_today()
-    warehouse = Warehouse.objects.get(label='MICH')
 
     shipping_types = dict((st['id'], st) for st in api_func('inventory', 'shippingtype'))
 
@@ -166,7 +158,7 @@ def shopify_pick_list(request, data, label='shopify_pick_list'):
     for f_req in data:
         sale_info = api_func('base', 'sale', f_req['order_id'])
 
-        if sale_info['gift_wrapping'] == 'False' and sale_info['customer_code']!='unknown':
+        if sale_info['customer_code']!='unknown':
             for fld in hack_list:
                 f_req[fld] = sale_info[fld]
 
@@ -177,8 +169,6 @@ def shopify_pick_list(request, data, label='shopify_pick_list'):
                 f_req['gift_message'] = None
 
             f_req['ship_type'] = shipping_types[str(f_req['ship_type_id'])]['label']
-            f_req['use_pdf'] = shopify_standard['use_pdf']
-            f_req['packing_type'] = shopify_standard['packing_type']
             f_req['skus'] = api_func('base', 'sale_skus', f_req['order_id'])
             f_req['id'] = 'SAL.' + str(f_req['id'])
             f_req['shipping_zip'] = str("'" + f_req['shipping_zip'])
@@ -187,6 +177,12 @@ def shopify_pick_list(request, data, label='shopify_pick_list'):
             skus = f_req['skus'].keys()
             sku = skus[0]
             line += [sku, inventory_names[sku], f_req['skus'][sku]]
+
+            # add the ship_from info
+            ship_from = Address.objects.filter(id=f_req['ship_from_id']).first()
+            if ship_from:
+                line += [getattr(ship_from, fld) for fld in ['company', 'address1', 'address2',
+                                                             'city', 'postal_code']]
             writer.writerow(line)
 
             # if more than 1 sku..
@@ -196,7 +192,7 @@ def shopify_pick_list(request, data, label='shopify_pick_list'):
                 line += [sku, inventory_names[sku], f_req['skus'][sku]]
                 writer.writerow(line)
 
-            writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3))
+            writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3 + 5))
 
     return response
 
@@ -239,7 +235,7 @@ def fulfill_request(request):
     # 3 get shipping info
     # shopify no wrap shipping
 
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
+    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SAVOR_STANDARD')
     for odr in shopify_no_wrap:
         odr['ship_type'] = shopify_standard['ship_type']
         odr['bill_to'] = shopify_standard['bill_to']

@@ -16,14 +16,19 @@ ENVIRON_DIR = os.path.realpath(os.path.join(PROJECT_DIR, '..'))
 
 CLIENT_PROJECT = os.path.split(ENVIRON_DIR)[1]
 
-DEVELOP = True
-DEBUG = DEVELOP or (os.environ.get('DEBUG', 0) == '1')
-
 # can be overrided by setting the accountifie_SVC_URL dyn variable on the /admin/system/variable/ page
 ACCOUNTIFIE_SVC_URL = os.environ.get('ACCOUNTIFIE_SVC_URL', 'http://localhost:5124')
 
 # can be overrided by setting the DEFAULT_GL_STRATEGY dyn variable on the /admin/system/variable/ page
 DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
+
+try:
+    from localsettings import LOCAL_DEBUG
+    DEBUG = LOCAL_DEBUG
+    DEVELOP = LOCAL_DEBUG
+except ImportError:
+    DEBUG = False
+    DEVELOP = False
 
 try:
     from localsettings import DB_NAME
@@ -56,7 +61,9 @@ ADMINS = (
 MANAGERS = ADMINS
 #Required for Django 1.5+.  Otherwise live servers in non-debug mode complain.
 #It checks host headers against this list.
-ALLOWED_HOSTS = [CLIENT_PROJECT, '.savor.us']
+#ALLOWED_HOSTS = [CLIENT_PROJECT, '.savor.us']
+
+ALLOWED_HOSTS = ['*']
 
 if DEVELOP:
     ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
@@ -72,6 +79,11 @@ DATABASES = {
         'OPTIONS': {}
     },
 }
+
+if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
+TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
 
 TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-gb'
@@ -200,6 +212,8 @@ INSTALLED_APPS = (
     'betterforms',
     'base',
     'inventory',
+    'accounting',
+    'testsuite',
 
 
     'accountifie.common',
@@ -211,14 +225,16 @@ INSTALLED_APPS = (
     'accountifie.tasks',
     'accountifie.cal',
 
+    'dal',
+    'dal_select2',
     'django_admin_bootstrapped',
+
     'django.contrib.admin',
     #'django_bootstrap_typeahead',
     #'django_graphiql',
-    #'graphene.contrib.django',
-
-    #'debug_toolbar',
-    
+    #'graphene.contrib.django',    
+    'debug_toolbar',
+    'django_behave',
 
 )
 
@@ -330,7 +346,6 @@ MESSAGE_TAGS = {
     }
 
 
-    
 DASHBOARD_TITLE = CLIENT_PROJECT + ' Dashboard'
 THUMBNAIL_SIZES = (
     (120,80),

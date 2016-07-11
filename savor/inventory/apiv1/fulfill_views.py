@@ -1,6 +1,7 @@
 import csv
 from multipledispatch import dispatch
 import itertools
+import logging
 
 from django.db.models import Prefetch
 
@@ -8,6 +9,7 @@ from accountifie.common.api import api_func
 from inventory.models import *
 from base.models import *
 
+logger = logging.getLogger('default')
 
 def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
@@ -16,8 +18,14 @@ def get_model_data(instance, flds):
 
 def batchrequest(qstring):
     batches = BatchRequest.objects.all() \
-                                  .select_related('location')
+                                  .select_related('location') \
+                                  .prefetch_related('fulfillments')
     return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
+
+
+def shipmentline(qstring):
+    shpmts = ShipmentLine.objects.all()
+    return [shpmt.to_json() for shpmt in shpmts]
 
 
 def batched_fulfillments(qstring):
@@ -70,7 +78,7 @@ def warehousefulfill(warehouse_pack_id, qstring):
             'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',
             'shipping_address2', 'shipping_address3', 'shipping_city',
             'shipping_zip', 'shipping_province', 'shipping_country',
-            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type_label', 'tracking_number']
+            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type', 'tracking_number']
 
     obj = WarehouseFulfill.objects.get(warehouse_pack_id=warehouse_pack_id)
     obj_data = get_model_data(obj, flds)
@@ -267,20 +275,6 @@ def fulfill_requested(qstring):
         return dict((k, v) for k, v in d.iteritems() if k in flds)
 
     return [get_info(x.to_json(), flds) for x in incomplete_sales]
-
-
-def shopify_no_wrap_request(qstring):
-    unfulfilled = api_func('inventory', 'unfulfilled')
-    shopify_no_wrap = [odr for odr in unfulfilled if odr['gift_wrapping'] == 'False' and odr['channel']=='Shopify' and odr['customer_code']!='unknown']
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SHOPIFY_STANDARD')
-    for odr in shopify_no_wrap:
-        odr['ship_type'] = shopify_standard['ship_type']
-        odr['bill_to'] = shopify_standard['bill_to']
-        odr['use_pdf'] = shopify_standard['use_pdf']
-        odr['packing_type'] = shopify_standard['packing_type']
-        odr['skus'] = api_func('base', 'sale_skus', odr['id'])
-
-    return shopify_no_wrap
 
 
 def fulfill_request(qstring):
