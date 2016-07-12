@@ -56,6 +56,7 @@ def daily(request):
 
     query_manager = QueryManager(gl_strategy=gl_strategy)
     ap_table = query_manager.balance_by_cparty(company_id, ['3000'])
+    ar_table = query_manager.balance_by_cparty(company_id, ['1100'])
     prepaid_table = query_manager.balance_by_cparty(company_id, ['1250','1251'], to_date=today)
     al_table = query_manager.balance_by_cparty(company_id, ['3010','3011','3012','3040','3050'], to_date=today)
 
@@ -71,6 +72,12 @@ def daily(request):
         if abs(ap_table.loc[i]) > 1:
             drilldown = '/reporting/history/account/3000/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
             ap_rows.append([i, ap_table.loc[i], drilldown])
+
+    debtor_rows = []
+    for i in ar_table.index:
+        if abs(ar_table.loc[i]) > 1:
+            drilldown = '/reporting/history/account/1100/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
+            debtor_rows.append([i, ar_table.loc[i], drilldown])
 
     prepaid_rows = []
     for i in prepaid_table.index:
@@ -115,6 +122,7 @@ def daily(request):
         expense_count=expense_count,
         expense_latest=expense_latest,
         creditor_rows=creditor_rows,
+        debtor_rows=debtor_rows,
         prepaid_rows=prepaid_rows,
         al_rows=al_rows,
         incomplete_rows=incomplete_rows,
