@@ -5,6 +5,7 @@ import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Prefetch
+from accountifie.common.api import api_func
 
 from accountifie.query.query_manager import QueryManager
 from base.models import SalesTax, TaxCollector, Sale
@@ -50,6 +51,29 @@ def output_salestax(request):
     writer.writerow(header_row)
     for st in all_st:
         line = [__get_salestax_data(st).get(c,'') for c in header_row]
+        writer.writerow(line)
+    return response
+
+
+@login_required
+def allsales_dump(request):
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="allsales.csv"'
+    writer = csv.writer(response)
+
+    all_sales = api_func('base', 'sale')
+
+    header_row = ['label', 'channel', 'customer_code', 'shipping_name',
+                  'items_string', 'sale_date', 'shipping_company', 
+                  'notification_email', 'shipping_phone'
+                  'shipping_address1', 'shipping_address2', 'shipping_city',
+                  'shipping_province', 'shipping_zip', 'shipping_country',
+                  ]
+
+    writer.writerow(header_row)
+    for sl in all_sales:
+        line = [sl.get(f,'') for f in header_row]
         writer.writerow(line)
     return response
 

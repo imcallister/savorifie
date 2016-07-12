@@ -1,7 +1,7 @@
 {% extends base_template %}
 
 
-{% block title %}General ledger index{% endblock %}
+{% block title %}Reporting index{% endblock %}
 
 {% block breadcrumb %}
     <li><a href="/">Home</a></li>
@@ -19,7 +19,7 @@
 
              <div class="tab-pane panel panel-default">
                 <div class="panel-heading">
-                            <h3 class="panel-title"><a href="/gl/">Quick Links</a></h3>
+                            <h3 class="panel-title"><a href="/gl/">Accounting Quick Links</a></h3>
                 </div>
 
                 <div class="panel-body">
@@ -394,18 +394,9 @@
 
             </div>
 
-            
-        </div>
-
-    
-
-
-
-        <div class="col-md-6">
-            
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><a href="/gl/">Schedules</a></h3>
+                    <h3 class="panel-title"><a href="/gl/">Amortization and Depreciation</a></h3>
                 </div>
                 <div class="panel-body">
 
@@ -433,6 +424,27 @@
                         <a href="/reporting/history/path/assets_intang/?year=2015&incl=depreciation,amortization">2015</a>
                     </p>
                     
+                </div>
+            </div>
+        </div>
+
+    
+
+
+
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><a href="/gl/">Tactical Reports</a></h3>
+                </div>
+                <div class="panel-body">
+
+                    <a href="/reporting/history/path/assets_noncurr_premandequip/?year=2013&excl=depreciation,amortization">All Sales</a>,
+                    <p>Sales Tax Reports
+                        <a href="/reporting/history/path/assets_noncurr_premandequip/?year=2013&incl=depreciation,amortization">2013</a>,
+                        <a href="/reporting/history/path/assets_noncurr_premandequip/?year=2014&incl=depreciation,amortization">2014</a>,
+                        <a href="/reporting/history/path/assets_noncurr_premandequip/?year=2015&incl=depreciation,amortization">2015</a>,
+                    </p>
                 </div>
             </div>
 
