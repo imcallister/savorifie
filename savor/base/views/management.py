@@ -32,7 +32,8 @@ def management(request):
 
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
     context['incomplete_banking'] = cashflows.filter(counterparty=None).count()
-    context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count()
+    context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count() + \
+                                  CreditCardTrans.objects.filter(counterparty_id='unknown').count()
 
     gl_strategy = request.GET.get('gl_strategy', None)
     query_manager = QueryManager(gl_strategy=gl_strategy)
