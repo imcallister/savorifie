@@ -34,11 +34,12 @@ def order_upload(request):
         file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
         dupes, new_packs, missing_ship_codes = process_thoroughbred(file_name_with_timestamp)
         messages.success(request, 'Loaded thoroughbred file: %d new records and %d duplicate records' % (new_packs, dupes))
-        messages.error(request, 'Missing shippint types: %d ' % (missing_ship_codes))
+        messages.error(request, 'Missing shipping types: %d ' % (missing_ship_codes))
         context = {}
         #return render_to_response('base/uploaded.html', context, context_instance=RequestContext(request))
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
+        context = {}
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the shopify file provided, please see below')
         return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
@@ -114,6 +115,6 @@ def process_thoroughbred(file_name):
                     line_obj = WarehouseFulfillLine(**pack_line)
                     line_obj.save()
         except:
-            logger.error('failed to load %s' % savor_request_id)
+            logger.error('Thoroughbred record: failed to load %s' % savor_request_id)
 
     return exist_recs_ctr, new_recs_ctr, missing_ship_codes
