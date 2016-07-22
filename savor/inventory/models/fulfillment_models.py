@@ -1,3 +1,5 @@
+"""Models related to creating requests for fulfillment."""
+
 import operator
 from decimal import Decimal
 import logging
@@ -13,6 +15,7 @@ from accountifie.common.api import api_func
 logger = logging.getLogger('default')
 
 class Warehouse(accountifie.common.models.McModel):
+    """docstring for warehouse"""
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
 
@@ -300,7 +303,7 @@ class WarehouseFulfill(accountifie.common.models.McModel):
 class WarehouseFulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
-    warehouse_fulfill = models.ForeignKey(WarehouseFulfill)
+    warehouse_fulfill = models.ForeignKey(WarehouseFulfill, related_name='lines')
 
     def __unicode__(self):
         return '%s: %d %s' % (str(self.warehouse_fulfill), self.quantity, str(self.inventory_item))

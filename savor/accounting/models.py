@@ -12,8 +12,8 @@ def fifo_assign(unit_sale_id, to_assign):
     ship_lines = api_func('inventory', 'shipmentline')
     avail_slines = {}
     for l in ship_lines:
-        if l['inventory_item'] not in avail_slines:
-            avail_slines[l['inventory_item']] = l['id']
+        if l['inventory_item_label'] not in avail_slines:
+            avail_slines[l['inventory_item_label']] = l['id']
 
     for sku in to_assign:
         fifo_info = {}

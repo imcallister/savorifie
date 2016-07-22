@@ -3,7 +3,7 @@ from multipledispatch import dispatch
 import itertools
 import logging
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, F
 
 from accountifie.common.api import api_func
 from inventory.models import *
@@ -11,21 +11,35 @@ from base.models import *
 
 logger = logging.getLogger('default')
 
+
+# common patterns
+# select_related ... expand
+# prefetch_related ... append related set
+# properties ... 
+# return as dict
+
 def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
 
 
 def batchrequest(qstring):
-    batches = BatchRequest.objects.all() \
-                                  .select_related('location') \
-                                  .prefetch_related('fulfillments')
-    return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
+    batches = BatchRequest.objects \
+                          .annotate(fulfillments_count=Count('fulfillments')) \
+                          .annotate(location_label=F('location__label')) \
+                          .all()  \
+                          .values()
+    return batches
 
 
 def shipmentline(qstring):
-    shpmts = ShipmentLine.objects.all()
-    return [shpmt.to_json() for shpmt in shpmts]
+    shpmts = ShipmentLine.objects \
+                         .annotate(inventory_item_label=F('inventory_item__label')) \
+                         .annotate(shipment_label=F('shipment__label')) \
+                         .all() \
+                         .values()
+
+    return shpmts
 
 
 def batched_fulfillments(qstring):

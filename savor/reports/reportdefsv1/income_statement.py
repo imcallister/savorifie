@@ -34,7 +34,7 @@ class IncomeStatement(Report):
     def calcs(self):
         table_data = []
 
-        top_level_paths = ['equity.retearnings.' + x for x in ['income', 'opexp']]
+        top_level_paths = ['equity.retearnings.' + x for x in ['sales', 'income', 'opexp']]
 
         path_totals = {}
         for table_path in top_level_paths:
