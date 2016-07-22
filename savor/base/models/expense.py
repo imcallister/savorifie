@@ -77,7 +77,7 @@ def make_stubs_from_ccard(cc_data):
                 account_id = stub_account
 
             Expense(comment=cc['description'], counterparty_id=cc['counterparty_id'],
-                    account_id=stub_account, from_ccard_id=cc['id'],
+                    account_id=account_id, from_ccard_id=cc['id'],
                     expense_date=cc['trans_date'], start_date=cc['post_date'],
                     amount=-cc['amount'], stub=False, paid_from_id=ap_account,
                     process_date=today, employee_id=unallocated_employee).save()
