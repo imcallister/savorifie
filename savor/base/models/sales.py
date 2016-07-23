@@ -279,7 +279,10 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         return total
 
     def payee(self):
-        return self.channel.counterparty
+        if self.channel.label == 'SAV':
+            return self.customer_code
+        else:
+            return self.channel.counterparty
 
 
     def _get_special_account(self):
@@ -387,4 +390,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                     tran['lines'].append((COGS_acct, COGS, self.customer_code, []))
                     tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
+        print '=' * 20
+        print tran
+        print '=' * 20
         return [tran]
