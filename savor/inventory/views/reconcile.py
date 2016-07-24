@@ -46,9 +46,9 @@ def reconcile_warehouse(request):
         whouse_recs = [r for r in warehouse_recds if r['savor_order_id']==order_id]
         if len(whouse_recs)>0:
             whouse_record = whouse_recs[0]
-
             if whouse_record['skus'] == unfld['skus'] and \
-                not rec_zip(order_data['shipping_zip'], whouse_record['shipping_zip']):
+                rec_zip(order_data['shipping_zip'], whouse_record['shipping_zip']):
+
                 new_fulfilled += 1
                 # how to set it to fulfilled....
                 post_data = {}
