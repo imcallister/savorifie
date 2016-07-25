@@ -237,6 +237,8 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'django_behave',
 
+    'rest_framework',
+
 )
 
 LOGIN_REDIRECT_URL = '/'

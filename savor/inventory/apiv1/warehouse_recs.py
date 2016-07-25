@@ -18,7 +18,6 @@ def thoroughbred_mismatch(qstring):
     unfulfilled = api_func('inventory', 'fulfillment', qstring={'status': 'requested'})
     unfulfilled += api_func('inventory', 'fulfillment', qstring={'status': 'partial'})
     warehouse_recds = api_func('inventory', 'warehousefulfill')
-
     mismatched = []
     for unfld in unfulfilled:
         order_id = unfld['order_id']

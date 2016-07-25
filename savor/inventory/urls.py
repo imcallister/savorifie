@@ -1,4 +1,6 @@
 from django.conf.urls import patterns, include, url
+from rest_framework.urlpatterns import format_suffix_patterns
+from .views import model_views
 
 urlpatterns = patterns('',
     url(r'inventory/sales_history', 'inventory.views.sales_detail'),
@@ -14,3 +16,12 @@ urlpatterns = patterns('',
     url(r'^inventory/management/$', 'inventory.views.management'),
     url(r'^inventory/$', 'inventory.views.main'),
 )
+
+
+urlpatterns += format_suffix_patterns([
+    url(r'^warehouse/$', model_views.WarehouseList.as_view()),
+    url(r'^warehouse/(?P<pk>[0-9]+)/$', model_views.WarehouseDetail.as_view()),
+
+    url(r'^fulfillment/$', model_views.FulfillmentList.as_view()),
+    url(r'^fulfillment/(?P<pk>[0-9]+)/$', model_views.FulfillmentDetail.as_view()),
+])

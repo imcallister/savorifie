@@ -204,7 +204,7 @@ class FulfillUpdate(accountifie.common.models.McModel):
 class FulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
-    fulfillment = models.ForeignKey('inventory.Fulfillment')
+    fulfillment = models.ForeignKey('inventory.Fulfillment', related_name='fulfill_lines')
 
     class Meta:
         app_label = 'inventory'
@@ -303,7 +303,7 @@ class WarehouseFulfill(accountifie.common.models.McModel):
 class WarehouseFulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
-    warehouse_fulfill = models.ForeignKey(WarehouseFulfill, related_name='lines')
+    warehouse_fulfill = models.ForeignKey(WarehouseFulfill)
 
     def __unicode__(self):
         return '%s: %d %s' % (str(self.warehouse_fulfill), self.quantity, str(self.inventory_item))
