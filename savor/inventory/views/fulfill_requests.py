@@ -41,6 +41,8 @@ def create_fulfill_request(warehouse, order_id):
         return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
         return 'WAREHOUSE_NOT_RECOGNISED'
+    elif order['ship_type'] == 'GROMWHOLE_FREIGHT':
+        return 'FREIGHT_ORDER'
     else:
         # now create a fulfillment request
         today = get_today()
@@ -86,6 +88,9 @@ def request_fulfill(request, warehouse, order_id):
         return redirect('/admin/base/sale/?requested=unrequested')
     elif res == 'WAREHOUSE_NOT_RECOGNISED':
         messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
+        return redirect('/admin/base/sale/?requested=unrequested')
+    elif res == 'FREIGHT_ORDER':
+        messages.error(request, 'Order %s is for freight shipping -- ask Ian' % (warehouse, order_label))
         return redirect('/admin/base/sale/?requested=unrequested')
     elif res == 'FULFILL_REQUESTED':
         messages.success(request, mark_safe('A fulfillment has been created for order %s.' % (order_label)))
