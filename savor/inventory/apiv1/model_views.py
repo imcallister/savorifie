@@ -5,6 +5,7 @@ from django.db.models import Prefetch
 
 from accountifie.common.api import api_func
 from inventory.models import *
+from inventory.serializers import *
 
 
 def get_fields_and_properties(model, instance):
@@ -17,16 +18,17 @@ def get_model_data(instance, flds):
     data = dict((fld, str(getattr(instance, fld))) for fld in flds)
     return data
 
+
 @dispatch(dict)
 def warehouse(qstring):
-    all_warehouses = Warehouse.objects.all()
-    return [get_model_data(obj, get_fields_and_properties(Warehouse, obj)) for obj in all_warehouses]
+    qs = Warehouse.objects.all()
+    return WarehouseSerializer(qs, many=True).data
 
 
 @dispatch(str, dict)
 def warehouse(label, qstring):
-    obj = Warehouse.objects.get(label=label)
-    return get_model_data(obj, get_fields_and_properties(Warehouse, obj))
+    obj = Warehouse.objects.filter(label=label).first()
+    return WarehouseSerializer(qs).data
 
 
 @dispatch(dict)
@@ -59,38 +61,35 @@ def product(label, qstring):
 
 @dispatch(dict)
 def channelshipmenttype(qstring):
-    all_types = list(ChannelShipmentType.objects.all())
-    flds = get_fields_and_properties(ChannelShipmentType, all_types[0])
-    return [get_model_data(t, flds) for t in all_types]
+    qs = ChannelShipmentType.objects.all()
+    return ChannelShipmentTypeSerializer(qs, many=True).data
 
 
 @dispatch(str, dict)
 def channelshipmenttype(label, qstring):
-    ship_info = ChannelShipmentType.objects.get(label=label)
-    flds = get_fields_and_properties(ChannelShipmentType, ship_info)
-    return get_model_data(ship_info, flds)
+    qs = ChannelShipmentType.objects.filter(label=label).first()
+    return ChannelShipmentTypeSerializer(qs).data
+
 
 @dispatch(dict)
 def shippingtype(qstring):
-    flds = ['shipper', 'label', 'description', 'id']
-    all_types = list(ShippingType.objects.all())
-    return [get_model_data(t, flds) for t in all_types]
+    qs = ShippingType.objects.all()
+    return ShippingTypeSerializer(qs, many=True).data
 
 
 @dispatch(str, dict)
 def shippingtype(label, qstring):
-    flds = ['shipper', 'shipper_id', 'label', 'description', 'id']
-    ship_info = ShippingType.objects.get(label=label)
-    return get_model_data(ship_info, flds)
-
+    qs = ShippingType.objects.filter(label=label).first()
+    return ShippingTypeSerializer(qs).data
 
 
 def inventorycount(qstring):
-    all_shipments = {}
-    for item in inventoryitem({}):
-        all_shipments[item['label']] = sum([sl.quantity for sl in ShipmentLine.objects.filter(inventory_item_id=item['id'])])
+    sku_counts = ShipmentLine.objects \
+                             .all() \
+                             .values('inventory_item__label') \
+                             .annotate(sku_count=Sum('quantity'))
+    return dict((l['inventory_item__label'], l['sku_count']) for l in sku_counts)
 
-    return all_shipments
 
 
 def locationinventory(qstring):

@@ -7,6 +7,9 @@ from rest_framework import status
 from rest_framework import generics
 
 
+# note can call from other views with
+# WarehouseList.as_view()(factory.get('/warehouse', format='json')).data
+
 class WarehouseList(generics.ListCreateAPIView):
     queryset = Warehouse.objects.all()
     serializer_class = WarehouseSerializer

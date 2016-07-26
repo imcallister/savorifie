@@ -19,7 +19,7 @@ urlpatterns = patterns('',
 
 
 urlpatterns += format_suffix_patterns([
-    url(r'^warehouse/$', model_views.WarehouseList.as_view()),
+    url(r'^warehouse/$', model_views.WarehouseList.as_view(), name='warehouse_list'),
     url(r'^warehouse/(?P<pk>[0-9]+)/$', model_views.WarehouseDetail.as_view()),
 
     url(r'^fulfillment/$', model_views.FulfillmentList.as_view()),
