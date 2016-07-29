@@ -130,8 +130,8 @@ class FulfillUpdateInline(admin.TabularInline):
 
 
 class FulfillmentAdmin(admin.ModelAdmin):
-    list_display = ('__unicode__', 'request_date', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
-    list_filter = ('warehouse', ShippingMissing,)
+    list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
+    list_filter = ('warehouse', 'status', ShippingMissing,)
     inlines = [FulfillLineInline, FulfillUpdateInline]
 
 admin.site.register(Fulfillment, FulfillmentAdmin)

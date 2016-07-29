@@ -27,6 +27,10 @@ def get_today():
 
 
 def post_fulfill_update(data):
+    fulfill_obj = Fulfillment.objects.get(id=data['fulfill_id'])
+    fulfill_obj.status = data['status']
+    fulfill_obj.save()
+
     FulfillUpdate(**data).save()
     return
 
@@ -62,6 +66,7 @@ def create_fulfill_request(warehouse, order_id):
             fulfill_info['bill_to'] = ch_ship_type.bill_to
             fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
 
+        fulfill_info['status'] = 'requested'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 

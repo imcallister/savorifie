@@ -151,7 +151,7 @@ class Fulfillment(accountifie.common.models.McModel):
     use_pdf = models.BooleanField(default=False)
     packing_type = models.CharField(max_length=30, choices=PACKING_TYPES, default='box')
     ship_from = models.ForeignKey(accountifie.common.models.Address, blank=True, null=True)
-
+    status = models.CharField(max_length=20, choices=FULFILL_CHOICES)
     properties = ['updates', 'fulfilllines', 'ship_info', 'latest_status']
 
     def __unicode__(self):
@@ -194,7 +194,7 @@ class FulfillUpdate(accountifie.common.models.McModel):
     status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
     shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
-    fulfillment = models.ForeignKey('inventory.Fulfillment')
+    fulfillment = models.ForeignKey('inventory.Fulfillment', related_name='fulfill_updates')
 
     class Meta:
         app_label = 'inventory'
@@ -303,7 +303,7 @@ class WarehouseFulfill(accountifie.common.models.McModel):
 class WarehouseFulfillLine(accountifie.common.models.McModel):
     inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
-    warehouse_fulfill = models.ForeignKey(WarehouseFulfill)
+    warehouse_fulfill = models.ForeignKey(WarehouseFulfill, related_name='fulfill_lines')
 
     def __unicode__(self):
         return '%s: %d %s' % (str(self.warehouse_fulfill), self.quantity, str(self.inventory_item))
@@ -311,4 +311,3 @@ class WarehouseFulfillLine(accountifie.common.models.McModel):
     class Meta:
         app_label = 'inventory'
         db_table = 'inventory_warehousefulfillline'
-

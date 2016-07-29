@@ -43,7 +43,7 @@ class Product(accountifie.common.models.McModel):
 class SKUUnit(accountifie.common.models.McModel):
     quantity = models.PositiveIntegerField(default=0)
     inventory_item = models.ForeignKey(InventoryItem, blank=True, null=True)
-    sku = models.ForeignKey(Product, blank=True, null=True)
+    sku = models.ForeignKey(Product, blank=True, null=True, related_name='skuunit')
     rev_percent = models.PositiveIntegerField(default=0)
 
     def __unicode__(self):
