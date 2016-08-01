@@ -145,7 +145,7 @@ FULFILL_CHOICES = (
 class Fulfillment(accountifie.common.models.McModel):
     request_date = models.DateField()
     warehouse = models.ForeignKey('inventory.Warehouse')
-    order = models.ForeignKey('base.Sale')
+    order = models.ForeignKey('base.Sale', related_name='fulfillments')
     ship_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     bill_to = models.CharField(max_length=100, blank=True, null=True)
     use_pdf = models.BooleanField(default=False)

@@ -1,16 +1,22 @@
 
-from .models import *
-from base.serializers import SimpleSaleSerializer
 from rest_framework import serializers
 
+from accountifie.common.serializers import EagerLoadingMixin
 
-class InventoryItemSerializer(serializers.ModelSerializer):
+from .models import *
+from base.serializers import SimpleSaleSerializer
+
+
+class InventoryItemSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['product_line']
+
     class Meta:
         model = InventoryItem
         fields = ('id', 'label', 'description', 'master_sku', 'product_line')
 
 
-class SKUUnitSerializer(serializers.ModelSerializer):
+class SKUUnitSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['inventory_item']
     inventory_item = serializers.StringRelatedField()
 
     class Meta:
@@ -18,7 +24,8 @@ class SKUUnitSerializer(serializers.ModelSerializer):
         fields = ('id', 'quantity', 'inventory_item', 'rev_percent')
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _PREFETCH_RELATED_FIELDS = ['skuunit']
     skuunit = SKUUnitSerializer(read_only=True, many=True)
 
     class Meta:
@@ -26,7 +33,8 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'label', 'description', 'skuunit')
 
 
-class ShippingTypeSerializer(serializers.ModelSerializer):
+class ShippingTypeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['shipper']
     shipper = serializers.StringRelatedField()
 
     class Meta:
@@ -34,7 +42,9 @@ class ShippingTypeSerializer(serializers.ModelSerializer):
         fields = ('id', 'label', 'description', 'shipper')
 
 
-class ChannelShipmentTypeSerializer(serializers.ModelSerializer):
+class ChannelShipmentTypeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['channel', 'ship_from', 'ship_type']
+
     ship_type = serializers.StringRelatedField()
     ship_from = serializers.StringRelatedField()
     channel = serializers.StringRelatedField()
@@ -51,7 +61,8 @@ class WarehouseSerializer(serializers.ModelSerializer):
         fields = ('id', 'label', 'description',)
 
 
-class FulfillUpdateSerializer(serializers.ModelSerializer):
+class FulfillUpdateSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['shipper']
     shipper = serializers.StringRelatedField()
 
     class Meta:
@@ -60,7 +71,8 @@ class FulfillUpdateSerializer(serializers.ModelSerializer):
                   'shipper', 'tracking_number')
 
 
-class FulfillLineSerializer(serializers.ModelSerializer):
+class FulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['inventory_item']
     inventory_item = serializers.StringRelatedField()
 
     class Meta:
@@ -68,21 +80,30 @@ class FulfillLineSerializer(serializers.ModelSerializer):
         fields = ('inventory_item', 'quantity')
 
 
-class FulfillmentSerializer(serializers.ModelSerializer):
+class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type',
+                              'order__channel', 'order__customer_code']
+    _PREFETCH_RELATED_FIELDS = ['fulfill_lines',
+                                'fulfill_lines__inventory_item']
     warehouse = serializers.StringRelatedField()
     ship_type = serializers.StringRelatedField()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
-    fulfill_updates = FulfillUpdateSerializer(many=True, read_only=True)
     order = SimpleSaleSerializer(read_only=True)
 
     class Meta:
         model = Fulfillment
         fields = ('id', 'order', 'request_date', 'status', 'warehouse',
                   'bill_to', 'ship_type',
-                  'use_pdf', 'packing_type', 'fulfill_lines', 'fulfill_updates')
+                  'use_pdf', 'packing_type', 'fulfill_lines',
+                  )
 
 
-class BatchRequestSerializer(serializers.ModelSerializer):
+class BatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['location']
+    _PREFETCH_RELATED_FIELDS = ['fulfillments'] + ['fulfillments__fulfill_lines', 'fulfillments__order__channel',
+                                                    'fulfillments__order__customer_code',
+                                                    'fulfillments__ship_type', 'fulfillments__warehouse',
+                                                    'fulfillments__fulfill_lines__inventory_item']
     location = serializers.StringRelatedField()
     fulfillments = FulfillmentSerializer(many=True, read_only=True)
 
@@ -92,7 +113,8 @@ class BatchRequestSerializer(serializers.ModelSerializer):
                   'fulfillments', 'comment',)
 
 
-class WarehouseFulfillLineSerializer(serializers.ModelSerializer):
+class WarehouseFulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['inventory_item']
     inventory_item = serializers.StringRelatedField()
 
     class Meta:
@@ -100,7 +122,12 @@ class WarehouseFulfillLineSerializer(serializers.ModelSerializer):
         fields = ('inventory_item', 'quantity',)
 
 
-class WarehouseFulfillSerializer(serializers.ModelSerializer):
+class WarehouseFulfillSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['savor_order', 'savor_transfer', 'savor_order__customer_code',
+                              'savor_order__channel',
+                              'warehouse', 'shipping_type']
+    _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'fulfill_lines__inventory_item']
+
     savor_order = SimpleSaleSerializer(read_only=True)
     savor_transfer = serializers.StringRelatedField()
     warehouse = serializers.StringRelatedField()

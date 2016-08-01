@@ -41,6 +41,11 @@ def channelshipmenttype(label, qstring):
     qs = ChannelShipmentType.objects.filter(label=label).first()
     return ChannelShipmentTypeSerializer(qs).data
 
+from rest_framework import generics
+class ChannelShipmentList(generics.ListCreateAPIView):
+    queryset = ChannelShipmentType.objects.all()
+    serializer_class = ChannelShipmentTypeSerializer
+
 
 @dispatch(dict)
 def shippingtype(qstring):
