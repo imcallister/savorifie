@@ -170,16 +170,7 @@ admin.site.register(InventoryTransfer, InventoryTransferAdmin)
 class BatchRequestAdmin(admin.ModelAdmin):
     list_display = ('id', 'created_date', 'location', )
     filter_horizontal = ('fulfillments',)
-    actions = ['output_to_picklist']
-
-    def output_to_picklist(self, request, queryset):
-        if len(queryset) > 1:
-            messages.error('Can only output for single batch')
-            return HttpResponseRedirect('/admin/inventory/batchrequest/')
-        else:
-            batch = queryset[0].fulfillments.all()
-            return shopify_pick_list(request, batch.values())
-
+    
 admin.site.register(BatchRequest, BatchRequestAdmin)
 
 
@@ -195,17 +186,5 @@ class WarehouseFulfillAdmin(admin.ModelAdmin):
                     'warehouse_pack_id', 'ship_date', 'shipping_type',
                     'tracking_number', 'shipping_zip',)
     inlines = [WarehouseFulfillLineInline,]
-
-    """
-    def response_change(self, request, new_object):
-        "They saved a change - send signal"
-        fulfill_saved.send(new_object)
-        return admin.ModelAdmin.response_change(self, request, new_object)
-
-    def response_add(self, request, obj):
-        "They added a new transfer - send signal"
-        fulfill_saved.send(obj)
-        return admin.ModelAdmin.response_add(self, request, obj)
-    """
 
 admin.site.register(WarehouseFulfill, WarehouseFulfillAdmin)

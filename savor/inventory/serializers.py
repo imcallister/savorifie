@@ -7,8 +7,18 @@ from .models import *
 from base.serializers import SimpleSaleSerializer
 
 
+class ProductLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    
+    class Meta:
+        model = ProductLine
+        fields = ('id', 'label', 'description')
+
+
+
 class InventoryItemSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['product_line']
+
+    product_line = ProductLineSerializer(read_only=True)
 
     class Meta:
         model = InventoryItem
@@ -81,6 +91,9 @@ class FulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 
 
 class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    def get_ship_info(self, obj):
+        return obj.ship_info
+
     _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type',
                               'order__channel', 'order__customer_code']
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines',
@@ -92,8 +105,8 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 
     class Meta:
         model = Fulfillment
-        fields = ('id', 'order', 'request_date', 'status', 'warehouse',
-                  'bill_to', 'ship_type',
+        fields = ('id', 'order', 'request_date', 'status',
+                  'ship_info', 'warehouse', 'bill_to', 'ship_type',
                   'use_pdf', 'packing_type', 'fulfill_lines',
                   )
 

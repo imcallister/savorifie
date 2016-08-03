@@ -1,4 +1,5 @@
 from multipledispatch import dispatch
+from django.db.models import Sum, Prefetch
 
 from accountifie.common.api import api_func
 from inventory.models import *
@@ -59,14 +60,14 @@ def locationinventory(qstring):
     # now remove fulfilled
     fulfill_qs = Fulfillment.objects.all() \
                                     .select_related('warehouse') \
-                                    .prefetch_related(Prefetch('fulfillline_set__inventory_item'))
+                                    .prefetch_related(Prefetch('fulfill_lines__inventory_item'))
 
     for fulfill in fulfill_qs:
         location = fulfill.warehouse.label
         if location not in all_shipments:
             all_shipments[location] = {}
 
-        amounts = dict((fl.inventory_item.label, fl.quantity) for fl in fulfill.fulfillline_set.all())
+        amounts = dict((fl.inventory_item.label, fl.quantity) for fl in fulfill.fulfill_lines.all())
         for item in amounts:
             if item not in all_shipments[location]:
                 all_shipments[location][item] = -amounts[item]

@@ -41,11 +41,6 @@ def channelshipmenttype(label, qstring):
     qs = ChannelShipmentType.objects.filter(label=label).first()
     return ChannelShipmentTypeSerializer(qs).data
 
-from rest_framework import generics
-class ChannelShipmentList(generics.ListCreateAPIView):
-    queryset = ChannelShipmentType.objects.all()
-    serializer_class = ChannelShipmentTypeSerializer
-
 
 @dispatch(dict)
 def shippingtype(qstring):
@@ -62,10 +57,10 @@ def shippingtype(label, qstring):
 @dispatch(dict)
 def inventoryitem(qstring):
     qs = InventoryItem.objects.all().select_related('product_line')
-    return InventoryItemSerializer(qs, many=True)
+    return InventoryItemSerializer(qs, many=True).data
 
 
 @dispatch(str, dict)
 def inventoryitem(label, qstring):
     qs = InventoryItem.objects.filter(label=label).first()
-    return InventoryItemSerializer(qs)
+    return InventoryItemSerializer(qs).data

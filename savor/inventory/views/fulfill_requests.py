@@ -70,6 +70,7 @@ def create_fulfill_request(warehouse, order_id):
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
+        # FIX THIS ... should be off fulfillments not sale object
         skus = api_func('base', 'sale_skus', str(order_id))
         for sku in skus:
             fline_info = {}

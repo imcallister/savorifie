@@ -42,7 +42,7 @@ CHANNELS = [
 
 
 class UnitSale(accountifie.common.models.McModel):
-    sale = models.ForeignKey('base.Sale')
+    sale = models.ForeignKey('base.Sale', related_name='unit_sale')
     sku = models.ForeignKey('inventory.Product', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
@@ -54,12 +54,14 @@ class UnitSale(accountifie.common.models.McModel):
     def __unicode__(self):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)
 
-    def save(self):
+    def save(self, update_gl=True):
         models.Model.save(self)
-        # need to do FIFO assignment
-        to_be_fifod = self.fifo_check()
-        if len(to_be_fifod) > 0:
-            accounting.models.fifo_assign(self.id, to_be_fifod)
+        
+        if update_gl:
+            # need to do FIFO assignment
+            to_be_fifod = self.fifo_check()
+            if len(to_be_fifod) > 0:
+                accounting.models.fifo_assign(self.id, to_be_fifod)
 
 
 
@@ -84,16 +86,16 @@ class UnitSale(accountifie.common.models.McModel):
 
 
     def get_inventory_items(self):
-        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
+        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit.all())
 
     def get_gross_sales(self):
         return dict((u.inventory_item.label,
                      u.quantity * self.quantity * self.unit_price * Decimal(u.rev_percent)/Decimal(100)) \
-                    for u in self.sku.skuunit_set.all())
+                    for u in self.sku.skuunit.all())
 
     @property
     def items_string(self):
-        return ','.join(['%s %s' % (u.quantity * self.quantity, u.inventory_item.label) for u in self.sku.skuunit_set.all()])
+        return ','.join(['%s %s' % (u.quantity * self.quantity, u.inventory_item.label) for u in self.sku.skuunit.all()])
 
 
 class SalesTax(accountifie.common.models.McModel):
@@ -167,14 +169,16 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         app_label = 'base'
         db_table = 'base_sale'
 
-    def save(self):
-        # fifo check
-        for u in self.unitsale_set.all():
-            to_be_fifod = u.fifo_check()
-            if len(to_be_fifod) > 0:
-                accounting.models.fifo_assign(u.id, to_be_fifod)
+    def save(self, update_gl=True):
+        if update_gl:
+            # fifo check
+            for u in self.unit_sale.all():
+                to_be_fifod = u.fifo_check()
+                if len(to_be_fifod) > 0:
+                    accounting.models.fifo_assign(u.id, to_be_fifod)
 
-        self.update_gl()
+            self.update_gl()
+
         models.Model.save(self)
 
 
@@ -203,7 +207,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
     @property
     def items_string(self):
-        return ','.join([u.items_string for u in self.unitsale_set.all()])
+        return ','.join([u.items_string for u in self.unit_sale.all()])
 
 
     @property
@@ -212,7 +216,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
 
     def _get_unitsales(self):
-        unitsales = self.unitsale_set.all()
+        unitsales = self.unit_sale.all()
 
         unitsale_lines = []
         for unit in unitsales:
@@ -302,7 +306,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
             self.__tax_amts[t.collector.entity] += Decimal(t.tax)
 
     def _get_unit_sales(self):
-        self.__unit_sales = self.unitsale_set.all()
+        self.__unit_sales = self.unit_sale.all()
         skus = list(set([x.sku for x in self.__unit_sales]))
         self.__sale_amts = dict((s,0) for s in skus)
         for s in self.__unit_sales:
@@ -339,7 +343,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
             for u_sale in self.__unit_sales:
                 inv_items = u_sale.get_inventory_items()
                 for ii in inv_items:
-                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    product_line = api_func('inventory', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
                     COGS = accounting.models.total_COGS(u_sale, ii)
@@ -372,7 +376,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                 inv_items = u_sale.get_gross_sales()
                 for ii in inv_items:
 
-                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    product_line = api_func('inventory', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
 
