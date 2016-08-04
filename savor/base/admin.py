@@ -366,6 +366,7 @@ class SaleAdmin(SimpleHistoryAdmin):
                 new_fulfills = 0
                 dupe_fulfills = 0
                 bad_warehouse = 0
+                freight_fulfills = 0
                 unknown_errors = 0
 
                 for order in queryset:
@@ -376,12 +377,15 @@ class SaleAdmin(SimpleHistoryAdmin):
                         dupe_fulfills += 1
                     elif res == 'WAREHOUSE_NOT_RECOGNISED':
                         bad_warehouse += 1
+                    elif res == 'FREIGHT_ORDER':
+                        freight_fulfills += 1
                     else:
                         unknown_errors += 1
 
                 messages.success(request, "Successfully created %d fulfill requests for warehouse %s." % (new_fulfills, warehouse))
                 messages.info(request, "%d dupes were skipped." % dupe_fulfills)
                 messages.warning(request, "%d had unrecognised warehouse." % bad_warehouse)
+                messages.warning(request, "%d are freight shipments. Contact Ian." % freight_fulfills)
                 messages.error(request, "%d unknown errors." % unknown_errors)
 
                 return HttpResponseRedirect(request.get_full_path())
