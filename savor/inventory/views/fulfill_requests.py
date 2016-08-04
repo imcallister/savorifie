@@ -27,6 +27,10 @@ def get_today():
 
 
 def post_fulfill_update(data):
+    fulfill_obj = Fulfillment.objects.get(id=data['fulfill_id'])
+    fulfill_obj.status = data['status']
+    fulfill_obj.save()
+
     FulfillUpdate(**data).save()
     return
 
@@ -65,9 +69,11 @@ def create_fulfill_request(warehouse, order_id):
             fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
 
 
+        fulfill_info['status'] = 'requested'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
+        # FIX THIS ... should be off fulfillments not sale object
         skus = api_func('base', 'sale_skus', str(order_id))
         for sku in skus:
             fline_info = {}

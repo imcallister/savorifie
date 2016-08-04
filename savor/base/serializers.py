@@ -1,0 +1,45 @@
+from accountifie.common.serializers import EagerLoadingMixin
+
+from .models import *
+from rest_framework import serializers
+
+
+class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['channel', 'customer_code']
+
+    channel = serializers.StringRelatedField()
+    customer_code = serializers.StringRelatedField()
+
+    class Meta:
+        model = Sale
+        fields = ('id', 'customer_code', 'channel', 'sale_date',
+                  'external_channel_id', 'shipping_name',
+                  'shipping_company', 'shipping_zip')
+
+
+class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    items_string = serializers.SerializerMethodField()
+
+    def get_label(self, obj):
+        return str(obj)
+
+    def get_items_string(self, obj):
+        return obj.items_string
+
+    _SELECT_RELATED_FIELDS = ['company', 'channel__counterparty', 'ship_type', 'customer_code']
+    _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
+    company = serializers.StringRelatedField()
+    channel = serializers.StringRelatedField()
+    ship_type = serializers.StringRelatedField()
+    customer_code = serializers.StringRelatedField()
+
+    class Meta:
+        model = Sale
+        fields = ('id', 'label', 'company', 'customer_code', 'channel', 'sale_date',
+                  'external_channel_id', 'special_sale', 'discount',
+                  'discount_code', 'gift_wrapping', 'gift_wrap_fee',
+                  'gift_message', 'ship_type', 'external_routing_id',
+                  'shipping_charge', 'notification_email', 'shipping_name',
+                  'shipping_company', 'shipping_address1', 'shipping_address2',
+                  'shipping_city', 'shipping_zip', 'shipping_province',
+                  'shipping_country', 'shipping_phone', 'items_string')

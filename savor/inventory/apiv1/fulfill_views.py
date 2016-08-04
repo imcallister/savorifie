@@ -2,297 +2,153 @@ import csv
 from multipledispatch import dispatch
 import itertools
 import logging
+import flatdict
+import time
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, F
 
 from accountifie.common.api import api_func
 from inventory.models import *
+from inventory.serializers import *
 from base.models import *
 
 logger = logging.getLogger('default')
 
-def get_model_data(instance, flds):
-    data = dict((fld, str(getattr(instance, fld))) for fld in flds)
-    return data
-
-
 def batchrequest(qstring):
-    batches = BatchRequest.objects.all() \
-                                  .select_related('location') \
-                                  .prefetch_related('fulfillments')
-    return [batch.to_json(expand=['fulfillment_count']) for batch in batches]
+    batches = BatchRequest.objects \
+                          .annotate(fulfillments_count=Count('fulfillments')) \
+                          .annotate(location_label=F('location__label')) \
+                          .all()  \
+                          .values()
+    return batches
 
 
 def shipmentline(qstring):
-    shpmts = ShipmentLine.objects.all()
-    return [shpmt.to_json() for shpmt in shpmts]
+    shpmts = ShipmentLine.objects \
+                         .annotate(inventory_item_label=F('inventory_item__label')) \
+                         .annotate(shipment_label=F('shipment__label')) \
+                         .all() \
+                         .values()
+
+    return shpmts
 
 
 def batched_fulfillments(qstring):
-    qs = BatchRequest.objects.all().prefetch_related('fulfillments')
-    batched_f = [[str(x.id) for x in batch.fulfillments.all()] for batch in qs]
-    return list(itertools.chain(*batched_f))
+    qs = BatchRequest.objects.all()
+    qs = BatchRequestSerializer.setup_eager_loading(qs)
+
+    batched_flmts = [[x['id'] for x in b['fulfillments']]
+                     for b in BatchRequestSerializer(qs, many=True).data]
+    return list(itertools.chain(*batched_flmts))
 
 
 def unbatched_fulfillments(qstring):
-    batched_fulmts = batched_fulfillments(qstring)
-    unbatched = Fulfillment.objects.exclude(id__in=batched_fulmts)
-    fulfillments = [{'label': str(f), 'id': f.id, 'warehouse': str(f.warehouse)} for f in unbatched]
-    unbatched = [f for f in fulfillments if str(f['id']) not in batched_fulmts]
-    return unbatched
+    batches = BatchRequest.objects.all().prefetch_related('fulfillments')
+    batched_flmts = list(itertools.chain(*[[x.id for x in b.fulfillments.all()] for b in batches]))
+    unbatched_qs = Fulfillment.objects \
+                              .select_related('warehouse') \
+                              .exclude(id__in=batched_flmts)
+
+    unb_fulfillments = [{'label': str(f), 'id': f.id, 'warehouse': str(f.warehouse)} for f in unbatched_qs]
+    return unb_fulfillments
 
 
 @dispatch(dict)
 def warehousefulfill(qstring):
-    flds = ['savor_order', 'savor_order_id', 'savor_transfer', 'warehouse',
-            'warehouse_pack_id', 'order_date', 'request_date',
-            'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',
-            'shipping_address2', 'shipping_address3', 'shipping_city',
-            'shipping_zip', 'shipping_province', 'shipping_country',
-            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type_id','tracking_number']
+    qs = WarehouseFulfill.objects.all()
 
-    data = []
-    wf_objs = WarehouseFulfill.objects.all() \
-                .prefetch_related(Prefetch('warehousefulfillline_set__inventory_item')) \
-                .select_related('warehouse', 'savor_order', 'shipping_type',
-                                'savor_transfer', 'savor_order__channel',
-                                'savor_order__channel__counterparty')
+    qs = WarehouseFulfillSerializer.setup_eager_loading(qs)
+    wh_flmts = WarehouseFulfillSerializer(qs, many=True).data
+    for f in wh_flmts:
+        f['skus'] = dict((l['inventory_item'], l['quantity']) for l in f['fulfill_lines'])
+        del f['fulfill_lines']
 
-    for obj in wf_objs:
-        obj_data = get_model_data(obj, flds)
-        lines = obj.warehousefulfillline_set.all()
-
-        obj_data['skus'] = {}
-        for l in lines:
-            obj_data['skus'][str(l.inventory_item)] = l.quantity
-
-        data.append(obj_data)
-
-    return data
+    return wh_flmts
 
 
 @dispatch(str, dict)
-def warehousefulfill(warehouse_pack_id, qstring):
-    flds = ['savor_order', 'savor_order_id', 'savor_transfer', 'warehouse',
-            'warehouse_pack_id', 'order_date', 'request_date',
-            'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',
-            'shipping_address2', 'shipping_address3', 'shipping_city',
-            'shipping_zip', 'shipping_province', 'shipping_country',
-            'shipping_phone', 'ship_email', 'shipping_type', 'shipping_type', 'tracking_number']
+def warehousefulfill(warehouse_pack_id, qstring):    
+    qs = WarehouseFulfill.objects \
+                         .filter(warehouse_pack_id=warehouse_pack_id) \
+                         .first()
+    whf = WarehouseFulfillSerializer(qs).data
+    whf['skus'] = dict((l['inventory_item'], l['quantity']) for l in whf['fulfill_lines'])
+    del whf['fulfill_lines']
 
-    obj = WarehouseFulfill.objects.get(warehouse_pack_id=warehouse_pack_id)
-    obj_data = get_model_data(obj, flds)
-    lines = obj.warehousefulfillline_set.all()
-    obj_data['skus'] = {}
-    for l in lines:
-        obj_data['skus'][str(l.inventory_item)] = l.quantity
-
-    return obj_data
+    return whf
 
 
-@dispatch(dict)
-def fulfillment2(qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
-            'bill_to', 'latest_status', 'ship_info']
-
-    if qstring.get('warehouse'):
-        fulfill_objs = Fulfillment.objects \
-                        .filter(warehouse__label=qstring.get('warehouse')) \
-                        .prefetch_related(Prefetch('fulfillline_set'),
-                                          Prefetch('fulfillupdate_set')) \
-                        .select_related('warehouse', 'order', 'ship_type')
+def _missing_shipping(rec):
+    if rec['ship_type'] and rec['bill_to'] != '':
+            return False
+    elif rec['ship_type'] == 'BY_HAND':
+            return False
     else:
-        fulfill_objs = Fulfillment.objects \
-                                  .all() \
-                                  .prefetch_related(Prefetch('fulfillline_set'),
-                                                    Prefetch('fulfillupdate_set')) \
-                                  .select_related('warehouse', 'order', 'ship_type')
-
-    fulfill_data = [obj.to_json(expand=['fulfilllines', 'latest_status']) for obj in fulfill_objs]
-
-    if qstring.get('missing_shipping', '').lower() == 'true':
-        fulfill_data = [x for x in fulfill_data if x.get('ship_info') == 'incomplete']
-
-    if 'status' in qstring:
-        fulfill_data = [x for x in fulfill_data if qstring['status'] in [u['status'] for u in x['updates']]]
-
-    return fulfill_data
+        return True
 
 
 @dispatch(dict)
 def fulfillment(qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
-             'bill_to', 'latest_status', 'ship_info']
-
+    start = time.time()
+    qs = Fulfillment.objects.all()
     if qstring.get('warehouse'):
-        fulfill_objs = Fulfillment.objects \
-                        .filter(warehouse__label=qstring.get('warehouse')) \
-                        .prefetch_related(Prefetch('fulfillline_set__inventory_item'),
-                                          Prefetch('fulfillupdate_set')) \
-                        .select_related('warehouse', 'order', 'ship_type', 
-                                        'order__channel',
-                                        'order__channel__counterparty')
-    else:
-        fulfill_objs = Fulfillment.objects \
-                          .all() \
-                          .prefetch_related(Prefetch('fulfillline_set__inventory_item'),
-                                            Prefetch('fulfillupdate_set')) \
-                          .select_related('warehouse', 'order', 'ship_type', 
-                                        'order__channel',
-                                        'order__channel__counterparty')
-
-    if qstring.get('missing_shipping', '').lower() == 'true':
-        fulfill_objs = [x for x in fulfill_objs if x.ship_info == 'incomplete']
-
-    all_fulfill = []
-    for obj in fulfill_objs:
-        data = get_model_data(obj, flds)
-
-        lines = obj.fulfillline_set.all()
-        data['skus'] = {}
-        for l in lines:
-            data['skus'][str(l.inventory_item)] = l.quantity
-
-        all_fulfill.append(data)
+        qs = qs.filter(warehouse__label=qstring.get('warehouse'))
 
     if 'status' in qstring:
-        return [req for req in all_fulfill if req['latest_status'] == qstring['status']]
-    else:
-        return all_fulfill
+        qs = qs.filter(status__in=qstring['status'].split(','))
+
+    qs = FulfillmentSerializer.setup_eager_loading(qs)
+    flfmts = FulfillmentSerializer(qs, many=True).data
+    if qstring.get('missing_shipping', '').lower() == 'true':
+        flfmts = [r for r in flfmts if _missing_shipping(r)]
+    for f in flfmts:
+        f['skus'] = dict((l['inventory_item'], l['quantity']) for l in f['fulfill_lines'])
+        del f['fulfill_lines']
+    return flfmts
 
 
 @dispatch(str, dict)
 def fulfillment(id, qstring):
-    flds = ['id', 'request_date', 'warehouse', 'order', 'order_id', 'ship_type',
-             'bill_to', 'latest_status', 'ship_info']
-    obj = Fulfillment.objects.get(id=id)
-    data = get_model_data(obj, flds)
-
-    lines = obj.fulfillline_set.all()
-    data['skus'] = {}
-    for l in lines:
-        data['skus'][str(l.inventory_item)] = l.quantity
-
-    return data
-
-
-def ungiftwrapped(qstring):
-    """
-    find all sale objects with gift wraps for which there either no fulfillment record or latest status!=completed
-    """
-    all_sales = api_func('base', 'sale')
-    all_fulfills = fulfillment({})
-    completed_ids = [str(x['order']) for x in all_fulfills if x['latest_status']=='completed']
-
-    flds = ['channel', 'id', 'order_id','items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
-            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
-            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
-
-    def get_info(d, flds):
-        return dict((k, v) for k, v in d.iteritems() if k in flds)
-
-    return [get_info(x, flds) for x in all_sales if x['label'] not in completed_ids and x['gift_wrapping']=='True']
+    qs = Fulfillment.objects.filter(id=id).first()
+    flfmt = FulfillmentSerializer(qs).data
+    flfmt['skus'] = dict((l['inventory_item'], l['quantity']) for l in flfmt['fulfill_lines'])
+    del flfmt['fulfill_lines']
+    return flfmt
 
 
 def requested(qstring):
-    """
-    find all sale objects for which there is a fulfillment record with latest status==completed
-    """
-    all_sales = api_func('base', 'sale')
-    all_fulfills = fulfillment(qstring)
-    all_fulfill_ids = dict((str(x['order']), str(x['warehouse'])) for x in all_fulfills if x['latest_status']!='completed')
+    unfulfilled = api_func('inventory',
+                           'fulfillment',
+                           qstring={'status': 'requested,partial'})
 
-    flds = ['channel', 'id', 'order_id','items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
-            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
-            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
+    for unf in unfulfilled:
+        unf['items'] =','.join(['%s %s' % (v, k) for k,v in unf['skus'].iteritems()])
+        del unf['skus']
 
-    def get_info(d, flds, warehouse):
-        info = dict((k, v) for k, v in d.iteritems() if k in flds)
-        info.update({'warehouse': warehouse})
-        return info
-
-    return [get_info(x, flds, all_fulfill_ids[x['label']]) for x in all_sales if x['label'] in all_fulfill_ids]
+    data = [dict((str(k), str(v)) for k, v in flatdict.FlatDict(f).iteritems()) for f in unfulfilled]
+    return data
 
 
 def fulfilled(qstring):
-    """
-    find all sale objects for which there is a fulfillment record with latest status==completed
-    """
-    all_sales = api_func('base', 'sale')
-    all_fulfills = fulfillment({})
-    all_fulfill_ids = [str(x['order']) for x in all_fulfills if x['latest_status']=='completed']
+    fulfilled = api_func('inventory',
+                         'fulfillment',
+                         qstring={'status': 'completed'})
 
-    flds = ['channel', 'id', 'order_id','items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
-            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
-            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
+    for ful in fulfilled:
+        ful['items'] =','.join(['%s %s' % (v, k) for k,v in ful['skus'].iteritems()])
+        del ful['skus']
 
-    def get_info(d, flds):
-        return dict((k, v) for k, v in d.iteritems() if k in flds)
-
-    return [get_info(x, flds) for x in all_sales if x['label'] in all_fulfill_ids]
+    data = [dict((str(k), str(v)) for k, v in flatdict.FlatDict(f).iteritems()) for f in fulfilled]
+    return data
 
 
 def unfulfilled(qstring):
     """
     find all sale objects for which there is no fulfillment record
     """
-    sales_qs = Sale.objects.all().prefetch_related(Prefetch('fulfillment_set'))
-    unfulfilled_sales = [x for x in sales_qs if x.fulfillment_set.count()==0]
+    fulfilled_sale_ids = [x['order_id'] for x in Fulfillment.objects.all().values('order_id')]
+    sales_qs = Sale.objects.exclude(id__in=fulfilled_sale_ids) \
+                           .select_related('customer_code') \
+                           .select_related('channel')
 
-    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city',
-            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
-            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
-
-    def get_info(d, flds):
-        return dict((k, v) for k, v in d.iteritems() if k in flds)
-
-    return [get_info(x.to_json(), flds) for x in unfulfilled_sales]
-
-
-def fulfill_requested(qstring):
-    """
-    find all sale objects for which there is a fulfillment record but no completion
-    """
-    update_qs = FulfillUpdate.objects.filter(status='completed') \
-                                     .prefetch_related(Prefetch('fulfillment'))
-    completed = [u.fulfillment.id for u in update_qs]
-    incomplete = Fulfillment.objects.exclude(id__in=completed) \
-                                    .select_related('order',
-                                                    'warehouse', 
-                                                    'ship_type',
-                                                    'order__company',
-                                                    'order__channel__counterparty',
-                                                    'order__ship_type',
-                                                    'order__customer_code')
-    incomplete_sales = [f.order for f in incomplete]
-
-    flds = ['channel', 'id', 'items_string', 'sale_date', 'shipping_name', 'shipping_company', 
-            'shipping_address1', 'shipping_address2', 'shipping_city', 'shipping_province',
-            'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
-            'gift_message', 'gift_wrapping', 'memo', 'external_channel_id', 'external_routing_id']
-
-    def get_info(d, flds):
-        return dict((k, v) for k, v in d.iteritems() if k in flds)
-
-    return [get_info(x.to_json(), flds) for x in incomplete_sales]
-
-
-def fulfill_request(qstring):
-    """
-    find all sale objects for which there is no fulfillment record
-    """
-    all_sales = api_func('base', 'sale')
-    all_sale_ids = [x['id'] for x in all_sales]
-
-    all_fulfills = fulfillment({})
-    all_fulfill_ids = [x['id'] for x in all_fulfills]
-
-    flds = ['channel_name', 'sale_date', 'shipping_name', 'shipping_company', 'shipping_address1', 'shipping_address2', 'shipping_city'
-            'shipping_province', 'shipping_zip', 'shipping_country', 'notification_email', 'shipping_phone',
-            'gift_message', 'gift_wrapping', 'memo', 'customer_code', 'external_channel_id', 'external_routing_id']
-
-    def get_info(d, flds):
-        return dict((k,v) for k,v in d.iteritems() if k in flds)
-
-    return [get_info(x, flds) for x in all_sales if x['id'] not in all_fulfill_ids]
-
+    return SimpleSaleSerializer(sales_qs, many=True).data

@@ -5,7 +5,7 @@ from django.views.generic.base import RedirectView, TemplateView
 from django.core.urlresolvers import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 
-#from graphene.contrib.django.views import GraphQLView
+from graphene.contrib.django.views import GraphQLView
 
 from savor.schema import schema
 
@@ -16,8 +16,8 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
 
-    #url(r'^graphql', csrf_exempt(GraphQLView.as_view(schema=schema))),
-    #url(r'^graphiql', include('django_graphiql.urls')),
+    url(r'^graphql', csrf_exempt(GraphQLView.as_view(schema=schema))),
+    url(r'^graphiql', include('django_graphiql.urls')),
     # main front pages
     
     url(r'^$', main_views.home, name='home'),
@@ -26,6 +26,7 @@ urlpatterns = patterns('',
     url(r'^reports/$', main_views.reports, name='reports'),
     url(r'^analysis/$', main_views.analysis, name='analysis'),
 
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')) ,
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'', include('audit.urls')),

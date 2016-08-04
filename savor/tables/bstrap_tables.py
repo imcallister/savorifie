@@ -114,16 +114,17 @@ def fulfill_requested(warehouse=None):
     else:
         data_url = "/api/inventory/requested/"
 
-    row_defs = [{'data_field': 'id', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
-                {'data_field': 'shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
-                {'data_field': 'customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
-                {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
-                {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+    row_defs = [
+                {'data_field': 'order:external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:id', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
                 {'data_field': 'warehouse', 'value': 'Warehouse', 'formatter': 'nameFormatter'},
-                {'data_field': 'external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
-                {'data_field': 'gift_wrapping', 'value': 'Gift Wrapping', 'formatter': 'nameFormatter'},
-                {'data_field': 'items_string', 'value': 'Items', 'formatter': 'nameFormatter'},
+                {'data_field': 'items', 'value': 'Items', 'formatter': 'nameFormatter'},
             ]
+
     return get_bstrap_table(data_url, row_defs)
 
 
