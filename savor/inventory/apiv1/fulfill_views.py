@@ -11,6 +11,7 @@ from accountifie.common.api import api_func
 from inventory.models import *
 from inventory.serializers import *
 from base.models import *
+from base.serializers import SimpleSaleSerializer
 
 logger = logging.getLogger('default')
 

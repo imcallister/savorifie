@@ -1,10 +1,10 @@
 
 from rest_framework import serializers
 
-from accountifie.common.serializers import EagerLoadingMixin
+from accountifie.common.serializers import EagerLoadingMixin, AddressSerializer
 
 from .models import *
-from base.serializers import SimpleSaleSerializer
+import savor.base.serializers as baseslz
 
 
 class ProductLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
@@ -90,24 +90,28 @@ class FulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('inventory_item', 'quantity')
 
 
+
 class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     def get_ship_info(self, obj):
         return obj.ship_info
 
-    _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type',
-                              'order__channel', 'order__customer_code']
+    _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type', 'ship_from',
+                              'order__channel__counterparty', 'order__customer_code']
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines',
                                 'fulfill_lines__inventory_item']
+    
     warehouse = serializers.StringRelatedField()
     ship_type = serializers.StringRelatedField()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
-    order = SimpleSaleSerializer(read_only=True)
+    order = baseslz.ShippingSaleSerializer(read_only=True)
+    ship_from = AddressSerializer(read_only=True)
 
     class Meta:
         model = Fulfillment
         fields = ('id', 'order', 'request_date', 'status',
                   'ship_info', 'warehouse', 'bill_to', 'ship_type',
                   'use_pdf', 'packing_type', 'fulfill_lines',
+                  'ship_from'
                   )
 
 
@@ -141,7 +145,7 @@ class WarehouseFulfillSerializer(serializers.ModelSerializer, EagerLoadingMixin)
                               'warehouse', 'shipping_type']
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'fulfill_lines__inventory_item']
 
-    savor_order = SimpleSaleSerializer(read_only=True)
+    savor_order = baseslz.SimpleSaleSerializer(read_only=True)
     savor_transfer = serializers.StringRelatedField()
     warehouse = serializers.StringRelatedField()
     shipping_type = serializers.StringRelatedField()

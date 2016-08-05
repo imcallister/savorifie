@@ -4,6 +4,16 @@ from .models import *
 from rest_framework import serializers
 
 
+class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['sku__label', 'sku__description']
+    
+    sku = serializers.StringRelatedField()
+    
+    class Meta:
+        model = UnitSale
+        fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
+    
+
 class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['channel', 'customer_code']
 
@@ -15,6 +25,27 @@ class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('id', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'shipping_name',
                   'shipping_company', 'shipping_zip')
+
+
+class ShippingSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+
+    def get_label(self, obj):
+        return str(obj)
+
+    _SELECT_RELATED_FIELDS = ['channel__counterparty', 'customer_code']
+    channel = serializers.StringRelatedField()
+    customer_code = serializers.StringRelatedField()
+
+    class Meta:
+        model = Sale
+        fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
+                  'external_channel_id', 'special_sale', 'discount',
+                  'discount_code', 'gift_wrapping', 'gift_wrap_fee',
+                  'gift_message', 'external_routing_id',
+                  'shipping_charge', 'notification_email', 'shipping_name',
+                  'shipping_company', 'shipping_address1', 'shipping_address2',
+                  'shipping_city', 'shipping_zip', 'shipping_province',
+                  'shipping_country', 'shipping_phone')
 
 
 class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
@@ -32,6 +63,7 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     channel = serializers.StringRelatedField()
     ship_type = serializers.StringRelatedField()
     customer_code = serializers.StringRelatedField()
+    unit_sale = UnitSaleSerializer(many=True)
 
     class Meta:
         model = Sale
@@ -42,4 +74,4 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'shipping_charge', 'notification_email', 'shipping_name',
                   'shipping_company', 'shipping_address1', 'shipping_address2',
                   'shipping_city', 'shipping_zip', 'shipping_province',
-                  'shipping_country', 'shipping_phone', 'items_string')
+                  'shipping_country', 'shipping_phone', 'items_string', 'unit_sale')

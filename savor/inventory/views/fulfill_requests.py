@@ -1,5 +1,6 @@
 import csv
-from collections import Counter
+import flatdict
+from collections import OrderedDict
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, redirect
@@ -15,6 +16,7 @@ from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
 from inventory.models import *
 import inventory.importers
+import inventory.serializers as slz
 
 import datetime
 import pytz
@@ -73,12 +75,11 @@ def create_fulfill_request(warehouse, order_id):
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
-        # FIX THIS ... should be off fulfillments not sale object
-        skus = api_func('base', 'sale_skus', str(order_id))
-        for sku in skus:
+        unit_sales = api_func('base', 'sale', str(order_id)).get('unit_sale', [])
+        for u in unit_sales:
             fline_info = {}
-            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=sku).id
-            fline_info['quantity'] = skus[sku]
+            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=u['sku']).id
+            fline_info['quantity'] = u['quantity']
             fline_info['fulfillment_id'] = fulfill_obj.id
             fline_obj = FulfillLine(**fline_info)
             fline_obj.save()
@@ -118,9 +119,11 @@ def sales_detail(request):
 
 @login_required
 def thoroughbred_list(request, batch_id):
-    batch = BatchRequest.objects.get(id=batch_id)
-    fulfill_list = batch.fulfillments.all()
-    return pick_list(request, fulfill_list.values(),
+    batch_qs = BatchRequest.objects.filter(id=batch_id)
+    fulfill_list = [f['fulfillments'] for f in batch_qs.values('fulfillments')]
+    fulfill_qs = Fulfillment.objects.filter(id__in=fulfill_list)
+    return pick_list(request,
+                     slz.FulfillmentSerializer(fulfill_qs, many=True).data,
                      label='thoroughbred_batch_%s' % str(batch_id))
 
 
@@ -131,80 +134,49 @@ def pick_list(request, data, label='shopify_pick_list'):
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
-    inventory_names = dict((inv_item['label'], inv_item['description']) \
-                           for inv_item in api_func('inventory', 'inventoryitem'))
+    flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
 
-    header_order = ['id', 'channel', 'shipping_name', 'shipping_company', 'external_routing_id',
-                    'shipping_address1', 'shipping_address2',
-                    'shipping_city', 'shipping_zip', 'shipping_province',
-                    'shipping_country', 'shipping_phone',
-                    'notification_email', 'ship_type',
-                    'bill_to', 'gift_message', 'use_pdf', 'packing_type']
+    headers = OrderedDict([('SAVOR ID', 'id'),
+                            ('Channel', 'order:channel'),
+                            ('Name', 'order:shipping_name'),
+                            ('Shipping Company', 'order:shipping_company'),
+                            ('Customer Reference', 'order:external_routing_id'),
+                            ('Shipping Address1', 'order:shipping_address1'),
+                            ('Shipping Address2', 'order:shipping_address2'),
+                            ('Shipping City', 'order:shipping_city'),
+                            ('Shipping Zip', 'order:shipping_zip'),
+                            ('Shipping Province', 'order:shipping_province'),
+                            ('Shipping Country', 'order:shipping_country'),
+                            ('Shipping Phone', 'order:shipping_phone'),
+                            ('Email', 'order:notification_email'),
+                            ('Shipping Type', 'ship_type'),
+                            ('Bill To', 'bill_to'),
+                            ('Gift Message', 'order:gift_message'),
+                            ('Use PDF?', 'use_pdf'),
+                            ('Pack Type', 'packing_type'),
+                            ('Ship From Company', 'ship_from:company'),
+                            ('Ship From Address1', 'ship_from:address1'),
+                            ('Ship From Address2', 'ship_from:address2'),
+                            ('Ship From City', 'ship_from:city'),
+                            ('Ship From ZIP', 'ship_from:postal_code')
+                           ])
 
-
-    headers = {'id': 'SAVOR ID', 'channel': 'Channel', 'shipping_company': 'Shipping Company',
-                'shipping_address1': 'Shipping Address1', 'shipping_address2': 'Shipping Address2',
-                'shipping_city': 'Shipping City', 'shipping_zip': 'Shipping Zip', 'shipping_province': 'Shipping Province',
-                'shipping_country': 'Shipping Country', 'shipping_phone': 'Shipping Phone',
-                'notification_email': 'Email', 'shipping_company': 'Shipping Company', 'ship_type': 'Shipping Type',
-                'bill_to': 'Bill To', 'gift_message': 'Gift Message', 'skus:sku': 'Lineitem sku',
-                'skus:name': 'Lineitem name', 'skus:quantity': 'Lineitem quantity', 'external_routing_id': 'Customer Reference',
-                'shipping_name': 'Name', 'use_pdf': 'Use PDF?', 'packing_type': 'Picking Slip Location'}
-
-    header_row = [unicode(headers[x]).encode('utf-8') for x in header_order]
+    header_row = headers.keys()
     header_row += [u'Item', u'Item Name', u'Quantity']
-    header_row += ['Ship From Company', 'Ship From Address1',
-                   'Ship From Address2', 'Ship From City',
-                   'Ship From ZIP'] 
     writer.writerow(header_row)
 
-    shipping_types = dict((st['id'], st) for st in api_func('inventory', 'shippingtype'))
+    for flf in flf_data:
+        row = [flf['ship'].get(headers[col], '') for col in headers]
+        row += [flf['skus'][0]['inventory_item'], '', flf['skus'][0]['quantity']]
+        writer.writerow(row)
 
-    hack_list = ['channel', 'shipping_name', 'shipping_company',
-                 'shipping_address1', 'shipping_address2',
-                 'shipping_city', 'shipping_zip', 'shipping_province',
-                 'shipping_country', 'shipping_phone',
-                 'notification_email', 'external_routing_id',
-                 'gift_message']
-
-    for f_req in data:
-        sale_info = api_func('base', 'sale', f_req['order_id'])
-
-        if sale_info['customer_code']!='unknown':
-            for fld in hack_list:
-                f_req[fld] = sale_info[fld]
-
-            if f_req['external_routing_id'] is None:
-                f_req['external_routing_id'] = ''
-
-            if f_req['gift_message'] == '':
-                f_req['gift_message'] = None
-
-            f_req['ship_type'] = shipping_types[str(f_req['ship_type_id'])]['label']
-            f_req['skus'] = api_func('base', 'sale_skus', f_req['order_id'])
-            f_req['id'] = 'SAL.' + str(f_req['id'])
-            f_req['shipping_zip'] = str("'" + f_req['shipping_zip'])
-
-            line = [unicode(f_req.get(d, '')).encode('utf-8') for d in header_order]
-            skus = f_req['skus'].keys()
-            sku = skus[0]
-            line += [sku, inventory_names[sku], f_req['skus'][sku]]
-
-            # add the ship_from info
-            ship_from = Address.objects.filter(id=f_req['ship_from_id']).first()
-            if ship_from:
-                line += [getattr(ship_from, fld) for fld in ['company', 'address1', 'address2',
-                                                             'city', 'postal_code']]
+        # if more than 1 sku..
+        for i in range(1, len(flf['skus'])):
+            line = [''] * len(headers)
+            line += [flf['skus'][i]['inventory_item'], '', flf['skus'][i]['quantity']]
             writer.writerow(line)
 
-            # if more than 1 sku..
-            for i in range(1, len(skus)):
-                sku = skus[i]
-                line = [''] * len(header_order)
-                line += [sku, inventory_names[sku], f_req['skus'][sku]]
-                writer.writerow(line)
-
-            writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3 + 5))
+        writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
 
     return response
 
