@@ -76,7 +76,7 @@
                 
                     <div class="col-md-8">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="panel panel-warning">
                                 <div class="panel-heading text-center">
                                   <h3 class="panel-title">MISSING SHIPPING INFO</h3>
@@ -85,8 +85,18 @@
                                     <font size="20"><a href='/admin/inventory/fulfillment/?shipping_missing=incomplete'>{{missing_shipping}}</a></font>
                                 </div>
                               </div>
-                            </div>                            
-                            <div class="col-md-6">
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-default">
+                                <div class="panel-heading text-center">
+                                  <h3 class="panel-title">BACK-ORDERED</h3>
+                                </div>
+                                <div class="panel-body text-center">
+                                    <font size="20"><a href='/admin/inventory/fulfillment/?status=back-ordered'>{{backordered}}</a></font>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="panel panel-success">
                                 <div class="panel-heading text-center">
                                   <h3 class="panel-title">UNBATCHED FULFILLS</h3>

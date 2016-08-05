@@ -36,6 +36,49 @@ def post_fulfill_update(data):
     FulfillUpdate(**data).save()
     return
 
+
+def create_backorder(order_id):
+    # check that it has not been requested already
+    fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
+    order = api_func('base', 'sale', unicode(order_id))
+    order_label = order['label']
+
+    if order_label in fulfillment_labels:
+        return 'FULFILL_ALREADY_REQUESTED'
+    else:
+        # now create a fulfillment request
+        today = get_today()
+        ch_ship_type = ChannelShipmentType.objects \
+                                          .filter(label=order['ship_type']) \
+                                          .first()
+
+        fulfill_info = {}
+        fulfill_info['request_date'] = today
+        fulfill_info['order_id'] = str(order_id)
+        
+        if ch_ship_type:
+            fulfill_info['bill_to'] = ch_ship_type.bill_to
+            fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
+            fulfill_info['use_pdf'] = ch_ship_type.use_pdf
+            fulfill_info['packing_type'] = ch_ship_type.packing_type
+            fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
+
+
+        fulfill_info['status'] = 'back-ordered'
+        fulfill_obj = Fulfillment(**fulfill_info)
+        fulfill_obj.save()
+
+        unit_sales = api_func('base', 'sale', str(order_id)).get('unit_sale', [])
+        for u in unit_sales:
+            fline_info = {}
+            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=u['sku']).id
+            fline_info['quantity'] = u['quantity']
+            fline_info['fulfillment_id'] = fulfill_obj.id
+            fline_obj = FulfillLine(**fline_info)
+            fline_obj.save()
+
+        return 'FULFILL_BACKORDERED'
+
 def create_fulfill_request(warehouse, order_id):
     # check that it has not been requested already
     fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]

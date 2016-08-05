@@ -296,7 +296,7 @@ class SaleAdmin(SimpleHistoryAdmin):
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
-    actions = ['delete_model', 'queue_for_warehouse']
+    actions = ['delete_model', 'queue_for_warehouse', 'queue_for_backorder']
     inlines = [
         UnitSaleInline,
         SalesTaxInline
@@ -356,13 +356,33 @@ class SaleAdmin(SimpleHistoryAdmin):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
         warehouse = forms.ModelChoiceField(Warehouse.objects.all())
 
+    def queue_for_backorder(self, request, queryset):
+        new_backorders = 0
+        dupe_fulfills = 0
+        unknown_errors = 0
+
+        for order in queryset:
+            res = inventory.views.create_backorder(order.id)
+            if res == 'FULFILL_BACKORDERED':
+                new_backorders += 1
+            elif res == 'FULFILL_ALREADY_REQUESTED':
+                dupe_fulfills += 1
+            else:
+                unknown_errors += 1
+
+        messages.success(request, "Successfully created %d back orders." % (new_backorders))
+        messages.info(request, "%d dupes were skipped." % dupe_fulfills)
+        messages.error(request, "%d unknown errors." % unknown_errors)
+
+        return HttpResponseRedirect(request.get_full_path())
+
+
     def queue_for_warehouse(self, request, queryset):
         form = None
         if 'apply' in request.POST:
             form = self.ChooseWarehouseForm(request.POST)
             if form.is_valid():
                 warehouse = form.cleaned_data['warehouse']
-                
                 new_fulfills = 0
                 dupe_fulfills = 0
                 bad_warehouse = 0
@@ -404,6 +424,7 @@ class SaleAdmin(SimpleHistoryAdmin):
 
         
     queue_for_warehouse.short_description = 'Queue for fulfillment'
+    queue_for_backorder.short_description = 'Add to back-order queue'
     delete_model.short_description = 'Delete sales and related GL entries'
 
 admin.site.register(Sale, SaleAdmin)

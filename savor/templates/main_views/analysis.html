@@ -3,9 +3,7 @@
 
 
 {% block breadcrumb %}
-<li class="active">Home</li>
 
-{{ block.super }}
 {% endblock %}
 
 
@@ -14,34 +12,172 @@
 <link href="/static/base/css/dashboard_styles.css" rel="stylesheet">
 
 
-<h2>Reports
-<span class="glyphicon glyphicon-info-sign" 
-    data-toggle="tooltip" 
-    title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
-    data-placement="right" aria-hidden="true">
-</span>
-</h2>
+<div class="container-fluid">
 
-<div class="container-fluid" id="wrapper">
+<!-- Nav tabs -->
+<ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#sales" aria-controls="sales" role="tab" data-toggle="tab">Sales</a></li>
+    <li role="presentation"><a href="#expenses" aria-controls="expenses" role="tab" data-toggle="tab">Expenses</a></li>
+</ul>
+
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane fade in active" id="sales">
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title"><a href="/gl/">Reports</a></h3>
+                    <div class="panel-title">Sales Breakdown
+                        <span class="glyphicon glyphicon-info-sign" 
+                            data-toggle="tooltip" 
+                            title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
+                            data-placement="right" aria-hidden="true">
+                        </span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <ul>
+                        <li><a href="/api/base/sales_by_month">By Month</a></li>
+                        <li><a href="/api/base/sales_by_channel">By Channel</a></li>
+                        <li><a href="/api/base/sales_by_counterparty">By Counterparty</a></li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="panel-title">Downloads</div>
                 </div>
 
                 <div class="panel-body">
 
                     <ul>
-                        <li><a href="/inventory/sales_history">Full History</a></li>
+                        <li><a href="/download_allsales">All sales</a></li>
+                        <p>Sales Tax Reports (not working yet)
+                        <a href="/download_salestax">2013</a>,
+                    </p>
                     </ul>
 
                 </div>
             </div>
         </div>
     </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="by_month" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->
+
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="by_counterparty" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->      
+    </div><!-- row -->
+
+    <div class="row">
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="by_channel" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="trace_traded_orders" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->
+    </div>
 </div>
 
+<div role="tabpanel" class="tab-pane fade container-fluid" id="expenses">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">Expenses Breakdown
+                        <span class="glyphicon glyphicon-info-sign" 
+                            data-toggle="tooltip" 
+                            title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
+                            data-placement="right" aria-hidden="true">
+                        </span>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <ul>
+                        <li><a href="/api/base/expense_by_month">By Month</a></li>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading">
+                    <div class="panel-title">Downloads</div>
+                </div>
+
+                <div class="panel-body">
+
+                    <ul>
+                        <li><a href="/download_allsales">All sales</a></li>
+                        <p>Sales Tax Reports (not working yet)
+                        <a href="/download_salestax">2013</a>,
+                    </p>
+                    </ul>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="by_month" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->
+
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="by_counterparty" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->      
+    </div><!-- row -->
+
+    <div class="row">
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="by_channel" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->
+      <div class="col-sm-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+                <div id="trace_traded_orders" class="panel-body" style="width:100%;height:400px"></div>
+            </div>
+          </div>
+      </div><!-- /.col-sm-8 -->
+    </div>
+</div>
+</div>
+</div>
 {% endblock %}
 
 
@@ -60,11 +196,43 @@
     <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
     <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
     <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
-      
+    
     <script>
         $(function () {
           $('[data-toggle="tooltip"]').tooltip()
         })
     </script>
+
+    <script type="text/javascript">
+        $(document).ready(simpleChart2("/api/base/sales_by_month?raw=true&output=chart",
+                                         "by_month",
+                                         'Units Sold by Month',
+                                         ['column'],
+                                         [0],
+                                         ['Unit Sales'],
+                                         ['Units']
+                                         ));
+    </script>
+    <script type="text/javascript">
+        $(document).ready(simpleChart2("/api/base/sales_by_counterparty?raw=true&output=chart",
+                                         "by_counterparty",
+                                         'Units Sold by Counterparty',
+                                         ['column'],
+                                         [0],
+                                         ['Unit Sales'],
+                                         ['Units']
+                                         ));
+    </script>
+    <script type="text/javascript">
+        $(document).ready(simpleChart2("/api/base/sales_by_channel?raw=true&output=chart",
+                                         "by_channel",
+                                         'Units Sold by Channel',
+                                         ['column'],
+                                         [0],
+                                         ['Unit Sales'],
+                                         ['Units']
+                                         ));
+    </script>
+
 
 {% endblock %}

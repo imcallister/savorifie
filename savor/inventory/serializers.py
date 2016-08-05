@@ -3,16 +3,15 @@ from rest_framework import serializers
 
 from accountifie.common.serializers import EagerLoadingMixin, AddressSerializer
 
-from .models import *
+import models
 import savor.base.serializers as baseslz
 
 
 class ProductLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     
     class Meta:
-        model = ProductLine
+        model = models.ProductLine
         fields = ('id', 'label', 'description')
-
 
 
 class InventoryItemSerializer(serializers.ModelSerializer, EagerLoadingMixin):
@@ -21,7 +20,7 @@ class InventoryItemSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     product_line = ProductLineSerializer(read_only=True)
 
     class Meta:
-        model = InventoryItem
+        model = models.InventoryItem
         fields = ('id', 'label', 'description', 'master_sku', 'product_line')
 
 
@@ -30,7 +29,7 @@ class SKUUnitSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     inventory_item = serializers.StringRelatedField()
 
     class Meta:
-        model = SKUUnit
+        model = models.SKUUnit
         fields = ('id', 'quantity', 'inventory_item', 'rev_percent')
 
 
@@ -39,7 +38,7 @@ class ProductSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     skuunit = SKUUnitSerializer(read_only=True, many=True)
 
     class Meta:
-        model = Product
+        model = models.Product
         fields = ('id', 'label', 'description', 'skuunit')
 
 
@@ -48,7 +47,7 @@ class ShippingTypeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     shipper = serializers.StringRelatedField()
 
     class Meta:
-        model = ShippingType
+        model = models.ShippingType
         fields = ('id', 'label', 'description', 'shipper')
 
 
@@ -60,14 +59,14 @@ class ChannelShipmentTypeSerializer(serializers.ModelSerializer, EagerLoadingMix
     channel = serializers.StringRelatedField()
 
     class Meta:
-        model = ChannelShipmentType
+        model = models.ChannelShipmentType
         fields = ('id', 'label', 'ship_type', 'bill_to', 'use_pdf',
                   'packing_type', 'ship_from', 'channel')
 
 
 class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Warehouse
+        model = models.Warehouse
         fields = ('id', 'label', 'description',)
 
 
@@ -76,7 +75,7 @@ class FulfillUpdateSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     shipper = serializers.StringRelatedField()
 
     class Meta:
-        model = FulfillUpdate
+        model = models.FulfillUpdate
         fields = ('update_date', 'comment', 'status',
                   'shipper', 'tracking_number')
 
@@ -86,7 +85,7 @@ class FulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     inventory_item = serializers.StringRelatedField()
 
     class Meta:
-        model = FulfillLine
+        model = models.FulfillLine
         fields = ('inventory_item', 'quantity')
 
 
@@ -107,7 +106,7 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     ship_from = AddressSerializer(read_only=True)
 
     class Meta:
-        model = Fulfillment
+        model = models.Fulfillment
         fields = ('id', 'order', 'request_date', 'status',
                   'ship_info', 'warehouse', 'bill_to', 'ship_type',
                   'use_pdf', 'packing_type', 'fulfill_lines',
@@ -125,7 +124,7 @@ class BatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     fulfillments = FulfillmentSerializer(many=True, read_only=True)
 
     class Meta:
-        model = BatchRequest
+        model = models.BatchRequest
         fields = ('id', 'created_date', 'location',
                   'fulfillments', 'comment',)
 
@@ -135,7 +134,7 @@ class WarehouseFulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMi
     inventory_item = serializers.StringRelatedField()
 
     class Meta:
-        model = WarehouseFulfillLine
+        model = models.WarehouseFulfillLine
         fields = ('inventory_item', 'quantity',)
 
 
@@ -152,7 +151,7 @@ class WarehouseFulfillSerializer(serializers.ModelSerializer, EagerLoadingMixin)
     fulfill_lines = WarehouseFulfillLineSerializer(many=True, read_only=True)
 
     class Meta:
-        model = WarehouseFulfill
+        model = models.WarehouseFulfill
         flds = ('savor_order', 'savor_transfer', 'warehouse', 'fulfill_lines',
                 'warehouse_pack_id', 'order_date', 'request_date',
                 'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',

@@ -1,16 +1,15 @@
 from accountifie.common.serializers import EagerLoadingMixin
 
-from .models import *
+import models
 from rest_framework import serializers
 
 
 class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['sku__label', 'sku__description']
-    
     sku = serializers.StringRelatedField()
-    
+
     class Meta:
-        model = UnitSale
+        model = models.UnitSale
         fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
     
 
@@ -21,7 +20,7 @@ class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     customer_code = serializers.StringRelatedField()
 
     class Meta:
-        model = Sale
+        model = models.Sale
         fields = ('id', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'shipping_name',
                   'shipping_company', 'shipping_zip')
@@ -37,7 +36,7 @@ class ShippingSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     customer_code = serializers.StringRelatedField()
 
     class Meta:
-        model = Sale
+        model = models.Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'special_sale', 'discount',
                   'discount_code', 'gift_wrapping', 'gift_wrap_fee',
@@ -66,7 +65,7 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     unit_sale = UnitSaleSerializer(many=True)
 
     class Meta:
-        model = Sale
+        model = models.Sale
         fields = ('id', 'label', 'company', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'special_sale', 'discount',
                   'discount_code', 'gift_wrapping', 'gift_wrap_fee',

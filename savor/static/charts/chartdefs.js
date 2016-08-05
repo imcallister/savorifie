@@ -1,3 +1,176 @@
+var simpleChart = function(dataUrl, renderAt, chartTitle, chartType, seriesNames) {
+
+     var chartDef = {
+        chart: {
+            renderTo: renderAt,
+            type: chartType,
+        },
+        legend: {enabled: true},
+        title: {text: chartTitle},
+        xAxis: {title: {text: null}},
+        yAxis: {title: {text: null}},
+        series: Array.apply(null, {length: seriesNames.length}).map(function() {return {};}),
+        credits: {
+            enabled: false
+        }
+    };
+
+    $.ajax({
+        type: 'get',
+        url: dataUrl,
+        success:function(data) {
+
+            chartDef.xAxis.categories = data['chart_data']['x_points'];
+            for (i=0; i < seriesNames.length; i++) {
+                chartDef.series[i].name = seriesNames[i];
+                chartDef.series[i].data = data['chart_data']['values'][i];
+            }
+            var chart = new Highcharts.Chart(chartDef);
+        }
+    });
+
+};
+
+var simpleChart2 = function(dataUrl, renderAt, chartTitle, seriesTypes, seriesAxis, seriesNames, yAxisNames) {
+
+     var chartDef = {
+        chart: {
+            renderTo: renderAt,
+        },
+        legend: {enabled: true},
+        title: {text: chartTitle},
+        xAxis: {title: {text: null}},
+        yAxis: [{title: {text: yAxisNames[0]}, min:0}, {title: {text: yAxisNames[1]}, opposite: true, min:0}],
+        series: Array.apply(null, {length: seriesNames.length}).map(function() {return {};}),
+        credits: {
+            enabled: false
+        }
+    };
+
+    $.ajax({
+        type: 'get',
+        url: dataUrl,
+        success:function(data) {
+
+            chartDef.xAxis.categories = data['chart_data']['x_points'];
+            for (i=0; i < seriesNames.length; i++) {
+                chartDef.series[i].name = seriesNames[i];
+                chartDef.series[i].type = seriesTypes[i];
+                chartDef.series[i].yAxis = seriesAxis[i];
+                chartDef.series[i].data = data['chart_data']['values'][i];
+            }
+            var chart = new Highcharts.Chart(chartDef);
+        }
+    });
+
+};
+
+
+var stackedChart = function(dataUrl, renderAt, chartTitle, chartType, seriesAxis) {
+
+     var chartDef = {
+        chart: {
+            renderTo: renderAt,
+            type: chartType,
+        },
+        legend: {enabled: true},
+        plotOptions: {column: {stacking: 'normal'}},
+        title: {text: chartTitle},
+        xAxis: {title: {text: null}},
+        yAxis: [{title: {text: null}, min:0}, {title: {text: null}, opposite: true, min:0}],
+        series: Array.apply(null, {length: seriesAxis.length}).map(function() {return {};}),
+        credits: {
+            enabled: false
+        }
+    };
+
+    $.ajax({
+        type: 'get',
+        url: dataUrl,
+        success:function(data) {
+
+            chartDef.xAxis.categories = data['chart_data']['x_points'];
+            
+            stacks = ['left axis', 'right axis']
+            for (i=0; i < seriesAxis.length; i++) {
+                chartDef.series[i].data = data['chart_data']['values'][i];
+                chartDef.series[i].stack = stacks[seriesAxis[i]];
+                chartDef.series[i].name = data['chart_data']['series_names'][i];
+                chartDef.series[i].yAxis = seriesAxis[i];
+            }
+            var chart = new Highcharts.Chart(chartDef);
+        }
+    });
+
+};
+
+var doubleAxisChart = function(dataUrl, renderAt, chartTitle, chartType, seriesNames, seriesAxis, yAxisNames) {
+
+     var chartDef = {
+        chart: {
+            renderTo: renderAt,
+            type: chartType,
+        },
+        legend: {enabled: true},
+        title: {text: chartTitle},
+        xAxis: {title: {text: null}},
+        yAxis: [{title: {text: yAxisNames[0]}, min:0}, {title: {text: yAxisNames[1]}, opposite: true, min:0}],
+        series: Array.apply(null, {length: seriesNames.length}).map(function() {return {};}),
+        credits: {
+            enabled: false
+        }
+    };
+
+    $.ajax({
+        type: 'get',
+        url: dataUrl,
+        success:function(data) {
+            chartDef.xAxis.categories = data['chart_data']['x_points'];
+            for (i=0; i < seriesNames.length; i++) {
+                chartDef.series[i].name = seriesNames[i];
+                chartDef.series[i].data = data['chart_data']['values'][i];
+                chartDef.series[i].yAxis = seriesAxis[i];
+            }
+            var chart = new Highcharts.Chart(chartDef);
+        }
+    });
+
+};
+
+var multiLineChart = function(dataUrl, renderAt, chartTitle) {
+    var chartDef = {
+        chart: {
+          renderTo: renderAt
+        },
+        title: {
+            text: chartTitle
+        },
+        xAxis: {
+            categories: []
+        },
+        series: []
+    };
+
+    $.ajax({
+      type: 'get',
+      url: dataUrl,
+      success:function(data) {
+          console.log(data);
+          chartDef.xAxis.categories = data['chart_data']['x_points'];
+          for (i=0; i < data.chart_data.series.length; i++) {
+              chartDef.series[i] = {
+                name: data['chart_data']['series'][i]['name'],
+                data: data['chart_data']['series'][i]['values']
+              }
+          }
+          var chart = new Highcharts.Chart(chartDef);
+      }
+    });
+};
+
+
+
+
 var cash_bals_chart = function(data_url, renderTo) {    
         
      var avgByDayOptions2 = {
