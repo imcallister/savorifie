@@ -58,12 +58,13 @@ def _backorder_list(qstring=None):
         items_string = ','.join(['%s %s' %(i[1], i[0]) for i in items])
 
         o = f['order']
-        o.update({'ship to': _get_name(o)})
-        o.update({'Action': action_form})
-        o.update({'Items': items_string})
-        o.update({'Unfulfilled': items_string})
-        o.update({'Date': parse(o['sale_date']).strftime('%d-%b-%y')})
-    return columns, orders
+        f.update({'ship to': _get_name(o)})
+        f.update({'Action': action_form})
+        f.update({'Items': items_string})
+        f.update({'Unfulfilled': items_string})
+        f.update({'Date': parse(o['sale_date']).strftime('%d-%b-%y')})
+    return columns, back_fulfills
+
 
 @login_required
 def management(request):
@@ -75,7 +76,7 @@ def management(request):
     context['tbq_columns'], context['tbq_rows'] = _fulfill_list()
     context['to_be_queued'] = len(context['tbq_rows'])
 
-    context['back_columns'], context['back_rows'] = _fulfill_list()
+    context['back_columns'], context['back_rows'] = _backorder_list()
     context['backordered'] = len(context['back_rows'])
 
     context['unbatched_fulfillments'] = len(api_func('inventory', 'unbatched_fulfillments'))
