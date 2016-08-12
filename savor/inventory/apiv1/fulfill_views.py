@@ -90,13 +90,14 @@ def _missing_shipping(rec):
 def fulfillment(qstring):
     start = time.time()
     qs = Fulfillment.objects.all()
+    qs = FulfillmentSerializer.setup_eager_loading(qs)
+    
     if qstring.get('warehouse'):
         qs = qs.filter(warehouse__label=qstring.get('warehouse'))
 
     if 'status' in qstring:
         qs = qs.filter(status__in=qstring['status'].split(','))
-
-    qs = FulfillmentSerializer.setup_eager_loading(qs)
+    
     flfmts = FulfillmentSerializer(qs, many=True).data
     if qstring.get('missing_shipping', '').lower() == 'true':
         flfmts = [r for r in flfmts if _missing_shipping(r)]

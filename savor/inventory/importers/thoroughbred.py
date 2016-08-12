@@ -67,11 +67,7 @@ def process_thoroughbred(file_name):
         savor_request_id = top_row['CUST_PO']
 
         try:
-            if savor_request_id[:3] == 'SAL':
-                pack_info['savor_order_id'] = api_func('inventory', 'fulfillment', savor_request_id[4:])['order_id']
-            else:
-                pack_info['savor_transfer_id'] = savor_id[4:]
-
+            pack_info['fulfillment_id'] = savor_request_id
             # set default values
             pack_info['warehouse_pack_id'] = k
             pack_info['order_date'] = parse(top_row['ORDER_DATE']).date()

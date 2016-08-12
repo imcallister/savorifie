@@ -82,11 +82,9 @@ def management(request):
     context['unbatched_fulfillments'] = len(api_func('inventory', 'unbatched_fulfillments'))
     context['unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') if x['status']=='requested'])
     context['missing_shipping'] = len(api_func('inventory', 'fulfillment', qstring={'missing_shipping': 'true'}))
-    
-    
 
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location_label', 'fulfillments_count', 'get_list']
-    
+
     batch_requests = sorted(api_func('inventory', 'batchrequest'),
                             key=lambda x: x['created_date'],
                             reverse=True)
@@ -98,7 +96,7 @@ def management(request):
     thoroughbred_mismatches = api_func('inventory', 'thoroughbred_mismatch')
     context['thoroughbred_mismatches'] = len(thoroughbred_mismatches)
     context['unreconciled'] = get_table('fulfill_requested')()
-    context['whmismatch_columns'] = ['order_id', 'fail_reason']
+    context['whmismatch_columns'] = ['fulfill_id', 'fail_reason']
     context['whmismatch_rows'] = thoroughbred_mismatches
 
     return render_to_response('inventory/management.html', context, context_instance = RequestContext(request))

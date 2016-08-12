@@ -30,7 +30,7 @@ def get_today():
 
 
 def post_fulfill_update(data):
-    fulfill_obj = Fulfillment.objects.get(id=data['fulfill_id'])
+    fulfill_obj = Fulfillment.objects.get(id=data['fulfillment_id'])
     fulfill_obj.status = data['status']
     fulfill_obj.save()
 
