@@ -195,8 +195,11 @@ def request_fulfill(request, warehouse, order_id):
     if request.GET.has_key('backorder'):
         if lower(request.GET.get('backorder')) == 'true':
             res = backorder_to_requested(warehouse, order_id)
+        else:
+            res = create_fulfill_request(warehouse, order_id)
     else:
         res = create_fulfill_request(warehouse, order_id)
+
     if res == 'FULFILL_ALREADY_REQUESTED':
         messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
         return redirect('/admin/base/sale/?requested=unrequested')
