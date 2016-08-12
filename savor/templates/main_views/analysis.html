@@ -19,7 +19,11 @@
     <li role="presentation" class="active"><a href="#sales" aria-controls="sales" role="tab" data-toggle="tab">Sales</a></li>
     <li role="presentation"><a href="#expenses" aria-controls="expenses" role="tab" data-toggle="tab">Expenses</a></li>
 </ul>
-
+<span class="glyphicon glyphicon-info-sign" 
+        data-toggle="tooltip" 
+        title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
+        data-placement="right" aria-hidden="true">
+</span>
 <div class="tab-content">
 <div role="tabpanel" class="tab-pane fade in active" id="sales">
     <div class="row">
@@ -27,18 +31,24 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <div class="panel-title">Sales Breakdown
-                        <span class="glyphicon glyphicon-info-sign" 
-                            data-toggle="tooltip" 
-                            title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
-                            data-placement="right" aria-hidden="true">
-                        </span>
+                        
                     </div>
+
                 </div>
                 <div class="panel-body">
                     <ul>
-                        <li><a href="/api/base/sales_by_month">By Month</a></li>
-                        <li><a href="/api/base/sales_by_channel">By Channel</a></li>
-                        <li><a href="/api/base/sales_by_counterparty">By Counterparty</a></li>
+                        <li>
+                            <a href="/api/base/sales_by_month">By month</a>
+                            (<a href="/api/base/sales_by_month?as_csv=true">download as csv</a>)
+                        </li>
+                        <li>
+                            <a href="/api/base/sales_by_channel">By Channel</a>
+                            (<a href="/api/base/sales_by_channel?as_csv=true">download as csv</a>)
+                        </li>
+                        <li>
+                            <a href="/api/base/sales_by_counterparty">By Counterparty</a>
+                            (<a href="/api/base/sales_by_counterparty?as_csv=true">download as csv</a>)
+                        </li>
                     </ul>
 
                 </div>

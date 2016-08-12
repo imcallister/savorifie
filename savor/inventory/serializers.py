@@ -117,7 +117,7 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 class BatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['location']
     _PREFETCH_RELATED_FIELDS = ['fulfillments'] + ['fulfillments__fulfill_lines', 'fulfillments__order__channel',
-                                                    'fulfillments__order__customer_code',
+                                                    'fulfillments__order__customer_code', 'fulfillments__ship_from',
                                                     'fulfillments__ship_type', 'fulfillments__warehouse',
                                                     'fulfillments__fulfill_lines__inventory_item']
     location = serializers.StringRelatedField()
@@ -140,9 +140,10 @@ class WarehouseFulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMi
 
 class WarehouseFulfillSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['savor_order', 'savor_transfer', 'savor_order__customer_code',
-                              'savor_order__channel',
+                              'savor_order__channel', 'savor_order__channel__counterparty__id', 
                               'warehouse', 'shipping_type']
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'fulfill_lines__inventory_item']
+    _PREFETCH_RELATED_FIELDS += ['savor_order__unit_sale__sku__skuunit__inventory_item']
 
     savor_order = baseslz.SimpleSaleSerializer(read_only=True)
     savor_transfer = serializers.StringRelatedField()

@@ -166,7 +166,7 @@ def sales_counts(qstring):
     sales_counts = dict((k['label'],0) for k in all_skus)
 
     for u_sale in all_sales:
-        u_sale_counts = u_sale.get_inventory_items()
+        u_sale_counts = u_sale.inventory_items()
         for sku in u_sale_counts:
             sales_counts[sku] += u_sale_counts[sku]
 

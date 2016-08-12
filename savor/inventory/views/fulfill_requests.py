@@ -1,11 +1,12 @@
 import csv
 import flatdict
 from collections import OrderedDict
+import json
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
@@ -35,6 +36,50 @@ def post_fulfill_update(data):
 
     FulfillUpdate(**data).save()
     return
+
+
+@login_required
+def queue_orders(request):
+    new_back_orders = 0
+    new_152 = 0
+    new_MICH = 0
+
+    bad_requests = []
+
+    if request.method == 'POST':
+        for k,v in request.POST.iteritems():
+            if k[:8] == 'q_choice' and v != '----':
+                if v == 'Back Order':
+                    rslt = create_backorder(k[9:])
+                    if rslt == 'FULFILL_BACKORDERED':
+                        new_back_orders += 1
+                    else:
+                        bad_requests.append(k[9:])
+                elif v == 'Queue for 152':
+                    rslt = create_fulfill_request('152Frank', k[9:])
+                    if rslt == 'FULFILL_REQUESTED':
+                        new_152 += 1
+                    else:
+                        bad_requests.append(k[9:])
+                elif v == 'Queue for MICH':
+                    rslt = create_fulfill_request('MICH', k[9:])
+                    if rslt == 'FULFILL_REQUESTED':
+                        new_MICH += 1
+                    else:
+                        bad_requests.append(k[9:])
+                    
+        messages.info(request, "%d new back orders. \
+                                %d new 152 fulfillments. \
+                                %d new MICH fulfillments, \
+                                Bad requests: %s" \
+                                % (new_back_orders,
+                                   new_152,
+                                   new_MICH,
+                                   ','.join(bad_requests)))
+
+        return HttpResponseRedirect("/inventory/management")
+    else:
+        raise ValueError("This resource requires a POST request")
 
 
 def create_backorder(order_id):
@@ -69,24 +114,37 @@ def create_backorder(order_id):
         fulfill_obj.save()
 
         unit_sales = api_func('base', 'sale', str(order_id)).get('unit_sale', [])
+        u_qty = {}
         for u in unit_sales:
+            for k, v in UnitSale.objects \
+                                .get(id=u['id']) \
+                                .inventory_items() \
+                                .iteritems():
+                if k in u_qty:
+                    u_qty[k] += int(v)
+                else:
+                    u_qty[k] = int(v)
+
+        for k,v in u_qty.iteritems():
             fline_info = {}
-            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=u['sku']).id
-            fline_info['quantity'] = u['quantity']
+            fline_info['inventory_item_id'] = k
+            fline_info['quantity'] = v
             fline_info['fulfillment_id'] = fulfill_obj.id
             fline_obj = FulfillLine(**fline_info)
             fline_obj.save()
-
         return 'FULFILL_BACKORDERED'
 
-def create_fulfill_request(warehouse, order_id):
-    # check that it has not been requested already
-    fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
-    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
-    order = api_func('base', 'sale', unicode(order_id))
-    order_label = order['label']
 
-    if order_label in fulfillment_labels:
+def backorder_to_requested(warehouse, fulfill_id):
+    pass
+
+
+def create_fulfill_request(warehouse, order_id):
+    unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
+    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
+
+    order = api_func('base', 'sale', order_id)
+    if unfulfilled is None:
         return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
         return 'WAREHOUSE_NOT_RECOGNISED'
@@ -105,7 +163,7 @@ def create_fulfill_request(warehouse, order_id):
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
-        
+
         if ch_ship_type:
             fulfill_info['bill_to'] = ch_ship_type.bill_to
             fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
@@ -113,16 +171,18 @@ def create_fulfill_request(warehouse, order_id):
             fulfill_info['packing_type'] = ch_ship_type.packing_type
             fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
 
-
         fulfill_info['status'] = 'requested'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
-        unit_sales = api_func('base', 'sale', str(order_id)).get('unit_sale', [])
-        for u in unit_sales:
+        unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
+        inv_items = dict((i['label'], i['id']) for i in api_func('inventory', 'inventoryitem'))
+
+        for label, quantity in unfulfilled_items.iteritems():
+            inv_id = inv_items[label]
             fline_info = {}
-            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=u['sku']).id
-            fline_info['quantity'] = u['quantity']
+            fline_info['inventory_item_id'] = inv_id
+            fline_info['quantity'] = quantity
             fline_info['fulfillment_id'] = fulfill_obj.id
             fline_obj = FulfillLine(**fline_info)
             fline_obj.save()
@@ -132,7 +192,11 @@ def create_fulfill_request(warehouse, order_id):
 
 @login_required
 def request_fulfill(request, warehouse, order_id):
-    res = create_fulfill_request(warehouse, order_id)
+    if request.GET.has_key('backorder'):
+        if lower(request.GET.get('backorder')) == 'true':
+            res = backorder_to_requested(warehouse, order_id)
+    else:
+        res = create_fulfill_request(warehouse, order_id)
     if res == 'FULFILL_ALREADY_REQUESTED':
         messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
         return redirect('/admin/base/sale/?requested=unrequested')

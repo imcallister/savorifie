@@ -11,19 +11,60 @@ class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = models.UnitSale
         fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
-    
+   
 
 class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['channel', 'customer_code']
+    items_string = serializers.SerializerMethodField()
+
+    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
+    _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
+
+    def get_label(self, obj):
+        return str(obj)
+
+    def get_items_string(self, obj):
+        return obj.items_string
+
 
     channel = serializers.StringRelatedField()
     customer_code = serializers.StringRelatedField()
 
     class Meta:
         model = models.Sale
-        fields = ('id', 'customer_code', 'channel', 'sale_date',
+        fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'shipping_name',
-                  'shipping_company', 'shipping_zip')
+                  'shipping_company', 'shipping_zip', 'items_string')
+
+
+class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    items_string = serializers.SerializerMethodField()
+    unfulfilled_items = serializers.SerializerMethodField()
+    unfulfilled_string = serializers.SerializerMethodField()
+
+    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
+    _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
+
+    def get_label(self, obj):
+        return str(obj)
+
+    def get_items_string(self, obj):
+        return obj.items_string
+
+    def get_unfulfilled_string(self, obj):
+        return obj.unfulfilled_items_string
+
+    def get_unfulfilled_items(self, obj):
+        return obj.unfulfilled_items
+
+
+    channel = serializers.StringRelatedField()
+    customer_code = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.Sale
+        fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
+                  'external_channel_id', 'shipping_name', 'shipping_company',
+                  'shipping_zip', 'items_string', 'unfulfilled_string', 'unfulfilled_items')
 
 
 class ShippingSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):

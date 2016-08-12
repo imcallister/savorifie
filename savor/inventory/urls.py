@@ -14,6 +14,8 @@ urlpatterns = patterns('',
     url(r'^inventory/upload/(?P<file_type>.*)/$', 'inventory.views.upload_file', name='upload_file'),
 
     url(r'^inventory/management/$', 'inventory.views.management'),
+    url(r'^inventory/queue_orders/$', 'inventory.views.queue_orders'),
+
     url(r'^inventory/$', 'inventory.views.main'),
 )
 

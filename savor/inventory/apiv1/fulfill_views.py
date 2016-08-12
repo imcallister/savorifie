@@ -11,7 +11,7 @@ from accountifie.common.api import api_func
 from inventory.models import *
 from inventory.serializers import *
 from base.models import *
-from base.serializers import SimpleSaleSerializer
+from base.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
 
 logger = logging.getLogger('default')
 
@@ -44,14 +44,12 @@ def batched_fulfillments(qstring):
 
 
 def unbatched_fulfillments(qstring):
-    batches = BatchRequest.objects.all().prefetch_related('fulfillments')
-    batched_flmts = list(itertools.chain(*[[x.id for x in b.fulfillments.all()] for b in batches]))
-    unbatched_qs = Fulfillment.objects \
-                              .select_related('warehouse') \
-                              .exclude(id__in=batched_flmts)
+    batched_flmts = batched_fulfillments(qstring)
+    qs = Fulfillment.objects.exclude(id__in=batched_flmts)
+    qs = FulfillmentSerializer.setup_eager_loading(qs)
 
-    unb_fulfillments = [{'label': str(f), 'id': f.id, 'warehouse': str(f.warehouse)} for f in unbatched_qs]
-    return unb_fulfillments
+    return [{'label': f['order']['label'], 'id': f['id'], 'warehouse': f['warehouse']} \
+            for f in FulfillmentSerializer(qs, many=True).data]
 
 
 @dispatch(dict)
@@ -142,14 +140,36 @@ def fulfilled(qstring):
     data = [dict((str(k), str(v)) for k, v in flatdict.FlatDict(f).iteritems()) for f in fulfilled]
     return data
 
+def backordered(qstring):
+    """
+    find all sale objects for which fulfillment is backordered
+    """
+    qs = Fulfillment.objects.filter(status='back-ordered')
+    qs = FulfillmentSerializer.setup_eager_loading(qs)
+    return FulfillmentSerializer(qs, many=True).data
 
+
+@dispatch(dict)
 def unfulfilled(qstring):
     """
     find all sale objects for which there is no fulfillment record
     """
-    fulfilled_sale_ids = [x['order_id'] for x in Fulfillment.objects.all().values('order_id')]
-    sales_qs = Sale.objects.exclude(id__in=fulfilled_sale_ids) \
-                           .select_related('customer_code') \
-                           .select_related('channel')
+    sales_qs = Sale.objects \
+                   .prefetch_related('unit_sale__sku__skuunit__inventory_item') \
+                   .prefetch_related('fulfillments__fulfill_lines__inventory_item') \
+                   .all()
 
-    return SimpleSaleSerializer(sales_qs, many=True).data
+    incomplete = [s.id for s in sales_qs if s.unfulfilled_items]
+    
+    qs = Sale.objects.filter(id__in=incomplete)
+    qs = SaleFulfillmentSerializer.setup_eager_loading(qs)
+    return SaleFulfillmentSerializer(qs, many=True).data
+
+
+@dispatch(str, dict)
+def unfulfilled(id, qstring):
+    """
+    find all sale objects for which there is no fulfillment record
+    """
+    qs = Sale.objects.get(id=id)
+    return SaleFulfillmentSerializer(qs).data
