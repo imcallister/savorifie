@@ -65,7 +65,7 @@ def allsales_dump(request):
     all_sales = api_func('base', 'sale')
 
     header_row = ['label', 'channel', 'customer_code', 'shipping_name',
-                  'items_string', 'sale_date', 'shipping_company', 
+                  'items_string', 'sale_date', 'shipping_company',
                   'notification_email', 'shipping_phone',
                   'shipping_address1', 'shipping_address2', 'shipping_city',
                   'shipping_province', 'shipping_zip', 'shipping_country',

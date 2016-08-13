@@ -10,8 +10,9 @@ Background: There are accounts and companies and counterparties in the system
 
     And there are accounts:
         |    id     |           path                                 |
-        |    1200   |   assets.curr.inventory.PL1.II01               |
-        |    1201   |   assets.curr.inventory.PL1.II02               |
+        |    1200   |      assets.curr.inventory.general             |
+        |    1201   |   assets.curr.inventory.PL1.II01               |
+        |    1202   |   assets.curr.inventory.PL1.II02               |
         |    3000   |         liabilities.curr.ap                    |
         
 
@@ -22,6 +23,7 @@ Background: There are accounts and companies and counterparties in the system
     And there are environment variables:
         |    key                    |   value   |
         |    GL_ACCOUNTS_PAYABLE    |   3000    |
+        |       GL_INVENTORY        |   1200    |
         |  DEFAULT_COMPANY_ID       |   TEST    |
         
     
@@ -55,6 +57,6 @@ Scenario: Shipment Line GL entries
     
     Then the lines should be:
         | account   |   amount  | counterparty |    date    |  date_end |
-        |  1200     |    2500   |   MANUF1     | 2016-01-01 |           |
-        |  3000     |   -2500   |   MANUF1     | 2016-01-01 |           |
+        |  1201     |    2500   |   MANUF1     | 2016-01-01 |           |
+        |  1200     |   -2500   |   MANUF1     | 2016-01-01 |           |
 

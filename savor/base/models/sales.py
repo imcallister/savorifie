@@ -1,6 +1,7 @@
 from django.utils.safestring import mark_safe
 from decimal import Decimal
 import logging
+import itertools
 
 from django.db import models
 
@@ -42,7 +43,7 @@ CHANNELS = [
 
 
 class UnitSale(accountifie.common.models.McModel):
-    sale = models.ForeignKey('base.Sale')
+    sale = models.ForeignKey('base.Sale', related_name='unit_sale')
     sku = models.ForeignKey('inventory.Product', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
@@ -54,12 +55,14 @@ class UnitSale(accountifie.common.models.McModel):
     def __unicode__(self):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)
 
-    def save(self):
+    def save(self, update_gl=True):
         models.Model.save(self)
-        # need to do FIFO assignment
-        to_be_fifod = self.fifo_check()
-        if len(to_be_fifod) > 0:
-            accounting.models.fifo_assign(self.id, to_be_fifod)
+        
+        if update_gl:
+            # need to do FIFO assignment
+            to_be_fifod = self.fifo_check()
+            if len(to_be_fifod) > 0:
+                accounting.models.fifo_assign(self.id, to_be_fifod)
 
 
 
@@ -77,23 +80,27 @@ class UnitSale(accountifie.common.models.McModel):
         for fifo in fifos:
             fifo_sku_count[fifo['sku']] += fifo['quantity']
 
-        sku_items = self.get_inventory_items()
+        sku_items = self.inventory_items()
         diff = dict((s, sku_items.get(s, 0) - fifo_sku_count.get(s, 0)) for s in sku_items)
         diff = dict((k,v) for k,v in diff.iteritems() if v>0)
         return diff
 
+    def inventory_items(self):
+        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit.all())
 
     def get_inventory_items(self):
-        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit_set.all())
+        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit.all())
 
     def get_gross_sales(self):
         return dict((u.inventory_item.label,
                      u.quantity * self.quantity * self.unit_price * Decimal(u.rev_percent)/Decimal(100)) \
-                    for u in self.sku.skuunit_set.all())
+                    for u in self.sku.skuunit.all())
 
     @property
     def items_string(self):
-        return ','.join(['%s %s' % (u.quantity * self.quantity, u.inventory_item.label) for u in self.sku.skuunit_set.all()])
+        items = [(u.quantity * self.quantity, u.inventory_item.label) for u in self.sku.skuunit.all()]
+        items = sorted(items, key=lambda x: x[1])
+        return ','.join(['%s %s' % (i[0], i[1]) for i in items])
 
 
 class SalesTax(accountifie.common.models.McModel):
@@ -111,6 +118,7 @@ class SalesTax(accountifie.common.models.McModel):
 
 SPECIAL_SALES = (
     ('press', 'Press Sample'),
+    ('consignment', 'Consignment'),
     ('prize', 'Gift/Prize'),
     ('retailer', 'Retailer Sample'),
 )
@@ -167,14 +175,16 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         app_label = 'base'
         db_table = 'base_sale'
 
-    def save(self):
-        # fifo check
-        for u in self.unitsale_set.all():
-            to_be_fifod = u.fifo_check()
-            if len(to_be_fifod) > 0:
-                accounting.models.fifo_assign(u.id, to_be_fifod)
+    def save(self, update_gl=True):
+        if update_gl:
+            # fifo check
+            for u in self.unit_sale.all():
+                to_be_fifod = u.fifo_check()
+                if len(to_be_fifod) > 0:
+                    accounting.models.fifo_assign(u.id, to_be_fifod)
 
-        self.update_gl()
+            self.update_gl()
+
         models.Model.save(self)
 
 
@@ -192,7 +202,6 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         else:
             return False
 
-
     @property
     def id_link(self):
         return mark_safe('<a href="/admin/base/sale/%s">%s</a>' % (self.id, self.id))
@@ -203,8 +212,53 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
     @property
     def items_string(self):
-        return ','.join([u.items_string for u in self.unitsale_set.all()])
+        items = [(k, v) for k, v in self.inventory_items.iteritems()]
+        items = sorted(items, key=lambda x: x[0])
+        return ','.join(['%s %s' % (i[1], i[0]) for i in items])
 
+    @property
+    def unfulfilled_items_string(self):
+        unf = self.unfulfilled_items
+        if unf:
+            items = [(k, v) for k, v in unf.iteritems()]
+            items = sorted(items, key=lambda x: x[0])
+            return ','.join(['%s %s' % (i[1], i[0]) for i in items])
+        else:
+            return ''
+
+    @property
+    def inventory_items(self):
+        u_items = [u.inventory_items().items() for u in self.unit_sale.all()]
+        all_u_items = list(itertools.chain.from_iterable(u_items))
+        g = itertools.groupby(sorted(all_u_items, key=lambda x: x[0]),
+                              key=lambda x:x[0])
+        return dict((k, sum([i[1] for i in list(v)])) for k, v in g)
+
+    @property
+    def fulfilled_items(self):
+        items = [(str(l.inventory_item), l.quantity) for f in self.fulfillments.all() \
+                                                     for l in f.fulfill_lines.all()]
+        all_items = list(itertools.chain.from_iterable(items))
+        g = itertools.groupby(sorted(items, key=lambda x: x[0]), key=lambda x: x[0])
+        fulf = dict((k, sum([i[1] for i in list(v)])) for k, v in g if v > 0)
+        if len(fulf) > 0:
+            return fulf
+        else:
+            return None
+
+    @property
+    def unfulfilled_items(self):
+        d1 = self.inventory_items
+        d2 = self.fulfilled_items
+        if d2:
+            unf = {k: int(d1.get(k, 0)) - int(d2.get(k,0)) for k in set(d1) | set(d2) }
+            unf = dict((k, v) for k,v in unf.iteritems() if v > 0)
+            if len(unf) > 0:
+                return unf
+            else:
+                return None
+        else:
+            return d1
 
     @property
     def label(self):
@@ -212,7 +266,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
 
 
     def _get_unitsales(self):
-        unitsales = self.unitsale_set.all()
+        unitsales = self.unit_sale.all()
 
         unitsale_lines = []
         for unit in unitsales:
@@ -305,7 +359,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
             self.__tax_amts[t.collector.entity] += Decimal(t.tax)
 
     def _get_unit_sales(self):
-        self.__unit_sales = self.unitsale_set.all()
+        self.__unit_sales = self.unit_sale.all()
         skus = list(set([x.sku for x in self.__unit_sales]))
         self.__sale_amts = dict((s,0) for s in skus)
         for s in self.__unit_sales:
@@ -340,9 +394,9 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
         if self.special_sale:
             sample_exp_acct = self._get_special_account()
             for u_sale in self.__unit_sales:
-                inv_items = u_sale.get_inventory_items()
+                inv_items = u_sale.inventory_items()
                 for ii in inv_items:
-                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    product_line = api_func('inventory', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
                     COGS = accounting.models.total_COGS(u_sale, ii)
@@ -375,7 +429,7 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                 inv_items = u_sale.get_gross_sales()
                 for ii in inv_items:
 
-                    product_line = api_func('inventory', 'inventoryitem', ii)['Product Line label']
+                    product_line = api_func('inventory', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
 
@@ -390,7 +444,4 @@ class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelOb
                     tran['lines'].append((COGS_acct, COGS, self.customer_code, []))
                     tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
-        print '=' * 20
-        print tran
-        print '=' * 20
         return [tran]

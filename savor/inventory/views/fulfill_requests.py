@@ -1,10 +1,12 @@
 import csv
-from collections import Counter
+import flatdict
+from collections import OrderedDict
+import json
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
@@ -15,6 +17,7 @@ from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
 from inventory.models import *
 import inventory.importers
+import inventory.serializers as slz
 
 import datetime
 import pytz
@@ -27,17 +30,121 @@ def get_today():
 
 
 def post_fulfill_update(data):
+    fulfill_obj = Fulfillment.objects.get(id=data['fulfillment_id'])
+    fulfill_obj.status = data['status']
+    fulfill_obj.save()
+
     FulfillUpdate(**data).save()
     return
 
-def create_fulfill_request(warehouse, order_id):
+
+@login_required
+def queue_orders(request):
+    new_back_orders = 0
+    new_152 = 0
+    new_MICH = 0
+
+    bad_requests = []
+
+    if request.method == 'POST':
+        for k,v in request.POST.iteritems():
+            if k[:8] == 'q_choice' and v != '----':
+                if v == 'Back Order':
+                    rslt = create_backorder(k[9:])
+                    if rslt == 'FULFILL_BACKORDERED':
+                        new_back_orders += 1
+                    else:
+                        bad_requests.append(k[9:])
+                elif v == 'Queue for 152':
+                    rslt = create_fulfill_request('152Frank', k[9:])
+                    if rslt == 'FULFILL_REQUESTED':
+                        new_152 += 1
+                    else:
+                        bad_requests.append(k[9:])
+                elif v == 'Queue for MICH':
+                    rslt = create_fulfill_request('MICH', k[9:])
+                    if rslt == 'FULFILL_REQUESTED':
+                        new_MICH += 1
+                    else:
+                        bad_requests.append(k[9:])
+                    
+        messages.info(request, "%d new back orders. \
+                                %d new 152 fulfillments. \
+                                %d new MICH fulfillments, \
+                                Bad requests: %s" \
+                                % (new_back_orders,
+                                   new_152,
+                                   new_MICH,
+                                   ','.join(bad_requests)))
+
+        return HttpResponseRedirect("/inventory/management")
+    else:
+        raise ValueError("This resource requires a POST request")
+
+
+def create_backorder(order_id):
     # check that it has not been requested already
     fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
-    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
     order = api_func('base', 'sale', unicode(order_id))
     order_label = order['label']
 
     if order_label in fulfillment_labels:
+        return 'FULFILL_ALREADY_REQUESTED'
+    else:
+        # now create a fulfillment request
+        today = get_today()
+        ch_ship_type = ChannelShipmentType.objects \
+                                          .filter(label=order['ship_type']) \
+                                          .first()
+
+        fulfill_info = {}
+        fulfill_info['request_date'] = today
+        fulfill_info['order_id'] = str(order_id)
+        
+        if ch_ship_type:
+            fulfill_info['bill_to'] = ch_ship_type.bill_to
+            fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
+            fulfill_info['use_pdf'] = ch_ship_type.use_pdf
+            fulfill_info['packing_type'] = ch_ship_type.packing_type
+            fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
+
+
+        fulfill_info['status'] = 'back-ordered'
+        fulfill_obj = Fulfillment(**fulfill_info)
+        fulfill_obj.save()
+
+        unit_sales = api_func('base', 'sale', str(order_id)).get('unit_sale', [])
+        u_qty = {}
+        for u in unit_sales:
+            for k, v in UnitSale.objects \
+                                .get(id=u['id']) \
+                                .inventory_items() \
+                                .iteritems():
+                if k in u_qty:
+                    u_qty[k] += int(v)
+                else:
+                    u_qty[k] = int(v)
+
+        for k,v in u_qty.iteritems():
+            fline_info = {}
+            fline_info['inventory_item_id'] = k
+            fline_info['quantity'] = v
+            fline_info['fulfillment_id'] = fulfill_obj.id
+            fline_obj = FulfillLine(**fline_info)
+            fline_obj.save()
+        return 'FULFILL_BACKORDERED'
+
+
+def backorder_to_requested(warehouse, fulfill_id):
+    pass
+
+
+def create_fulfill_request(warehouse, order_id):
+    unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
+    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
+
+    order = api_func('base', 'sale', order_id)
+    if unfulfilled is None:
         return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
         return 'WAREHOUSE_NOT_RECOGNISED'
@@ -56,7 +163,7 @@ def create_fulfill_request(warehouse, order_id):
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
-        
+
         if ch_ship_type:
             fulfill_info['bill_to'] = ch_ship_type.bill_to
             fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
@@ -64,15 +171,18 @@ def create_fulfill_request(warehouse, order_id):
             fulfill_info['packing_type'] = ch_ship_type.packing_type
             fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
 
-
+        fulfill_info['status'] = 'requested'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
-        skus = api_func('base', 'sale_skus', str(order_id))
-        for sku in skus:
+        unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
+        inv_items = dict((i['label'], i['id']) for i in api_func('inventory', 'inventoryitem'))
+
+        for label, quantity in unfulfilled_items.iteritems():
+            inv_id = inv_items[label]
             fline_info = {}
-            fline_info['inventory_item_id'] = InventoryItem.objects.get(label=sku).id
-            fline_info['quantity'] = skus[sku]
+            fline_info['inventory_item_id'] = inv_id
+            fline_info['quantity'] = quantity
             fline_info['fulfillment_id'] = fulfill_obj.id
             fline_obj = FulfillLine(**fline_info)
             fline_obj.save()
@@ -82,7 +192,14 @@ def create_fulfill_request(warehouse, order_id):
 
 @login_required
 def request_fulfill(request, warehouse, order_id):
-    res = create_fulfill_request(warehouse, order_id)
+    if request.GET.has_key('backorder'):
+        if lower(request.GET.get('backorder')) == 'true':
+            res = backorder_to_requested(warehouse, order_id)
+        else:
+            res = create_fulfill_request(warehouse, order_id)
+    else:
+        res = create_fulfill_request(warehouse, order_id)
+
     if res == 'FULFILL_ALREADY_REQUESTED':
         messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
         return redirect('/admin/base/sale/?requested=unrequested')
@@ -112,9 +229,11 @@ def sales_detail(request):
 
 @login_required
 def thoroughbred_list(request, batch_id):
-    batch = BatchRequest.objects.get(id=batch_id)
-    fulfill_list = batch.fulfillments.all()
-    return pick_list(request, fulfill_list.values(),
+    batch_qs = BatchRequest.objects.filter(id=batch_id)
+    fulfill_list = [f['fulfillments'] for f in batch_qs.values('fulfillments')]
+    fulfill_qs = Fulfillment.objects.filter(id__in=fulfill_list)
+    return pick_list(request,
+                     slz.FulfillmentSerializer(fulfill_qs, many=True).data,
                      label='thoroughbred_batch_%s' % str(batch_id))
 
 
@@ -125,80 +244,49 @@ def pick_list(request, data, label='shopify_pick_list'):
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
-    inventory_names = dict((inv_item['label'], inv_item['description']) \
-                           for inv_item in api_func('inventory', 'inventoryitem'))
+    flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
 
-    header_order = ['id', 'channel', 'shipping_name', 'shipping_company', 'external_routing_id',
-                    'shipping_address1', 'shipping_address2',
-                    'shipping_city', 'shipping_zip', 'shipping_province',
-                    'shipping_country', 'shipping_phone',
-                    'notification_email', 'ship_type',
-                    'bill_to', 'gift_message', 'use_pdf', 'packing_type']
+    headers = OrderedDict([('SAVOR ID', 'id'),
+                            ('Channel', 'order:channel'),
+                            ('Name', 'order:shipping_name'),
+                            ('Shipping Company', 'order:shipping_company'),
+                            ('Customer Reference', 'order:external_routing_id'),
+                            ('Shipping Address1', 'order:shipping_address1'),
+                            ('Shipping Address2', 'order:shipping_address2'),
+                            ('Shipping City', 'order:shipping_city'),
+                            ('Shipping Zip', 'order:shipping_zip'),
+                            ('Shipping Province', 'order:shipping_province'),
+                            ('Shipping Country', 'order:shipping_country'),
+                            ('Shipping Phone', 'order:shipping_phone'),
+                            ('Email', 'order:notification_email'),
+                            ('Shipping Type', 'ship_type'),
+                            ('Bill To', 'bill_to'),
+                            ('Gift Message', 'order:gift_message'),
+                            ('Use PDF?', 'use_pdf'),
+                            ('Pack Type', 'packing_type'),
+                            ('Ship From Company', 'ship_from:company'),
+                            ('Ship From Address1', 'ship_from:address1'),
+                            ('Ship From Address2', 'ship_from:address2'),
+                            ('Ship From City', 'ship_from:city'),
+                            ('Ship From ZIP', 'ship_from:postal_code')
+                           ])
 
-
-    headers = {'id': 'SAVOR ID', 'channel': 'Channel', 'shipping_company': 'Shipping Company',
-                'shipping_address1': 'Shipping Address1', 'shipping_address2': 'Shipping Address2',
-                'shipping_city': 'Shipping City', 'shipping_zip': 'Shipping Zip', 'shipping_province': 'Shipping Province',
-                'shipping_country': 'Shipping Country', 'shipping_phone': 'Shipping Phone',
-                'notification_email': 'Email', 'shipping_company': 'Shipping Company', 'ship_type': 'Shipping Type',
-                'bill_to': 'Bill To', 'gift_message': 'Gift Message', 'skus:sku': 'Lineitem sku',
-                'skus:name': 'Lineitem name', 'skus:quantity': 'Lineitem quantity', 'external_routing_id': 'Customer Reference',
-                'shipping_name': 'Name', 'use_pdf': 'Use PDF?', 'packing_type': 'Picking Slip Location'}
-
-    header_row = [unicode(headers[x]).encode('utf-8') for x in header_order]
+    header_row = headers.keys()
     header_row += [u'Item', u'Item Name', u'Quantity']
-    header_row += ['Ship From Company', 'Ship From Address1',
-                   'Ship From Address2', 'Ship From City',
-                   'Ship From ZIP'] 
     writer.writerow(header_row)
 
-    shipping_types = dict((st['id'], st) for st in api_func('inventory', 'shippingtype'))
+    for flf in flf_data:
+        row = [flf['ship'].get(headers[col], '') for col in headers]
+        row += [flf['skus'][0]['inventory_item'], '', flf['skus'][0]['quantity']]
+        writer.writerow(row)
 
-    hack_list = ['channel', 'shipping_name', 'shipping_company',
-                 'shipping_address1', 'shipping_address2',
-                 'shipping_city', 'shipping_zip', 'shipping_province',
-                 'shipping_country', 'shipping_phone',
-                 'notification_email', 'external_routing_id',
-                 'gift_message']
-
-    for f_req in data:
-        sale_info = api_func('base', 'sale', f_req['order_id'])
-
-        if sale_info['customer_code']!='unknown':
-            for fld in hack_list:
-                f_req[fld] = sale_info[fld]
-
-            if f_req['external_routing_id'] is None:
-                f_req['external_routing_id'] = ''
-
-            if f_req['gift_message'] == '':
-                f_req['gift_message'] = None
-
-            f_req['ship_type'] = shipping_types[str(f_req['ship_type_id'])]['label']
-            f_req['skus'] = api_func('base', 'sale_skus', f_req['order_id'])
-            f_req['id'] = 'SAL.' + str(f_req['id'])
-            f_req['shipping_zip'] = str("'" + f_req['shipping_zip'])
-
-            line = [unicode(f_req.get(d, '')).encode('utf-8') for d in header_order]
-            skus = f_req['skus'].keys()
-            sku = skus[0]
-            line += [sku, inventory_names[sku], f_req['skus'][sku]]
-
-            # add the ship_from info
-            ship_from = Address.objects.filter(id=f_req['ship_from_id']).first()
-            if ship_from:
-                line += [getattr(ship_from, fld) for fld in ['company', 'address1', 'address2',
-                                                             'city', 'postal_code']]
+        # if more than 1 sku..
+        for i in range(1, len(flf['skus'])):
+            line = [''] * len(headers)
+            line += [flf['skus'][i]['inventory_item'], '', flf['skus'][i]['quantity']]
             writer.writerow(line)
 
-            # if more than 1 sku..
-            for i in range(1, len(skus)):
-                sku = skus[i]
-                line = [''] * len(header_order)
-                line += [sku, inventory_names[sku], f_req['skus'][sku]]
-                writer.writerow(line)
-
-            writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_order) + 3 + 5))
+        writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
 
     return response
 

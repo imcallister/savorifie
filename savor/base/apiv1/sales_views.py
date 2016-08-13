@@ -1,5 +1,9 @@
 import datetime
+from dateutil.parser import parse
 from multipledispatch import dispatch
+import itertools
+import operator
+
 
 from django.conf import settings
 from django.forms.models import model_to_dict
@@ -7,53 +11,130 @@ from django.db.models import Prefetch
 
 from accountifie.common.api import api_func
 from savor.base.models import Sale, UnitSale, Channel
-
-
-def get_model_data(instance, flds):
-    data = dict((fld, str(getattr(instance, fld))) for fld in flds)
-    return data
+from base.serializers import FullSaleSerializer, SimpleSaleSerializer, ShippingSaleSerializer
 
 
 @dispatch(dict)
 def sale(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
+    view_type = qstring.get('view', 'full')
 
     if type(start_date) != datetime.date:
         start_date = parse(start_date).date()
     if type(end_date) != datetime.date:
         end_date = parse(end_date).date()
+    qs = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date)
 
-    all_sales = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date) \
-                            .select_related('company', 'channel__counterparty', 'customer_code', 'ship_type') \
-                            .prefetch_related(Prefetch('unitsale_set__sku__skuunit_set__inventory_item'))
+    if view_type == 'simple':
+        serializer = SimpleSaleSerializer
+    elif view_type == 'shipping':
+        serializer = ShippingSaleSerializer
+    else:
+        serializer = FullSaleSerializer
 
-    fields=[field.name for field in all_sales[0]._meta.fields]
-    fields.append('items_string')
-    fields.append('label')
-    return [get_model_data(sale_obj, fields) for sale_obj in all_sales]
+    qs = serializer.setup_eager_loading(qs)
+    return serializer(qs, many=True).data
 
 
 @dispatch(str, dict)
 def sale(id, qstring):
-    sale_obj = Sale.objects.filter(id=id) \
-                           .select_related('company', 'channel__counterparty', 'customer_code', 'ship_type') \
-                           .prefetch_related(Prefetch('unitsale_set__sku__skuunit_set__inventory_item')) \
-                           .first()
+    view_type = qstring.get('view', 'full')
 
-    fields=[field.name for field in sale_obj._meta.fields]
-    fields.append('items_string')
-    fields.append('label')
-    return get_model_data(sale_obj, fields)
+    qs = Sale.objects.filter(id=id).first()
+
+    if view_type == 'simple':
+        serializer = SimpleSaleSerializer
+    elif view_type == 'shipping':
+        serializer = ShippingSaleSerializer
+    else:
+        serializer = FullSaleSerializer
+
+    return serializer(qs).data
 
 
 @dispatch(unicode, dict)
 def sale(id, qstring):
-    sale_obj = Sale.objects.get(id=id)
-    fields=[field.name for field in sale_obj._meta.fields]
-    fields.append('items_string')
-    fields.append('label')
-    return get_model_data(sale_obj, fields)
+    qs = Sale.objects.filter(id=id).first()
+    return FullSaleSerializer(qs).data
+
+
+def sales_by_month(qstring):
+    all_sales = sorted(sale({'view': 'full'}), key=lambda x: parse(x['sale_date']))
+    output = qstring.get('output', 'raw')
+
+    def group_key(o):
+        dt = parse(o['sale_date'])
+        return (dt.year, dt.month)
+
+    def agg(o):
+        return sum([u['quantity'] for u in o['unit_sale']])
+
+    def fmt_month(m):
+        return datetime.date(m[0], m[1], 1).strftime('%b-%y')
+
+    grouped = itertools.groupby(all_sales, key=group_key)
+    if output == 'raw':
+        return dict((fmt_month(k), sum([agg(o) for o in v])) for k, v in grouped)
+    elif output == 'chart':
+        data = dict((k, sum([agg(o) for o in v])) for k, v in grouped)
+        sorted_dates = sorted(data.keys(), key=lambda x: x[0]*12 + x[1])
+
+        chart_data = {}
+        chart_data['chart_data'] = {}
+        chart_data['chart_data']['x_points'] = [fmt_month(d) for d in sorted_dates]
+        chart_data['chart_data']['values'] = []
+        chart_data['chart_data']['values'].append([data.get(x, 0) for x in sorted_dates])
+        chart_data['chart_data']['seriesTypes'] = ['bar']
+        return chart_data
+    else:
+        return None
+
+
+def sales_by_counterparty(qstring):
+    all_sales = sorted(sale({'view': 'full'}), key=lambda x: x['customer_code'])
+    output = qstring.get('output', 'raw')
+
+    def agg(o):
+        return sum([u['quantity'] for u in o['unit_sale']])
+
+    grouped = itertools.groupby(all_sales, key=lambda x: x['customer_code'])
+    if output == 'raw':
+        return dict((k, sum([agg(o) for o in v])) for k, v in grouped)
+    elif output == 'chart':
+        data = dict((k, sum([agg(o) for o in v])) for k, v in grouped)
+        sorted_data = sorted(data.items(), key=operator.itemgetter(1))
+        sorted_data = [x for x in sorted_data if x[1] >= 5]
+        chart_data = {}
+        chart_data['chart_data'] = {}
+        chart_data['chart_data']['x_points'] = [x[0] for x in sorted_data]
+        chart_data['chart_data']['values'] = []
+        chart_data['chart_data']['values'].append([x[1] for x in sorted_data])
+        chart_data['chart_data']['seriesTypes'] = ['bar']
+        return chart_data
+
+
+def sales_by_channel(qstring):
+    all_sales = sorted(sale({'view': 'full'}), key=lambda x: x['channel'])
+    output = qstring.get('output', 'raw')
+
+    def agg(o):
+        return sum([u['quantity'] for u in o['unit_sale']])
+
+    grouped = itertools.groupby(all_sales, key=lambda x: x['channel'])
+    if output == 'raw':
+        return dict((k, sum([agg(o) for o in v])) for k, v in grouped)
+    elif output == 'chart':
+        data = dict((k, sum([agg(o) for o in v])) for k, v in grouped)
+        sorted_data = sorted(data.items(), key=operator.itemgetter(1))
+
+        chart_data = {}
+        chart_data['chart_data'] = {}
+        chart_data['chart_data']['x_points'] = [x[0] for x in sorted_data]
+        chart_data['chart_data']['values'] = []
+        chart_data['chart_data']['values'].append([x[1] for x in sorted_data])
+        chart_data['chart_data']['seriesTypes'] = ['bar']
+        return chart_data
 
 
 def summary_sales_stats(qstring):
@@ -67,8 +148,9 @@ def summary_sales_stats(qstring):
 
 
 def missing_cps(qstring):
-    missing_cp_sales = Sale.objects.filter(customer_code__id='unknown')
-    return [model_to_dict(sale, fields=[field.name for field in sale._meta.fields]) for sale in missing_cp_sales]
+    qs = Sale.objects.filter(customer_code__id='unknown')
+    qs = SimpleSaleSerializer.setup_eager_loading(qs)
+    return SimpleSaleSerializer(qs).data
 
 
 def channel_counts(qstring):
@@ -79,86 +161,13 @@ def channel_counts(qstring):
 def sales_counts(qstring):
     all_skus = api_func('inventory', 'inventoryitem')
     all_sales = UnitSale.objects.all() \
-                                .prefetch_related(Prefetch('sku__skuunit_set__inventory_item'))
+                                .prefetch_related(Prefetch('sku__skuunit__inventory_item'))
 
     sales_counts = dict((k['label'],0) for k in all_skus)
 
     for u_sale in all_sales:
-        u_sale_counts = u_sale.get_inventory_items()
+        u_sale_counts = u_sale.inventory_items()
         for sku in u_sale_counts:
             sales_counts[sku] += u_sale_counts[sku]
 
     return sales_counts
-
-
-@dispatch(unicode, dict)
-def sale_skus(sale_id, qstring):
-    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
-
-    skus_list = {}
-    for u_sale in unit_sales:
-        inv_items = u_sale.get_inventory_items()
-        for i in inv_items:
-            if i in skus_list:
-                skus_list[i] += inv_items[i]
-            else:
-                skus_list[i] = inv_items[i]
-    return skus_list
-
-
-@dispatch(str, dict)
-def sale_skus(sale_id, qstring):
-    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
-
-    skus_list = {}
-    for u_sale in unit_sales:
-        inv_items = u_sale.get_inventory_items()
-        for i in inv_items:
-            if i in skus_list:
-                skus_list[i] += inv_items[i]
-            else:
-                skus_list[i] = inv_items[i]
-    return skus_list
-
-
-@dispatch(unicode, dict)
-def unit_sales(sale_id, qstring):
-    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
-    u_sale_flds = ['sku', 'quantity', 'unit_price']
-    return [get_model_data(u_sale, u_sale_flds) for u_sale in unit_sales]
-
-
-@dispatch(str, dict)
-def unit_sales(sale_id, qstring):
-    unit_sales = UnitSale.objects.filter(sale_id=sale_id)
-    u_sale_flds = ['sku', 'quantity', 'unit_price']
-    return [get_model_data(u_sale, u_sale_flds) for u_sale in unit_sales]
-
-
-@dispatch(dict)
-def unit_sales(qstring):
-    start_date = qstring.get('from_date', settings.DATE_EARLY)
-    end_date = qstring.get('to_date', datetime.datetime.now().date())
-
-    if type(start_date) != datetime.date:
-        start_date = parse(start_date).date()
-    if type(end_date) != datetime.date:
-        end_date = parse(end_date).date()
-
-    all_unit_sales = UnitSale.objects.filter(sale__sale_date__gte=start_date, sale__sale_date__lte=end_date)
-
-    u_sale_flds = ['sku', 'quantity', 'unit_price']
-    sale_flds = ['customer_code', 'memo','sale_date',"channel","external_ref"]
-
-    output_data = []
-    for u_sale in all_unit_sales:
-        inventory_items = u_sale.get_inventory_items()
-        for item in inventory_items:
-            data = get_model_data(u_sale, u_sale_flds)
-            data['inventory item'] = item
-            data['quantity'] = inventory_items[item]
-            data.update(get_model_data(u_sale.sale, sale_flds))
-            data['sale_link'] = u_sale.sale.id_link
-            output_data.append(data)
-
-    return output_data

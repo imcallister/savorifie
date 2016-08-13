@@ -1,7 +1,7 @@
-Feature: Sale generates GL entries
-When a Sale object is created
-I want two transaction lines to be created
-So that they can be sent to the backend service
+Feature: Sales api returns list of sales
+When a Sales object is created
+I want the sales api ro return two dictionaries
+So that they can be used in reporting
 
 Background: There are accounts and companies and counterparties in the system
     Given there are companies:
@@ -71,56 +71,19 @@ Background: There are accounts and companies and counterparties in the system
 
 
 
-Scenario: Regular Sale GL entries
-    Given a new sale:
-        |  id  |  company  |  channel   |  customer_code  | shipping_charge | sale_date   |
-        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |      0          |  2016-03-20 |
-    And new unitsales:
-        |   id  |   sale   |    sku    |  quantity  | unit_price |
-        |   1   |    1     |   PR001   |     1      |    80      |
+Scenario: Regular Sale api call
+    Given a sale exists:
+        |  external_channel_id  |  company  |  channel   |  customer_code  | shipping_charge | sale_date   |
+        |      SHOPIFY123       |  TEST     |  SHOPIFY   |  retail_buyer   |      0          |  2016-03-20 |
+    And unitsales exist:
+        |   id  |    sale      |    sku    |  quantity  | unit_price |
+        |   1   | SHOPIFY123   |   PR001   |     1      |    80      |
     
-    When we calculate the BMO GL entries
+    When we call the base.sale api
     
-    Then the lines should be:
+    Then the api results should be:
         | account   |   amount  |  counterparty  |    date    |  date_end |
         |  1100     |   80.0    |    SHOPIFY     | 2016-03-20 |           |
         |  1200     |   -25.0   | retail_buyer   | 2016-03-20 |           |
         |  5000     |   -80     | retail_buyer   | 2016-03-20 |           |
         |  5100     |   25.0    | retail_buyer   | 2016-03-20 |           |
-
-
-Scenario: Free sample. Savor pays all shipping costs
-    Given a new sale:
-        |  id  |  company  |  channel   |  customer_code | counterparty | special_sale | shipping_charge | sale_date  |
-        |   1  |  TEST     |  SHOPIFY   |  press         |     TESTCP   |   press      |       0         | 2016-03-20 |
-    And new unitsales:
-        |   id  |   sale   |    sku    |  quantity  | unit_price |
-        |   1   |    1     |   PR001   |     1      |    80      |
-    
-    When we calculate the BMO GL entries
-    
-    Then the lines should be:
-        | account   |   amount  |  counterparty  |    date    |  date_end |
-        |  1200     |   -25.0   |    press       | 2016-03-20 |           | 
-        |  5110     |   25.0    |    press       | 2016-03-20 |           |
-
-
-Scenario: Sale with Discount GL entries
-    Given a new sale:
-        |  id  |  company  |  channel   |  customer_code  | discount | shipping_charge  | sale_date  |
-        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |   10     |       0          | 2016-03-20 |
-    And new unitsales:
-        |   id  |   sale   |    sku    |  quantity  | unit_price |
-        |   1   |    1     |   PR001   |     1      |    80      |
-    
-    When we calculate the BMO GL entries
-    
-    Then the lines should be:
-        | account   |   amount  |  counterparty     |    date    |  date_end |
-        |  1100     |   70.0    |    SHOPIFY        | 2016-03-20 |           |
-        |  1200     |   -25.0   |    retail_buyer   | 2016-03-20 |           |
-        |  5000     |   -80     |    retail_buyer   | 2016-03-20 |           |
-        |  5100     |   25.0    |    retail_buyer   | 2016-03-20 |           |
-        |  5120     |   10      |    retail_buyer   | 2016-03-20 |           |
-
-
