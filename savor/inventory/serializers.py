@@ -42,9 +42,17 @@ class ProductSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('id', 'label', 'description', 'skuunit')
 
 
+class ShipperSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['company']
+    company = serializers.StringRelatedField()
+
+    class Meta:
+        model = models.Shipper
+        fields = ['id', 'company']
+
 class ShippingTypeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['shipper']
-    shipper = serializers.StringRelatedField()
+    _SELECT_RELATED_FIELDS = ['shipper__counterparty']
+    shipper = ShipperSerializer(read_only=True)
 
     class Meta:
         model = models.ShippingType
@@ -153,7 +161,7 @@ class WarehouseFulfillSerializer(serializers.ModelSerializer, EagerLoadingMixin)
 
     class Meta:
         model = models.WarehouseFulfill
-        flds = ('savor_order', 'savor_transfer', 'warehouse', 'fulfill_lines',
+        flds = ('fulfillment_id', 'savor_order', 'savor_transfer', 'warehouse', 'fulfill_lines',
                 'warehouse_pack_id', 'order_date', 'request_date',
                 'ship_date', 'shipping_name', 'shipping_attn', 'shipping_address1',
                 'shipping_address2', 'shipping_address3', 'shipping_city',

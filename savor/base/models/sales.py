@@ -118,6 +118,7 @@ class SalesTax(accountifie.common.models.McModel):
 
 SPECIAL_SALES = (
     ('press', 'Press Sample'),
+    ('consignment', 'Consignment'),
     ('prize', 'Gift/Prize'),
     ('retailer', 'Retailer Sample'),
 )

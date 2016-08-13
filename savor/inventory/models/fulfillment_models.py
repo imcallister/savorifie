@@ -139,6 +139,7 @@ FULFILL_CHOICES = (
     ('back-ordered', 'back-ordered'),
     ('requested', 'requested'),
     ('partial', 'partial'),
+    ('mismatched', 'mismatched'),
     ('completed', 'completed'),
 )
 
@@ -271,6 +272,7 @@ class TransferUpdate(accountifie.common.models.McModel):
 
 
 class WarehouseFulfill(accountifie.common.models.McModel):
+    fulfillment = models.ForeignKey('inventory.fulfillment', blank=True, null=True)
     savor_order = models.ForeignKey('base.sale', blank=True, null=True)
     savor_transfer = models.ForeignKey('inventory.InventoryTransfer', blank=True, null=True)
     warehouse = models.ForeignKey('inventory.warehouse')

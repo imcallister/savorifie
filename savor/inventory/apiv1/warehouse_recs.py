@@ -15,27 +15,26 @@ def rec_zip(z1, z2):
 
 @dispatch(dict)
 def thoroughbred_mismatch(qstring):
-    unfulfilled = api_func('inventory',
+    mismatched_f = api_func('inventory',
                            'fulfillment',
-                           qstring={'status': 'requested,partial'})
+                           qstring={'status': 'mismatched'})
     warehouse_recds = api_func('inventory', 'warehousefulfill')
-
     mismatched = []
-    for unfld in unfulfilled:
-        order_id = unfld['order']['id']
-        order_zip = unfld['order']['shipping_zip']
+    for f in mismatched_f:
+        fulfill_id = f['id']
+        order_zip = f['order']['shipping_zip']
         whouse_recs = [r for r in warehouse_recds
-                       if r['savor_order']['id'] == order_id]
+                       if r['fulfillment'] == fulfill_id]
 
-        if len(whouse_recs)>0:
+        if len(whouse_recs) > 0:
             whouse_record = whouse_recs[0]
 
-            if whouse_record['skus'] != unfld['skus']:
-                mismatched.append({'order_id': order_id,
+            if whouse_record['skus'] != f['skus']:
+                mismatched.append({'fulfill_id': fulfill_id,
                                    'fail_reason': 'SKUS'})
             elif not rec_zip(order_zip,
                              whouse_record['shipping_zip']):
-                mismatched.append({'order_id': order_id,
+                mismatched.append({'fulfill_id': fulfill_id,
                                    'fail_reason': 'ZIP'})
 
     return mismatched
