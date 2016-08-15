@@ -272,11 +272,6 @@ def NC2_pick_list(request, data, label='MICH_batch'):
                             ('Gift Message', 'order:gift_message'),
                             ('Use PDF?', 'use_pdf'),
                             ('Pack Type', 'packing_type'),
-                            ('Ship From Company', 'ship_from:company'),
-                            ('Ship From Address1', 'ship_from:address1'),
-                            ('Ship From Address2', 'ship_from:address2'),
-                            ('Ship From City', 'ship_from:city'),
-                            ('Ship From ZIP', 'ship_from:postal_code')
                            ])
 
     header_row = headers.keys()
