@@ -121,6 +121,20 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'ship_from'
                   )
 
+class SimpleBatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['location']
+    _PREFETCH_RELATED_FIELDS = ['fulfillments']
+
+    location = serializers.StringRelatedField()
+
+    def get_fulfillment_count(self, obj):
+        return obj.fulfillments.count()
+
+    class Meta:
+        model = models.BatchRequest
+        fields = ('id', 'created_date', 'location',
+                  'fulfillment_count', 'comment',)
+
 
 class BatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['location']

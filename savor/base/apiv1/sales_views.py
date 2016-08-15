@@ -91,6 +91,9 @@ def sales_by_month(qstring):
         return None
 
 
+def incomplete_sales_count(qstring):
+    return Sale.objects.filter(customer_code='unknown').count()
+
 def sales_by_counterparty(qstring):
     all_sales = sorted(sale({'view': 'full'}), key=lambda x: x['customer_code'])
     output = qstring.get('output', 'raw')
