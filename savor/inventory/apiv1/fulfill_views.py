@@ -27,7 +27,6 @@ def batchrequest(qstring):
 def batchrequest(id, qstring):
     qs = BatchRequest.objects \
                      .get(id=id)
-    qs = BatchRequestSerializer.setup_eager_loading(qs)
     return BatchRequestSerializer(qs).data
 
 

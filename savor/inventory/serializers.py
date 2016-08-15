@@ -108,7 +108,7 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                                 'fulfill_lines__inventory_item']
     
     warehouse = serializers.StringRelatedField()
-    ship_type = serializers.StringRelatedField()
+    ship_type = ShippingTypeSerializer()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
     order = baseslz.ShippingSaleSerializer(read_only=True)
     ship_from = AddressSerializer(read_only=True)

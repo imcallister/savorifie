@@ -232,7 +232,7 @@ def sales_detail(request):
 def batch_list(request, batch_id):
     batch_qs = BatchRequest.objects.get(id=batch_id)
     batch_info = slz.BatchRequestSerializer(batch_qs).data
-    print batch_info['location']
+    
     if batch_info['location'] == 'MICH':
         return MICH_pick_list(request, batch_info['fulfillments'],
                               label='MICH_batch_%s' % str(batch_id))
@@ -244,6 +244,17 @@ def batch_list(request, batch_id):
                               label='152Frank_batch_%s' % str(batch_id))
     
 
+NC2_NOTES = {
+    'UNCOMMON': 'Must use UG packing slip PDF (attached).  Must use UG shipping label (attached).  Packing slip goes in clear pouch on side of box #1.',
+    'PSOURCE': 'Must affix barcode stickers from Fineline technology to back of the product on the bottom right corner. Orders > 150 pounds should be palletized and shipped fedex FREIGHT ECONOMY to warehouse 7801 Industrial Drive, Forest Park, IL 60130, Attn: Product.   We need dimensions, wt for BOL.  Savor to provide BOL (attached).  Shipper name with PO number on all boxes.  Mark 1 of 2, 2 of 2 etc.   To schedule pickup call 18663934585.',
+    'BEDBATH': 'Must use bed bath packing slip PDF (attached). Must use fedex label (attached).',
+    'BUYBUY': 'Must use buybuy BABY packing slip PDF (attached). Must use fedex label (attached).',
+    'GROMMET': 'Must use Grommet packing slip PDF (attached).  Must use Grommet mailing label (attached).',
+    'GROMWHOLE': 'Must use Grommet packing slip PDF (attached). Must use Grommet mailing label (attached)',
+    'AMZN': 'Must use Amazon packing label (attached).',
+    'WAYFAIR': 'Must use Wayfair packing label (attached).  Must use Wayfair mailing label (attached)',
+    'SHOPIFY': ''
+}
 
 @login_required
 def NC2_pick_list(request, data, label='MICH_batch'):
@@ -252,10 +263,23 @@ def NC2_pick_list(request, data, label='MICH_batch'):
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
-    flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
+    def get_ship_data(d):
+        fd = flatdict.FlatDict(d)
+        fd['notes'] = NC2_NOTES.get(fd['order:channel'], '')
+        if fd['ship_type']['label'] == 'FREIGHT':
+            fd['ifs_ship_type'] = 'PICK'
+        elif fd['ship_type']['label'] == 'IFS_BEST':
+            fd['ifs_ship_type'] = 'BEST'
+        else:
+            fd['ifs_ship_type'] = 'HOLD'
+        return fd
+
+    sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
+    flf_data = [{'skus': d['fulfill_lines'], 'ship': get_ship_data(d)} for d in data]
 
     headers = OrderedDict([('SAVOR ID', 'id'),
                             ('Channel', 'order:channel'),
+                            ('Ship Type', 'ifs_ship_type'),
                             ('Name', 'order:shipping_name'),
                             ('Shipping Company', 'order:shipping_company'),
                             ('Customer Reference', 'order:external_routing_id'),
@@ -267,11 +291,8 @@ def NC2_pick_list(request, data, label='MICH_batch'):
                             ('Shipping Country', 'order:shipping_country'),
                             ('Shipping Phone', 'order:shipping_phone'),
                             ('Email', 'order:notification_email'),
-                            ('Shipping Type', 'ship_type'),
-                            ('Bill To', 'bill_to'),
                             ('Gift Message', 'order:gift_message'),
-                            ('Use PDF?', 'use_pdf'),
-                            ('Pack Type', 'packing_type'),
+                            ('Notes', 'notes'),
                            ])
 
     header_row = headers.keys()
@@ -280,13 +301,15 @@ def NC2_pick_list(request, data, label='MICH_batch'):
 
     for flf in flf_data:
         row = [flf['ship'].get(headers[col], '') for col in headers]
-        row += [flf['skus'][0]['inventory_item'], '', flf['skus'][0]['quantity']]
+        label = flf['skus'][0]['inventory_item']
+        row += [label, sku_names[label], flf['skus'][0]['quantity']]
         writer.writerow(row)
 
         # if more than 1 sku..
         for i in range(1, len(flf['skus'])):
             line = [''] * len(headers)
-            line += [flf['skus'][i]['inventory_item'], '', flf['skus'][i]['quantity']]
+            label = flf['skus'][i]['inventory_item']
+            line += [label, sku_names[label], flf['skus'][i]['quantity']]
             writer.writerow(line)
 
         writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
@@ -300,6 +323,7 @@ def MICH_pick_list(request, data, label='MICH_batch'):
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
+    sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
     flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
 
     headers = OrderedDict([('SAVOR ID', 'id'),
@@ -333,13 +357,15 @@ def MICH_pick_list(request, data, label='MICH_batch'):
 
     for flf in flf_data:
         row = [flf['ship'].get(headers[col], '') for col in headers]
-        row += [flf['skus'][0]['inventory_item'], '', flf['skus'][0]['quantity']]
+        label = flf['skus'][0]['inventory_item']
+        row += [label, sku_names[label], flf['skus'][0]['quantity']]
         writer.writerow(row)
 
         # if more than 1 sku..
         for i in range(1, len(flf['skus'])):
             line = [''] * len(headers)
-            line += [flf['skus'][i]['inventory_item'], '', flf['skus'][i]['quantity']]
+            label = flf['skus'][i]['inventory_item']
+            line += [label, sku_names[label], flf['skus'][i]['quantity']]
             writer.writerow(line)
 
         writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
