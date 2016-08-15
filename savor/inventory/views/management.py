@@ -83,7 +83,9 @@ def management(request):
 
     context['unbatched_fulfillments'] = len(api_func('inventory', 'unbatched_fulfillments'))
     context['unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') if x['status']=='requested'])
-    context['missing_shipping'] = len(api_func('inventory', 'fulfillment', qstring={'missing_shipping': 'true'}))
+    context['missing_shipping'] = len(api_func('inventory', 'fulfillment',
+                                               qstring={'missing_shipping': 'true',
+                                                        'status': 'requested'}))
 
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
 
