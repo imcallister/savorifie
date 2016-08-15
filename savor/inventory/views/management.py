@@ -9,17 +9,19 @@ from django.utils.safestring import mark_safe
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
-import base.models
 
 
-def post_button(order_id, back=True):
+def post_button(order_id, back=False):
     html = '<select class="form-control" name="q_choice_%s"> \
               <option>----</option>' % order_id
     if back:
-        html += '<option>Back Order</option>'
+        for wh in ['MICH', '152Frank', 'NC2']:
+            html += '<option>Queue backorder for %s</option>' % wh
 
-    for wh in ['MICH', '152Frank']:
-        html += '<option>Queue for %s</option>' % wh
+    if not back:
+        html += '<option>Back Order</option>'
+        for wh in ['MICH', '152Frank', 'NC2']:
+            html += '<option>Queue for %s</option>' % wh
 
     html += '</select>'
     return mark_safe(html)
@@ -48,10 +50,10 @@ def _fulfill_list(qstring=None):
 
 def _backorder_list(qstring=None):
     back_fulfills = api_func('inventory', 'backordered')
-    
+
     columns = ["label", "Date", 'ship to', 'Items', 'Unfulfilled', 'Action']
     for f in back_fulfills:
-        action_form = post_button(f['id'], back=False)
+        action_form = post_button(f['id'], back=True)
 
         items = [(i['inventory_item'], i['quantity']) for i in f['fulfill_lines']]
         items = sorted(items, key=lambda x: x[0])
@@ -71,7 +73,7 @@ def management(request):
     start = time.time()
     context = {'shopify_upload_form': FileForm()}
 
-    context['incomplete_orders'] = base.models.Sale.objects.filter(customer_code='unknown').count()
+    context['incomplete_orders'] = api_func('base', 'incomplete_sales_count')
 
     context['tbq_columns'], context['tbq_rows'] = _fulfill_list()
     context['to_be_queued'] = len(context['tbq_rows'])
@@ -83,13 +85,13 @@ def management(request):
     context['unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') if x['status']=='requested'])
     context['missing_shipping'] = len(api_func('inventory', 'fulfillment', qstring={'missing_shipping': 'true'}))
 
-    context['batch_columns'] = ['id', 'created_date', 'comment', 'location_label', 'fulfillments_count', 'get_list']
+    context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
 
     batch_requests = sorted(api_func('inventory', 'batchrequest'),
                             key=lambda x: x['created_date'],
                             reverse=True)
     for batch in batch_requests:
-        link = mark_safe('<a href="/inventory/thoroughbred_list/%s/">Download</a>' % batch['id'])
+        link = mark_safe('<a href="/inventory/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
 

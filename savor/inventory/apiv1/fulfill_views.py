@@ -15,13 +15,19 @@ from base.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
 
 logger = logging.getLogger('default')
 
+@dispatch(dict)
 def batchrequest(qstring):
-    batches = BatchRequest.objects \
-                          .annotate(fulfillments_count=Count('fulfillments')) \
-                          .annotate(location_label=F('location__label')) \
-                          .all()  \
-                          .values()
-    return batches
+    qs = BatchRequest.objects \
+                     .all()
+    qs = SimpleBatchRequestSerializer.setup_eager_loading(qs)
+    return SimpleBatchRequestSerializer(qs, many=True).data
+
+
+@dispatch(str, dict)
+def batchrequest(id, qstring):
+    qs = BatchRequest.objects \
+                     .get(id=id)
+    return BatchRequestSerializer(qs).data
 
 
 def shipmentline(qstring):
@@ -45,7 +51,9 @@ def batched_fulfillments(qstring):
 
 def unbatched_fulfillments(qstring):
     batched_flmts = batched_fulfillments(qstring)
-    qs = Fulfillment.objects.exclude(id__in=batched_flmts)
+    qs = Fulfillment.objects \
+                    .exclude(id__in=batched_flmts) \
+                    .filter(status='requested')
     qs = FulfillmentSerializer.setup_eager_loading(qs)
 
     return [{'label': f['order']['label'], 'id': f['id'], 'warehouse': f['warehouse']} \

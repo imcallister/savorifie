@@ -41,8 +41,9 @@ def post_fulfill_update(data):
 @login_required
 def queue_orders(request):
     new_back_orders = 0
-    new_152 = 0
-    new_MICH = 0
+    warehouses = [w['label'] for w in api_func('inventory', 'warehouse')]
+    new_requests = dict((w,0) for w in warehouses)
+    back_to_queue = dict((w,0) for w in warehouses)
 
     bad_requests = []
 
@@ -55,28 +56,29 @@ def queue_orders(request):
                         new_back_orders += 1
                     else:
                         bad_requests.append(k[9:])
-                elif v == 'Queue for 152':
-                    rslt = create_fulfill_request('152Frank', k[9:])
+                elif v[:9] == 'Queue for':
+                    wh = v[10:]
+                    rslt = create_fulfill_request(wh, k[9:])
                     if rslt == 'FULFILL_REQUESTED':
-                        new_152 += 1
+                        new_requests[wh] += 1
                     else:
                         bad_requests.append(k[9:])
-                elif v == 'Queue for MICH':
-                    rslt = create_fulfill_request('MICH', k[9:])
-                    if rslt == 'FULFILL_REQUESTED':
-                        new_MICH += 1
+                elif v[:19] == 'Queue backorder for':
+                    wh = v[20:]
+                    rslt = backorder_to_requested(wh, k[9:])
+                    if rslt == 'BACKORDER_REQUESTED':
+                        back_to_queue[wh] += 1
                     else:
                         bad_requests.append(k[9:])
-                    
-        messages.info(request, "%d new back orders. \
-                                %d new 152 fulfillments. \
-                                %d new MICH fulfillments, \
-                                Bad requests: %s" \
-                                % (new_back_orders,
-                                   new_152,
-                                   new_MICH,
-                                   ','.join(bad_requests)))
 
+        msg = '%d new back orders.' % new_back_orders
+        for wh in warehouses:
+            msg += ' %d new %s fulfillments.' % (new_requests[wh], wh)
+        for wh in warehouses:
+            msg += ' %d backorders to %s.' % (back_to_queue[wh], wh)
+        msg += ' %d Bad requests' % len(bad_requests)
+        messages.info(request, msg)
+        
         return HttpResponseRedirect("/inventory/management")
     else:
         raise ValueError("This resource requires a POST request")
@@ -84,11 +86,12 @@ def queue_orders(request):
 
 def create_backorder(order_id):
     # check that it has not been requested already
-    fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
-    order = api_func('base', 'sale', unicode(order_id))
-    order_label = order['label']
-
-    if order_label in fulfillment_labels:
+    unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
+    unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in api_func('inventory', 'inventoryitem'))
+    order = api_func('base', 'sale', order_id)
+    
+    if unfulfilled is None:
         return 'FULFILL_ALREADY_REQUESTED'
     else:
         # now create a fulfillment request
@@ -100,7 +103,7 @@ def create_backorder(order_id):
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['order_id'] = str(order_id)
-        
+
         if ch_ship_type:
             fulfill_info['bill_to'] = ch_ship_type.bill_to
             fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
@@ -108,42 +111,44 @@ def create_backorder(order_id):
             fulfill_info['packing_type'] = ch_ship_type.packing_type
             fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
 
-
         fulfill_info['status'] = 'back-ordered'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
-        unit_sales = api_func('base', 'sale', str(order_id)).get('unit_sale', [])
-        u_qty = {}
-        for u in unit_sales:
-            for k, v in UnitSale.objects \
-                                .get(id=u['id']) \
-                                .inventory_items() \
-                                .iteritems():
-                if k in u_qty:
-                    u_qty[k] += int(v)
-                else:
-                    u_qty[k] = int(v)
-
-        for k,v in u_qty.iteritems():
+        for label, quantity in unfulfilled_items.iteritems():
+            inv_id = inv_items[label]
             fline_info = {}
-            fline_info['inventory_item_id'] = k
-            fline_info['quantity'] = v
+            fline_info['inventory_item_id'] = inv_id
+            fline_info['quantity'] = quantity
             fline_info['fulfillment_id'] = fulfill_obj.id
             fline_obj = FulfillLine(**fline_info)
             fline_obj.save()
-        return 'FULFILL_BACKORDERED'
+
+    return 'FULFILL_BACKORDERED'
 
 
 def backorder_to_requested(warehouse, fulfill_id):
-    pass
+    fulfill_obj = Fulfillment.objects.get(id=fulfill_id)
+    fulfill_obj.status = 'requested'
+    fulfill_obj.warehouse = Warehouse.objects.get(label=warehouse)
+    fulfill_obj.save()
+
+    update = FulfillUpdate()
+    update.update_date = get_today()
+    update.comment = 'back-ordered to requested'
+    update.status = 'requested'
+    update.fulfillment = fulfill_obj
+    update.save()
+    return 'BACKORDER_REQUESTED'
 
 
 def create_fulfill_request(warehouse, order_id):
     unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
     warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
-
+    unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in api_func('inventory', 'inventoryitem'))
     order = api_func('base', 'sale', order_id)
+
     if unfulfilled is None:
         return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
@@ -174,9 +179,6 @@ def create_fulfill_request(warehouse, order_id):
         fulfill_info['status'] = 'requested'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
-
-        unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
-        inv_items = dict((i['label'], i['id']) for i in api_func('inventory', 'inventoryitem'))
 
         for label, quantity in unfulfilled_items.iteritems():
             inv_id = inv_items[label]
@@ -226,24 +228,102 @@ def sales_detail(request):
     return render_to_response('inventory/sales_detail.html', context, context_instance = RequestContext(request))
 
 
+@login_required
+def batch_list(request, batch_id):
+    batch_qs = BatchRequest.objects.get(id=batch_id)
+    batch_info = slz.BatchRequestSerializer(batch_qs).data
+    
+    if batch_info['location'] == 'MICH':
+        return MICH_pick_list(request, batch_info['fulfillments'],
+                              label='MICH_batch_%s' % str(batch_id))
+    elif batch_info['location'] == 'NC2':
+        return NC2_pick_list(request, batch_info['fulfillments'],
+                              label='NC2_batch_%s' % str(batch_id))
+    elif batch_info['location'] == '152Frank':
+        return MICH_pick_list(request, batch_info['fulfillments'],
+                              label='152Frank_batch_%s' % str(batch_id))
+    
+
+NC2_NOTES = {
+    'UNCOMMON': 'Must use UG packing slip PDF (attached).  Must use UG shipping label (attached).  Packing slip goes in clear pouch on side of box #1.',
+    'PSOURCE': 'Must affix barcode stickers from Fineline technology to back of the product on the bottom right corner. Orders > 150 pounds should be palletized and shipped fedex FREIGHT ECONOMY to warehouse 7801 Industrial Drive, Forest Park, IL 60130, Attn: Product.   We need dimensions, wt for BOL.  Savor to provide BOL (attached).  Shipper name with PO number on all boxes.  Mark 1 of 2, 2 of 2 etc.   To schedule pickup call 18663934585.',
+    'BEDBATH': 'Must use bed bath packing slip PDF (attached). Must use fedex label (attached).',
+    'BUYBUY': 'Must use buybuy BABY packing slip PDF (attached). Must use fedex label (attached).',
+    'GROMMET': 'Must use Grommet packing slip PDF (attached).  Must use Grommet mailing label (attached).',
+    'GROMWHOLE': 'Must use Grommet packing slip PDF (attached). Must use Grommet mailing label (attached)',
+    'AMZN': 'Must use Amazon packing label (attached).',
+    'WAYFAIR': 'Must use Wayfair packing label (attached).  Must use Wayfair mailing label (attached)',
+    'SHOPIFY': ''
+}
 
 @login_required
-def thoroughbred_list(request, batch_id):
-    batch_qs = BatchRequest.objects.filter(id=batch_id)
-    fulfill_list = [f['fulfillments'] for f in batch_qs.values('fulfillments')]
-    fulfill_qs = Fulfillment.objects.filter(id__in=fulfill_list)
-    return pick_list(request,
-                     slz.FulfillmentSerializer(fulfill_qs, many=True).data,
-                     label='thoroughbred_batch_%s' % str(batch_id))
-
-
-@login_required
-def pick_list(request, data, label='shopify_pick_list'):
+def NC2_pick_list(request, data, label='MICH_batch'):
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
+    def get_ship_data(d):
+        fd = flatdict.FlatDict(d)
+        fd['notes'] = NC2_NOTES.get(fd['order:channel'], '')
+        if fd['ship_type']['label'] == 'FREIGHT':
+            fd['ifs_ship_type'] = 'PICK'
+        elif fd['ship_type']['label'] == 'IFS_BEST':
+            fd['ifs_ship_type'] = 'BEST'
+        else:
+            fd['ifs_ship_type'] = 'HOLD'
+        return fd
+
+    sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
+    flf_data = [{'skus': d['fulfill_lines'], 'ship': get_ship_data(d)} for d in data]
+
+    headers = OrderedDict([('SAVOR ID', 'id'),
+                            ('Channel', 'order:channel'),
+                            ('Ship Type', 'ifs_ship_type'),
+                            ('Name', 'order:shipping_name'),
+                            ('Shipping Company', 'order:shipping_company'),
+                            ('Customer Reference', 'order:external_routing_id'),
+                            ('Shipping Address1', 'order:shipping_address1'),
+                            ('Shipping Address2', 'order:shipping_address2'),
+                            ('Shipping City', 'order:shipping_city'),
+                            ('Shipping Zip', 'order:shipping_zip'),
+                            ('Shipping Province', 'order:shipping_province'),
+                            ('Shipping Country', 'order:shipping_country'),
+                            ('Shipping Phone', 'order:shipping_phone'),
+                            ('Email', 'order:notification_email'),
+                            ('Gift Message', 'order:gift_message'),
+                            ('Notes', 'notes'),
+                           ])
+
+    header_row = headers.keys()
+    header_row += [u'Item', u'Item Name', u'Quantity']
+    writer.writerow(header_row)
+
+    for flf in flf_data:
+        row = [flf['ship'].get(headers[col], '') for col in headers]
+        label = flf['skus'][0]['inventory_item']
+        row += [label, sku_names[label], flf['skus'][0]['quantity']]
+        writer.writerow(row)
+
+        # if more than 1 sku..
+        for i in range(1, len(flf['skus'])):
+            line = [''] * len(headers)
+            label = flf['skus'][i]['inventory_item']
+            line += [label, sku_names[label], flf['skus'][i]['quantity']]
+            writer.writerow(line)
+
+        writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
+
+    return response
+
+@login_required
+def MICH_pick_list(request, data, label='MICH_batch'):
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
+    writer = csv.writer(response)
+
+    sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
     flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
 
     headers = OrderedDict([('SAVOR ID', 'id'),
@@ -277,13 +357,15 @@ def pick_list(request, data, label='shopify_pick_list'):
 
     for flf in flf_data:
         row = [flf['ship'].get(headers[col], '') for col in headers]
-        row += [flf['skus'][0]['inventory_item'], '', flf['skus'][0]['quantity']]
+        label = flf['skus'][0]['inventory_item']
+        row += [label, sku_names[label], flf['skus'][0]['quantity']]
         writer.writerow(row)
 
         # if more than 1 sku..
         for i in range(1, len(flf['skus'])):
             line = [''] * len(headers)
-            line += [flf['skus'][i]['inventory_item'], '', flf['skus'][i]['quantity']]
+            label = flf['skus'][i]['inventory_item']
+            line += [label, sku_names[label], flf['skus'][i]['quantity']]
             writer.writerow(line)
 
         writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))

@@ -108,7 +108,7 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                                 'fulfill_lines__inventory_item']
     
     warehouse = serializers.StringRelatedField()
-    ship_type = serializers.StringRelatedField()
+    ship_type = ShippingTypeSerializer()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
     order = baseslz.ShippingSaleSerializer(read_only=True)
     ship_from = AddressSerializer(read_only=True)
@@ -120,6 +120,20 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'use_pdf', 'packing_type', 'fulfill_lines',
                   'ship_from'
                   )
+
+class SimpleBatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['location']
+    _PREFETCH_RELATED_FIELDS = ['fulfillments']
+
+    location = serializers.StringRelatedField()
+
+    def get_fulfillment_count(self, obj):
+        return obj.fulfillments.count()
+
+    class Meta:
+        model = models.BatchRequest
+        fields = ('id', 'created_date', 'location',
+                  'fulfillment_count', 'comment',)
 
 
 class BatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
