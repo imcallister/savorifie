@@ -56,8 +56,9 @@ def unbatched_fulfillments(qstring):
                     .filter(status='requested')
     qs = FulfillmentSerializer.setup_eager_loading(qs)
 
-    return [{'label': f['order']['label'], 'id': f['id'], 'warehouse': f['warehouse']} \
-            for f in FulfillmentSerializer(qs, many=True).data]
+    #return [{'label': f['order']['label'], 'id': f['id'], 'warehouse': f['warehouse']} \
+    #        for f in FulfillmentSerializer(qs, many=True).data]
+    return FulfillmentSerializer(qs, many=True).data
 
 
 @dispatch(dict)

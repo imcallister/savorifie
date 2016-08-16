@@ -48,6 +48,21 @@ def _fulfill_list(qstring=None):
     return columns, orders
 
 
+def _unbatched_fulfill_list(qstring=None):
+    fulfills = api_func('inventory', 'unbatched_fulfillments')
+
+    def get_items(f):
+        return ','.join(['%d %s' % (l['quantity'], l['inventory_item']) for l in f['fulfill_lines']])
+
+    columns = ["label", "Date", 'ship to', 'Items', 'warehouse']
+    for f in fulfills:
+        f.update({'label': f['order']['label']})
+        f.update({'ship to': _get_name(f['order'])})
+        f.update({'Items': get_items(f)})
+        f.update({'Date': parse(f['request_date']).strftime('%d-%b-%y')})
+    return columns, fulfills
+
+
 def _backorder_list(qstring=None):
     back_fulfills = api_func('inventory', 'backordered')
 
@@ -81,7 +96,9 @@ def management(request):
     context['back_columns'], context['back_rows'] = _backorder_list()
     context['backordered'] = len(context['back_rows'])
 
-    context['unbatched_fulfillments'] = len(api_func('inventory', 'unbatched_fulfillments'))
+    context['unbatched_columns'], context['unbatched_rows'] = _unbatched_fulfill_list()
+    context['unbatched_fulfillments'] = len(context['unbatched_rows'])
+
     context['unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') if x['status']=='requested'])
     context['missing_shipping'] = len(api_func('inventory', 'fulfillment',
                                                qstring={'missing_shipping': 'true',

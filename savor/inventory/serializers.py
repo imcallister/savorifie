@@ -103,10 +103,11 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         return obj.ship_info
 
     _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type', 'ship_from',
-                              'order__channel__counterparty', 'order__customer_code']
+                              'order__channel__counterparty', 'order__customer_code',
+                              'ship_type__shipper__company']
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines',
                                 'fulfill_lines__inventory_item']
-    
+
     warehouse = serializers.StringRelatedField()
     ship_type = ShippingTypeSerializer()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
@@ -138,10 +139,11 @@ class SimpleBatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixi
 
 class BatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['location']
-    _PREFETCH_RELATED_FIELDS = ['fulfillments'] + ['fulfillments__fulfill_lines', 'fulfillments__order__channel',
+    _PREFETCH_RELATED_FIELDS = ['fulfillments'] + ['fulfillments__fulfill_lines', 'fulfillments__order__channel__counterparty',
                                                     'fulfillments__order__customer_code', 'fulfillments__ship_from',
-                                                    'fulfillments__ship_type', 'fulfillments__warehouse',
+                                                    'fulfillments__ship_type__shipper__company', 'fulfillments__warehouse',
                                                     'fulfillments__fulfill_lines__inventory_item']
+
     location = serializers.StringRelatedField()
     fulfillments = FulfillmentSerializer(many=True, read_only=True)
 

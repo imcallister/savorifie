@@ -2,7 +2,6 @@ import logging
 
 from django.db import models
 
-import accountifie.common.models
 from accountifie.common.api import api_func
 
 logger = logging.getLogger('default')
@@ -30,7 +29,7 @@ def total_COGS(u_sale, inv_item_label):
     return sum([a.quantity * a.shipment_line.cost for a in assigns])
 
 
-class COGSAssignment(accountifie.common.models.McModel):
+class COGSAssignment(models.Model):
     shipment_line = models.ForeignKey('inventory.ShipmentLine')
     unit_sale = models.ForeignKey('base.UnitSale', blank=True)
     quantity = models.PositiveIntegerField()
