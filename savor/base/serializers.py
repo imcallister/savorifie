@@ -42,7 +42,7 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     unfulfilled_string = serializers.SerializerMethodField()
 
     _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
-    _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
+    _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item', 'fulfillments__fulfill_lines__inventory_item']
 
     def get_label(self, obj):
         return str(obj)
@@ -64,7 +64,8 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         model = models.Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'shipping_name', 'shipping_company',
-                  'shipping_zip', 'items_string', 'unfulfilled_string', 'unfulfilled_items')
+                  'shipping_zip', 'items_string', 'unfulfilled_string', 'unfulfilled_items',
+                  )
 
 
 class ShippingSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):

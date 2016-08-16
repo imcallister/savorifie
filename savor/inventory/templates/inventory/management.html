@@ -107,7 +107,9 @@
                                   <h3 class="panel-title">UNBATCHED FULFILLS</h3>
                                 </div>
                                 <div class="panel-body text-center">
-                                    <font size="20"><a href='/api/inventory/unbatched_fulfillments/'>{{unbatched_fulfillments}}</a></font>
+                                    <font size="20">
+                                        <a data-toggle="modal" data-target="#unbatched">{{unbatched_fulfillments}}</a>
+                                    </font>
                                 </div>
                               </div>
                             </div>                            
@@ -220,6 +222,24 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="unbatched" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title">Unbatched Fulfillments</h4>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid" id="wrapper">
+          {% include "splashdict.html" with columns=unbatched_columns rows=unbatched_rows %}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
 
 <div class="modal fade" id="showBatches" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">

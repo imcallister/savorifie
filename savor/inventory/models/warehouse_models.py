@@ -1,0 +1,76 @@
+
+from django.db import models
+
+
+class Warehouse(models.Model):
+    description = models.CharField(max_length=200)
+    label = models.CharField(max_length=20)
+
+    def __unicode__(self):
+        return self.label
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_warehouse'
+
+
+class InventoryTransfer(models.Model):
+    transfer_date = models.DateField()
+    location = models.ForeignKey('inventory.Warehouse', related_name='location')
+    destination = models.ForeignKey('inventory.Warehouse', related_name='destination')
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_inventorytransfer'
+
+
+class TransferLine(models.Model):
+    inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
+    quantity = models.PositiveIntegerField(default=0)
+    transfer = models.ForeignKey('inventory.InventoryTransfer')
+
+    def __unicode__(self):
+        return '%d %s' % (self.quantity, self.inventory_item.label)
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_transferline'
+
+
+class BatchRequest(models.Model):
+    created_date = models.DateField()
+    location = models.ForeignKey('inventory.Warehouse')
+    fulfillments = models.ManyToManyField('inventory.Fulfillment', blank=True)
+    comment = models.TextField(blank=True, null=True)
+
+    properties = ['fulfillment_count',]
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_batchrequest'
+
+    @property
+    def fulfillment_count(self):
+        return self.fulfillments.all().count()
+
+
+FULFILL_CHOICES = (
+    ('back-ordered', 'back-ordered'),
+    ('requested', 'requested'),
+    ('partial', 'partial'),
+    ('mismatched', 'mismatched'),
+    ('completed', 'completed'),
+)
+
+
+class TransferUpdate(models.Model):
+    update_date = models.DateField()
+    comment = models.CharField(max_length=200, blank=True, null=True)
+    status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
+    shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
+    tracking_number = models.CharField(max_length=100, blank=True, null=True)
+    transfer = models.ForeignKey('inventory.InventoryTransfer')
+
+    class Meta:
+        app_label = 'inventory'
+        db_table = 'inventory_transferupdate'

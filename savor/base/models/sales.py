@@ -10,7 +10,6 @@ from simple_history.models import HistoricalRecords
 import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
-import accountifie.common.models
 import accounting.models
 from accountifie.gl.models import Account
 
@@ -19,7 +18,7 @@ DZERO = Decimal('0')
 
 logger = logging.getLogger('default')
 
-class TaxCollector(accountifie.common.models.McModel):
+class TaxCollector(models.Model):
     entity = models.CharField(max_length=100)
 
     def __unicode__(self):
@@ -42,7 +41,7 @@ CHANNELS = [
 ]
 
 
-class UnitSale(accountifie.common.models.McModel):
+class UnitSale(models.Model):
     sale = models.ForeignKey('base.Sale', related_name='unit_sale')
     sku = models.ForeignKey('inventory.Product', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
@@ -103,7 +102,7 @@ class UnitSale(accountifie.common.models.McModel):
         return ','.join(['%s %s' % (i[0], i[1]) for i in items])
 
 
-class SalesTax(accountifie.common.models.McModel):
+class SalesTax(models.Model):
     sale = models.ForeignKey('base.Sale')
     collector = models.ForeignKey('base.TaxCollector')
     tax = models.DecimalField(max_digits=11, decimal_places=2)
@@ -123,7 +122,7 @@ SPECIAL_SALES = (
     ('retailer', 'Retailer Sample'),
 )
 
-class Sale(accountifie.common.models.McModel, accountifie.gl.bmo.BusinessModelObject):
+class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
 
     channel = models.ForeignKey(Channel, blank=True, null=True)
