@@ -16,7 +16,8 @@
 
 <!-- Nav tabs -->
 <ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#sales" aria-controls="sales" role="tab" data-toggle="tab">Sales</a></li>
+    <li role="presentation" class="active"><a href="#sales" aria-controls="sales" role="tab" data-toggle="tab">Sales Stats</a></li>
+    <li role="presentation"><a href="#orders" aria-controls="orders" role="tab" data-toggle="tab">Orders Details</a></li>
     <li role="presentation"><a href="#expenses" aria-controls="expenses" role="tab" data-toggle="tab">Expenses</a></li>
 </ul>
 <span class="glyphicon glyphicon-info-sign" 
@@ -108,6 +109,10 @@
           </div>
       </div><!-- /.col-sm-8 -->
     </div>
+</div>
+
+<div role="tabpanel" class="tab-pane fade container-fluid" id="orders">
+    {{orders_content}}
 </div>
 
 <div role="tabpanel" class="tab-pane fade container-fluid" id="expenses">

@@ -15,8 +15,10 @@ urlpatterns = patterns('',
 
     url(r'^inventory/management/$', 'inventory.views.management'),
     url(r'^inventory/queue_orders/$', 'inventory.views.queue_orders'),
-
+    url(r'^orders_list$', 'inventory.views.orders'),
+    url(r'^order/drilldown/(?P<order_id>[_a-zA-Z0-9]+)/$', 'inventory.views.order_drilldown'),
     url(r'^inventory/$', 'inventory.views.main'),
+
 )
 
 

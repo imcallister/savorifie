@@ -1,0 +1,206 @@
+{% extends base_template %}
+{% load staticfiles %}
+
+
+{% block breadcrumb %}
+<li class="active">Home</li>
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+<link href="/static/base/css/dashboard_styles.css" rel="stylesheet">
+<!--
+This is where bootstrap starts to get a bit demented.   Surely not all
+these divs are needed.
+
+
+-->
+
+<h2>Order Details -- {{id}}</h2>
+
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">Order Details</div>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed table-hover table-bordered">
+                        <tr>
+                            <td>ID</td>
+                            <td>{{label}}</td>
+                        </tr>
+                        <tr>
+                            <td>Channel</td>
+                            <td>{{channel}}</td>
+                        </tr>
+                        <tr>
+                            <td>SKUS</td>
+                            <td>{{items_string}}</td>
+                        </tr>
+                        <tr>
+                            <td>Unfulfilled</td>
+                            <td>{{unfulfilled_string}}</td>
+                        </tr>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">Amounts</div>
+                </div>
+                <div class="panel-body">
+                    <table class="table table-striped table-condensed table-hover table-bordered">
+                        <th>
+                            <td>Quantity</td>
+                            <td>Unit Price</td>
+                        </th>
+                        {% for u in unit_sales %}
+                        <tr>
+                            <td>{{u.sku}}</td>
+                            <td>{{u.quantity}}</td>
+                            <td>{{u.unit_price}}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            {% for fulfill in fulfillment_list %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div class="panel-title">Fulfillment: {{fulfill.id}}</div>
+                    </div>
+                    <div class="panel-body">
+                        <h4>Request</h4>
+                        <table class="table table-striped table-condensed table-hover table-bordered">
+                            <tr>
+                                {% for col in fulfillment_cols %}
+                                    <td>{{col}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                {% for v in fulfill.fulfill %}
+                                    <td>{{v}}</td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                        <h4>Warehouse Updates</h4>
+                        <table class="table table-striped table-condensed table-hover table-bordered">
+                            <tr>
+                                {% for col in update_cols %}
+                                    <td>{{col}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% for u in fulfill.updates %}
+                            <tr>
+                                {% for v in u %}
+                                    <td>{{v}}</td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    
+                </div>
+            {% endfor %}
+        </div>
+    </div><!--/.row-->
+    
+</div>
+    
+
+</div>
+
+
+
+
+
+{% endblock %}
+
+{% block sidebar %}
+
+{% endblock %}
+
+
+{% block extrajs %}
+    <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
+    <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
+    <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
+    <script src="{{ STATIC_URL }}base/js/easypiechart.js"></script>
+    
+    <script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
+
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-editable.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
+    <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
+      
+  
+
+
+    <script type="text/javascript">
+    
+    $(document).ready(cash_bals_chart("{% url 'cash_balances' %}", 'cash_bals_panel'));
+    $(document).ready(expense_trends("{% url 'expense_trends' %}", 'expense_trends_panel'));
+
+    
+    $(function() {
+        $('#easypiechart-BE1').easyPieChart({
+            scaleColor: false,
+            barColor: '#8E4585'
+        });
+    });
+
+    $(function() {
+        $('#easypiechart-BE2').easyPieChart({
+            scaleColor: false,
+            barColor: '#229CE4'
+        });
+    });
+
+    $(function() {
+       $('#easypiechart-BE3').easyPieChart({
+           scaleColor: false,
+           barColor: '#778899'
+       });
+    });
+
+    $(function() {
+        $('#easypiechart-SYE1').easyPieChart({
+            scaleColor: false,
+            barColor: '#8E4585'
+        });
+    });
+
+    $(function() {
+        $('#easypiechart-SYE2').easyPieChart({
+            scaleColor: false,
+            barColor: '#229CE4'
+        });
+    });
+
+    $(function() {
+       $('#easypiechart-SYE3').easyPieChart({
+           scaleColor: false,
+           barColor: '#778899'
+       });
+    });
+
+    </script>
+
+{% endblock %}

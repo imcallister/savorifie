@@ -1,0 +1,22 @@
+{% extends base_template %}
+
+{% block breadcrumb %}
+<div class="navbar-collapse collapse navbar-responsive-collapse">
+  <h2>Orders Detail</h2>
+</div>
+{% endblock %}
+
+
+{% block content %}
+    {{content}}
+{% endblock %}
+
+{% block extrajs %}
+    {{block.super}}
+    <script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap.min.js"></script>
+
+
+{% endblock %}
