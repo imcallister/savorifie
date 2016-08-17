@@ -11,7 +11,7 @@ from accountifie.toolkit.utils import extractDateRange, get_company
 from accountifie.common.api import api_func
 
 from base.models import Expense, Cashflow, Sale
-
+import tables.bstrap_tables
 
 @login_required
 def maintenance(request):
@@ -25,8 +25,9 @@ def reports(request):
 
 @login_required
 def analysis(request):
-    d = {}
-    return render_to_response('main_views/analysis.html', RequestContext(request, d))
+    context = {}
+    context['orders_content'] = tables.bstrap_tables.orders_list()
+    return render_to_response('main_views/analysis.html', RequestContext(request, context))
 
 
 @login_required

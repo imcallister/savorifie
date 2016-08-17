@@ -97,7 +97,6 @@ class FulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('inventory_item', 'quantity')
 
 
-
 class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     def get_ship_info(self, obj):
         return obj.ship_info
@@ -120,6 +119,37 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'ship_info', 'warehouse', 'bill_to', 'ship_type',
                   'use_pdf', 'packing_type', 'fulfill_lines',
                   'ship_from'
+                  )
+
+
+class FullFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    def get_ship_info(self, obj):
+        return obj.ship_info
+
+    _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type', 'ship_from',
+                              'order__channel__counterparty', 'order__customer_code',
+                              'ship_type__shipper__company']
+    _PREFETCH_RELATED_FIELDS = ['fulfill_lines',
+                                'fulfill_lines__inventory_item',
+                                'fulfill_updates__shipper__company']
+
+    warehouse = serializers.StringRelatedField()
+    ship_type = ShippingTypeSerializer()
+    fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
+    fulfill_updates = FulfillUpdateSerializer(many=True, read_only=True)
+    order = baseslz.ShippingSaleSerializer(read_only=True)
+    ship_from = AddressSerializer(read_only=True)
+    items_string = serializers.SerializerMethodField()
+
+    def get_items_string(self, obj):
+        return obj.items_string
+
+    class Meta:
+        model = models.Fulfillment
+        fields = ('id', 'order', 'request_date', 'status',
+                  'ship_info', 'warehouse', 'bill_to', 'ship_type',
+                  'use_pdf', 'packing_type', 'fulfill_lines',
+                  'ship_from', 'fulfill_updates', 'items_string'
                   )
 
 class SimpleBatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):

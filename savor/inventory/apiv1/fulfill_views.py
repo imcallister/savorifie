@@ -118,8 +118,18 @@ def fulfillment(qstring):
 
 @dispatch(str, dict)
 def fulfillment(id, qstring):
+    view_type = qstring.get('view', 'standard')
+    if type(view_type) == list:
+        view_type = view_type[0]
+
     qs = Fulfillment.objects.filter(id=id).first()
-    flfmt = FulfillmentSerializer(qs).data
+    
+    if view_type == 'full':
+        serializer = FullFulfillmentSerializer
+    else:
+        serializer = FulfillmentSerializer
+    
+    flfmt = serializer(qs).data
     flfmt['skus'] = dict((l['inventory_item'], l['quantity']) for l in flfmt['fulfill_lines'])
     del flfmt['fulfill_lines']
     return flfmt

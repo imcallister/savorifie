@@ -6,12 +6,12 @@ import operator
 
 
 from django.conf import settings
-from django.forms.models import model_to_dict
 from django.db.models import Prefetch
 
 from accountifie.common.api import api_func
 from savor.base.models import Sale, UnitSale, Channel
-from base.serializers import FullSaleSerializer, SimpleSaleSerializer, ShippingSaleSerializer
+from base.serializers import FullSaleSerializer, SimpleSaleSerializer, \
+    ShippingSaleSerializer, SaleFulfillmentSerializer
 
 
 @dispatch(dict)
@@ -30,6 +30,8 @@ def sale(qstring):
         serializer = SimpleSaleSerializer
     elif view_type == 'shipping':
         serializer = ShippingSaleSerializer
+    elif view_type == 'fulfillment':
+        serializer = SaleFulfillmentSerializer
     else:
         serializer = FullSaleSerializer
 
@@ -40,6 +42,8 @@ def sale(qstring):
 @dispatch(str, dict)
 def sale(id, qstring):
     view_type = qstring.get('view', 'full')
+    if type(view_type) == list:
+        view_type = view_type[0]
 
     qs = Sale.objects.filter(id=id).first()
 
@@ -47,6 +51,10 @@ def sale(id, qstring):
         serializer = SimpleSaleSerializer
     elif view_type == 'shipping':
         serializer = ShippingSaleSerializer
+    elif view_type == 'fulfillment':
+        serializer = SaleFulfillmentSerializer
+    elif view_type == 'drilldown':
+        serializer = SaleDrilldownSerializer
     else:
         serializer = FullSaleSerializer
 
@@ -141,7 +149,7 @@ def sales_by_channel(qstring):
 
 
 def summary_sales_stats(qstring):
-    unit_sales_info = unit_sales(qstring)
+    unit_sales_info = api_func('base', 'unitsale', qstring=qstring)
     inventory_items = api_func('inventory', 'inventoryitem')
     for item in inventory_items:
         item['sold'] = len([x for x in unit_sales_info if x['inventory item']==item['label']])

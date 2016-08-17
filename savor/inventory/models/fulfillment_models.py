@@ -55,6 +55,12 @@ class Fulfillment(models.Model):
             return 'incomplete'
 
     @property
+    def items_string(self):
+        items = [(l.quantity, l.inventory_item.label) for l in self.fulfill_lines.all()]
+        items = sorted(items, key=lambda x: x[1])
+        return ','.join(['%s %s' % (i[0], i[1]) for i in items])
+
+    @property
     def latest_status(self):
         updates = dict((u.update_date, u.status) for u in self.fulfillupdate_set.all())
         if len(updates) == 0:

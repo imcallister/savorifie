@@ -33,6 +33,20 @@ def unit_sales():
             ]
     return get_bstrap_table(data_url, row_defs)
 
+
+def orders_list():
+    data_url = "/api/base/sale/?view=fulfillment"
+    row_defs = [{'data_field': 'drilldown', 'value': 'Order ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_name', 'value': 'Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_company', 'value': 'Company', 'formatter': 'nameFormatter'},
+                {'data_field': 'items_string', 'value': 'SKUs', 'formatter': 'nameFormatter'},
+                {'data_field': 'unfulfilled_string', 'value': 'Unfulfilled', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
+
 def nominal(dt):
     if type(dt) == str:
         dt_str = dt

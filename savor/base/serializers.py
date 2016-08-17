@@ -1,3 +1,5 @@
+from django.utils.safestring import mark_safe
+
 from accountifie.common.serializers import EagerLoadingMixin
 
 import models
@@ -11,7 +13,7 @@ class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = models.UnitSale
         fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
-   
+
 
 class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     items_string = serializers.SerializerMethodField()
@@ -24,7 +26,6 @@ class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 
     def get_items_string(self, obj):
         return obj.items_string
-
 
     channel = serializers.StringRelatedField()
     customer_code = serializers.StringRelatedField()
@@ -40,6 +41,8 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     items_string = serializers.SerializerMethodField()
     unfulfilled_items = serializers.SerializerMethodField()
     unfulfilled_string = serializers.SerializerMethodField()
+    drilldown = serializers.SerializerMethodField()
+    fulfillment_ids = serializers.SerializerMethodField()
 
     _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
     _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item', 'fulfillments__fulfill_lines__inventory_item']
@@ -56,15 +59,21 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     def get_unfulfilled_items(self, obj):
         return obj.unfulfilled_items
 
+    def get_fulfillment_ids(self, obj):
+        return [f.id for f in obj.fulfillments.all()]
+
+    def get_drilldown(self, obj):
+        return mark_safe('<a href="/order/drilldown/%s">%s</a>' % (obj.id, obj.label))
 
     channel = serializers.StringRelatedField()
     customer_code = serializers.StringRelatedField()
 
     class Meta:
         model = models.Sale
-        fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
+        fields = ('id', 'label', 'customer_code', 'channel', 'sale_date', 'drilldown',
                   'external_channel_id', 'shipping_name', 'shipping_company',
                   'shipping_zip', 'items_string', 'unfulfilled_string', 'unfulfilled_items',
+                  'fulfillment_ids',
                   )
 
 
