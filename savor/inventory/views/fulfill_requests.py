@@ -256,6 +256,29 @@ NC2_NOTES = {
     'SHOPIFY': ''
 }
 
+
+def optimize_NC2(skus):
+    opt_skus = []
+    for sku in skus:
+        qty = sku['quantity']
+        inv_item = sku['inventory_item']
+        if qty < 2:
+            opt_skus.append({'inventory_item': inv_item,
+                             'quantity': qty})
+        else:
+            # make some masters
+            mstr_cnt = qty // 2
+            opt_skus.append({'inventory_item': 'MAS' + inv_item,
+                             'quantity': mstr_cnt})
+
+            # any left over as single
+            sngl_cnt = qty - 2 * mstr_cnt
+            if sngl_cnt > 0:
+                opt_skus.append({'inventory_item': inv_item,
+                                 'quantity': sngl_cnt})
+    return opt_skus
+
+
 @login_required
 def NC2_pick_list(request, data, label='MICH_batch'):
 
@@ -275,7 +298,13 @@ def NC2_pick_list(request, data, label='MICH_batch'):
         return fd
 
     sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
+    master_sku_names = dict(('MAS%s' % k, '%s Master' % v) for k, v in sku_names.iteritems())
+    sku_names.update(master_sku_names)
+
     flf_data = [{'skus': d['fulfill_lines'], 'ship': get_ship_data(d)} for d in data]
+
+    for f in flf_data:
+        f['id'] = 'FLF%s' % f
 
     headers = OrderedDict([('SAVOR ID', 'id'),
                             ('Channel', 'order:channel'),
@@ -300,16 +329,17 @@ def NC2_pick_list(request, data, label='MICH_batch'):
     writer.writerow(header_row)
 
     for flf in flf_data:
+        opt_skus = optimize_NC2(flf['skus'])
         row = [flf['ship'].get(headers[col], '') for col in headers]
-        label = flf['skus'][0]['inventory_item']
-        row += [label, sku_names[label], flf['skus'][0]['quantity']]
+        label = opt_skus[0]['inventory_item']
+        row += [label, sku_names[label], opt_skus[0]['quantity']]
         writer.writerow(row)
 
         # if more than 1 sku..
-        for i in range(1, len(flf['skus'])):
+        for i in range(1, len(opt_skus)):
             line = [''] * len(headers)
-            label = flf['skus'][i]['inventory_item']
-            line += [label, sku_names[label], flf['skus'][i]['quantity']]
+            label = opt_skus[i]['inventory_item']
+            line += [label, sku_names[label], opt_skus[i]['quantity']]
             writer.writerow(line)
 
         writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
@@ -326,6 +356,9 @@ def MICH_pick_list(request, data, label='MICH_batch'):
     sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
     flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
 
+    for f in flf_data:
+        f['id'] = 'FLF%s' % f
+    
     headers = OrderedDict([('SAVOR ID', 'id'),
                             ('Channel', 'order:channel'),
                             ('Name', 'order:shipping_name'),
@@ -339,7 +372,7 @@ def MICH_pick_list(request, data, label='MICH_batch'):
                             ('Shipping Country', 'order:shipping_country'),
                             ('Shipping Phone', 'order:shipping_phone'),
                             ('Email', 'order:notification_email'),
-                            ('Shipping Type', 'ship_type'),
+                            ('Shipping Type', 'ship_type:description'),
                             ('Bill To', 'bill_to'),
                             ('Gift Message', 'order:gift_message'),
                             ('Use PDF?', 'use_pdf'),
