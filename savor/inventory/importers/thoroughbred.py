@@ -64,7 +64,9 @@ def process_thoroughbred(file_name):
         # have our orders be of form 'SAL.xxxx' or 'TRF.xxxx'
         # for most packs we are using first row
         top_row = v.iloc[0]
-        savor_request_id = top_row['CUST_PO']
+        savor_request_id = top_row['CUST_PO'].replace('SAL.', '') \
+                                             .replace('FLF', '') \
+                                             .replace('TRF.', '')
 
         try:
             pack_info['fulfillment_id'] = savor_request_id

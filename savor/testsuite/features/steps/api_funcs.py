@@ -41,6 +41,9 @@ def impl(context):
 
 @then(u'the api results should be')
 def impl(context):
+    print('*' * 20)
+    print([flatdict.FlatDict(d) for d in context.api_results])
+    print('*' * 20)
     expected = [(row['account'],
                  Decimal(row['amount']),
                  row['counterparty'],
