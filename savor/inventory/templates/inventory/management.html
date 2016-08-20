@@ -129,7 +129,8 @@
                 <div class="panel-body">
                     <div class="col-md-4">
                         <ul class="nav nav-pills nav-stacked">
-                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadThoroughbred">Load Thoroughbred</a></li>                    
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadThoroughbred">Load Thoroughbred</a></li>
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadNC2">Load NC2</a></li>
                             <li><a class="btn btn-primary" href="/inventory/reconcile_warehouse/" role="button">Reconcile warehouse reports</a></li>
 
                         </ul>
@@ -319,6 +320,27 @@
 
       </div>
       
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="loadNC2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload NC2 fulfillment file</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+        <form role='form' enctype="multipart/form-data" method="post" action="/inventory/nc2_upload/">{% csrf_token %}
+            <div class="form-group">    
+                {{shopify_upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+      </div>
     </div>
   </div>
 </div>

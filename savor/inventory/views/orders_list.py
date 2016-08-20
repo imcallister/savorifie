@@ -32,6 +32,7 @@ def order_drilldown(request, order_id):
     context['label'] = sale_info['label']
     context['channel'] = sale_info['channel']
     context['items_string'] = sale_info['items_string']
+    context['gift_wrapping'] = sale_info['gift_wrapping']
     context['unfulfilled'] = sale_info['unfulfilled_string']
 
     context['unit_sales'] = [{'quantity': u['quantity'],

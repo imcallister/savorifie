@@ -21,6 +21,10 @@ class WarehouseFulfill(models.Model):
     shipping_country = models.CharField(max_length=30, blank=True, null=True)
     shipping_phone = models.CharField(max_length=30, blank=True, null=True)
 
+    weight = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    shipping_cost = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+    handling_cost = models.DecimalField(max_digits=8, decimal_places=2, blank=True, null=True)
+
     ship_email = models.EmailField(max_length=254, blank=True, null=True)
     shipping_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     tracking_number = models.CharField(max_length=100, blank=True, null=True)
