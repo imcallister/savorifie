@@ -11,6 +11,10 @@ import inventory.importers
 def thoroughbred_upload(request):
     return inventory.importers.thoroughbred.order_upload(request)
 
+@login_required
+def nc2_upload(request):
+    return inventory.importers.nc2.order_upload(request)
+
 
 @login_required
 def upload_file(request, file_type, check=False):
@@ -18,6 +22,8 @@ def upload_file(request, file_type, check=False):
     if request.method == 'POST':
         if file_type == 'thoroughbred':
             return inventory.importers.thoroughbred.order_upload(request)
+        elif file_type == 'nc2':
+            return inventory.importers.nc2.order_upload(request)
         else:
             raise ValueError("Unexpected file type; know about thoroughbred")
 

@@ -8,6 +8,7 @@ urlpatterns = patterns('',
     url(r'inventory/reconcile_warehouse/$', 'inventory.views.reconcile_warehouse'),
     url(r'inventory/request_fulfill/(?P<warehouse>[_a-zA-Z0-9]+)/(?P<order_id>[_a-zA-Z0-9]+)/$', 'inventory.views.request_fulfill'),
     url(r'inventory/thoroughbred_upload/$', 'inventory.views.thoroughbred_upload'),
+    url(r'inventory/nc2_upload/$', 'inventory.views.nc2_upload'),
     url(r'inventory/batch_list/(?P<batch_id>[_a-zA-Z0-9]+)/$', 'inventory.views.batch_list'),
 
     url(r'inventory/make_batch/(?P<warehouse>[_a-zA-Z0-9]+)/$', 'inventory.views.make_batch'),
