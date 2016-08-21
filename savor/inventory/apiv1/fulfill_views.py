@@ -7,7 +7,6 @@ import time
 
 from django.db.models import Prefetch, Count, F
 
-from accountifie.common.api import api_func
 from inventory.models import *
 from inventory.serializers import *
 from base.models import *
@@ -56,8 +55,6 @@ def unbatched_fulfillments(qstring):
                     .filter(status='requested')
     qs = FulfillmentSerializer.setup_eager_loading(qs)
 
-    #return [{'label': f['order']['label'], 'id': f['id'], 'warehouse': f['warehouse']} \
-    #        for f in FulfillmentSerializer(qs, many=True).data]
     return FulfillmentSerializer(qs, many=True).data
 
 
@@ -75,7 +72,7 @@ def warehousefulfill(qstring):
 
 
 @dispatch(str, dict)
-def warehousefulfill(warehouse_pack_id, qstring):    
+def warehousefulfill(warehouse_pack_id, qstring):
     qs = WarehouseFulfill.objects \
                          .filter(warehouse_pack_id=warehouse_pack_id) \
                          .first()
@@ -100,13 +97,13 @@ def fulfillment(qstring):
     start = time.time()
     qs = Fulfillment.objects.all()
     qs = FulfillmentSerializer.setup_eager_loading(qs)
-    
+
     if qstring.get('warehouse'):
         qs = qs.filter(warehouse__label=qstring.get('warehouse'))
 
     if 'status' in qstring:
         qs = qs.filter(status__in=qstring['status'].split(','))
-    
+
     flfmts = FulfillmentSerializer(qs, many=True).data
     if qstring.get('missing_shipping', '').lower() == 'true':
         flfmts = [r for r in flfmts if _missing_shipping(r)]
@@ -136,9 +133,9 @@ def fulfillment(id, qstring):
 
 
 def requested(qstring):
-    unfulfilled = api_func('inventory',
-                           'fulfillment',
-                           qstring={'status': 'requested,partial'})
+    qs = qstring.copy()
+    qs['status'] = 'requested,partial'
+    unfulfilled = fulfillment(qs)
 
     for unf in unfulfilled:
         unf['items'] =','.join(['%s %s' % (v, k) for k,v in unf['skus'].iteritems()])
@@ -149,10 +146,7 @@ def requested(qstring):
 
 
 def fulfilled(qstring):
-    fulfilled = api_func('inventory',
-                         'fulfillment',
-                         qstring={'status': 'completed'})
-
+    fulfilled = fulfillment(qstring={'status': 'completed'})
     for ful in fulfilled:
         ful['items'] =','.join(['%s %s' % (v, k) for k,v in ful['skus'].iteritems()])
         del ful['skus']

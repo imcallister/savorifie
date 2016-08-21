@@ -99,7 +99,13 @@ def management(request):
     context['unbatched_columns'], context['unbatched_rows'] = _unbatched_fulfill_list()
     context['unbatched_fulfillments'] = len(context['unbatched_rows'])
 
-    context['unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') if x['status']=='requested'])
+    context['MICH_unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') 
+                                              if x['status']=='requested' and x['warehouse'] == 'MICH'])
+    context['NC2_unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') 
+                                              if x['status']=='requested' and x['warehouse'] == 'NC2'])
+    context['152Frank_unreconciled_count'] = len([x for x in api_func('inventory', 'fulfillment') 
+                                              if x['status']=='requested' and x['warehouse'] == '152Frank'])
+
     context['missing_shipping'] = len(api_func('inventory', 'fulfillment',
                                                qstring={'missing_shipping': 'true',
                                                         'status': 'requested'}))
@@ -116,7 +122,9 @@ def management(request):
 
     thoroughbred_mismatches = api_func('inventory', 'thoroughbred_mismatch')
     context['thoroughbred_mismatches'] = len(thoroughbred_mismatches)
-    context['unreconciled'] = get_table('fulfill_requested')()
+    context['MICH_unreconciled'] = get_table('fulfill_requested')(warehouse='MICH')
+    context['NC2_unreconciled'] = get_table('fulfill_requested')(warehouse='NC2')
+    context['152Frank_unreconciled'] = get_table('fulfill_requested')(warehouse='152Frank')
     context['whmismatch_columns'] = ['fulfill_id', 'fail_reason']
     context['whmismatch_rows'] = thoroughbred_mismatches
 
