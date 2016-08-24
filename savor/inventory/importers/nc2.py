@@ -82,7 +82,7 @@ def process_nc2(file_name):
             pack_info['handling_cost'] = sum([float(w) for w in v['HandlingCost'].values])
 
             ship_code = top_row['ShipMethod']
-            SHIP_MAP = {'FEG': 'FEDEX_GROUND', 'PMD': 'USPS_PRIORITY'}
+            SHIP_MAP = {'FEG': 'FEDEX_GROUND', 'PMD': 'USPS_PRIORITY', 'GRND': 'UPS_GROUND'}
             if ship_code not in SHIP_MAP:
                 missing_ship_codes += 1
             else:

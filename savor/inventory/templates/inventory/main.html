@@ -19,7 +19,7 @@ these divs are needed.
 
 -->
 
-<h2>Order 1</h2>
+<h2>Total Shipments</h2>
 
 <div class="container-fluid" id="wrapper">
 
@@ -433,36 +433,6 @@ these divs are needed.
 
 {% endblock %}
 
-{% block sidebar %}
-
-<h3>Actions</h3>
-
-<ul class="nav nav-pills nav-stacked">
-    <li><a class="btn btn-primary" href="/inventory/reconcile_warehouse/" role="button">Rec warehouse info</a></li>
-</ul>
-
-<h3>Key Stats</h3>
-<table class="table table-striped table-condensed table-hover table-bordered">
-    <tr>
-        <td>Shopify Orders</td>
-        <td>{{shopify_total_orders}}</td>
-    </tr>
-    <tr>
-        <td>Grommet Orders</td>
-        <td>{{grommet_total_orders}}</td>
-    </tr>
-    <tr>
-        <td>Other Orders</td>
-        <td>{{other_orders}}</td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-    </tr>
-    
-</table>
-
-{% endblock %}
 
 
 {% block extrajs %}

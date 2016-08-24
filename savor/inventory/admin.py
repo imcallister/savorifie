@@ -114,7 +114,7 @@ class ShippingMissing(SimpleListFilter):
     def queryset(self, request, qs):
         if self.value():
             fulfillment_ids = [x['id'] for x in api_func('inventory', 'fulfillment')
-                               if x['ship_info'] == self.value()]
+                               if x['ship_info'] == self.value() and x['status'] == 'requested']
             return qs.filter(id__in=fulfillment_ids)
 
 

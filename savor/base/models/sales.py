@@ -128,8 +128,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     channel = models.ForeignKey(Channel, blank=True, null=True)
     sale_date = models.DateField()
     external_channel_id = models.CharField(max_length=50, unique=True)
-    external_ref = models.CharField(max_length=50, blank=True, null=True,
-                                    help_text='for tracking enduser POs')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
     ship_type = models.ForeignKey('inventory.ChannelShipmentType', blank=True, null=True, default=None)

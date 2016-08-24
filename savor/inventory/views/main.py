@@ -22,9 +22,4 @@ def main(request):
 
     context['location_counts'] = api_func('inventory', 'locationinventory')
 
-    channel_counts = api_func('base', 'channel_counts')
-    context['shopify_total_orders'] = channel_counts.get('Shopify',0)
-    context['grommet_total_orders'] = channel_counts.get('The Grommet',0)
-    context['other_orders'] = sum(channel_counts.values()) - context['shopify_total_orders'] - context['grommet_total_orders']
-
     return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))
