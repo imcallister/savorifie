@@ -127,6 +127,9 @@ def requested(qstring):
     qs['status'] = 'requested,partial'
     unfulfilled = fulfillment(qs)
 
+    # filter out unbatched
+    unbatched = [f['id'] for f in unbatched_fulfillments({})]
+    unfulfilled = [f for f in unfulfilled if f['id'] not in unbatched]
     for unf in unfulfilled:
         unf['items'] =','.join(['%s %s' % (v, k) for k,v in unf['skus'].iteritems()])
         del unf['skus']
