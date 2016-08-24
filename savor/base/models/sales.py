@@ -127,12 +127,12 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     channel = models.ForeignKey(Channel, blank=True, null=True)
     sale_date = models.DateField()
-    external_channel_id = models.CharField(max_length=50, unique=True)
+    external_channel_id = models.CharField(max_length=50, unique=True, blank=True, null=True)
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
     ship_type = models.ForeignKey('inventory.ChannelShipmentType', blank=True, null=True, default=None)
 
-    shipping_charge = models.DecimalField(max_digits=11, decimal_places=2)
+    shipping_charge = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
 
     discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
     discount_code = models.CharField(max_length=50, blank=True, null=True)
@@ -161,10 +161,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def __unicode__(self):
         if self.external_channel_id:
             sale_id = self.external_channel_id
-        elif self.external_ref:
-            sale_id = self.external_ref
         else:
-            sale_id = self.id
+            sale_id = 'SAV.' + str(self.id)
 
         return '%s: %s' % (self.channel.counterparty.id, sale_id)
 
@@ -173,6 +171,34 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         db_table = 'base_sale'
 
     def save(self, update_gl=True):
+        if not self.external_channel_id:
+            if self.special_sale:
+                sample_ids = [s['external_channel_id'].lower() for s in Sale.objects \
+                                                     .filter(external_channel_id__icontains='sample') \
+                                                     .values('external_channel_id')]
+                special_ids = [s['external_channel_id'].lower() for s in Sale.objects \
+                                                      .filter(external_channel_id__icontains='special') \
+                                                      .values('external_channel_id')]
+
+                sample_ids = [int(s.replace('sample', '')) for s in sample_ids]
+                special_ids = [int(s.replace('special', '')) for s in special_ids]
+                used_ids = sample_ids + special_ids
+                if len(used_ids) == 0:
+                    max_id = 0
+                else:
+                    max_id = max(used_ids)
+                self.external_channel_id = 'SPECIAL%d' % (max_id + 1)
+            else:
+                ch_lbl = str(self.channel)
+                auto_ids = [s['external_channel_id'] for s in Sale.objects \
+                                                      .filter(external_channel_id__icontains=ch_lbl) \
+                                                      .values('external_channel_id')]
+                used_ids = [int(s.replace(ch_lbl + '.', '')) for s in auto_ids]
+                if len(used_ids) == 0:
+                    max_id = 0
+                else:
+                    max_id = max(used_ids)
+                self.external_channel_id = '%s.%d' % (ch_lbl, max_id + 1)
         if update_gl:
             # fifo check
             for u in self.unit_sale.all():
@@ -373,7 +399,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         tran = dict(company=self.company,
                     date=self.sale_date,
-                    comment= "%s: %s" % (self.channel, self.external_ref),
+                    comment= "%s: %s" % (self.channel, self.external_channel_id),
                     trans_id='%s.%s.%s' % (self.short_code, self.id, 'SALE'),
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[]
