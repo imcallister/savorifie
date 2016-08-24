@@ -1,7 +1,7 @@
 from multipledispatch import dispatch
 from django.db.models import Sum, Prefetch
 
-from accountifie.common.api import api_func
+from .model_views import warehouse
 from inventory.models import *
 
 
@@ -14,7 +14,7 @@ def inventorycount(qstring):
 
 
 def locationinventory(qstring):
-    all_shipments = dict((wh['label'], {}) for wh in api_func('inventory', 'warehouse'))
+    all_shipments = dict((wh['label'], {}) for wh in warehouse())
 
     shipment_qs = Shipment.objects.all() \
                                   .select_related('destination') \

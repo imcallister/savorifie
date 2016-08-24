@@ -15,9 +15,13 @@ from accountifie.common.api import api_func
 from accountifie.common.models import Address
 from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
+
 from inventory.models import *
 import inventory.importers
 import inventory.serializers as slz
+import inventory.apiv1 as inventory_api
+import base.apiv1 as base_api
+
 
 import datetime
 import pytz
@@ -41,7 +45,7 @@ def post_fulfill_update(data):
 @login_required
 def queue_orders(request):
     new_back_orders = 0
-    warehouses = [w['label'] for w in api_func('inventory', 'warehouse')]
+    warehouses = [w['label'] for w in inventory_api.warehouse()]
     new_requests = dict((w,0) for w in warehouses)
     back_to_queue = dict((w,0) for w in warehouses)
 

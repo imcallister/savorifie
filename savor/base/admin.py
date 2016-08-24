@@ -291,7 +291,7 @@ class FulfillRequested(SimpleListFilter):
 
 
 class SaleAdmin(SimpleHistoryAdmin):
-    list_display=('external_channel_id', 'external_ref', 'sale_date', 'channel',
+    list_display=('external_channel_id', 'sale_date', 'channel',
                   'customer_code', 'shipping_name', 'ship_type', 'special_sale')
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
@@ -305,11 +305,11 @@ class SaleAdmin(SimpleHistoryAdmin):
 
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),
-                                ('external_channel_id', 'external_ref',),
+                                ('external_channel_id',),
                                 ('customer_code', 'special_sale'),
                                 ('memo',),
                                 )
-        }),
+                     }),
         ('Discount', {'fields': ('discount', 'discount_code',), 'classes': ('collapse',)}),
         ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee',), 'gift_message',), 'classes': ('collapse',)}),
         ('Shipping Details', {'fields': (('shipping_charge',), ('shipping_name',), 
@@ -319,12 +319,6 @@ class SaleAdmin(SimpleHistoryAdmin):
                                          ('shipping_phone', 'notification_email',), ('ship_type',)),
                               'classes': ('collapse',)})
     )
-
-    
-    """
-    def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-        return super(SaleAdmin, self).changeform_view(request, object_id=object_id, form_url=form_url, extra_context=extra_context)
-    """
 
 
     def response_change(self, request, new_object):

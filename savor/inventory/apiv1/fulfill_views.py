@@ -83,18 +83,8 @@ def warehousefulfill(warehouse_pack_id, qstring):
     return whf
 
 
-def _missing_shipping(rec):
-    if rec['ship_type'] and rec['bill_to'] != '':
-            return False
-    elif rec['ship_type'] == 'BY_HAND':
-            return False
-    else:
-        return True
-
-
 @dispatch(dict)
 def fulfillment(qstring):
-    start = time.time()
     qs = Fulfillment.objects.all()
     qs = FulfillmentSerializer.setup_eager_loading(qs)
 
@@ -106,7 +96,7 @@ def fulfillment(qstring):
 
     flfmts = FulfillmentSerializer(qs, many=True).data
     if qstring.get('missing_shipping', '').lower() == 'true':
-        flfmts = [r for r in flfmts if _missing_shipping(r)]
+        flfmts = [r for r in flfmts if r['ship_info'] == 'incomplete']
     for f in flfmts:
         f['skus'] = dict((l['inventory_item'], l['quantity']) for l in f['fulfill_lines'])
         del f['fulfill_lines']

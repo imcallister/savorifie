@@ -29,7 +29,6 @@ def unit_sales():
                 {'data_field': 'unit_price', 'value': 'Unit Price', 'formatter': 'nameFormatter'},
                 {'data_field': 'quantity', 'value': 'Quantity', 'formatter': 'nameFormatter'},
                 {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
-                {'data_field': 'external_ref', 'value': 'External Ref', 'formatter': 'nameFormatter'},
             ]
     return get_bstrap_table(data_url, row_defs)
 

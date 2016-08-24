@@ -1,6 +1,8 @@
 from multipledispatch import dispatch
 
-from accountifie.common.api import api_func
+import base.apiv1 as base_api
+from .fulfill_views import fulfillment, warehousefulfill
+
 from inventory.models import WarehouseFulfill, Fulfillment
 
 
@@ -15,10 +17,8 @@ def rec_zip(z1, z2):
 
 @dispatch(dict)
 def thoroughbred_mismatch(qstring):
-    mismatched_f = api_func('inventory',
-                           'fulfillment',
-                           qstring={'status': 'mismatched'})
-    warehouse_recds = api_func('inventory', 'warehousefulfill')
+    mismatched_f = fulfillment(qstring={'status': 'mismatched'})
+    warehouse_recds = warehousefulfill()
     mismatched = []
     for f in mismatched_f:
         fulfill_id = f['id']
@@ -41,7 +41,7 @@ def thoroughbred_mismatch(qstring):
 
 @dispatch(str, dict)
 def thoroughbred_mismatch(order_id, qstring):
-    order_data = api_func('base', 'sale', order_id)
+    order_data = base_api.sale(order_id)
     # for now assume only ever one fulfill
     wh_fulfill = WarehouseFulfill.objects \
                                  .filter(savor_order_id=order_id) \
@@ -51,10 +51,10 @@ def thoroughbred_mismatch(order_id, qstring):
                              .filter(order_id=order_id) \
                              .values('id')[0]
 
-    req_record = api_func('inventory', 'fulfillment', req_fulfill['id'])
+    req_record = fulfillment(req_fulfill['id'])
     req_record['shipping_zip'] = order_data['shipping_zip']
     req_record['shipping_name'] = order_data['shipping_name']
-    whouse_record = api_func('inventory', 'warehousefulfill', wh_fulfill['warehouse_pack_id'])
+    whouse_record = warehousefulfill(wh_fulfill['warehouse_pack_id'])
 
     output = []
     flds = ['shipping_name', 'shipping_zip', 'skus']
