@@ -222,15 +222,6 @@ def request_fulfill(request, warehouse, order_id):
         return None
 
 
-@login_required
-def sales_detail(request):
-    context = {}
-    context['unit_sales'] = get_table('unit_sales')()
-
-    stats = api_func('base', 'summary_sales_stats')
-    context['stats'] = stats.copy()
-    return render_to_response('inventory/sales_detail.html', context, context_instance = RequestContext(request))
-
 
 @login_required
 def batch_list(request, batch_id):
@@ -433,30 +424,3 @@ def make_batch(request, warehouse):
         messages.success(request, '%d fulfillments added to new batch %s' % (len(to_batch), str(batch)))
         return redirect('/inventory/management/')
 
-
-@login_required
-def fulfill_request(request):
-    
-    # 1 get unfulfilled & split into bucket
-    unfulfilled = api_func('inventory', 'unfulfilled')
-
-    shopify_no_wrap = [odr for odr in unfulfilled if odr['gift_wrapping']=='False' and odr['channel']=='Shopify']
-    shopify_wrap = [odr for odr in unfulfilled if odr['gift_wrapping']!='False' and odr['channel']=='Shopify']
-
-    # still need transfers and Grommet
-
-    # 3 get shipping info
-    # shopify no wrap shipping
-
-    shopify_standard = api_func('inventory', 'channelshipmenttype', 'SAVOR_STANDARD')
-    for odr in shopify_no_wrap:
-        odr['ship_type'] = shopify_standard['ship_type']
-        odr['bill_to'] = shopify_standard['bill_to']
-
-
-    context = {}
-    context['unit_sales'] = get_table('unit_sales')()
-
-    stats = api_func('base', 'summary_sales_stats')
-    context['stats'] = stats.copy()
-    return render_to_response('inventory/sales_detail.html', context, context_instance = RequestContext(request))

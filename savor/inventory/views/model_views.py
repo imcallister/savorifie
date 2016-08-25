@@ -1,9 +1,5 @@
-from inventory.models import Warehouse, Fulfillment, FulfillLine, InventoryItem
-from inventory.serializers import WarehouseSerializer, FulfillmentSerializer, FulfillLineSerializer, InventoryItemSerializer
-from django.http import Http404
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
+from inventory.models import Warehouse, Fulfillment
+from inventory.serializers import WarehouseSerializer, FulfillmentSerializer
 from rest_framework import generics
 
 

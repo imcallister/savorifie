@@ -211,6 +211,7 @@ INSTALLED_APPS = (
 
     'betterforms',
     'base',
+    'products',
     'inventory',
     'accounting',
     'testsuite',

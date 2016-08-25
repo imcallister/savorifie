@@ -421,7 +421,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             for u_sale in self.__unit_sales:
                 inv_items = u_sale.inventory_items()
                 for ii in inv_items:
-                    product_line = api_func('inventory', 'inventoryitem', ii)['product_line']['label']
+                    product_line = api_func('product', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
                     COGS = accounting.models.total_COGS(u_sale, ii)
@@ -454,7 +454,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                 inv_items = u_sale.get_gross_sales()
                 for ii in inv_items:
 
-                    product_line = api_func('inventory', 'inventoryitem', ii)['product_line']['label']
+                    product_line = api_func('product', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
 
