@@ -17,7 +17,7 @@ class InventoryItem(models.Model):
     description = models.CharField(max_length=200)
     label = models.CharField(max_length=20)
     master_sku = models.CharField(max_length=20, blank=True, null=True)
-    product_line = models.ForeignKey('inventory.ProductLine')
+    product_line = models.ForeignKey(ProductLine)
 
     def __unicode__(self):
         return self.label

@@ -54,11 +54,6 @@ def reconcile_warehouse(request):
             post_data = {}
             post_data['update_date'] = whouse_record['ship_date']
             post_data['comment'] = 'auto-update from reconcile_warehouse'
-            print '-' * 20
-            print 'working on'
-            print whouse_record['shipping_type']
-            print
-            print whouse_record
             post_data['shipper_id'] = api_func('inventory', 'shippingtype',
                                                whouse_record['shipping_type'])['shipper']['id']
             post_data['tracking_number'] = whouse_record['tracking_number']

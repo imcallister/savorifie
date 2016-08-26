@@ -8,7 +8,7 @@ import operator
 from django.conf import settings
 from django.db.models import Prefetch
 
-from accountifie.common.api import api_func
+import products.apiv1 as product_api
 from savor.base.models import Sale, UnitSale, Channel
 from base.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer
@@ -148,16 +148,6 @@ def sales_by_channel(qstring):
         return chart_data
 
 
-def summary_sales_stats(qstring):
-    unit_sales_info = api_func('base', 'unitsale', qstring=qstring)
-    inventory_items = api_func('inventory', 'inventoryitem')
-    for item in inventory_items:
-        item['sold'] = len([x for x in unit_sales_info if x['inventory item']==item['label']])
-
-    stats = dict((item['label'], item['sold']) for item in inventory_items)
-    return stats
-
-
 def missing_cps(qstring):
     qs = Sale.objects.filter(customer_code__id='unknown')
     qs = SimpleSaleSerializer.setup_eager_loading(qs)
@@ -170,7 +160,7 @@ def channel_counts(qstring):
 
 
 def sales_counts(qstring):
-    all_skus = api_func('inventory', 'inventoryitem')
+    all_skus = product_api.inventoryitem({})
     all_sales = UnitSale.objects.all() \
                                 .prefetch_related(Prefetch('sku__skuunit__inventory_item'))
 

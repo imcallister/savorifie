@@ -14,7 +14,7 @@ def inventorycount(qstring):
 
 
 def locationinventory(qstring):
-    all_shipments = dict((wh['label'], {}) for wh in warehouse())
+    all_shipments = dict((wh['label'], {}) for wh in warehouse({}))
 
     shipment_qs = Shipment.objects.all() \
                                   .select_related('destination') \
