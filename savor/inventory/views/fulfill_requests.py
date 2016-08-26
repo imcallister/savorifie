@@ -45,7 +45,7 @@ def post_fulfill_update(data):
 @login_required
 def queue_orders(request):
     new_back_orders = 0
-    warehouses = [w['label'] for w in inventory_api.warehouse()]
+    warehouses = [w['label'] for w in inventory_api.warehouse({})]
     new_requests = dict((w,0) for w in warehouses)
     back_to_queue = dict((w,0) for w in warehouses)
 
@@ -92,7 +92,7 @@ def create_backorder(order_id):
     # check that it has not been requested already
     unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
     unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in api_func('inventory', 'inventoryitem'))
+    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem'))
     order = api_func('base', 'sale', order_id)
     
     if unfulfilled is None:
@@ -150,7 +150,7 @@ def create_fulfill_request(warehouse, order_id):
     unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
     warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
     unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in api_func('inventory', 'inventoryitem'))
+    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem'))
     order = api_func('base', 'sale', order_id)
 
     if unfulfilled is None:
@@ -292,7 +292,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
             fd['ifs_ship_type'] = 'HOLD'
         return fd
 
-    sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
+    sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem'))
     master_sku_names = dict(('MAS%s' % k, '%s Master' % v) for k, v in sku_names.iteritems())
     sku_names.update(master_sku_names)
 
@@ -348,7 +348,7 @@ def MICH_pick_list(request, data, label='MICH_batch'):
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
-    sku_names = dict((i['label'], i['description']) for i in api_func('inventory', 'inventoryitem'))
+    sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem'))
     flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
 
     for f in flf_data:
