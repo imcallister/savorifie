@@ -35,7 +35,7 @@ class ShippingTypeAdmin(admin.ModelAdmin):
 
 
 class ChannelShipmentTypeAdmin(admin.ModelAdmin):
-    list_display = ('channel', 'label', 'ship_type', 'bill_to',)
+    list_display = ('channel', 'label', 'ship_type', 'bill_to', 'ship_from',)
     list_filter = ('channel',)
 
 admin.site.register(Shipper, ShipperAdmin)
