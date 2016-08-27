@@ -11,6 +11,7 @@ from django.http import HttpResponseRedirect
 
 from savor.base.models import Sale, SalesTax, UnitSale, TaxCollector
 import inventory.models
+import products.models
 import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
 from accountifie.common.api import api_func
@@ -29,7 +30,7 @@ def get_unitsale(row):
     quantity = int(row['Lineitem quantity'])
     unit_price = row['Lineitem price']
     sku_code = row['Lineitem sku']
-    sku_id = inventory.models.Product.objects.get(label=sku_code).id
+    sku_id = products.models.Product.objects.get(label=sku_code).id
 
     if quantity != '' and unit_price != '' and sku_id != '':
         return {'quantity': quantity, 'unit_price': unit_price, 'sku_id': sku_id}
