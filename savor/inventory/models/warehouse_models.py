@@ -37,21 +37,6 @@ class TransferLine(models.Model):
         db_table = 'inventory_transferline'
 
 
-class BatchRequest(models.Model):
-    created_date = models.DateField()
-    location = models.ForeignKey('inventory.Warehouse')
-    fulfillments = models.ManyToManyField('inventory.Fulfillment', blank=True)
-    comment = models.TextField(blank=True, null=True)
-
-    properties = ['fulfillment_count',]
-
-    class Meta:
-        app_label = 'inventory'
-        db_table = 'inventory_batchrequest'
-
-    @property
-    def fulfillment_count(self):
-        return self.fulfillments.all().count()
 
 
 FULFILL_CHOICES = (

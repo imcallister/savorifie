@@ -9,8 +9,8 @@ from django.conf import settings
 from django.db.models import Prefetch
 
 import products.apiv1 as product_api
-from savor.base.models import Sale, UnitSale, Channel
-from base.serializers import FullSaleSerializer, SimpleSaleSerializer, \
+from .models import Sale, UnitSale, Channel
+from .serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer
 
 

@@ -10,7 +10,8 @@ from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company
 from accountifie.common.api import api_func
 
-from base.models import Expense, Cashflow, Sale
+from base.models import Expense, Cashflow
+from sales.models import Sale
 import tables.bstrap_tables
 
 @login_required

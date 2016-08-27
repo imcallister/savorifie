@@ -17,7 +17,6 @@ from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
 
 from inventory.models import *
-import inventory.importers
 import inventory.serializers as slz
 import inventory.apiv1 as inventory_api
 import base.apiv1 as base_api

@@ -2,7 +2,7 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.serializers import EagerLoadingMixin
 
-import models
+from .models import UnitSale, Sale
 from rest_framework import serializers
 
 
@@ -11,7 +11,7 @@ class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     sku = serializers.StringRelatedField()
 
     class Meta:
-        model = models.UnitSale
+        model = UnitSale
         fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
 
 
@@ -31,7 +31,7 @@ class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     customer_code = serializers.StringRelatedField()
 
     class Meta:
-        model = models.Sale
+        model = Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'shipping_name',
                   'shipping_company', 'shipping_zip', 'items_string')
@@ -69,7 +69,7 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     customer_code = serializers.StringRelatedField()
 
     class Meta:
-        model = models.Sale
+        model = Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date', 'drilldown',
                   'external_channel_id', 'shipping_name', 'shipping_company',
                   'shipping_zip', 'items_string', 'unfulfilled_string', 'unfulfilled_items',
@@ -87,7 +87,7 @@ class ShippingSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     customer_code = serializers.StringRelatedField()
 
     class Meta:
-        model = models.Sale
+        model = Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'special_sale', 'discount',
                   'discount_code', 'gift_wrapping', 'gift_wrap_fee',
@@ -116,7 +116,7 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     unit_sale = UnitSaleSerializer(many=True)
 
     class Meta:
-        model = models.Sale
+        model = Sale
         fields = ('id', 'label', 'company', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'special_sale', 'discount',
                   'discount_code', 'gift_wrapping', 'gift_wrap_fee',
