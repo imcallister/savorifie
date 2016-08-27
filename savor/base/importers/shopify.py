@@ -160,7 +160,7 @@ def process_shopify(file_name):
                 obj_data = {
                     'collector_id': tax_collector.id,
                     'tax': t[1],
-                    'sale_id' : sale_obj.id
+                    'sale_id': sale_obj.id
                 }
 
                 tax_obj = SalesTax(**obj_data)
