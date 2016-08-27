@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from dateutil.parser import parse
+from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
 from django.contrib import messages
@@ -43,6 +44,8 @@ def order_upload(request):
 
 def process_nc2(file_name):
     incoming_name = os.path.join(INCOMING_ROOT, file_name)
+    
+    # TODO .... using pandas makes it all very ugly
     with open(incoming_name, 'U') as f:
         warehouse_records = pd.read_csv(incoming_name)
 
@@ -51,6 +54,12 @@ def process_nc2(file_name):
     missing_ship_codes = 0
 
     # any pre-formatting of data here
+
+    def rounder(f, places=2):
+        if places==5:
+            return Decimal(Decimal(f).quantize(Decimal('.00001'), rounding=ROUND_HALF_UP))
+        else:
+            return Decimal(Decimal(f).quantize(Decimal('.01'), rounding=ROUND_HALF_UP))
 
     records = []
     for k, v in warehouse_records.groupby('OrderNum'):
@@ -76,10 +85,11 @@ def process_nc2(file_name):
             pack_info['shipping_zip'] = top_row['Zip']
             pack_info['shipping_country'] = top_row['Country']
             pack_info['ship_email'] = top_row['Email']
-            pack_info['tracking_number'] = ','.join([str(n) for n in v['Tracking#'].values])
-            pack_info['weight'] = sum([float(w) for w in v['Weight [Lbs.]'].values])
-            pack_info['shipping_cost'] = sum([float(w) for w in v['ShippingCost'].values])
-            pack_info['handling_cost'] = sum([float(w) for w in v['HandlingCost'].values])
+
+            pack_info['tracking_number'] = ','.join([str(n) for n in v['Tracking#'].values])[:90]
+            pack_info['weight'] = sum([rounder(w, places=5) for w in v['Weight [Lbs.]'].values])
+            pack_info['shipping_cost'] = sum([rounder(w, places=2) for w in v['ShippingCost'].values])
+            pack_info['handling_cost'] = sum([rounder(w, places=2) for w in v['HandlingCost'].values])
 
             ship_code = top_row['ShipMethod']
             SHIP_MAP = {'FEG': 'FEDEX_GROUND', 'PMD': 'USPS_PRIORITY', 'GRND': 'UPS_GROUND'}
@@ -96,7 +106,7 @@ def process_nc2(file_name):
                 new_recs_ctr += 1
                 pack_obj = WarehouseFulfill(**pack_info)
                 pack_obj.save()
-        except:
-            logger.error('NC2 record: failed to load %s' % savor_request_id)
+        except BaseException as e:
+            logger.error('NC2 record: failed to load %s. Error: %s' % (savor_request_id, str(e)))
 
     return exist_recs_ctr, new_recs_ctr, missing_ship_codes
