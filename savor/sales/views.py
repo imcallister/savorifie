@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.db.models import Prefetch
 from accountifie.common.api import api_func
 
-from savor.sales.models import SalesTax, Sale
+from .models import SalesTax, Sale
 
 
 def __get_salestax_data(obj):

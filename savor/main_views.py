@@ -10,8 +10,8 @@ from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company
 from accountifie.common.api import api_func
 
-from base.models import Expense, Cashflow, Sale
-#from sales.models import Sale
+from base.models import Expense, Cashflow
+#import savor.sales.models
 import tables.bstrap_tables
 
 @login_required
@@ -67,7 +67,7 @@ def daily(request):
 
     stub_expenses = Expense.objects.filter(account_id=unalloc_account).count()
     incomplete_cashflows = cashflows.filter(counterparty=None).count()
-    incomplete_shopify_sales = Sale.objects.filter(customer_code='unknown').count()
+    #incomplete_shopify_sales = savor.sales.models.Sale.objects.filter(customer_code='unknown').count()
 
     ap_rows = []
     for i in ap_table.index:

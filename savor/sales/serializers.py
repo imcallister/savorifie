@@ -2,7 +2,7 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.serializers import EagerLoadingMixin
 
-from savor.sales.models import UnitSale, Sale
+from .models import UnitSale, Sale
 from rest_framework import serializers
 
 

@@ -11,7 +11,7 @@ from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company
 from accountifie.toolkit.forms import FileForm
 from accountifie.gl.models import ExternalBalance, ExternalAccount
-from base.models import Expense, Cashflow, Sale, CreditCardTrans
+from base.models import Expense, Cashflow, CreditCardTrans
 
 
 

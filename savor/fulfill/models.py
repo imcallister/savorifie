@@ -30,7 +30,7 @@ PACKING_TYPES = (
 class Fulfillment(models.Model):
     request_date = models.DateField()
     warehouse = models.ForeignKey('inventory.Warehouse', blank=True, null=True)
-    order = models.ForeignKey('base.Sale', related_name='fulfillments')
+    order = models.ForeignKey('sales.Sale', related_name='fulfillments')
     ship_type = models.ForeignKey('inventory.ShippingType', blank=True, null=True)
     bill_to = models.CharField(max_length=100, blank=True, null=True)
     use_pdf = models.BooleanField(default=False)
@@ -95,7 +95,7 @@ class FulfillLine(models.Model):
 
 class WarehouseFulfill(models.Model):
     fulfillment = models.ForeignKey(Fulfillment, blank=True, null=True)
-    savor_order = models.ForeignKey('base.sale', blank=True, null=True)
+    savor_order = models.ForeignKey('sales.sale', blank=True, null=True)
     savor_transfer = models.ForeignKey('inventory.InventoryTransfer', blank=True, null=True)
     warehouse = models.ForeignKey('inventory.Warehouse')
     warehouse_pack_id = models.CharField(max_length=100, blank=True, null=True)

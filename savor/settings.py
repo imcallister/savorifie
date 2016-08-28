@@ -209,7 +209,7 @@ INSTALLED_APPS = (
     'betterforms',
     'base',
     'products',
-    #'sales',
+    'sales',
     'inventory',
     'fulfill',
     'reports',

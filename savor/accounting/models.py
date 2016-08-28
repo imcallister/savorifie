@@ -31,7 +31,7 @@ def total_COGS(u_sale, inv_item_label):
 
 class COGSAssignment(models.Model):
     shipment_line = models.ForeignKey('inventory.ShipmentLine')
-    unit_sale = models.ForeignKey('base.UnitSale', blank=True)
+    unit_sale = models.ForeignKey('sales.UnitSale', blank=True)
     quantity = models.PositiveIntegerField()
 
     def __unicode__(self):
