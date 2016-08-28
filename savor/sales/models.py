@@ -11,16 +11,17 @@ import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 import accounting.models
-from accountifie.gl.models import Account
+from accountifie.gl.models import Account, Counterparty
 
 
 DZERO = Decimal('0')
 
 logger = logging.getLogger('default')
 
+
 class Channel(models.Model):
     label = models.CharField(max_length=20)
-    counterparty = models.ForeignKey('gl.Counterparty')
+    counterparty = models.ForeignKey(Counterparty)
 
     def __unicode__(self):
         return self.label
@@ -39,8 +40,6 @@ class TaxCollector(models.Model):
     class Meta:
         app_label = 'sales'
         db_table = 'base_taxcollector'
-
-
 
 
 class UnitSale(models.Model):
@@ -64,7 +63,6 @@ class UnitSale(models.Model):
             to_be_fifod = self.fifo_check()
             if len(to_be_fifod) > 0:
                 accounting.models.fifo_assign(self.id, to_be_fifod)
-
 
 
     def fifo_check(self):

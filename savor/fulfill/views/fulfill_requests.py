@@ -265,7 +265,7 @@ def optimize_NC2(skus):
         else:
             # make some masters
             mstr_cnt = qty // 2
-            opt_skus.append({'inventory_item': 'MAS' + inv_item,
+            opt_skus.append({'inventory_item': 'MST' + inv_item,
                              'quantity': mstr_cnt})
 
             # any left over as single
@@ -295,7 +295,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
         return fd
 
     sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem'))
-    master_sku_names = dict(('MAS%s' % k, '%s Master' % v) for k, v in sku_names.iteritems())
+    master_sku_names = dict(('MST%s' % k, '%s Master' % v) for k, v in sku_names.iteritems())
     sku_names.update(master_sku_names)
 
     flf_data = [{'skus': d['fulfill_lines'], 'ship': get_ship_data(d)} for d in data]
@@ -304,7 +304,6 @@ def NC2_pick_list(request, data, label='MICH_batch'):
         f['id'] = 'FLF%s' % f
 
     headers = OrderedDict([('SAVOR ID', 'id'),
-                            ('Channel', 'order:channel'),
                             ('Ship Type', 'ifs_ship_type'),
                             ('Name', 'order:shipping_name'),
                             ('Shipping Company', 'order:shipping_company'),
@@ -318,7 +317,6 @@ def NC2_pick_list(request, data, label='MICH_batch'):
                             ('Shipping Phone', 'order:shipping_phone'),
                             ('Email', 'order:notification_email'),
                             ('Gift Message', 'order:gift_message'),
-                            ('Notes', 'notes'),
                            ])
 
     header_row = headers.keys()
@@ -327,19 +325,11 @@ def NC2_pick_list(request, data, label='MICH_batch'):
 
     for flf in flf_data:
         opt_skus = optimize_NC2(flf['skus'])
-        row = [flf['ship'].get(headers[col], '') for col in headers]
-        label = opt_skus[0]['inventory_item']
-        row += [label, sku_names[label], opt_skus[0]['quantity']]
-        writer.writerow(row)
-
-        # if more than 1 sku..
-        for i in range(1, len(opt_skus)):
-            line = [''] * len(headers)
+        for i in range(0, len(opt_skus)):
+            line = [flf['ship'].get(headers[col], '') for col in headers]
             label = opt_skus[i]['inventory_item']
             line += [label, sku_names[label], opt_skus[i]['quantity']]
             writer.writerow(line)
-
-        writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
 
     return response
 
