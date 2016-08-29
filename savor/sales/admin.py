@@ -64,7 +64,7 @@ class FulfillRequested(SimpleListFilter):
             return (('requested', 'Fulfill Requested'), ('unrequested', 'Not Fulfill Requested'))
 
     def queryset(self, request, qs):
-        fulfillment_ids = [x['order']['id'] for x in api_func('inventory', 'fulfillment')]
+        fulfillment_ids = [x['order']['id'] for x in api_func('fulfill', 'fulfillment')]
         if self.value() == 'requested':
             return qs.filter(id__in=fulfillment_ids)
         if self.value() == 'unrequested':

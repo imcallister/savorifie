@@ -23,6 +23,10 @@ class Channel(models.Model):
     label = models.CharField(max_length=20)
     counterparty = models.ForeignKey(Counterparty)
 
+    class Meta:
+        app_label = 'sales'
+        db_table = 'base_channel'
+
     def __unicode__(self):
         return self.label
 

@@ -4,7 +4,8 @@ from rest_framework import serializers
 from accountifie.common.serializers import EagerLoadingMixin, AddressSerializer
 
 import models
-import savor.base.serializers as baseslz
+import sales.serializers as salesslz
+import inventory.serializers as invslz
 
 
 
@@ -38,9 +39,9 @@ class FulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                                 'fulfill_lines__inventory_item']
 
     warehouse = serializers.StringRelatedField()
-    ship_type = ShippingTypeSerializer()
+    ship_type = invslz.ShippingTypeSerializer()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
-    order = baseslz.ShippingSaleSerializer(read_only=True)
+    order = salesslz.ShippingSaleSerializer(read_only=True)
     ship_from = AddressSerializer(read_only=True)
 
     class Meta:
@@ -64,10 +65,10 @@ class FullFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                                 'fulfill_updates__shipper__company']
 
     warehouse = serializers.StringRelatedField()
-    ship_type = ShippingTypeSerializer()
+    ship_type = invslz.ShippingTypeSerializer()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
     fulfill_updates = FulfillUpdateSerializer(many=True, read_only=True)
-    order = baseslz.ShippingSaleSerializer(read_only=True)
+    order = salesslz.ShippingSaleSerializer(read_only=True)
     ship_from = AddressSerializer(read_only=True)
     items_string = serializers.SerializerMethodField()
 
@@ -129,7 +130,7 @@ class WarehouseFulfillSerializer(serializers.ModelSerializer, EagerLoadingMixin)
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'fulfill_lines__inventory_item']
     _PREFETCH_RELATED_FIELDS += ['savor_order__unit_sale__sku__skuunit__inventory_item']
 
-    savor_order = baseslz.SimpleSaleSerializer(read_only=True)
+    savor_order = salesslz.SimpleSaleSerializer(read_only=True)
     savor_transfer = serializers.StringRelatedField()
     warehouse = serializers.StringRelatedField()
     shipping_type = serializers.StringRelatedField()

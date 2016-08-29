@@ -10,7 +10,7 @@ from django.db.models import Prefetch, Count, F
 from .models import *
 from .serializers import *
 from base.models import *
-from base.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
+from sales.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
 
 logger = logging.getLogger('default')
 

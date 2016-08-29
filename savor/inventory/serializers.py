@@ -4,7 +4,6 @@ from rest_framework import serializers
 from accountifie.common.serializers import EagerLoadingMixin, AddressSerializer
 
 import models
-import savor.base.serializers as baseslz
 
 
 class ShipperSerializer(serializers.ModelSerializer, EagerLoadingMixin):
