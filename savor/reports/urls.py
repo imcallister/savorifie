@@ -7,6 +7,6 @@ urlpatterns = patterns('',
     url(r'^expense_trends/', 'reports.charts.expense_trends', name='expense_trends'),
 
     url(r'^inventory/management/$', views.management),
-    url(r'^inventory/$', views.main),
+    url(r'^inventory/$', views.inventory_counts),
     
 )

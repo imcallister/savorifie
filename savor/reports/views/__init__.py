@@ -1,2 +1,2 @@
-from main import *
+from inventory import *
 from management import *

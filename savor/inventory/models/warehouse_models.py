@@ -25,7 +25,7 @@ class InventoryTransfer(models.Model):
 
 
 class TransferLine(models.Model):
-    inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
+    inventory_item = models.ForeignKey('products.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     transfer = models.ForeignKey('inventory.InventoryTransfer')
 

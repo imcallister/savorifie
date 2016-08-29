@@ -43,7 +43,7 @@ class Fulfillment(models.Model):
         return '%s:%s %s' % (self.id, str(self.order), self.order.shipping_name)
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'fulfill'
         db_table = 'inventory_fulfillment'
 
     @property
@@ -79,17 +79,17 @@ class FulfillUpdate(models.Model):
     fulfillment = models.ForeignKey(Fulfillment, related_name='fulfill_updates')
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'fulfill'
         db_table = 'inventory_fulfillupdate'
 
 
 class FulfillLine(models.Model):
-    inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
+    inventory_item = models.ForeignKey('products.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     fulfillment = models.ForeignKey(Fulfillment, related_name='fulfill_lines')
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'fulfill'
         db_table = 'inventory_fulfillline'
 
 
@@ -125,12 +125,12 @@ class WarehouseFulfill(models.Model):
         return 'Fill %s' % self.warehouse_pack_id
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'fulfill'
         db_table = 'inventory_warehousefulfill'
 
 
 class WarehouseFulfillLine(models.Model):
-    inventory_item = models.ForeignKey('inventory.InventoryItem',
+    inventory_item = models.ForeignKey('products.InventoryItem',
                                        blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     warehouse_fulfill = models.ForeignKey(WarehouseFulfill,
@@ -142,20 +142,20 @@ class WarehouseFulfillLine(models.Model):
                               str(self.inventory_item))
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'fulfill'
         db_table = 'inventory_warehousefulfillline'
 
 
 class BatchRequest(models.Model):
     created_date = models.DateField()
     location = models.ForeignKey('inventory.Warehouse')
-    fulfillments = models.ManyToManyField('inventory.Fulfillment', blank=True)
+    fulfillments = models.ManyToManyField('fulfill.Fulfillment', blank=True)
     comment = models.TextField(blank=True, null=True)
 
     properties = ['fulfillment_count',]
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'fulfill'
         db_table = 'inventory_batchrequest'
 
     @property

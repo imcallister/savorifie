@@ -39,16 +39,16 @@
                 <div class="panel-body">
                     <ul>
                         <li>
-                            <a href="/api/base/sales_by_month">By month</a>
-                            (<a href="/api/base/sales_by_month?as_csv=true">download as csv</a>)
+                            <a href="/api/sales/sales_by_month">By month</a>
+                            (<a href="/api/sales/sales_by_month?as_csv=true">download as csv</a>)
                         </li>
                         <li>
-                            <a href="/api/base/sales_by_channel">By Channel</a>
-                            (<a href="/api/base/sales_by_channel?as_csv=true">download as csv</a>)
+                            <a href="/api/sales/sales_by_channel">By Channel</a>
+                            (<a href="/api/sales/sales_by_channel?as_csv=true">download as csv</a>)
                         </li>
                         <li>
-                            <a href="/api/base/sales_by_counterparty">By Counterparty</a>
-                            (<a href="/api/base/sales_by_counterparty?as_csv=true">download as csv</a>)
+                            <a href="/api/sales/sales_by_counterparty">By Counterparty</a>
+                            (<a href="/api/sales/sales_by_counterparty?as_csv=true">download as csv</a>)
                         </li>
                     </ul>
 
@@ -219,7 +219,7 @@
     </script>
 
     <script type="text/javascript">
-        $(document).ready(simpleChart2("/api/base/sales_by_month?raw=true&output=chart",
+        $(document).ready(simpleChart2("/api/sales/sales_by_month?raw=true&output=chart",
                                          "by_month",
                                          'Units Sold by Month',
                                          ['column'],
@@ -229,7 +229,7 @@
                                          ));
     </script>
     <script type="text/javascript">
-        $(document).ready(simpleChart2("/api/base/sales_by_counterparty?raw=true&output=chart",
+        $(document).ready(simpleChart2("/api/sales/sales_by_counterparty?raw=true&output=chart",
                                          "by_counterparty",
                                          'Units Sold by Counterparty',
                                          ['column'],
@@ -239,7 +239,7 @@
                                          ));
     </script>
     <script type="text/javascript">
-        $(document).ready(simpleChart2("/api/base/sales_by_channel?raw=true&output=chart",
+        $(document).ready(simpleChart2("/api/sales/sales_by_channel?raw=true&output=chart",
                                          "by_channel",
                                          'Units Sold by Channel',
                                          ['column'],

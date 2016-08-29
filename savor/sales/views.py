@@ -1,11 +1,23 @@
 import csv
 
+from django.core.management import call_command
+from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.db.models import Prefetch
 from accountifie.common.api import api_func
 
 from .models import SalesTax, Sale
+import importers
+
+
+def assign_COGS(request):
+    call_command('calc_COGS')
+    return HttpResponseRedirect("/maintenance")
+
+@login_required
+def shopify_upload(request):
+    return importers.shopify.order_upload(request)
 
 
 def __get_salestax_data(obj):

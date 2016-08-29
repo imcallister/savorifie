@@ -3,6 +3,7 @@ from django.db.models import Sum, Prefetch
 
 from .model_views import warehouse
 from inventory.models import *
+from fulfill.models import *
 
 
 def inventorycount(qstring):

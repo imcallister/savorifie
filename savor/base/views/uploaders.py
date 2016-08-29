@@ -5,15 +5,9 @@ from django.template import RequestContext
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 
-import base.importers
 from base.models import Cashflow, CreditCardTrans, make_expense_stubs, make_stubs_from_ccard
 from accountifie.toolkit.forms import FileForm
 import accountifie.toolkit
-
-
-@login_required
-def shopify_upload(request):
-    return base.importers.shopify.order_upload(request)
 
 
 @login_required
@@ -65,8 +59,8 @@ def bulk_expense_stubs(request):
 
         messages.info(request, "%d new stub expenses created. \
                                 %d duplicates found and not created"
-                                % (cf_rslts['new'] + cc_rslts['new'],
-                                   cf_rslts['duplicates'] + cc_rslts['duplicates']))
+                               % (cf_rslts['new'] + cc_rslts['new'],
+                                  cf_rslts['duplicates'] + cc_rslts['duplicates']))
 
         return HttpResponseRedirect("/admin/base/expense/?unmatched=UNMATCHED")
     else:

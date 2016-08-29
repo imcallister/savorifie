@@ -48,7 +48,7 @@ class Shipment(models.Model):
 
 class ShipmentLine(models.Model, accountifie.gl.bmo.BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
-    inventory_item = models.ForeignKey('inventory.InventoryItem', blank=True, null=True)
+    inventory_item = models.ForeignKey('products.InventoryItem', blank=True, null=True)
     quantity = models.PositiveIntegerField(default=0)
     cost = models.DecimalField(max_digits=6, decimal_places=2, default=0)
     shipment = models.ForeignKey('inventory.Shipment')

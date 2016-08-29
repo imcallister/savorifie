@@ -9,7 +9,7 @@ class ProductLine(models.Model):
         return self.label
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'products'
         db_table = 'inventory_productline'
 
 
@@ -23,7 +23,7 @@ class InventoryItem(models.Model):
         return self.label
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'products'
         db_table = 'inventory_inventoryitem'
 
 
@@ -35,7 +35,7 @@ class Product(models.Model):
         return self.label
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'products'
         db_table = 'inventory_product'
 
 
@@ -49,5 +49,5 @@ class SKUUnit(models.Model):
         return '%d: %s' % (self.quantity, self.inventory_item)
 
     class Meta:
-        app_label = 'inventory'
+        app_label = 'products'
         db_table = 'inventory_skuunit'
