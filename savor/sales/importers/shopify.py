@@ -9,7 +9,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
-from .models import Sale, SalesTax, UnitSale, TaxCollector
+from ..models import Sale, SalesTax, UnitSale, TaxCollector
 import products.models
 import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
@@ -54,11 +54,17 @@ def order_upload(request):
         upload = request.FILES.values()[0]
         file_name = upload._name
         file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
-        dupes, new_sales, unknown_cp_ctr = process_shopify(file_name_with_timestamp)
-        messages.success(request, 'Loaded shopify file: %d new sales and %d duplicate sales' % (new_sales, dupes))
-        messages.warning(request, 'Missing counterparty info: %d not recognised. Please see Shopify report.' % unknown_cp_ctr)
-        context = {}
-        #return render_to_response('base/uploaded.html', context, context_instance=RequestContext(request))
+
+        rslts = process_shopify(file_name_with_timestamp)
+        if rslts['status'] == 'ERROR':
+            messages.warning(request, 'File is not csv. Please check file')
+        else:
+            dupes = rslts['exist_sales_ctr']
+            new_sales = rslts['new_sales_ctr']
+            unknown_cp_ctr = rslts['unknown_cp_ctr']
+            messages.success(request, 'Loaded shopify file: %d new sales and %d duplicate sales' % (new_sales, dupes))
+            messages.warning(request, 'Missing counterparty info: %d not recognised. Please see Shopify report.' % unknown_cp_ctr)
+
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
@@ -67,6 +73,9 @@ def order_upload(request):
 
 
 def process_shopify(file_name):
+    if file_name.split('.')[-1] != 'csv':
+        return {'status': 'ERROR', 'msg': 'WRONG_FILE_TYPE'}
+
     incoming_name = os.path.join(INCOMING_ROOT, file_name)
     with open(incoming_name, 'U') as f:
         sales = pd.read_csv(incoming_name)
@@ -175,4 +184,5 @@ def process_shopify(file_name):
                     unitsale_obj.save()
 
             sale_obj.save()
-    return exist_sales_ctr, new_sales_ctr, unknown_cp_ctr
+    return {'status': 'SUCCESS', 'exist_sales_ctr': exist_sales_ctr,
+            'new_sales_ctr': new_sales_ctr, 'unknown_cp_ctr': unknown_cp_ctr}
