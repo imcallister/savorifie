@@ -2,7 +2,8 @@ from multipledispatch import dispatch
 from django.db.models import Sum, Prefetch
 
 from .model_views import warehouse
-from inventory.models import *
+from inventory.models import ShipmentLine, Shipment, InventoryTransfer
+from fulfill.models import Fulfillment
 
 
 def inventorycount(qstring):

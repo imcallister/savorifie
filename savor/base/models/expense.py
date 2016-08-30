@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 from accountifie.gl.bmo import BusinessModelObject
 import accountifie.gl.models
 from accountifie.toolkit.utils import get_default_company
-from accountifie.common.api import api_func
+import accountifie.environment.apiv1 as env_api
 
 logger = logging.getLogger('default')
 
@@ -31,9 +31,9 @@ def make_expense_stubs(cf_data):
     where the cashflows were booked versus Accounts Payable
     """
     today = datetime.datetime.now().date()
-    stub_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
-    unallocated_employee = api_func('environment', 'variable', 'UNALLOCATED_EMPLOYEE_ID')
-    ap_account = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
+    stub_account = env_api.variable('UNALLOCATED_ACCT', {})
+    unallocated_employee = env.api.variable('UNALLOCATED_EMPLOYEE_ID', {})
+    ap_account = env_api.variable('GL_ACCOUNTS_PAYABLE', {})
 
     new_stubs = 0
     from_AP = [cf for cf in cf_data if cf['trans_type_id'] == ap_account]
@@ -61,9 +61,9 @@ def make_stubs_from_ccard(cc_data):
     an expense created from them
     """
     today = datetime.datetime.now().date()
-    stub_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
-    unallocated_employee = api_func('environment', 'variable', 'UNALLOCATED_EMPLOYEE_ID')
-    ap_account = api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE')
+    stub_account = env_api.variable('UNALLOCATED_ACCT', {})
+    unallocated_employee = env.api.variable('UNALLOCATED_EMPLOYEE_ID', {})
+    ap_account = env_api.variable('GL_ACCOUNTS_PAYABLE', {})
 
     new_stubs = 0
     for cc in cc_data:
@@ -219,9 +219,9 @@ class Expense(models.Model, BusinessModelObject):
         """
 
         capitalize_it, debit, acc_asset_dep, months  = self._capitalize(self.account)
-        ACCTS_PAYABLE = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE'))
-        PREPAID_EXP = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_PREPAID_EXP'))
-        ACCRUED_LIAB = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCRUED_LIAB'))
+        ACCTS_PAYABLE = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_ACCOUNTS_PAYABLE', {}))
+        PREPAID_EXP = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_PREPAID_EXP', {}))
+        ACCRUED_LIAB = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_ACCRUED_LIAB', {}))
         
         trans = []
 

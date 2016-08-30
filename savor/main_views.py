@@ -10,7 +10,8 @@ from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company
 from accountifie.common.api import api_func
 
-from base.models import Expense, Cashflow, Sale
+from base.models import Expense, Cashflow
+#import savor.sales.models
 import tables.bstrap_tables
 
 @login_required
@@ -66,7 +67,7 @@ def daily(request):
 
     stub_expenses = Expense.objects.filter(account_id=unalloc_account).count()
     incomplete_cashflows = cashflows.filter(counterparty=None).count()
-    incomplete_shopify_sales = Sale.objects.filter(customer_code='unknown').count()
+    #incomplete_shopify_sales = savor.sales.models.Sale.objects.filter(customer_code='unknown').count()
 
     ap_rows = []
     for i in ap_table.index:
@@ -95,7 +96,7 @@ def daily(request):
     incomplete_rows = []
     incomplete_rows.append(['Expenses', stub_expenses, '/admin/base/expense/?unmatched=UNMATCHED'])
     incomplete_rows.append(['Payments -- 1001', incomplete_cashflows, '/admin/base/cashflow/?unmatched=UNMATCHED'])
-    incomplete_shopify = [['Missing CPs', incomplete_shopify_sales, '/admin/base/sale/?customer_code=unknown']]
+    incomplete_shopify = [['Missing CPs', incomplete_shopify_sales, '/admin/sales/sale/?customer_code=unknown']]
 
     gl_strategy = request.GET.get('gl_strategy', None)
     query_manager = QueryManager(gl_strategy=gl_strategy)

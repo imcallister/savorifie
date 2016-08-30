@@ -11,27 +11,21 @@ import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 import accounting.models
-from accountifie.gl.models import Account
+from accountifie.gl.models import Account, Counterparty
 
 
 DZERO = Decimal('0')
 
 logger = logging.getLogger('default')
 
-class TaxCollector(models.Model):
-    entity = models.CharField(max_length=100)
-
-    def __unicode__(self):
-        return self.entity
-
-    class Meta:
-        app_label = 'base'
-        db_table = 'base_taxcollector'
-
 
 class Channel(models.Model):
     label = models.CharField(max_length=20)
-    counterparty = models.ForeignKey('gl.Counterparty')
+    counterparty = models.ForeignKey(Counterparty)
+
+    class Meta:
+        app_label = 'sales'
+        db_table = 'base_channel'
 
     def __unicode__(self):
         return self.label
@@ -41,14 +35,25 @@ CHANNELS = [
 ]
 
 
+class TaxCollector(models.Model):
+    entity = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return self.entity
+
+    class Meta:
+        app_label = 'sales'
+        db_table = 'base_taxcollector'
+
+
 class UnitSale(models.Model):
-    sale = models.ForeignKey('base.Sale', related_name='unit_sale')
-    sku = models.ForeignKey('inventory.Product', null=True, blank=True)
+    sale = models.ForeignKey('sales.Sale', related_name='unit_sale')
+    sku = models.ForeignKey('products.Product', null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
 
     class Meta:
-        app_label = 'base'
+        app_label = 'sales'
         db_table = 'base_unitsale'
 
     def __unicode__(self):
@@ -62,7 +67,6 @@ class UnitSale(models.Model):
             to_be_fifod = self.fifo_check()
             if len(to_be_fifod) > 0:
                 accounting.models.fifo_assign(self.id, to_be_fifod)
-
 
 
     def fifo_check(self):
@@ -102,17 +106,6 @@ class UnitSale(models.Model):
         return ','.join(['%s %s' % (i[0], i[1]) for i in items])
 
 
-class SalesTax(models.Model):
-    sale = models.ForeignKey('base.Sale')
-    collector = models.ForeignKey('base.TaxCollector')
-    tax = models.DecimalField(max_digits=11, decimal_places=2)
-
-    class Meta:
-        app_label = 'base'
-        db_table = 'base_salestax'
-
-    def __unicode__(self):
-        return '%s: %s' % (self.sale, self.collector)
 
 
 SPECIAL_SALES = (
@@ -169,7 +162,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         return '%s: %s' % (self.channel.counterparty.id, sale_id)
 
     class Meta:
-        app_label = 'base'
+        app_label = 'sales'
         db_table = 'base_sale'
 
     def save(self, update_gl=True):
@@ -230,7 +223,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     @property
     def id_link(self):
-        return mark_safe('<a href="/admin/base/sale/%s">%s</a>' % (self.id, self.id))
+        return mark_safe('<a href="/admin/sales/sale/%s">%s</a>' % (self.id, self.id))
 
     @property
     def channel_name(self):
@@ -471,3 +464,16 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
         return [tran]
+
+class SalesTax(models.Model):
+    sale = models.ForeignKey(Sale)
+    collector = models.ForeignKey(TaxCollector)
+    tax = models.DecimalField(max_digits=11, decimal_places=2)
+
+    class Meta:
+        app_label = 'sales'
+        db_table = 'base_salestax'
+
+    def __unicode__(self):
+        return '%s: %s' % (self.sale, self.collector)
+

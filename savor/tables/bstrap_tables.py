@@ -21,7 +21,7 @@ def large_expenses(dt):
 
 
 def unit_sales():
-    data_url = "/api/base/unit_sales"
+    data_url = "/api/sales/unit_sales"
     row_defs = [{'data_field': 'sale_link', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'sku', 'value': 'SKU', 'formatter': 'nameFormatter'},
@@ -34,7 +34,7 @@ def unit_sales():
 
 
 def orders_list():
-    data_url = "/api/base/sale/?view=fulfillment"
+    data_url = "/api/sales/sale/?view=fulfillment"
     row_defs = [{'data_field': 'drilldown', 'value': 'Order ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
@@ -123,9 +123,9 @@ def task_audit(task_id):
 
 def fulfill_requested(warehouse=None):
     if warehouse:
-        data_url = "/api/inventory/requested/?warehouse=%s" % warehouse
+        data_url = "/api/fulfill/requested/?warehouse=%s" % warehouse
     else:
-        data_url = "/api/inventory/requested/"
+        data_url = "/api/fulfill/requested/"
 
     row_defs = [
                 {'data_field': 'order:external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
@@ -142,7 +142,7 @@ def fulfill_requested(warehouse=None):
 
 
 def fulfill_confirmed():
-    data_url = "/api/inventory/fulfilled/"
+    data_url = "/api/fulfill/fulfilled/"
     row_defs = [{'data_field': 'id', 'value': 'Request ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
@@ -155,7 +155,7 @@ def fulfill_confirmed():
     return get_bstrap_table(data_url, row_defs)
 
 def unfulfilled():
-    data_url = "/api/inventory/unfulfilled/"
+    data_url = "/api/fulfill/unfulfilled/"
     row_defs = [{'data_field': 'shipping_name', 'value': 'Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'customer_code', 'value': 'Customer', 'formatter': 'nameFormatter'},
                 {'data_field': 'items_string', 'value': 'Items', 'formatter': 'nameFormatter'},

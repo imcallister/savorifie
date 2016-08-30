@@ -36,7 +36,7 @@ def _get_name(o):
 
 
 def _fulfill_list(qstring=None):
-    orders = api_func('inventory', 'unfulfilled')
+    orders = api_func('fulfill', 'unfulfilled')
     columns = ["label", "Date", 'ship to', 'Items', 'Unfulfilled', 'Action']
     for o in orders:
         action_form = post_button(o['id'])
@@ -49,7 +49,7 @@ def _fulfill_list(qstring=None):
 
 
 def _unbatched_fulfill_list(qstring=None):
-    fulfills = api_func('inventory', 'unbatched_fulfillments')
+    fulfills = api_func('fulfill', 'unbatched_fulfillments')
 
     def get_items(f):
         return ','.join(['%d %s' % (l['quantity'], l['inventory_item']) for l in f['fulfill_lines']])
@@ -64,7 +64,7 @@ def _unbatched_fulfill_list(qstring=None):
 
 
 def _backorder_list(qstring=None):
-    back_fulfills = api_func('inventory', 'backordered')
+    back_fulfills = api_func('fulfill', 'backordered')
 
     columns = ["label", "Date", 'ship to', 'Items', 'Unfulfilled', 'Action']
     for f in back_fulfills:
@@ -88,7 +88,7 @@ def management(request):
     start = time.time()
     context = {'shopify_upload_form': FileForm()}
 
-    context['incomplete_orders'] = api_func('base', 'incomplete_sales_count')
+    context['incomplete_orders'] = api_func('sales', 'incomplete_sales_count')
 
     context['tbq_columns'], context['tbq_rows'] = _fulfill_list()
     context['to_be_queued'] = len(context['tbq_rows'])
@@ -99,28 +99,28 @@ def management(request):
     context['unbatched_columns'], context['unbatched_rows'] = _unbatched_fulfill_list()
     context['unbatched_fulfillments'] = len(context['unbatched_rows'])
 
-    context['MICH_unreconciled_count'] = len([x for x in api_func('inventory', 'requested') 
+    context['MICH_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
                                               if x['warehouse'] == 'MICH'])
-    context['NC2_unreconciled_count'] = len([x for x in api_func('inventory', 'requested') 
+    context['NC2_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
                                              if x['warehouse'] == 'NC2'])
-    context['152Frank_unreconciled_count'] = len([x for x in api_func('inventory', 'requested') 
+    context['152Frank_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
                                                   if x['warehouse'] == '152Frank'])
 
-    context['missing_shipping'] = len(api_func('inventory', 'fulfillment',
+    context['missing_shipping'] = len(api_func('fulfill', 'fulfillment',
                                                qstring={'missing_shipping': 'true',
                                                         'status': 'requested'}))
 
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
 
-    batch_requests = sorted(api_func('inventory', 'batchrequest'),
+    batch_requests = sorted(api_func('fulfill', 'batchrequest'),
                             key=lambda x: x['created_date'],
                             reverse=True)
     for batch in batch_requests:
-        link = mark_safe('<a href="/inventory/batch_list/%s/">Download</a>' % batch['id'])
+        link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
 
-    thoroughbred_mismatches = api_func('inventory', 'thoroughbred_mismatch')
+    thoroughbred_mismatches = api_func('reports', 'thoroughbred_mismatch')
     #context['thoroughbred_mismatches'] = len(thoroughbred_mismatches)
     context['MICH_unreconciled'] = get_table('fulfill_requested')(warehouse='MICH')
     context['NC2_unreconciled'] = get_table('fulfill_requested')(warehouse='NC2')

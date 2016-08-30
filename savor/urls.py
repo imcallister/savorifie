@@ -7,8 +7,6 @@ from django.views.decorators.csrf import csrf_exempt
 
 from graphene.contrib.django.views import GraphQLView
 
-from savor.schema import schema
-
 import main_views
 
 admin.autodiscover()
@@ -16,8 +14,6 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
 
-    url(r'^graphql', csrf_exempt(GraphQLView.as_view(schema=schema))),
-    url(r'^graphiql', include('django_graphiql.urls')),
     # main front pages
     
     url(r'^$', main_views.home, name='home'),
@@ -31,8 +27,9 @@ urlpatterns = patterns('',
 
     url(r'', include('audit.urls')),
     url(r'', include('base.urls')),
-    url(r'^reports/', include('reports.urls')),
+    url(r'', include('reports.urls')),
     url(r'', include('inventory.urls')),
+    url(r'', include('fulfill.urls')),
 
     # general accountifie urls
     url (r'', include('accountifie.urls'))

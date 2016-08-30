@@ -9,8 +9,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
-from savor.base.models import Sale, SalesTax, UnitSale, TaxCollector
-from inventory.models import WarehouseFulfill, WarehouseFulfillLine
+from ..models import WarehouseFulfill, WarehouseFulfillLine
 import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
 from accountifie.common.api import api_func

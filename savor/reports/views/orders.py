@@ -18,11 +18,11 @@ def orders(request):
 @login_required
 def order_drilldown(request, order_id):
     # gather info
-    sale_info = api_func('base', 'sale', order_id, qstring={'view': 'fulfillment'})
-    sku_data = api_func('base', 'sale', order_id) 
+    sale_info = api_func('sales', 'sale', order_id, qstring={'view': 'fulfillment'})
+    sku_data = api_func('sales', 'sale', order_id) 
 
     def get_fulfillment(id):
-        return api_func('inventory', 'fulfillment', id, qstring={'view': 'full'})
+        return api_func('fulfill', 'fulfillment', id, qstring={'view': 'full'})
 
     fulfillments = [get_fulfillment(id) for id in sale_info['fulfillment_ids']]
 

@@ -7,10 +7,10 @@ import time
 
 from django.db.models import Prefetch, Count, F
 
-from inventory.models import *
-from inventory.serializers import *
-from base.models import *
-from base.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
+from .models import *
+from .serializers import *
+from sales.models import *
+from sales.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
 
 logger = logging.getLogger('default')
 
@@ -50,8 +50,12 @@ def batched_fulfillments(qstring):
 
 def unbatched_fulfillments(qstring):
     batched_flmts = batched_fulfillments(qstring)
+    missing_shipping = [f['id'] for f in fulfillment({'missing_shipping': 'true',
+                                                      'status': 'requested'})]
+
     qs = Fulfillment.objects \
                     .exclude(id__in=batched_flmts) \
+                    .exclude(id__in=missing_shipping) \
                     .filter(status='requested')
     qs = FulfillmentSerializer.setup_eager_loading(qs)
 

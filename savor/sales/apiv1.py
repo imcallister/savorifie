@@ -9,9 +9,32 @@ from django.conf import settings
 from django.db.models import Prefetch
 
 import products.apiv1 as product_api
-from savor.base.models import Sale, UnitSale, Channel
-from base.serializers import FullSaleSerializer, SimpleSaleSerializer, \
+from .models import Sale, UnitSale, Channel
+from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer
+
+
+@dispatch(str, dict)
+def channel(channel_id, qstring):
+    channel = Channel.objects.get(counterparty_id=channel_id)
+    data = {'id': channel.id, 'counterparty_id': channel.counterparty.id}
+    return data
+
+
+# how to take str or unicode??
+@dispatch(unicode, dict)
+def channel(channel_id, qstring):
+    channel = Channel.objects.get(counterparty_id=channel_id)
+    data = {'id': channel.id, 'counterparty_id': channel.counterparty.id}
+    return data
+
+
+@dispatch(dict)
+def channel(qstring):
+    channels = Channel.objects.all()
+
+    data = [{'id': channel.id, 'counterparty_id': channel.counterparty.id} for channel in channels]
+    return data
 
 
 @dispatch(dict)
