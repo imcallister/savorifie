@@ -24,7 +24,7 @@
                     <div class="col-md-4">
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadShopify">Load Shopify</a></li>
-                            <li><a class="btn btn-primary" href="/admin/base/sale/add?next=/inventory/management/" role="button">Create Manual order</a></li>
+                            <li><a class="btn btn-primary" href="/admin/sales/sale/add?next=/inventory/management/" role="button">Create Manual order</a></li>
                         </ul>
                     </div>
                 
@@ -36,7 +36,7 @@
                                         <h3 class="panel-title">INCOMPLETE ORDERS</h3>
                                     </div>
                                     <div class="panel-body text-center">
-                                        <font size="20"><a href='/admin/base/sale/?customer_code=unknown'>{{incomplete_orders}}</a></font>
+                                        <font size="20"><a href='/admin/sales/sale/?customer_code=unknown'>{{incomplete_orders}}</a></font>
                                     </div>
                                 </div>
                             </div>
@@ -70,9 +70,9 @@
                     <div class="col-md-4">
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-primary" href="/admin/inventory/inventorytransfer/add?next=/inventory/management/" role="button">Create inventory transfer</a></li>
-                            <li><a class="btn btn-primary" href="/inventory/make_batch/MICH/" role="button">Create Michigan batch</a></li>
-                            <li><a class="btn btn-primary" href="/inventory/make_batch/152Frank/" role="button">Create 152 Franklin batch</a></li>
-                            <li><a class="btn btn-primary" href="/inventory/make_batch/NC2/" role="button">Create NC2 ShipEdge batch</a></li>
+                            <li><a class="btn btn-primary" href="/fulfill/make_batch/MICH/" role="button">Create Michigan batch</a></li>
+                            <li><a class="btn btn-primary" href="/fulfill/make_batch/152Frank/" role="button">Create 152 Franklin batch</a></li>
+                            <li><a class="btn btn-primary" href="/fulfill/make_batch/NC2/" role="button">Create NC2 ShipEdge batch</a></li>
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#showBatches">Download Batches</a></li>
                         </ul>
                     </div>
@@ -85,7 +85,7 @@
                                   <h3 class="panel-title">MISSING SHIPPING INFO</h3>
                                 </div>
                                 <div class="panel-body text-center">
-                                    <font size="20"><a href='/admin/inventory/fulfillment/?shipping_missing=incomplete'>{{missing_shipping}}</a></font>
+                                    <font size="20"><a href='/admin/fulfill/fulfillment/?shipping_missing=incomplete'>{{missing_shipping}}</a></font>
                                 </div>
                               </div>
                             </div>
@@ -131,7 +131,7 @@
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadThoroughbred">Load Thoroughbred</a></li>
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadNC2">Load NC2</a></li>
-                            <li><a class="btn btn-primary" href="/inventory/reconcile_warehouse/" role="button">Reconcile warehouse reports</a></li>
+                            <li><a class="btn btn-primary" href="/fulfill/reconcile_warehouse/" role="button">Reconcile warehouse reports</a></li>
 
                         </ul>
                     </div>
@@ -189,7 +189,7 @@
 <div class="modal fade" id="orderQueuing" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-        <form method="POST" action="/inventory/queue_orders/" class="form modal-content" role="form">
+        <form method="POST" action="/fulfill/queue_orders/" class="form modal-content" role="form">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h3 class="modal-title">Orders to be Queued</h4>
@@ -212,7 +212,7 @@
 <div class="modal fade" id="backOrdered" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
-        <form method="POST" action="/inventory/queue_orders/" class="form modal-content" role="form">
+        <form method="POST" action="/fulfill/queue_orders/" class="form modal-content" role="form">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 <h3 class="modal-title">Orders to be Queued</h4>
@@ -318,7 +318,7 @@
       <div class="modal-body">
         <p>Please choose a .csv file</p>
 
-        <form role='form' enctype="multipart/form-data" method="post" action="/inventory/thoroughbred_upload/">{% csrf_token %}
+        <form role='form' enctype="multipart/form-data" method="post" action="/fulfill/thoroughbred_upload/">{% csrf_token %}
             <div class="form-group">    
                 {{shopify_upload_form.as_p}}
             </div>
@@ -341,7 +341,7 @@
       </div>
       <div class="modal-body">
         <p>Please choose a .csv file</p>
-        <form role='form' enctype="multipart/form-data" method="post" action="/inventory/nc2_upload/">{% csrf_token %}
+        <form role='form' enctype="multipart/form-data" method="post" action="/fulfill/nc2_upload/">{% csrf_token %}
             <div class="form-group">    
                 {{shopify_upload_form.as_p}}
             </div>

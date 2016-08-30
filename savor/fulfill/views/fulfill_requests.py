@@ -1,26 +1,21 @@
 import csv
 import flatdict
 from collections import OrderedDict
-import json
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response, redirect
-from django.template import RequestContext
+from django.shortcuts import redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
 
-from accountifie.common.api import api_func
-from accountifie.common.models import Address
-from accountifie.common.table import get_table
-from accountifie.toolkit.forms import FileForm
-
-from inventory.models import *
-import inventory.serializers as slz
+from inventory.models import Warehouse, ChannelShipmentType
+from fulfill.models import BatchRequest, Fulfillment, FulfillLine
+import fulfill.serializers as flfslz
 import inventory.apiv1 as inventory_api
-import base.apiv1 as base_api
-
+import fulfill.apiv1 as fulfill_api
+import products.apiv1 as products_api
+import sales.apiv1 as sales_api
 
 import datetime
 import pytz
@@ -89,12 +84,11 @@ def queue_orders(request):
 
 def create_backorder(order_id):
     # check that it has not been requested already
-    unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
-    unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem'))
-    order = api_func('base', 'sale', order_id)
+    unfulfilled_items = fulfill_api.unfulfilled(str(order_id), {})['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem({}))
+    order = sales_api.sale(order_id, {})
     
-    if unfulfilled is None:
+    if unfulfilled_items is None:
         return 'FULFILL_ALREADY_REQUESTED'
     else:
         # now create a fulfillment request
@@ -146,13 +140,12 @@ def backorder_to_requested(warehouse, fulfill_id):
 
 
 def create_fulfill_request(warehouse, order_id):
-    unfulfilled = api_func('inventory', 'unfulfilled', order_id)['unfulfilled_items']
-    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
-    unfulfilled_items = api_func('inventory', 'unfulfilled', str(order_id))['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem'))
-    order = api_func('base', 'sale', order_id)
+    warehouse_labels = [w['label'] for w in inventory_api.warehouse({})]
+    unfulfilled_items = fulfill_api.unfulfilled(str(order_id), {})['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem())
+    order = sales_api.sale(order_id, {})
 
-    if unfulfilled is None:
+    if unfulfilled_items is None:
         return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
         return 'WAREHOUSE_NOT_RECOGNISED'
@@ -210,26 +203,25 @@ def request_fulfill(request, warehouse, order_id):
 
     if res == 'FULFILL_ALREADY_REQUESTED':
         messages.error(request, 'A fulfillment has already been requested for order %s' % order_label)
-        return redirect('/admin/base/sale/?requested=unrequested')
+        return redirect('/admin/sales/sale/?requested=unrequested')
     elif res == 'WAREHOUSE_NOT_RECOGNISED':
         messages.error(request, 'Warehouse %s not recognised for order %s' % (warehouse, order_label))
-        return redirect('/admin/base/sale/?requested=unrequested')
+        return redirect('/admin/sales/sale/?requested=unrequested')
     elif res == 'FREIGHT_ORDER':
         messages.error(request, 'Order %s is for freight shipping -- ask Ian' % (warehouse, order_label))
-        return redirect('/admin/base/sale/?requested=unrequested')
+        return redirect('/admin/sales/sale/?requested=unrequested')
     elif res == 'FULFILL_REQUESTED':
         messages.success(request, mark_safe('A fulfillment has been created for order %s.' % (order_label)))
-        return redirect('/admin/base/sale/?requested=unrequested')
+        return redirect('/admin/sales/sale/?requested=unrequested')
     else:
         return None
-
 
 
 @login_required
 def batch_list(request, batch_id):
     batch_qs = BatchRequest.objects.get(id=batch_id)
-    batch_info = slz.BatchRequestSerializer(batch_qs).data
-    
+    batch_info = flfslz.BatchRequestSerializer(batch_qs).data
+
     if batch_info['location'] == 'MICH':
         return MICH_pick_list(request, batch_info['fulfillments'],
                               label='MICH_batch_%s' % str(batch_id))
@@ -239,7 +231,7 @@ def batch_list(request, batch_id):
     elif batch_info['location'] == '152Frank':
         return MICH_pick_list(request, batch_info['fulfillments'],
                               label='152Frank_batch_%s' % str(batch_id))
-    
+
 
 NC2_NOTES = {
     'UNCOMMON': 'Must use UG packing slip PDF (attached).  Must use UG shipping label (attached).  Packing slip goes in clear pouch on side of box #1.',
@@ -294,7 +286,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
             fd['ifs_ship_type'] = 'HOLD'
         return fd
 
-    sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem'))
+    sku_names = dict((i['label'], i['description']) for i in products_api.inventoryitem({}))
     master_sku_names = dict(('MST%s' % k, '%s Master' % v) for k, v in sku_names.iteritems())
     sku_names.update(master_sku_names)
 
@@ -340,7 +332,7 @@ def MICH_pick_list(request, data, label='MICH_batch'):
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
     writer = csv.writer(response)
 
-    sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem'))
+    sku_names = dict((i['label'], i['description']) for i in products_api.inventoryitem({}))
     flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
 
     for f in flf_data:
@@ -401,7 +393,7 @@ def make_batch(request, warehouse):
         return redirect('/inventory/management/')
     else:
         # get all unbatched
-        unbatched = api_func('inventory', 'unbatched_fulfillments')
+        unbatched = fulfill_api.unbatched_fulfillments({})
         to_batch = [f for f in unbatched if f['warehouse'] == warehouse]
 
         batch_info = {}

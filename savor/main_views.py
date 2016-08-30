@@ -96,7 +96,7 @@ def daily(request):
     incomplete_rows = []
     incomplete_rows.append(['Expenses', stub_expenses, '/admin/base/expense/?unmatched=UNMATCHED'])
     incomplete_rows.append(['Payments -- 1001', incomplete_cashflows, '/admin/base/cashflow/?unmatched=UNMATCHED'])
-    incomplete_shopify = [['Missing CPs', incomplete_shopify_sales, '/admin/base/sale/?customer_code=unknown']]
+    incomplete_shopify = [['Missing CPs', incomplete_shopify_sales, '/admin/sales/sale/?customer_code=unknown']]
 
     gl_strategy = request.GET.get('gl_strategy', None)
     query_manager = QueryManager(gl_strategy=gl_strategy)

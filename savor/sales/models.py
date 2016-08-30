@@ -223,7 +223,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     @property
     def id_link(self):
-        return mark_safe('<a href="/admin/base/sale/%s">%s</a>' % (self.id, self.id))
+        return mark_safe('<a href="/admin/sales/sale/%s">%s</a>' % (self.id, self.id))
 
     @property
     def channel_name(self):

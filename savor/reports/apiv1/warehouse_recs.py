@@ -1,9 +1,9 @@
 from multipledispatch import dispatch
 
-import base.apiv1 as base_api
-from .fulfill_views import fulfillment, warehousefulfill
+import sales.apiv1 as salesapi
+from fulfill.apiv1 import fulfillment, warehousefulfill
 
-from inventory.models import WarehouseFulfill, Fulfillment
+from fulfill.models import WarehouseFulfill, Fulfillment
 
 
 def rec_zip(z1, z2):
@@ -17,8 +17,8 @@ def rec_zip(z1, z2):
 
 @dispatch(dict)
 def thoroughbred_mismatch(qstring):
-    mismatched_f = fulfillment(qstring={'status': 'mismatched'})
-    warehouse_recds = warehousefulfill()
+    mismatched_f = fulfillment({'status': 'mismatched'})
+    warehouse_recds = warehousefulfill({})
     mismatched = []
     for f in mismatched_f:
         fulfill_id = f['id']
@@ -41,7 +41,7 @@ def thoroughbred_mismatch(qstring):
 
 @dispatch(str, dict)
 def thoroughbred_mismatch(order_id, qstring):
-    order_data = base_api.sale(order_id)
+    order_data = salesapi.sale(order_id)
     # for now assume only ever one fulfill
     wh_fulfill = WarehouseFulfill.objects \
                                  .filter(savor_order_id=order_id) \

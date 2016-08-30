@@ -5,9 +5,8 @@ from django.contrib import messages
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 
-
 from .models import *
-from accountifie.common.api import api_func
+import fulfill.apiv1 as fulfill_api
 
 
 class ShippingMissing(SimpleListFilter):
@@ -19,7 +18,7 @@ class ShippingMissing(SimpleListFilter):
 
     def queryset(self, request, qs):
         if self.value():
-            fulfillment_ids = [x['id'] for x in api_func('inventory', 'fulfillment')
+            fulfillment_ids = [x['id'] for x in fulfill_api.fulfillment()
                                if x['ship_info'] == self.value() and x['status'] == 'requested']
             return qs.filter(id__in=fulfillment_ids)
 

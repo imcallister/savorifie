@@ -1,12 +1,13 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
 
-from accountifie.common.api import api_func
 from fulfill_requests import post_fulfill_update
-from inventory.models import WarehouseFulfill
-from inventory.serializers import WarehouseFulfillSerializer
+from ..models import WarehouseFulfill
+from ..serializers import WarehouseFulfillSerializer
+import fulfill.apiv1 as fulfill_api
+import inventory.apiv1 as inventory_api
+
 
 def rec_zip(z1, z2):
     # deal with the dropped leading zero issue
@@ -37,16 +38,15 @@ def reconcile_warehouse(request):
     4: store info in fulmfillment request and set status
     """
 
-    incomplete = api_func('inventory', 'fulfillment', qstring={'status': 'requested'})
-    incomplete += api_func('inventory', 'fulfillment', qstring={'status': 'partial'})
-    incomplete += api_func('inventory', 'fulfillment', qstring={'status': 'mismatched'})
+    incomplete = fulfill_api.fulfillment({'status': 'requested'})
+    incomplete += fulfill_api.fulfillment({'status': 'partial'})
+    incomplete += fulfill_api.fulfillment({'status': 'mismatched'})
 
     start_incomplete = len(incomplete)
     new_completed = 0
     mismatch_fulfills = 0
 
     for unfld in incomplete:
-        #fulfill_data = api_func('inventory', 'fulfillment', unfld['id'])
         wh_fulfill = whouseflf_from_fulfill(unfld['id'])
 
         if len(wh_fulfill) > 0:
@@ -54,8 +54,7 @@ def reconcile_warehouse(request):
             post_data = {}
             post_data['update_date'] = whouse_record['ship_date']
             post_data['comment'] = 'auto-update from reconcile_warehouse'
-            post_data['shipper_id'] = api_func('inventory', 'shippingtype',
-                                               whouse_record['shipping_type'])['shipper']['id']
+            post_data['shipper_id'] = inventory_api.shippingtype(whouse_record['shipping_type'])['shipper']['id']
             post_data['tracking_number'] = whouse_record['tracking_number']
             post_data['fulfillment_id'] = unfld['id']
 
