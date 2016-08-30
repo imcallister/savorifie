@@ -8,7 +8,7 @@ from django.db.models import Prefetch
 from accountifie.common.api import api_func
 
 from .models import SalesTax, Sale
-import importers
+import importers.shopify
 
 
 def assign_COGS(request):

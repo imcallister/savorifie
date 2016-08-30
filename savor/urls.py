@@ -27,6 +27,7 @@ urlpatterns = patterns('',
 
     url(r'', include('audit.urls')),
     url(r'', include('base.urls')),
+    url(r'', include('sales.urls')),
     url(r'', include('reports.urls')),
     url(r'', include('inventory.urls')),
     url(r'', include('fulfill.urls')),
