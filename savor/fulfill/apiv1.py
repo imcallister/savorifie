@@ -50,8 +50,12 @@ def batched_fulfillments(qstring):
 
 def unbatched_fulfillments(qstring):
     batched_flmts = batched_fulfillments(qstring)
+    missing_shipping = [f['id'] for f in fulfillment({'missing_shipping': 'true',
+                                                      'status': 'requested'})]
+
     qs = Fulfillment.objects \
                     .exclude(id__in=batched_flmts) \
+                    .exclude(id__in=missing_shipping) \
                     .filter(status='requested')
     qs = FulfillmentSerializer.setup_eager_loading(qs)
 

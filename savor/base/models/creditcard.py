@@ -5,7 +5,7 @@ from simple_history.models import HistoricalRecords
 import accountifie.gl.models
 from accountifie.gl.bmo import BusinessModelObject
 from accountifie.toolkit.utils import get_default_company
-from accountifie.common.api import api_func
+import accountifie.environment.apiv1 as env_api
 
 
 class CreditCardTrans(models.Model, BusinessModelObject):
@@ -51,8 +51,10 @@ class CreditCardTrans(models.Model, BusinessModelObject):
 
     def get_gl_transactions(self):
         mcard = accountifie.gl.models.Counterparty.objects.get(id='MCARD')
-        debit = accountifie.gl.models.Account.objects.get(display_name='Mastercard')
-        credit = accountifie.gl.models.Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_PAYABLE'))
+        debit = accountifie.gl.models.Account.objects \
+                                             .get(display_name='Mastercard')
+        credit = accountifie.gl.models.Account.objects \
+                                              .get(id=env_api.variable(GL_ACCOUNTS_PAYABLE, {}))
         cp = self.counterparty
         comment= "MasterCard ending #%s trans #%s: %s" % (self.card_number, self.id, cp)
 

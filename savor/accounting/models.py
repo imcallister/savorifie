@@ -2,13 +2,13 @@ import logging
 
 from django.db import models
 
-from accountifie.common.api import api_func
+import inventory.apiv1 as inventory_api
 
 logger = logging.getLogger('default')
 
 
 def fifo_assign(unit_sale_id, to_assign):
-    ship_lines = api_func('inventory', 'shipmentline')
+    ship_lines = inventory_api.shipmentline({})
     avail_slines = {}
     for l in ship_lines:
         if l['inventory_item_label'] not in avail_slines:

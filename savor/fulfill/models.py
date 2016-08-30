@@ -95,7 +95,7 @@ class FulfillLine(models.Model):
 
 class WarehouseFulfill(models.Model):
     fulfillment = models.ForeignKey(Fulfillment, blank=True, null=True)
-    savor_order = models.ForeignKey('sales.sale', blank=True, null=True)
+    savor_order = models.ForeignKey('sales.Sale', blank=True, null=True)
     savor_transfer = models.ForeignKey('inventory.InventoryTransfer', blank=True, null=True)
     warehouse = models.ForeignKey('inventory.Warehouse')
     warehouse_pack_id = models.CharField(max_length=100, blank=True, null=True)

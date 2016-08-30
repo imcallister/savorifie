@@ -13,9 +13,7 @@ from simple_history.admin import SimpleHistoryAdmin
 from .models import *
 import accountifie.gl.widgets
 from accountifie.gl.bmo import on_bmo_save
-from accountifie.common.api import api_func
-from inventory.models import Warehouse
-import inventory.views
+import accountifie.environment.apiv1 as env_api
 
 
 class UnmatchedCashflows(SimpleListFilter):
@@ -40,7 +38,7 @@ class UnmatchedExpense(SimpleListFilter):
             return (('MATCHED','MATCHED'),('UNMATCHED','UNMATCHED'))
 
     def queryset(self, request, qs):
-        unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
+        unalloc_account = env_api.variable('UNALLOCATED_ACCT', {})
         if self.value() == 'UNMATCHED':
             return qs.filter(account_id=unalloc_account)
         if self.value() == 'MATCHED':
