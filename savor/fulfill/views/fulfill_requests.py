@@ -10,7 +10,7 @@ from django.utils.safestring import mark_safe
 
 
 from inventory.models import Warehouse, ChannelShipmentType
-from fulfill.models import BatchRequest, Fulfillment, FulfillLine
+from fulfill.models import BatchRequest, Fulfillment, FulfillLine, FulfillUpdate
 import fulfill.serializers as flfslz
 import inventory.apiv1 as inventory_api
 import fulfill.apiv1 as fulfill_api

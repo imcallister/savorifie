@@ -54,7 +54,7 @@ def reconcile_warehouse(request):
             post_data = {}
             post_data['update_date'] = whouse_record['ship_date']
             post_data['comment'] = 'auto-update from reconcile_warehouse'
-            post_data['shipper_id'] = inventory_api.shippingtype(whouse_record['shipping_type'])['shipper']['id']
+            post_data['shipper_id'] = inventory_api.shippingtype(str(whouse_record['shipping_type']), {})['shipper']['id']
             post_data['tracking_number'] = whouse_record['tracking_number']
             post_data['fulfillment_id'] = unfld['id']
 
