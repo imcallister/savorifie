@@ -15,18 +15,11 @@
 <div class="container-fluid">
 
 <!-- Nav tabs -->
-<ul class="nav nav-tabs" role="tablist">
-    <li role="presentation" class="active"><a href="#sales" aria-controls="sales" role="tab" data-toggle="tab">Sales Stats</a></li>
-    <li role="presentation"><a href="#orders" aria-controls="orders" role="tab" data-toggle="tab">Orders Details</a></li>
-    <li role="presentation"><a href="#expenses" aria-controls="expenses" role="tab" data-toggle="tab">Expenses</a></li>
-</ul>
 <span class="glyphicon glyphicon-info-sign" 
         data-toggle="tooltip" 
         title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
         data-placement="right" aria-hidden="true">
 </span>
-<div class="tab-content">
-<div role="tabpanel" class="tab-pane fade in active" id="sales">
     <div class="row">
         <div class="col-md-6">
             <div class="panel panel-default">
@@ -111,88 +104,6 @@
     </div>
 </div>
 
-<div role="tabpanel" class="tab-pane fade container-fluid" id="orders">
-    {{orders_content}}
-</div>
-
-<div role="tabpanel" class="tab-pane fade container-fluid" id="expenses">
-    <div class="row">
-        <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="panel-title">Expenses Breakdown
-                        <span class="glyphicon glyphicon-info-sign" 
-                            data-toggle="tooltip" 
-                            title="Testing it right here. And keep going to see how it looks. Yeah not bad. check it out." 
-                            data-placement="right" aria-hidden="true">
-                        </span>
-                    </div>
-                </div>
-                <div class="panel-body">
-                    <ul>
-                        <li><a href="/api/base/expense_by_month">By Month</a></li>
-                    </ul>
-
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="panel panel-success">
-                <div class="panel-heading">
-                    <div class="panel-title">Downloads</div>
-                </div>
-
-                <div class="panel-body">
-
-                    <ul>
-                        <li><a href="/download_allsales">All sales</a></li>
-                        <p>Sales Tax Reports (not working yet)
-                        <a href="/download_salestax">2013</a>,
-                    </p>
-                    </ul>
-
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-      <div class="col-sm-6">
-          <div class="panel panel-default">
-            <div class="panel-body">
-                <div id="by_month" class="panel-body" style="width:100%;height:400px"></div>
-            </div>
-          </div>
-      </div><!-- /.col-sm-8 -->
-
-      <div class="col-sm-6">
-          <div class="panel panel-default">
-            <div class="panel-body">
-                <div id="by_counterparty" class="panel-body" style="width:100%;height:400px"></div>
-            </div>
-          </div>
-      </div><!-- /.col-sm-8 -->      
-    </div><!-- row -->
-
-    <div class="row">
-      <div class="col-sm-6">
-          <div class="panel panel-default">
-            <div class="panel-body">
-                <div id="by_channel" class="panel-body" style="width:100%;height:400px"></div>
-            </div>
-          </div>
-      </div><!-- /.col-sm-8 -->
-      <div class="col-sm-6">
-          <div class="panel panel-default">
-            <div class="panel-body">
-                <div id="trace_traded_orders" class="panel-body" style="width:100%;height:400px"></div>
-            </div>
-          </div>
-      </div><!-- /.col-sm-8 -->
-    </div>
-</div>
-</div>
-</div>
 {% endblock %}
 
 

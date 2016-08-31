@@ -10,10 +10,8 @@ from accountifie.gl.models import ExternalAccount
 from base.models import Expense, Cashflow, CreditCardTrans
 
 
-
-
 @login_required
-def management(request):
+def bookkeeping(request):
     company_id = get_company(request)
     from_date, to_date = extractDateRange(request)
 
@@ -32,7 +30,7 @@ def management(request):
     query_manager = QueryManager(gl_strategy=gl_strategy)
     ap_table = query_manager.balance_by_cparty(company_id, ['3000'])
     ar_table = query_manager.balance_by_cparty(company_id, ['1100'])
-    
+
     ap_rows = []
     for i in ap_table.index:
         if abs(ap_table.loc[i]) > 1:
@@ -48,4 +46,4 @@ def management(request):
     context['ap_rows'] = ap_rows
     context['ar_rows'] = ar_rows
 
-    return render_to_response('base/management.html', context, context_instance = RequestContext(request))
+    return render_to_response('reports/bookkeeping.html', context, context_instance = RequestContext(request))

@@ -9,10 +9,10 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
-from ..models import WarehouseFulfill, WarehouseFulfillLine
+from ..models import WarehouseFulfill
 import accountifie.toolkit
 from accountifie.toolkit.forms import FileForm
-from accountifie.common.api import api_func
+import inventory.apiv1 as inventory_api
 
 import logging
 logger = logging.getLogger('default')
@@ -28,7 +28,6 @@ def order_upload(request):
 
     if form.is_valid():
         upload = request.FILES.values()[0]
-        file_name = upload._name
         file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
         dupes, new_packs, missing_ship_codes = process_nc2(file_name_with_timestamp)
         messages.success(request, 'Loaded NC2 file: %d new records and %d duplicate records' % (new_packs, dupes))
@@ -64,7 +63,7 @@ def process_nc2(file_name):
     records = []
     for k, v in warehouse_records.groupby('OrderNum'):
         pack_info = {}
-        pack_info['warehouse_id'] = api_func('inventory', 'warehouse', 'NC2')['id']
+        pack_info['warehouse_id'] = inventory_api.warehouse('NC2', {})['id']
 
         # have our orders be of form 'SAL.xxxx' or 'TRF.xxxx'
         # for most packs we are using first row
@@ -96,7 +95,7 @@ def process_nc2(file_name):
             if ship_code not in SHIP_MAP:
                 missing_ship_codes += 1
             else:
-                pack_info['shipping_type_id'] = api_func('inventory', 'shippingtype', SHIP_MAP[ship_code])['id']
+                pack_info['shipping_type_id'] = inventory_api.shippingtype(SHIP_MAP[ship_code], {})['id']
 
             pack_obj = WarehouseFulfill.objects.filter(warehouse_pack_id=pack_info['warehouse_pack_id']).first()
             if pack_obj:

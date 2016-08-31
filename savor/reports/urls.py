@@ -7,9 +7,11 @@ urlpatterns = patterns('',
     url(r'^expense_trends/', 'reports.charts.expense_trends', name='expense_trends'),
 
     url(r'^order/drilldown/(?P<order_id>[_a-zA-Z0-9]+)/$', views.order_drilldown),
-    url(r'^orders_list$', views.orders),
+    url(r'^orders_list/$', views.orders),
+    url(r'^sales-analysis/$', views.sales_analysis, name='sales_analysis'),
+
     url(r'^inventory/management/$', views.management),
     url(r'^inventory/$', views.inventory_counts),
-    
+    url(r'^bookkeeping/', views.bookkeeping, name='bookkeeping'),
 
 )

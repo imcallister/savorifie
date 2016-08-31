@@ -18,10 +18,8 @@ urlpatterns = patterns('',
     
     url(r'^$', main_views.home, name='home'),
     url(r'^maintenance/', main_views.maintenance, name='maintenance'),
-    url(r'^daily/', main_views.daily, name='daily'),
     url(r'^reports/$', main_views.reports, name='reports'),
-    url(r'^analysis/$', main_views.analysis, name='analysis'),
-
+    
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')) ,
     url(r'^admin/', include(admin.site.urls)),
 
