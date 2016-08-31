@@ -54,7 +54,7 @@ class CreditCardTrans(models.Model, BusinessModelObject):
         debit = accountifie.gl.models.Account.objects \
                                              .get(display_name='Mastercard')
         credit = accountifie.gl.models.Account.objects \
-                                              .get(id=env_api.variable(GL_ACCOUNTS_PAYABLE, {}))
+                                              .get(id=env_api.variable('GL_ACCOUNTS_PAYABLE', {}))
         cp = self.counterparty
         comment= "MasterCard ending #%s trans #%s: %s" % (self.card_number, self.id, cp)
 
