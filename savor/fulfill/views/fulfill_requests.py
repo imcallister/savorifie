@@ -48,7 +48,7 @@ def queue_orders(request):
     if request.method == 'POST':
         for k,v in request.POST.iteritems():
             if k[:8] == 'q_choice' and v != '----':
-                if v == 'Back Order':
+                if v == 'Future Order':
                     rslt = create_backorder(k[9:])
                     if rslt == 'FULFILL_BACKORDERED':
                         new_back_orders += 1
@@ -61,7 +61,7 @@ def queue_orders(request):
                         new_requests[wh] += 1
                     else:
                         bad_requests.append(k[9:])
-                elif v[:19] == 'Queue backorder for':
+                elif v[:19] == 'Queue future order for':
                     wh = v[20:]
                     rslt = backorder_to_requested(wh, k[9:])
                     if rslt == 'BACKORDER_REQUESTED':
@@ -69,11 +69,11 @@ def queue_orders(request):
                     else:
                         bad_requests.append(k[9:])
 
-        msg = '%d new back orders.' % new_back_orders
+        msg = '%d new future orders.' % new_back_orders
         for wh in warehouses:
             msg += ' %d new %s fulfillments.' % (new_requests[wh], wh)
         for wh in warehouses:
-            msg += ' %d backorders to %s.' % (back_to_queue[wh], wh)
+            msg += ' %d future orders to %s.' % (back_to_queue[wh], wh)
         msg += ' %d Bad requests' % len(bad_requests)
         messages.info(request, msg)
         

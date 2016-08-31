@@ -143,7 +143,7 @@ class SaleAdmin(SimpleHistoryAdmin):
             else:
                 unknown_errors += 1
 
-        messages.success(request, "Successfully created %d back orders." % (new_backorders))
+        messages.success(request, "Successfully created %d future orders." % (new_backorders))
         messages.info(request, "%d dupes were skipped." % dupe_fulfills)
         messages.error(request, "%d unknown errors." % unknown_errors)
 

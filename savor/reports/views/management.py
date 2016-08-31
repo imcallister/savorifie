@@ -16,10 +16,10 @@ def post_button(order_id, back=False):
               <option>----</option>' % order_id
     if back:
         for wh in ['MICH', '152Frank', 'NC2']:
-            html += '<option>Queue backorder for %s</option>' % wh
+            html += '<option>Queue future order for %s</option>' % wh
 
     if not back:
-        html += '<option>Back Order</option>'
+        html += '<option>Future Order</option>'
         for wh in ['MICH', '152Frank', 'NC2']:
             html += '<option>Queue for %s</option>' % wh
 
