@@ -14,9 +14,7 @@ from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
-import inventory.views
-
-
+import fulfill.views
 
 
 class ChannelAdmin(admin.ModelAdmin):
@@ -137,7 +135,7 @@ class SaleAdmin(SimpleHistoryAdmin):
         unknown_errors = 0
 
         for order in queryset:
-            res = inventory.views.create_backorder(order.id)
+            res = fulfill.views.create_backorder(order.id)
             if res == 'FULFILL_BACKORDERED':
                 new_backorders += 1
             elif res == 'FULFILL_ALREADY_REQUESTED':
@@ -165,7 +163,7 @@ class SaleAdmin(SimpleHistoryAdmin):
                 unknown_errors = 0
 
                 for order in queryset:
-                    res = inventory.views.create_fulfill_request(warehouse.label, order.id)
+                    res = fulfill.views.create_fulfill_request(warehouse.label, order.id)
                     if res == 'FULFILL_REQUESTED':
                         new_fulfills += 1
                     elif res == 'FULFILL_ALREADY_REQUESTED':
