@@ -10,9 +10,11 @@ import tables.bstrap_tables
 
 # HTTP Error 500
 def custom_500(request):
+    type, value, tb = sys.exc_info(),
+
     response = render_to_response(
         '500.html',
-        context_instance=RequestContext(request)
+        context_instance=RequestContext(request, {'message': value})
     )
     
     response.status_code = 200
