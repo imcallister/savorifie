@@ -1,11 +1,9 @@
+import sys
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 
 from accountifie.toolkit.utils import extractDateRange, get_company
-
-
-import tables.bstrap_tables
 
 
 # HTTP Error 500
