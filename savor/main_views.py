@@ -12,7 +12,7 @@ def custom_500(request):
 
     response = render_to_response(
         '500.html',
-        context_instance=RequestContext(request, {'message': value})
+        RequestContext(request, {'message': value})
     )
     
     response.status_code = 200
