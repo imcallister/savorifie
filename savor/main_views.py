@@ -7,12 +7,18 @@ from accountifie.toolkit.utils import extractDateRange, get_company
 
 import tables.bstrap_tables
 
+
+# HTTP Error 500
 def custom_500(request):
-    t = loader.get_template('500.html')
-    type, value, tb = sys.exc_info(),
-    return HttpResponseServerError(t.render(Context({
-                                     'message': value,
-                                    })))
+    response = render_to_response(
+        '500.html',
+        context_instance=RequestContext(request)
+    )
+    
+    response.status_code = 200
+    
+    return response
+
 
 @login_required
 def maintenance(request):

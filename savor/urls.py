@@ -5,6 +5,8 @@ from django.views.generic.base import RedirectView, TemplateView
 from django.core.urlresolvers import reverse_lazy
 from django.views.decorators.csrf import csrf_exempt
 
+from django.conf.urls import handler500
+
 from graphene.contrib.django.views import GraphQLView
 
 import main_views
