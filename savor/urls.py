@@ -11,6 +11,7 @@ import main_views
 
 admin.autodiscover()
 
+handler500 = 'main_views.custom_500'
 
 urlpatterns = patterns('',
 
