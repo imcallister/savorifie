@@ -199,10 +199,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
     'djangosecure',
-    #'cerberos',
     'accountifie.dashboard',
 
     'django_nose',
@@ -212,7 +209,10 @@ INSTALLED_APPS = (
     'betterforms',
     'base',
     'products',
+    'sales',
     'inventory',
+    'fulfill',
+    'reports',
     'accounting',
     'testsuite',
 

@@ -2,13 +2,13 @@ import logging
 
 from django.db import models
 
-from accountifie.common.api import api_func
+import inventory.apiv1 as inventory_api
 
 logger = logging.getLogger('default')
 
 
 def fifo_assign(unit_sale_id, to_assign):
-    ship_lines = api_func('inventory', 'shipmentline')
+    ship_lines = inventory_api.shipmentline({})
     avail_slines = {}
     for l in ship_lines:
         if l['inventory_item_label'] not in avail_slines:
@@ -31,7 +31,7 @@ def total_COGS(u_sale, inv_item_label):
 
 class COGSAssignment(models.Model):
     shipment_line = models.ForeignKey('inventory.ShipmentLine')
-    unit_sale = models.ForeignKey('base.UnitSale', blank=True)
+    unit_sale = models.ForeignKey('sales.UnitSale', blank=True)
     quantity = models.PositiveIntegerField()
 
     def __unicode__(self):
