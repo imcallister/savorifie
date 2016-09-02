@@ -113,7 +113,7 @@ def management(request):
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
 
     batch_requests = sorted(api_func('fulfill', 'batchrequest'),
-                            key=lambda x: x['created_date'],
+                            key=lambda x: int(x['id']),
                             reverse=True)
     for batch in batch_requests:
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])

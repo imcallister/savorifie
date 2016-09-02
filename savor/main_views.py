@@ -1,4 +1,5 @@
 import sys
+import traceback
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
@@ -8,11 +9,12 @@ from accountifie.toolkit.utils import extractDateRange, get_company
 
 # HTTP Error 500
 def custom_500(request):
-    type, value, tb = sys.exc_info(),
+    type, value, tb = sys.exc_info()
 
+    msg = '%s. %s' % (value, traceback.format_tb(tb))
     response = render_to_response(
         '500.html',
-        RequestContext(request, {'message': value})
+        RequestContext(request, {'message': msg})
     )
     
     response.status_code = 200

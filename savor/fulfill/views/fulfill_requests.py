@@ -296,19 +296,19 @@ def NC2_pick_list(request, data, label='MICH_batch'):
         f['id'] = 'FLF%s' % f
 
     headers = OrderedDict([('SAVOR ID', 'id'),
-                            ('Ship Type', 'ifs_ship_type'),
-                            ('Name', 'order:shipping_name'),
-                            ('Shipping Company', 'order:shipping_company'),
-                            ('Customer Reference', 'order:external_routing_id'),
-                            ('Shipping Address1', 'order:shipping_address1'),
-                            ('Shipping Address2', 'order:shipping_address2'),
-                            ('Shipping City', 'order:shipping_city'),
-                            ('Shipping Zip', 'order:shipping_zip'),
-                            ('Shipping Province', 'order:shipping_province'),
-                            ('Shipping Country', 'order:shipping_country'),
-                            ('Shipping Phone', 'order:shipping_phone'),
-                            ('Email', 'order:notification_email'),
-                            ('Gift Message', 'order:gift_message'),
+                           ('Customer Reference', 'order:external_routing_id'),
+                           ('Ship Type', 'ifs_ship_type'),
+                           ('Gift Message', 'order:gift_message'),
+                           ('Email', 'order:notification_email'),
+                           ('Shipping Phone', 'order:shipping_phone'),
+                           ('Name', 'order:shipping_name'),
+                           ('Shipping Company', 'order:shipping_company'),
+                           ('Shipping Address1', 'order:shipping_address1'),
+                           ('Shipping Address2', 'order:shipping_address2'),
+                           ('Shipping City', 'order:shipping_city'),
+                           ('Shipping Province', 'order:shipping_province'),
+                           ('Shipping Zip', 'order:shipping_zip'),
+                           ('Shipping Country', 'order:shipping_country'),
                            ])
 
     header_row = headers.keys()
