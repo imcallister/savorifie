@@ -293,7 +293,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
     flf_data = [{'skus': d['fulfill_lines'], 'ship': get_ship_data(d)} for d in data]
 
     for f in flf_data:
-        f['id'] = 'FLF%s' % f
+        f['ship']['id'] = 'FLF%s' % f['ship']['id']
 
     headers = OrderedDict([('SAVOR ID', 'id'),
                            ('Customer Reference', 'order:external_routing_id'),
