@@ -1,5 +1,5 @@
 from multipledispatch import dispatch
-from django.db.models import Sum, Prefetch
+from django.db.models import Sum, Prefetch, F
 
 from .model_views import warehouse
 from inventory.models import ShipmentLine, Shipment, InventoryTransfer
@@ -12,6 +12,15 @@ def inventorycount(qstring):
                              .values('inventory_item__label') \
                              .annotate(sku_count=Sum('quantity'))
     return dict((l['inventory_item__label'], l['sku_count']) for l in sku_counts)
+
+def shipmentline(qstring):
+    shpmts = ShipmentLine.objects \
+                         .annotate(inventory_item_label=F('inventory_item__label')) \
+                         .annotate(shipment_label=F('shipment__label')) \
+                         .all() \
+                         .values()
+
+    return shpmts
 
 
 def locationinventory(qstring):
