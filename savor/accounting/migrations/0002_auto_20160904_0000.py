@@ -10,10 +10,14 @@ class Migration(migrations.Migration):
         ('accounting', '0001_initial'),
     ]
 
-    operations = [
+    state_operations = [
         migrations.AlterField(
             model_name='cogsassignment',
             name='unit_sale',
             field=models.ForeignKey(to='sales.UnitSale', blank=True),
         ),
     ]
+
+    operations = [
+        migrations.SeparateDatabaseAndState(
+            state_operations=state_operations) ]
