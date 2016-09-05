@@ -10,7 +10,6 @@ PACKING_TYPES = (
 
 class ChannelShipmentType(models.Model):
     label = models.CharField(max_length=30)
-    channel = models.ForeignKey('sales.Channel')
     ship_type = models.ForeignKey('inventory.ShippingType')
     bill_to = models.CharField(max_length=100)
     use_pdf = models.BooleanField(default=False)
