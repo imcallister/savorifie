@@ -13,14 +13,14 @@ def inventorycount(qstring):
                              .annotate(sku_count=Sum('quantity'))
     return dict((l['inventory_item__label'], l['sku_count']) for l in sku_counts)
 
+
 def shipmentline(qstring):
     shpmts = ShipmentLine.objects \
                          .annotate(inventory_item_label=F('inventory_item__label')) \
                          .annotate(shipment_label=F('shipment__label')) \
                          .all() \
                          .values()
-
-    return shpmts
+    return list(shpmts)
 
 
 def locationinventory(qstring):
