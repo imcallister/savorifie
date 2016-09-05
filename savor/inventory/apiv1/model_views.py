@@ -19,15 +19,15 @@ def warehouse(label, qstring):
 
 
 @dispatch(dict)
-def channelshipmenttype(qstring):
-    qs = ChannelShipmentType.objects.all()
-    return ChannelShipmentTypeSerializer(qs, many=True).data
+def shipoption(qstring):
+    qs = ShipOption.objects.all()
+    return ShipOptionSerializer(qs, many=True).data
 
 
 @dispatch(str, dict)
-def channelshipmenttype(label, qstring):
-    qs = ChannelShipmentType.objects.filter(label=label).first()
-    return ChannelShipmentTypeSerializer(qs).data
+def shipoption(label, qstring):
+    qs = ShipOption.objects.filter(label=label).first()
+    return ShipOptionSerializer(qs).data
 
 
 @dispatch(dict)

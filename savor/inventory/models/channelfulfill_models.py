@@ -8,7 +8,7 @@ PACKING_TYPES = (
 )
 
 
-class ChannelShipmentType(models.Model):
+class ShipOption(models.Model):
     label = models.CharField(max_length=30)
     ship_type = models.ForeignKey('inventory.ShippingType')
     bill_to = models.CharField(max_length=100)

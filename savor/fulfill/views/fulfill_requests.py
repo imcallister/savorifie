@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.utils.safestring import mark_safe
 
 
-from inventory.models import Warehouse, ChannelShipmentType
+from inventory.models import Warehouse
 from fulfill.models import BatchRequest, Fulfillment, FulfillLine, FulfillUpdate
 import fulfill.serializers as flfslz
 import inventory.apiv1 as inventory_api
@@ -93,21 +93,10 @@ def create_backorder(order_id):
     else:
         # now create a fulfillment request
         today = get_today()
-        ch_ship_type = ChannelShipmentType.objects \
-                                          .filter(label=order['ship_type']) \
-                                          .first()
 
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['order_id'] = str(order_id)
-
-        if ch_ship_type:
-            fulfill_info['bill_to'] = ch_ship_type.bill_to
-            fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
-            fulfill_info['use_pdf'] = ch_ship_type.use_pdf
-            fulfill_info['packing_type'] = ch_ship_type.packing_type
-            fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
-
         fulfill_info['status'] = 'back-ordered'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
@@ -156,25 +145,10 @@ def create_fulfill_request(warehouse, order_id):
         today = get_today()
         warehouse = Warehouse.objects.get(label=warehouse)
 
-        ch_ship_type = ChannelShipmentType.objects \
-                                          .filter(label=order['ship_type']) \
-                                          .first()
-
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
-
-        if ch_ship_type:
-            fulfill_info['bill_to'] = ch_ship_type.bill_to
-            if ch_ship_type.ship_type:
-                fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
-
-            fulfill_info['use_pdf'] = ch_ship_type.use_pdf
-            fulfill_info['packing_type'] = ch_ship_type.packing_type
-            if ch_ship_type.ship_from:
-                fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
-
         fulfill_info['status'] = 'requested'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()

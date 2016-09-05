@@ -83,8 +83,6 @@ def process_shopify(file_name):
     # any pre-formatting of data here
     sales['Shipping Zip'] = sales['Shipping Zip'].map(lambda x: str(x).replace("'",""))
 
-    channel_ship_standard = api_func('inventory', 'channelshipmenttype', 'SAVOR_STANDARD')['id']
-
     new_sales_ctr = 0
     exist_sales_ctr = 0
     unknown_cp_ctr = 0
@@ -111,10 +109,6 @@ def process_shopify(file_name):
         sale_info['company_id'] = 'SAV'
         sale_info['external_channel_id'] = str(v.iloc[0]['Name'])
         sale_info['shipping_charge'] = Decimal(str(v.iloc[0]['Shipping']))
-
-        if v.iloc[0]['Shipping Method'].lower() == 'standard shipping':
-            sale_info['ship_type_id'] = channel_ship_standard
-
         sale_info['discount_code'] = str(v.iloc[0]['Discount Code'])
         if sale_info['discount_code']=='':
             sale_info['discount_code'] = None

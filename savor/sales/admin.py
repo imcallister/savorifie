@@ -95,7 +95,7 @@ class SaleAdmin(SimpleHistoryAdmin):
                                          ('shipping_company', 'external_routing_id',),
                                          ('shipping_address1'), ('shipping_address2'),
                                          ('shipping_city', 'shipping_country'), ('shipping_province', 'shipping_zip'),
-                                         ('shipping_phone', 'notification_email',), ('ship_type',)),
+                                         ('shipping_phone', 'notification_email',), ),
                               'classes': ('collapse',)})
     )
 
