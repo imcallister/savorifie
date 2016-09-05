@@ -71,7 +71,7 @@ class FulfillRequested(SimpleListFilter):
 
 class SaleAdmin(SimpleHistoryAdmin):
     list_display=('external_channel_id', 'sale_date', 'channel',
-                  'customer_code', 'shipping_name', 'ship_type', 'special_sale')
+                  'customer_code', 'shipping_name', 'special_sale')
     list_filter = ('channel', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
@@ -95,7 +95,7 @@ class SaleAdmin(SimpleHistoryAdmin):
                                          ('shipping_company', 'external_routing_id',),
                                          ('shipping_address1'), ('shipping_address2'),
                                          ('shipping_city', 'shipping_country'), ('shipping_province', 'shipping_zip'),
-                                         ('shipping_phone', 'notification_email',), ('ship_type',)),
+                                         ('shipping_phone', 'notification_email',), ),
                               'classes': ('collapse',)})
     )
 

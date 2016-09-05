@@ -23,17 +23,16 @@ class ShippingTypeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('id', 'label', 'description', 'shipper')
 
 
-class ChannelShipmentTypeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+class ShipOptionSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['channel', 'ship_from', 'ship_type']
 
     ship_type = serializers.StringRelatedField()
     ship_from = serializers.StringRelatedField()
-    channel = serializers.StringRelatedField()
-
+    
     class Meta:
-        model = models.ChannelShipmentType
+        model = models.ShipOption
         fields = ('id', 'label', 'ship_type', 'bill_to', 'use_pdf',
-                  'packing_type', 'ship_from', 'channel')
+                  'packing_type', 'ship_from')
 
 
 class WarehouseSerializer(serializers.ModelSerializer):

@@ -9,7 +9,8 @@ from django.contrib import messages
 from django.utils.safestring import mark_safe
 
 
-from inventory.models import Warehouse, ChannelShipmentType
+from accountifie.common.models import Address
+from inventory.models import Warehouse, ShippingType
 from fulfill.models import BatchRequest, Fulfillment, FulfillLine, FulfillUpdate
 import fulfill.serializers as flfslz
 import inventory.apiv1 as inventory_api
@@ -82,6 +83,42 @@ def queue_orders(request):
         raise ValueError("This resource requires a POST request")
 
 
+@login_required
+def shipping(request):
+    ship_options = dict((o['label'], o) for o in inventory_api.shipoption({}))
+    new_ship_choices = 0
+
+    bad_requests = []
+
+    if request.method == 'POST':
+        for k, v in request.POST.iteritems():
+            if k[:8] == 'q_choice' and v != '----':
+                if v not in ship_options:
+                    bad_requests.append(k)
+                else:
+                    flmnt = Fulfillment.objects.get(id=k.split('_')[-1])
+
+                    flmnt.packing_type = ship_options[v]['packing_type']
+                    flmnt.use_pdf = ship_options[v]['use_pdf']
+                    flmnt.bill_to = ship_options[v]['bill_to']
+                    flmnt.ship_from = Address.objects \
+                                             .filter(label=ship_options[v]['ship_from']) \
+                                             .first()
+
+                    flmnt.ship_type = ShippingType.objects \
+                                                  .filter(label=ship_options[v]['ship_type']) \
+                                                  .first()
+
+                    flmnt.save()
+                    new_ship_choices += 1
+
+        msg = '%d new ship choices.' % new_ship_choices
+        msg += ' %d Bad requests' % len(bad_requests)
+        messages.info(request, msg)
+        return HttpResponseRedirect("/inventory/management")
+    else:
+        raise ValueError("This resource requires a POST request")
+
 def create_backorder(order_id):
     # check that it has not been requested already
     unfulfilled_items = fulfill_api.unfulfilled(str(order_id), {})['unfulfilled_items']
@@ -93,21 +130,10 @@ def create_backorder(order_id):
     else:
         # now create a fulfillment request
         today = get_today()
-        ch_ship_type = ChannelShipmentType.objects \
-                                          .filter(label=order['ship_type']) \
-                                          .first()
 
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['order_id'] = str(order_id)
-
-        if ch_ship_type:
-            fulfill_info['bill_to'] = ch_ship_type.bill_to
-            fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
-            fulfill_info['use_pdf'] = ch_ship_type.use_pdf
-            fulfill_info['packing_type'] = ch_ship_type.packing_type
-            fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
-
         fulfill_info['status'] = 'back-ordered'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
@@ -156,25 +182,10 @@ def create_fulfill_request(warehouse, order_id):
         today = get_today()
         warehouse = Warehouse.objects.get(label=warehouse)
 
-        ch_ship_type = ChannelShipmentType.objects \
-                                          .filter(label=order['ship_type']) \
-                                          .first()
-
         fulfill_info = {}
         fulfill_info['request_date'] = today
         fulfill_info['warehouse_id'] = warehouse.id
         fulfill_info['order_id'] = str(order_id)
-
-        if ch_ship_type:
-            fulfill_info['bill_to'] = ch_ship_type.bill_to
-            if ch_ship_type.ship_type:
-                fulfill_info['ship_type_id'] = ch_ship_type.ship_type.id
-
-            fulfill_info['use_pdf'] = ch_ship_type.use_pdf
-            fulfill_info['packing_type'] = ch_ship_type.packing_type
-            if ch_ship_type.ship_from:
-                fulfill_info['ship_from_id'] = ch_ship_type.ship_from.id
-
         fulfill_info['status'] = 'requested'
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
