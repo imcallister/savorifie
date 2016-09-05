@@ -9,7 +9,8 @@ from django.contrib import messages
 from django.utils.safestring import mark_safe
 
 
-from inventory.models import Warehouse
+from accountifie.common.models import Address
+from inventory.models import Warehouse, ShippingType
 from fulfill.models import BatchRequest, Fulfillment, FulfillLine, FulfillUpdate
 import fulfill.serializers as flfslz
 import inventory.apiv1 as inventory_api
@@ -81,6 +82,42 @@ def queue_orders(request):
     else:
         raise ValueError("This resource requires a POST request")
 
+
+@login_required
+def shipping(request):
+    ship_options = dict((o['label'], o) for o in inventory_api.shipoption({}))
+    new_ship_choices = 0
+
+    bad_requests = []
+
+    if request.method == 'POST':
+        for k, v in request.POST.iteritems():
+            if k[:8] == 'q_choice' and v != '----':
+                if v not in ship_options:
+                    bad_requests.append(k)
+                else:
+                    flmnt = Fulfillment.objects.get(id=k.split('_')[-1])
+
+                    flmnt.packing_type = ship_options[v]['packing_type']
+                    flmnt.use_pdf = ship_options[v]['use_pdf']
+                    flmnt.bill_to = ship_options[v]['bill_to']
+                    flmnt.ship_from = Address.objects \
+                                             .filter(label=ship_options[v]['ship_from']) \
+                                             .first()
+
+                    flmnt.ship_type = ShippingType.objects \
+                                                  .filter(label=ship_options[v]['ship_type']) \
+                                                  .first()
+
+                    flmnt.save()
+                    new_ship_choices += 1
+
+        msg = '%d new ship choices.' % new_ship_choices
+        msg += ' %d Bad requests' % len(bad_requests)
+        messages.info(request, msg)
+        return HttpResponseRedirect("/inventory/management")
+    else:
+        raise ValueError("This resource requires a POST request")
 
 def create_backorder(order_id):
     # check that it has not been requested already
