@@ -188,7 +188,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                 auto_ids = [s['external_channel_id'] for s in Sale.objects \
                                                       .filter(external_channel_id__icontains=ch_lbl) \
                                                       .values('external_channel_id')]
-                print auto_ids
                 used_ids = [int(s.replace(ch_lbl + '.', '')) for s in auto_ids]
                 if len(used_ids) == 0:
                     max_id = 0

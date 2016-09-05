@@ -29,16 +29,6 @@ def batchrequest(id, qstring):
     return BatchRequestSerializer(qs).data
 
 
-def shipmentline(qstring):
-    shpmts = ShipmentLine.objects \
-                         .annotate(inventory_item_label=F('inventory_item__label')) \
-                         .annotate(shipment_label=F('shipment__label')) \
-                         .all() \
-                         .values()
-
-    return shpmts
-
-
 def batched_fulfillments(qstring):
     qs = BatchRequest.objects.all()
     qs = BatchRequestSerializer.setup_eager_loading(qs)
