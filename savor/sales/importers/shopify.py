@@ -115,7 +115,7 @@ def process_shopify(file_name):
 
         sale_info['discount'] = Decimal(v.iloc[0]['Discount Amount'])
         sale_info['sale_date'] = parse(v.iloc[0]['Created at']).date()
-        sale_info['channel_id'] = api_func('base', 'channel', 'SHOPIFY')['id']
+        sale_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
 
         company = v.iloc[0]['Billing Company']
         if company != '':
