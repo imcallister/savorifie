@@ -27,6 +27,17 @@ def post_button(order_id, back=False):
     return mark_safe(html)
 
 
+def miss_ship_button(fulfill_id, back=False):
+    ship_options = [o['label'] for o in api_func('inventory', 'shipoption')]
+
+    html = '<select class="form-control" name="q_choice_%s"> \
+              <option>----</option>' % fulfill_id
+    for lbl in ship_options:
+        html += '<option>%s</option>' % lbl
+
+    html += '</select>'
+    return mark_safe(html)
+
 
 def _get_name(o):
         n = o['shipping_name']
@@ -47,6 +58,25 @@ def _fulfill_list(qstring=None):
         o.update({'Date': parse(o['sale_date']).strftime('%d-%b-%y')})
     return columns, orders
 
+
+def _miss_ship_list(qstring=None):
+    flflmts = api_func('fulfill',
+                       'fulfillment',
+                       qstring={'missing_shipping': 'true',
+                                'status': 'requested'})
+
+    def get_items(f):
+        return ','.join(['%d %s' % (v, k) for k, v in f['skus'].iteritems()])
+
+    columns = ["label", "Fulfill Created", 'ship to', 'Items', 'Action']
+    for f in flflmts:
+        action_form = miss_ship_button(f['id'])
+        f.update({'label': f['order']['label']})
+        f.update({'ship to': _get_name(f['order'])})
+        f.update({'Action': action_form})
+        f.update({'Items': get_items(f)})
+        f.update({'Fulfill Created': parse(f['request_date']).strftime('%d-%b-%y')})
+    return columns, flflmts
 
 def _unbatched_fulfill_list(qstring=None):
     fulfills = api_func('fulfill', 'unbatched_fulfillments')
@@ -99,16 +129,15 @@ def management(request):
     context['unbatched_columns'], context['unbatched_rows'] = _unbatched_fulfill_list()
     context['unbatched_fulfillments'] = len(context['unbatched_rows'])
 
+    context['missship_columns'], context['missship_rows'] = _miss_ship_list()
+    context['missing_shipping'] = len(context['missship_rows'])
+
     context['MICH_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
                                               if x['warehouse'] == 'MICH'])
     context['NC2_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
                                              if x['warehouse'] == 'NC2'])
     context['152Frank_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
                                                   if x['warehouse'] == '152Frank'])
-
-    context['missing_shipping'] = len(api_func('fulfill', 'fulfillment',
-                                               qstring={'missing_shipping': 'true',
-                                                        'status': 'requested'}))
 
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
 
@@ -119,13 +148,8 @@ def management(request):
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
-
-    thoroughbred_mismatches = api_func('reports', 'thoroughbred_mismatch')
-    #context['thoroughbred_mismatches'] = len(thoroughbred_mismatches)
     context['MICH_unreconciled'] = get_table('fulfill_requested')(warehouse='MICH')
     context['NC2_unreconciled'] = get_table('fulfill_requested')(warehouse='NC2')
     context['152Frank_unreconciled'] = get_table('fulfill_requested')(warehouse='152Frank')
-    context['whmismatch_columns'] = ['fulfill_id', 'fail_reason']
-    context['whmismatch_rows'] = thoroughbred_mismatches
-
-    return render_to_response('inventory/management.html', context, context_instance = RequestContext(request))
+    
+    return render_to_response('management.html', context, context_instance = RequestContext(request))
