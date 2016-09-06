@@ -62,8 +62,8 @@ def queue_orders(request):
                         new_requests[wh] += 1
                     else:
                         bad_requests.append(k[9:])
-                elif v[:19] == 'Queue future order for':
-                    wh = v[20:]
+                elif 'Queue future order' in v:
+                    wh = v[23:]
                     rslt = backorder_to_requested(wh, k[9:])
                     if rslt == 'BACKORDER_REQUESTED':
                         back_to_queue[wh] += 1
