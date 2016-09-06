@@ -168,15 +168,13 @@ def backorder_to_requested(warehouse, fulfill_id):
 def create_fulfill_request(warehouse, order_id):
     warehouse_labels = [w['label'] for w in inventory_api.warehouse({})]
     unfulfilled_items = fulfill_api.unfulfilled(str(order_id), {})['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem())
+    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem({}))
     order = sales_api.sale(order_id, {})
 
     if unfulfilled_items is None:
         return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
         return 'WAREHOUSE_NOT_RECOGNISED'
-    elif order['ship_type'] == 'GROMWHOLE_FREIGHT':
-        return 'FREIGHT_ORDER'
     else:
         # now create a fulfillment request
         today = get_today()
