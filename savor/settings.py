@@ -122,6 +122,9 @@ STATIC_ROOT = os.path.join(ENVIRON_DIR, 'htdocs', 'static')
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
+BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_DIR, 'components')
+
+
 PDFOUT_PATH = 'pdfout'
 PDFOUT = os.path.join(DATA_ROOT, PDFOUT_PATH)
 
@@ -136,7 +139,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'djangobower.finders.BowerFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -202,6 +205,8 @@ INSTALLED_APPS = (
     'djangosecure',
     'accountifie.dashboard',
 
+    'djangobower',
+    
     'django_nose',
     'django_extensions',
     'simple_history',
@@ -216,7 +221,7 @@ INSTALLED_APPS = (
     'accounting',
     'testsuite',
 
-
+    'accountifie.celery',
     'accountifie.common',
     'accountifie.forecasts',
     'accountifie.gl',
@@ -239,6 +244,14 @@ INSTALLED_APPS = (
     'django_behave',
 
     'rest_framework',
+
+)
+
+BOWER_INSTALLED_APPS = (
+    'jquery#1.11',
+    'bootstrap',
+    'bootstrap-table#1.9.0',
+    'highcharts',
 
 )
 
