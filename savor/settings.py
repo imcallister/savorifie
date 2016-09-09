@@ -1,6 +1,17 @@
 # Project project Django settings.
 import os, sys, json, pandas
 
+import djcelery
+djcelery.setup_loader()
+ 
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'json'
+
+#CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+
 
 # stop those annoying warnings
 pandas.options.mode.chained_assignment = None
@@ -244,7 +255,7 @@ INSTALLED_APPS = (
     'django_behave',
 
     'rest_framework',
-
+    'djcelery',
 )
 
 BOWER_INSTALLED_APPS = (

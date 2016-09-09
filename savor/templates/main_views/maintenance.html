@@ -69,7 +69,7 @@
 
 {% block extrajs %}
 <script>
-    $('#start-recalculate').click({'task': '/recalculate/'}, start_long_task);
+    $('#start-recalculate').click({'task': '/celery/recalculate/'}, start_long_task);
 </script>
 {% endblock %}
 
