@@ -1,6 +1,17 @@
 # Project project Django settings.
 import os, sys, json, pandas
 
+import djcelery
+djcelery.setup_loader()
+ 
+BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['json', 'pickle']
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'json'
+
+#CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
+
 
 # stop those annoying warnings
 pandas.options.mode.chained_assignment = None
@@ -122,6 +133,9 @@ STATIC_ROOT = os.path.join(ENVIRON_DIR, 'htdocs', 'static')
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
 
+BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_DIR, 'components')
+
+
 PDFOUT_PATH = 'pdfout'
 PDFOUT = os.path.join(DATA_ROOT, PDFOUT_PATH)
 
@@ -136,7 +150,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    'djangobower.finders.BowerFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -202,6 +216,8 @@ INSTALLED_APPS = (
     'djangosecure',
     'accountifie.dashboard',
 
+    'djangobower',
+    
     'django_nose',
     'django_extensions',
     'simple_history',
@@ -216,7 +232,7 @@ INSTALLED_APPS = (
     'accounting',
     'testsuite',
 
-
+    'accountifie.celery',
     'accountifie.common',
     'accountifie.forecasts',
     'accountifie.gl',
@@ -239,6 +255,14 @@ INSTALLED_APPS = (
     'django_behave',
 
     'rest_framework',
+    'djcelery',
+)
+
+BOWER_INSTALLED_APPS = (
+    'jquery#1.11',
+    'bootstrap',
+    'bootstrap-table#1.9.0',
+    'highcharts',
 
 )
 

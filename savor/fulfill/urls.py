@@ -3,7 +3,7 @@ import views
 
 urlpatterns = patterns('',
     url(r'fulfill/thoroughbred_upload/$', views.thoroughbred_upload),
-    url(r'fulfill/nc2_upload/$', views.nc2_upload),
+    #url(r'fulfill/nc2_upload/$', views.nc2_upload),
 
     url(r'fulfill/reconcile_warehouse/$', views.reconcile_warehouse),
     url(r'fulfill/shipping/$', views.shipping),

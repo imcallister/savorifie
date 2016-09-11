@@ -33,6 +33,8 @@ urlpatterns = patterns('',
     url(r'', include('inventory.urls')),
     url(r'', include('fulfill.urls')),
 
+    url(r'', include('importers.urls')),
+
     # general accountifie urls
     url (r'', include('accountifie.urls'))
 )
