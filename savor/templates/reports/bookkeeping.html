@@ -272,13 +272,38 @@
     </div>
 </div>
 
+<div class="modal fade" id="NC2Billing" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <h3>NC2 Handling Charges</h3>        
+        {{NC2Billing}}
+      </div>
+      
+    </div>
+  </div>
+</div>
 
 {% endblock %}
 
 {% block sidebar %}
-  <a class="btn btn-success btn-lg" data-toggle="modal" data-target="#help">
-    <span style="font-size:2em;" class="glyphicon  glyphicon-question-sign" aria-hidden="true"></span>
-  </a>
+<div class="panel panel-default">
+    <div class="panel-body">
+      <a class="btn btn-success btn-lg" data-toggle="modal" data-target="#help">
+        <span style="font-size:2em;" class="glyphicon  glyphicon-question-sign" aria-hidden="true"></span>
+      </a>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <ul class="nav nav-pills nav-stacked">
+            <li><a class="btn btn-primary" data-toggle="modal" data-target="#NC2Billing">View NC2 Billing</a></li>
+        </ul>
+    </div>
+</div>
 {% endblock %}
 
 {% block extrajs %}

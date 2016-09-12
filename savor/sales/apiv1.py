@@ -62,7 +62,8 @@ def sale(qstring):
         start_date = parse(start_date).date()
     if type(end_date) != datetime.date:
         end_date = parse(end_date).date()
-    qs = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date)
+    qs = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date) \
+                     .order_by('-sale_date')
 
     if view_type == 'simple':
         serializer = SimpleSaleSerializer

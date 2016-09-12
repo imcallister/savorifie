@@ -19,7 +19,7 @@ these divs are needed.
 
 -->
 
-<h2>Order Details -- {{id}}</h2>
+<h2>Order Details -- {{label}}</h2>
 
 <div class="container-fluid" id="wrapper">
     <div class="row">
@@ -31,10 +31,6 @@ these divs are needed.
                 <div class="panel-body">
                     <table class="table table-striped table-condensed table-hover table-bordered">
                         <tr>
-                            <td>ID</td>
-                            <td>{{label}}</td>
-                        </tr>
-                        <tr>
                             <td>Channel</td>
                             <td>{{channel}}</td>
                         </tr>
@@ -43,7 +39,7 @@ these divs are needed.
                             <td>{{items_string}}</td>
                         </tr>
                         <tr>
-                            <td>Unfulfilled</td>
+                            <td>Unfulfilled items</td>
                             <td>{{unfulfilled_string}}</td>
                         </tr>
                         <tr>
@@ -85,10 +81,10 @@ these divs are needed.
             {% for fulfill in fulfillment_list %}
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <div class="panel-title">Fulfillment: {{fulfill.id}}</div>
+                        <h3>Fulfillment #: {{fulfill.id}}.&nbsp;&nbsp;&nbsp;Batch #: {{fulfill.batch_id}}</h3>
                     </div>
                     <div class="panel-body">
-                        <h4>Request</h4>
+                        <h3>Request</h3>
                         <table class="table table-striped table-condensed table-hover table-bordered">
                             <tr>
                                 {% for col in fulfillment_cols %}

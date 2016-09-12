@@ -29,6 +29,14 @@ def batchrequest(id, qstring):
     return BatchRequestSerializer(qs).data
 
 
+@dispatch(str, dict)
+def fulfillment_batch(id, qstring):
+    batch_id = BatchRequest.objects \
+                           .filter(fulfillments__in=[id]) \
+                           .first() \
+                           .id
+    return {'batch_id': batch_id}
+
 def batched_fulfillments(qstring):
     qs = BatchRequest.objects.all()
     qs = BatchRequestSerializer.setup_eager_loading(qs)

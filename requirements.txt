@@ -20,7 +20,7 @@ docutils==0.12
 html2text
 markdown==2.6
 jsonfield==1.0.3
-django-simple-history==1.6.3
+django-simple-history==1.8.1
 django-extensions
 django-model-changes==0.15
 django-pandas==0.2.2

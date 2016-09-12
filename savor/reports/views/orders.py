@@ -28,7 +28,6 @@ def order_drilldown(request, order_id):
 
     context = {}
     context['title'] = 'Orders'
-    context['id'] = order_id
     context['label'] = sale_info['label']
     context['channel'] = sale_info['channel']
     context['items_string'] = sale_info['items_string']
@@ -47,11 +46,12 @@ def order_drilldown(request, order_id):
     context['fulfillment_list'] = []
 
     for f in fulfillments:
-        fulfill_data = {'id': f['id']}
+        batch_id = api_func('fulfill', 'fulfillment_batch', str(f['id'])).get('batch_id', '')
+        fulfill_data = {'id': f['id'], 'batch_id': batch_id}
         fulfill_data['fulfill'] = [f[col] for col in fulfill_cols]
         fulfill_data['updates'] = [[u[u_col] for u_col in update_cols] for u in f['fulfill_updates']]
         context['fulfillment_list'].append(fulfill_data)
 
-    return render_to_response('inventory/order_drilldown.html',
+    return render_to_response('order_drilldown.html',
                               context,
                               context_instance=RequestContext(request))
