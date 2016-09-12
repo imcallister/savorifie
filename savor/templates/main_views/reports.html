@@ -438,15 +438,43 @@
                     <h3 class="panel-title"><a href="/gl/">Tactical Reports</a></h3>
                 </div>
                 <div class="panel-body">
-
                     <a href="/download_allsales">All Sales</a>
-                    <p>Sales Tax Reports (not working yet)
-                        <a href="/download_salestax">2013</a>,
-                    </p>
                 </div>
             </div>
-
-            
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Sales Tax</a></h3>
+                </div>
+                <div class="panel-body">
+                    <h3>Aggregated by collector</h3>
+                    <ul>
+                        <li>
+                            <a href="/api/reports/collected_salestax/?from_date=2016-6-1&to_date=2016-8-31">
+                                1-Jun-16 to 31-Aug-16
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/api/reports/collected_salestax/?from_date=2016-3-1&to_date=2016-5-31">
+                                    1-Mar-16 to 31-May-16
+                            </a>
+                        </li>
+                    </ul>
+                    <h3>Download all salestax</h3>
+                    <ul>
+                        <li>
+                            <a href="/api/sales/salestax/?as_csv=true&from_date=2016-6-1&to_date=2016-8-31">
+                                1-Jun-16 to 31-Aug-16
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/api/sales/salestax/?as_csv=true&from_date=2016-3-1&to_date=2016-5-31">
+                                    1-Mar-16 to 31-May-16
+                            </a>
+                        </li>
+                    </ul>
+                    <a href=
+                </div>
+            </div>
         </div>
         
     </div>

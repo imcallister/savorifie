@@ -2,7 +2,7 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.serializers import EagerLoadingMixin
 
-from .models import UnitSale, Sale
+from .models import UnitSale, Sale, SalesTax
 from rest_framework import serializers
 
 
@@ -13,6 +13,21 @@ class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = UnitSale
         fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
+
+
+class SalesTaxSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['sale__channel__counterparty__id', 'collector__entity']
+
+    sale_date = serializers.SerializerMethodField()
+    sale = serializers.StringRelatedField()
+    collector = serializers.StringRelatedField()
+
+    def get_sale_date(self, obj):
+        return obj.sale.sale_date
+
+    class Meta:
+        model = SalesTax
+        fields = ('sale_date', 'sale', 'collector', 'tax',)
 
 
 class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
