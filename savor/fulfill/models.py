@@ -27,6 +27,16 @@ PACKING_TYPES = (
 )
 
 
+class ShippingCharge(models.Model):
+    shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
+    account = models.CharField(max_length=25, blank=True, null=True)
+    tracking_number = models.CharField(max_length=50, blank=True, null=True)
+    invoice_number = models.CharField(max_length=25, blank=True, null=True)
+    ship_date = models.DateField()
+    charge = models.DecimalField(max_digits=8, decimal_places=2)
+    fulfillment = models.ForeignKey('fulfill.Fulfillment', blank=True, null=True)
+
+
 class Fulfillment(models.Model):
     request_date = models.DateField()
     warehouse = models.ForeignKey('inventory.Warehouse', blank=True, null=True)
