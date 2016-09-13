@@ -9,9 +9,9 @@ from django.conf import settings
 from django.db.models import Prefetch
 
 import products.apiv1 as product_api
-from .models import Sale, UnitSale, Channel
+from .models import Sale, UnitSale, Channel, SalesTax
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
-    ShippingSaleSerializer, SaleFulfillmentSerializer
+    ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer
 
 
 @dispatch(str, dict)
@@ -37,6 +37,21 @@ def channel(qstring):
     return data
 
 
+def salestax(qstring):
+    start_date = qstring.get('from_date', settings.DATE_EARLY)
+    end_date = qstring.get('to_date', datetime.datetime.now().date())
+    if type(start_date) != datetime.date:
+        start_date = parse(start_date).date()
+    if type(end_date) != datetime.date:
+        end_date = parse(end_date).date()
+    qs = SalesTax.objects.filter(sale__sale_date__gte=start_date,
+                                 sale__sale_date__lte=end_date)
+
+    serializer = SalesTaxSerializer
+    qs = serializer.setup_eager_loading(qs)
+    return list(serializer(qs, many=True).data)
+
+
 @dispatch(dict)
 def sale(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
@@ -47,7 +62,8 @@ def sale(qstring):
         start_date = parse(start_date).date()
     if type(end_date) != datetime.date:
         end_date = parse(end_date).date()
-    qs = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date)
+    qs = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date) \
+                     .order_by('-sale_date')
 
     if view_type == 'simple':
         serializer = SimpleSaleSerializer
@@ -59,7 +75,7 @@ def sale(qstring):
         serializer = FullSaleSerializer
 
     qs = serializer.setup_eager_loading(qs)
-    return serializer(qs, many=True).data
+    return list(serializer(qs, many=True).data)
 
 
 @dispatch(str, dict)
