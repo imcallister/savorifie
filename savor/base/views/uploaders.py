@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from base.models import Cashflow, CreditCardTrans, make_expense_stubs, make_stubs_from_ccard
 from accountifie.toolkit.forms import FileForm
 import accountifie.toolkit
+import base.importers
 
 
 @login_required
