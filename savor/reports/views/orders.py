@@ -11,7 +11,7 @@ def orders(request):
     context = {}
     context['title'] = 'Orders'
     context['content'] = tables.bstrap_tables.orders_list()
-    return render_to_response('inventory/orders_list.html',
+    return render_to_response('orders_list.html',
                               context,
                               context_instance=RequestContext(request))
 
