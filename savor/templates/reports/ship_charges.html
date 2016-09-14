@@ -8,28 +8,60 @@
 
 
 {% block content %}
-    {{content}}
+<div class="container-fluid">
 
-    <div class="modal fade" id="loadUPS" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-      <div class="modal-dialog" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h3 class="modal-title" id="myModalLabel">Upload UPS shipping charges file</h3>
+  <div class="row">
+      <div class="col-md-6">
+          <div class="panel panel-default">
+              <div class="panel-heading">
+                  <div class="panel-title">UPS Invoices</div>
+              </div>
+              <div class="panel-body">
+                  {{UPS_invoices}}
+              </div>
           </div>
-          <div class="modal-body">
-            <p>Please choose a .csv file</p>
-            <form role='form' enctype="multipart/form-data" method="post" action="/importers/ups_upload/">{% csrf_token %}
-                <div class="form-group">    
-                    {{upload_form.as_p}}
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <a href='/' class="btn btn-default">Cancel</a>
-            </form>
+      </div>
+      <div class="col-md-6">
+          <div class="panel panel-success">
+              <div class="panel-heading">
+                  <div class="panel-title">Downloads</div>
+              </div>
+
+              <div class="panel-body">
+
+                  <ul>
+                      <li><a href="/download_allsales">All sales</a></li>
+                      <p>Sales Tax Reports (not working yet)
+                      <a href="/download_salestax">2013</a>,
+                  </p>
+                  </ul>
+
+              </div>
           </div>
-        </div>
+      </div>
+  </div>
+</div>
+
+<div class="modal fade" id="loadUPS" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload UPS shipping charges file</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+        <form role='form' enctype="multipart/form-data" method="post" action="/importers/ups_upload/">{% csrf_token %}
+            <div class="form-group">    
+                {{upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
       </div>
     </div>
+  </div>
+</div>
 
 
 {% endblock %}
@@ -39,9 +71,9 @@
     <script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
     <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
     <script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
-    <!--<script src="{{ STATIC_URL }}base/js/bootstrap.min.js"></script>-->
-
-
+    <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
+    <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
+    
 {% endblock %}
 
 {% block sidebar %}

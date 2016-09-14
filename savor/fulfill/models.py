@@ -35,6 +35,8 @@ class ShippingCharge(models.Model):
     ship_date = models.DateField()
     charge = models.DecimalField(max_digits=8, decimal_places=2)
     fulfillment = models.ForeignKey('fulfill.Fulfillment', blank=True, null=True)
+    order_related = models.BooleanField(default=True)
+    comment = models.TextField(null=True, blank=True)
 
 
 class Fulfillment(models.Model):

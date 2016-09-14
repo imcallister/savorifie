@@ -19,6 +19,15 @@ def large_expenses(dt):
             ]
     return get_bstrap_table(data_url, row_defs)
 
+def UPS_invoices():
+    
+    data_url = "/api/fulfill/UPS_invoices"
+    row_defs = [{'data_field': 'invoice_number', 'value': 'Invoice #', 'formatter': 'nameFormatter'},
+                {'data_field': 'last_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'charge', 'value': 'Amount', 'formatter': 'nameFormatter'}
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
 
 def unit_sales():
     data_url = "/api/sales/unit_sales"
