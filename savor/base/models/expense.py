@@ -32,7 +32,7 @@ def make_expense_stubs(cf_data):
     """
     today = datetime.datetime.now().date()
     stub_account = env_api.variable('UNALLOCATED_ACCT', {})
-    unallocated_employee = env.api.variable('UNALLOCATED_EMPLOYEE_ID', {})
+    unallocated_employee = env_api.variable('UNALLOCATED_EMPLOYEE_ID', {})
     ap_account = env_api.variable('GL_ACCOUNTS_PAYABLE', {})
 
     new_stubs = 0
@@ -62,7 +62,7 @@ def make_stubs_from_ccard(cc_data):
     """
     today = datetime.datetime.now().date()
     stub_account = env_api.variable('UNALLOCATED_ACCT', {})
-    unallocated_employee = env.api.variable('UNALLOCATED_EMPLOYEE_ID', {})
+    unallocated_employee = env_api.variable('UNALLOCATED_EMPLOYEE_ID', {})
     ap_account = env_api.variable('GL_ACCOUNTS_PAYABLE', {})
 
     new_stubs = 0
