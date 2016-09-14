@@ -7,12 +7,21 @@ import time
 
 from django.db.models import Prefetch, Count, F
 
-from .models import *
-from .serializers import *
+from fulfill.models import *
+from fulfill.serializers import *
 from sales.models import *
 from sales.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
 
 logger = logging.getLogger('default')
+
+
+@dispatch(dict)
+def shippingcharge(qstring):
+    qs = ShippingCharge.objects \
+                       .all()
+    qs = ShippingChargeSerializer.setup_eager_loading(qs)
+    return list(ShippingChargeSerializer(qs, many=True).data)
+
 
 @dispatch(dict)
 def batchrequest(qstring):
