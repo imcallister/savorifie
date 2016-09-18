@@ -45,7 +45,8 @@ admin.site.register(Fulfillment, FulfillmentAdmin)
 
 class ShippingChargeAdmin(admin.ModelAdmin):
     list_display = ('tracking_number', 'invoice_number', 'ship_date',
-                    'charge', 'fulfillment', 'account')
+                    'charge', 'fulfillment', 'account', 'order_related')
+    list_filter = ('order_related',)
     
 admin.site.register(ShippingCharge, ShippingChargeAdmin)
 
