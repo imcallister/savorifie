@@ -72,6 +72,20 @@ def order_upload(request):
         return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
 
 
+def shopify_fee(sale_obj):
+    sale_obj._get_unit_sales()
+    sale_obj._get_sales_taxes()
+    total = sale_obj.gross_sale_proceeds()
+    if sale_obj.discount:
+        total -= Decimal(sale_obj.discount)
+    if sale_obj.shipping_charge:
+        total += Decimal(sale_obj.shipping_charge)
+    if sale_obj.gift_wrap_fee:
+        total += Decimal(sale_obj.gift_wrap_fee)
+    total += sale_obj.total_sales_tax()
+    return total * Decimal('0.029') + Decimal('0.3')
+
+
 def process_shopify(file_name):
     if file_name.split('.')[-1] != 'csv':
         return {'status': 'ERROR', 'msg': 'WRONG_FILE_TYPE'}
@@ -177,6 +191,8 @@ def process_shopify(file_name):
                     unitsale_obj = UnitSale(**obj_data)
                     unitsale_obj.save()
 
+            # add shopify channel charge (2.9% + 0.30)
+            sale_obj.channel_charge = shopify_fee(sale_obj)
             sale_obj.save()
     return {'status': 'SUCCESS', 'exist_sales_ctr': exist_sales_ctr,
             'new_sales_ctr': new_sales_ctr, 'unknown_cp_ctr': unknown_cp_ctr}

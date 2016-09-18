@@ -84,7 +84,7 @@ class SaleAdmin(SimpleHistoryAdmin):
 
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),
-                                ('external_channel_id',),
+                                ('external_channel_id', 'channel_charges',),
                                 ('customer_code', 'special_sale'),
                                 ('memo',),
                                 )

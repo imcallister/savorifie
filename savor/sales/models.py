@@ -127,7 +127,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
 
     shipping_charge = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
-
+    channel_charges = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
     discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
     discount_code = models.CharField(max_length=50, blank=True, null=True)
 
@@ -347,6 +347,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         if self.gift_wrap_fee:
             total += Decimal(self.gift_wrap_fee)
         total += self.total_sales_tax()
+        total -= self.channel_charges
         return total
 
     def payee(self):
@@ -416,6 +417,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
+                    
                     COGS = accounting.models.total_COGS(u_sale, ii)
                     qty = inv_items[ii]
                     tran['lines'].append((inv_acct, -COGS * qty, self.customer_code, []))
@@ -440,6 +442,15 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             # DISCOUNTS
             if self.discount and self.discount > 0:
                 tran['lines'].append((discount_acct, Decimal(self.discount), self.customer_code, []))
+
+            if self.channel_charges > 0:
+                channel_fees_path = 'equity.retearnings.costofsales.channelfees.%s' % channel_id
+                channel_fees_acct = Account.objects \
+                                           .filter(path=channel_fees_path) \
+                                           .first()
+                tran['lines'].append((channel_fees_acct,
+                                      Decimal(self.channel_charges),
+                                      channel_id, []))
 
             # INVENTORY, GROSS SALES & COGS
             for u_sale in self.__unit_sales:
