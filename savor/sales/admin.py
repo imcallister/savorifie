@@ -10,7 +10,7 @@ from django.db.models import Q
 
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax
+from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, ChannelPayouts
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
@@ -194,10 +194,15 @@ class SaleAdmin(SimpleHistoryAdmin):
                                      },
                                     context_instance=RequestContext(request))
 
-
-        
     queue_for_warehouse.short_description = 'Queue for fulfillment'
     queue_for_backorder.short_description = 'Add to back-order queue'
     delete_model.short_description = 'Delete sales and related GL entries'
 
 admin.site.register(Sale, SaleAdmin)
+
+class ChannelPayoutsAdmin(admin.ModelAdmin):
+    list_display = ('__unicode__', 'payout_date', 'payout', 'channel',)
+    filter_horizontal = ('sales',)
+    
+admin.site.register(ChannelPayouts, ChannelPayoutsAdmin)
+

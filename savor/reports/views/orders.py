@@ -46,7 +46,8 @@ def order_drilldown(request, order_id):
     context['fulfillment_list'] = []
 
     for f in fulfillments:
-        batch_id = api_func('fulfill', 'fulfillment_batch', str(f['id'])).get('batch_id', '')
+        batch = api_func('fulfill', 'fulfillment_batch', str(f['id']))
+        batch_id = batch.get('batch_id') if batch else 'unbatched'
         fulfill_data = {'id': f['id'], 'batch_id': batch_id}
         fulfill_data['fulfill'] = [f[col] for col in fulfill_cols]
         fulfill_data['updates'] = [[u[u_col] for u_col in update_cols] for u in f['fulfill_updates']]
