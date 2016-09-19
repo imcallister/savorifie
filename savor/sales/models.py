@@ -35,6 +35,16 @@ CHANNELS = [
 ]
 
 
+class ChannelPayouts(models.Model):
+    channel = models.ForeignKey(Channel)
+    payout_date = models.DateField()
+    payout = models.DecimalField(max_digits=8, decimal_places=2)
+    sales = models.ManyToManyField('sales.Sale', blank=True)
+
+    def __unicode__(self):
+        return ','.join([str(s) for s in self.sales.all()])
+
+
 class TaxCollector(models.Model):
     entity = models.CharField(max_length=100)
 
@@ -417,7 +427,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
                     inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
                     inv_acct = Account.objects.filter(path=inv_acct_path).first()
-                    
+
                     COGS = accounting.models.total_COGS(u_sale, ii)
                     qty = inv_items[ii]
                     tran['lines'].append((inv_acct, -COGS * qty, self.customer_code, []))
