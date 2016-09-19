@@ -24,6 +24,7 @@
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadFirstRepublic">Load First Republic</a></li>
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadMasterCard">Load Mastercard</a></li>
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#shopifyUnpaid">View Unpaid Shopify</a></li>
                         </ul>
                     </div>
                 
@@ -271,6 +272,14 @@
         {{unreconciled}}
     </div>
 </div>
+
+
+<div class="modal fade" id="shopifyUnpaid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-content">
+        {{shopify_unpaid}}
+    </div>
+</div>
+
 
 <div class="modal fade" id="NC2Billing" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
   <div class="modal-dialog" role="document">

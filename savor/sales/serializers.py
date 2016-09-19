@@ -52,6 +52,32 @@ class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'shipping_company', 'shipping_zip', 'items_string')
 
 
+class SaleProceedsSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    proceeds = serializers.SerializerMethodField()
+    items_string = serializers.SerializerMethodField()
+
+    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
+    _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
+
+    def get_proceeds(self, obj):
+        return obj.total_receivable()
+
+    def get_label(self, obj):
+        return str(obj)
+
+    def get_items_string(self, obj):
+        return obj.items_string
+
+    channel = serializers.StringRelatedField()
+    customer_code = serializers.StringRelatedField()
+
+    class Meta:
+        model = Sale
+        fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
+                  'external_channel_id', 'shipping_name', 'proceeds',
+                  'shipping_company', 'items_string')
+
+
 class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     items_string = serializers.SerializerMethodField()
     unfulfilled_items = serializers.SerializerMethodField()
