@@ -6,6 +6,7 @@ from accountifie.common.api import api_func
 from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company
 from accountifie.toolkit.forms import FileForm
+from accountifie.common.table import get_table
 from accountifie.gl.models import ExternalAccount
 from base.models import Expense, Cashflow, CreditCardTrans
 
@@ -20,6 +21,8 @@ def bookkeeping(request):
     unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
     chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
+
+    context['shopify_unpaid'] = get_table('unpaid_channel')('SHOPIFY')
 
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
     context['incomplete_banking'] = cashflows.filter(counterparty=None).count()

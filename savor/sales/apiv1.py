@@ -3,15 +3,17 @@ from dateutil.parser import parse
 from multipledispatch import dispatch
 import itertools
 import operator
+from decimal import Decimal
 
 
 from django.conf import settings
 from django.db.models import Prefetch
 
 import products.apiv1 as product_api
-from .models import Sale, UnitSale, Channel, SalesTax
+from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
-    ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer
+    ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
+    SaleProceedsSerializer
 
 
 @dispatch(str, dict)
@@ -211,3 +213,16 @@ def sales_counts(qstring):
             sales_counts[sku] += u_sale_counts[sku]
 
     return sales_counts
+
+
+def unpaid_channel(channel_lbl, qstring):
+    # find Shopify sales which are not in a channel payout batch
+    paidout_sales = []
+    for cpt in ChannelPayouts.objects.filter(channel__counterparty_id=channel_lbl):
+        paidout_sales += [s.id for s in cpt.sales.all()]
+
+    qs = Sale.objects.filter(channel__counterparty_id='SHOPIFY') \
+                     .exclude(id__in=paidout_sales)
+    qs = SaleProceedsSerializer.setup_eager_loading(qs)
+    unpaid = list(SaleProceedsSerializer(qs, many=True).data)
+    return [u for u in unpaid if u['proceeds'] != Decimal('0')]

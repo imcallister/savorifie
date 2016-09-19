@@ -20,11 +20,23 @@ def large_expenses(dt):
     return get_bstrap_table(data_url, row_defs)
 
 def UPS_invoices():
-    
     data_url = "/api/fulfill/UPS_invoices"
     row_defs = [{'data_field': 'invoice_number', 'value': 'Invoice #', 'formatter': 'nameFormatter'},
                 {'data_field': 'last_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'charge', 'value': 'Amount', 'formatter': 'nameFormatter'}
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
+
+def unpaid_channel(label):
+    data_url = "/api/sales/unpaid_channel/%s/" % label
+    row_defs = [{'data_field': 'label', 'value': 'ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+                {'data_field': 'sale_date', 'value': 'ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_name', 'value': 'Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_company', 'value': 'Company', 'formatter': 'nameFormatter'},
+                {'data_field': 'proceeds', 'value': 'Proceeds', 'formatter': 'nameFormatter'},
+                {'data_field': 'items_string', 'value': 'SKUs', 'formatter': 'nameFormatter'},
             ]
     return get_bstrap_table(data_url, row_defs)
 

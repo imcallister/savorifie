@@ -349,6 +349,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
 
     def total_receivable(self):
+        self._get_unit_sales()
+        self._get_sales_taxes()
         total = self.gross_sale_proceeds()
         if self.discount:
             total -= Decimal(self.discount)
