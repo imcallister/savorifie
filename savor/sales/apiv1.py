@@ -13,7 +13,7 @@ import products.apiv1 as product_api
 from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
-    SaleProceedsSerializer
+    SaleProceedsSerializer, SalesTaxSerializer2
 
 
 @dispatch(str, dict)
@@ -53,6 +53,19 @@ def salestax(qstring):
     qs = serializer.setup_eager_loading(qs)
     return list(serializer(qs, many=True).data)
 
+def salestax2(qstring):
+    start_date = qstring.get('from_date', settings.DATE_EARLY)
+    end_date = qstring.get('to_date', datetime.datetime.now().date())
+    if type(start_date) != datetime.date:
+        start_date = parse(start_date).date()
+    if type(end_date) != datetime.date:
+        end_date = parse(end_date).date()
+    qs = Sale.objects.filter(sale_date__gte=start_date,
+                             sale_date__lte=end_date)
+
+    serializer = SalesTaxSerializer2
+    qs = serializer.setup_eager_loading(qs)
+    return list(serializer(qs, many=True).data)
 
 @dispatch(dict)
 def sale(qstring):

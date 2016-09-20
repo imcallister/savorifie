@@ -42,7 +42,10 @@ class ChannelPayouts(models.Model):
     sales = models.ManyToManyField('sales.Sale', blank=True)
 
     def __unicode__(self):
-        return ','.join([str(s) for s in self.sales.all()])
+        if self.sales.count() == 0:
+            return 'ADJUST.%s' % self.id
+        else:
+            return ','.join([str(s) for s in self.sales.all()])
 
 
 class TaxCollector(models.Model):
@@ -347,7 +350,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         else:
             return Decimal('0')
 
-
     def total_receivable(self):
         self._get_unit_sales()
         self._get_sales_taxes()
@@ -359,6 +361,19 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         if self.gift_wrap_fee:
             total += Decimal(self.gift_wrap_fee)
         total += self.total_sales_tax()
+        total -= self.channel_charges
+        return total
+
+    def taxable_proceeds(self):
+        self._get_unit_sales()
+        self._get_sales_taxes()
+        total = self.gross_sale_proceeds()
+        if self.discount:
+            total -= Decimal(self.discount)
+        if self.shipping_charge:
+            total += Decimal(self.shipping_charge)
+        if self.gift_wrap_fee:
+            total += Decimal(self.gift_wrap_fee)
         total -= self.channel_charges
         return total
 
@@ -382,7 +397,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             return None
 
     def _get_sales_taxes(self):
-        sales_taxes = self.salestax_set.all()
+        sales_taxes = self.sales_tax.all()
         tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
         self.__tax_amts = dict((p,0) for p in tax_collectors)
         for t in sales_taxes:
@@ -487,7 +502,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         return [tran]
 
 class SalesTax(models.Model):
-    sale = models.ForeignKey(Sale)
+    sale = models.ForeignKey(Sale, related_name='sales_tax')
     collector = models.ForeignKey(TaxCollector)
     tax = models.DecimalField(max_digits=11, decimal_places=2)
 

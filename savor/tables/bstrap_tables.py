@@ -32,7 +32,7 @@ def unpaid_channel(label):
     data_url = "/api/sales/unpaid_channel/%s/" % label
     row_defs = [{'data_field': 'label', 'value': 'ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
-                {'data_field': 'sale_date', 'value': 'ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'sale_date', 'value': 'Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_name', 'value': 'Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_company', 'value': 'Company', 'formatter': 'nameFormatter'},
                 {'data_field': 'proceeds', 'value': 'Proceeds', 'formatter': 'nameFormatter'},
