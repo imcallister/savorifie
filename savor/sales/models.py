@@ -374,7 +374,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             total += Decimal(self.shipping_charge)
         if self.gift_wrap_fee:
             total += Decimal(self.gift_wrap_fee)
-        total -= self.channel_charges
         return total
 
     def payee(self):
