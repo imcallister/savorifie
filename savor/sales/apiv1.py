@@ -13,7 +13,7 @@ import products.apiv1 as product_api
 from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
-    SaleProceedsSerializer, SalesTaxSerializer2
+    SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer
 
 
 @dispatch(str, dict)
@@ -226,6 +226,25 @@ def sales_counts(qstring):
             sales_counts[sku] += u_sale_counts[sku]
 
     return sales_counts
+
+
+def channel_payout_comp(channel_lbl, qstring):
+    qs = ChannelPayouts.objects.filter(channel__counterparty_id=channel_lbl)
+    qs = ChannelPayoutSerializer.setup_eager_loading(qs)
+    return ChannelPayoutSerializer(qs, many=True).data
+    """
+    payout_comp = []
+    for p in payouts:
+        ch_pout = p.payout
+        sav_pout = p.calcd_payout()
+        diff = ch_pout - sav_pout
+        line = {'id': p.id, 'label': str(p), 'channel payout': ch_pout,
+                'calcd payout': sav_pout, 'diff': diff}
+        payout_comp.append(line)
+    print 'returing channel_payout_comp'
+    print payout_comp
+    return payout_comp
+    """
 
 
 def unpaid_channel(channel_lbl, qstring):
