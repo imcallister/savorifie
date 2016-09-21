@@ -218,6 +218,8 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 class ChannelPayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     calcd_payout = serializers.SerializerMethodField()
     label = serializers.SerializerMethodField()
+    diff = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
 
     def get_label(self, obj):
         return str(obj)
@@ -225,10 +227,16 @@ class ChannelPayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     def get_calcd_payout(self, obj):
         return obj.calcd_payout()
 
+    def get_date(self, obj):
+        return obj.payout_date.strftime('%d-%b-%Y')
+
+    def get_diff(self, obj):
+        return obj.payout - obj.calcd_payout()
+
     _SELECT_RELATED_FIELDS = ['channel__counterparty__id',]
     _PREFETCH_RELATED_FIELDS = ['sales__unit_sale__sku__skuunit__inventory_item',
                                 'sales__sales_tax__collector', 'sales__channel__counterparty']
 
     class Meta:
         model = ChannelPayouts
-        fields = ('id', 'label', 'channel', 'payout', 'calcd_payout',)
+        fields = ('id', 'date', 'label', 'channel', 'payout', 'calcd_payout', 'diff')

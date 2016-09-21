@@ -24,8 +24,6 @@ def bookkeeping(request):
 
     context['shopify_unpaid'] = get_table('unpaid_channel')('SHOPIFY')
     context['shopify_comparison'] = get_table('channel_payout_comp')('SHOPIFY')
-
-    print context['shopify_comparison']
     
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
     context['incomplete_banking'] = cashflows.filter(counterparty=None).count()
