@@ -47,6 +47,9 @@ class ChannelPayouts(models.Model):
         else:
             return ','.join([str(s) for s in self.sales.all()])
 
+    def calcd_payout(self):
+        return sum([s.total_receivable() for s in self.sales.all()])
+
 
 class TaxCollector(models.Model):
     entity = models.CharField(max_length=100)

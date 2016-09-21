@@ -23,7 +23,8 @@ def bookkeeping(request):
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
 
     context['shopify_unpaid'] = get_table('unpaid_channel')('SHOPIFY')
-
+    context['shopify_comparison'] = get_table('channel_payout_comp')('SHOPIFY')
+    
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
     context['incomplete_banking'] = cashflows.filter(counterparty=None).count()
     context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count() + \

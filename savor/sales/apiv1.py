@@ -13,7 +13,7 @@ import products.apiv1 as product_api
 from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
-    SaleProceedsSerializer, SalesTaxSerializer2
+    SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer
 
 
 @dispatch(str, dict)
@@ -227,6 +227,12 @@ def sales_counts(qstring):
 
     return sales_counts
 
+
+def channel_payout_comp(channel_lbl, qstring):
+    qs = ChannelPayouts.objects.filter(channel__counterparty_id=channel_lbl)
+    qs = ChannelPayoutSerializer.setup_eager_loading(qs)
+    return ChannelPayoutSerializer(qs, many=True).data
+    
 
 def unpaid_channel(channel_lbl, qstring):
     # find Shopify sales which are not in a channel payout batch

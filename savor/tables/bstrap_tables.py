@@ -41,6 +41,18 @@ def unpaid_channel(label):
     return get_bstrap_table(data_url, row_defs)
 
 
+def channel_payout_comp(label):
+    data_url = "/api/sales/channel_payout_comp/%s/" % label
+    row_defs = [{'data_field': 'id', 'value': 'ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'date', 'value': 'ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'label', 'value': 'Description', 'formatter': 'nameFormatter'},
+                {'data_field': 'payout', 'value': 'Payout', 'formatter': 'nameFormatter'},
+                {'data_field': 'calcd_payout', 'value': 'Savor Calc', 'formatter': 'nameFormatter'},
+                {'data_field': 'diff', 'value': 'Diff', 'formatter': 'nameFormatter'},
+                
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
 def unit_sales():
     data_url = "/api/sales/unit_sales"
     row_defs = [{'data_field': 'sale_link', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
