@@ -9,6 +9,8 @@ from accountifie.toolkit.forms import FileForm
 from accountifie.common.table import get_table
 from accountifie.gl.models import ExternalAccount
 from base.models import Expense, Cashflow, CreditCardTrans
+from fulfill.models import ShippingCharge
+from sales.models import ChannelPayouts
 
 
 @login_required
@@ -25,6 +27,9 @@ def bookkeeping(request):
     context['shopify_unpaid'] = get_table('unpaid_channel')('SHOPIFY')
     context['shopify_comparison'] = get_table('channel_payout_comp')('SHOPIFY')
     
+    context['UPS_invoices'] = get_table('UPS_invoices')()
+    context['mis_UPS'] = get_table('UPS_wrong_acct')()
+
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
     context['incomplete_banking'] = cashflows.filter(counterparty=None).count()
     context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count() + \
@@ -49,5 +54,34 @@ def bookkeeping(request):
 
     context['ap_rows'] = ap_rows
     context['ar_rows'] = ar_rows
+
+    last_FRB = Cashflow.objects.all() \
+                               .order_by('-post_date') \
+                               .first() \
+                               .post_date \
+                               .strftime('%d-%b-%Y')
+
+    last_CITI = CreditCardTrans.objects.all() \
+                                       .order_by('-post_date') \
+                                       .first() \
+                                       .post_date \
+                                       .strftime('%d-%b-%Y')
+
+    last_UPS = ShippingCharge.objects \
+                             .filter(shipper__company_id='UPS') \
+                             .order_by('-ship_date') \
+                             .first() \
+                             .ship_date \
+                             .strftime('%d-%b-%Y')
+
+    last_SHOP = ChannelPayouts.objects \
+                             .filter(channel__counterparty_id='SHOPIFY') \
+                             .order_by('-payout_date') \
+                             .first() \
+                             .payout_date \
+                             .strftime('%d-%b-%Y')
+
+    context['upload_rows'] = [['Shopify Payouts', last_SHOP], ['Citicard', last_CITI],
+                              ['First Republic', last_FRB], ['UPS Billing', last_UPS]]
 
     return render_to_response('reports/bookkeeping.html', context, context_instance = RequestContext(request))
