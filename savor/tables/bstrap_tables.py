@@ -28,6 +28,21 @@ def UPS_invoices():
     return get_bstrap_table(data_url, row_defs)
 
 
+def UPS_wrong_acct():
+    data_url = "/api/fulfill/UPS_wrong_acct"
+
+    row_defs = [{'data_field': 'tracking_number', 'value': 'Tracking #', 'formatter': 'nameFormatter'},
+                {'data_field': 'invoice_number', 'value': 'Invoice #', 'formatter': 'nameFormatter'},
+                {'data_field': 'ship_date', 'value': 'Ship Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'order_related', 'value': 'Order Related?', 'formatter': 'nameFormatter'},
+                {'data_field': 'charge', 'value': 'Amount', 'formatter': 'nameFormatter'},
+                {'data_field': 'fulfillment', 'value': 'Fulfillment', 'formatter': 'nameFormatter'},
+                {'data_field': 'requested_ship_type', 'value': 'Requested', 'formatter': 'nameFormatter'},
+                {'data_field': 'warehouse', 'value': 'Warehouse', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
+
 def unpaid_channel(label):
     data_url = "/api/sales/unpaid_channel/%s/" % label
     row_defs = [{'data_field': 'label', 'value': 'ID', 'formatter': 'nameFormatter'},

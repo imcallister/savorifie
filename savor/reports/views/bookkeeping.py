@@ -25,6 +25,9 @@ def bookkeeping(request):
     context['shopify_unpaid'] = get_table('unpaid_channel')('SHOPIFY')
     context['shopify_comparison'] = get_table('channel_payout_comp')('SHOPIFY')
     
+    context['UPS_invoices'] = get_table('UPS_invoices')()
+    context['mis_UPS'] = get_table('UPS_wrong_acct')()
+
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
     context['incomplete_banking'] = cashflows.filter(counterparty=None).count()
     context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count() + \
@@ -49,5 +52,8 @@ def bookkeeping(request):
 
     context['ap_rows'] = ap_rows
     context['ar_rows'] = ar_rows
+
+    context['upload_rows'] = [['Shopify', '15-Sep-16'], ['Citicard', '1-Sep-16'],
+                              ['First Republic', '3-Sep-16'], ['UPS Billing', '31-Aug-16']]
 
     return render_to_response('reports/bookkeeping.html', context, context_instance = RequestContext(request))

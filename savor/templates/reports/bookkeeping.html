@@ -14,6 +14,59 @@
 
 <div class="container-fluid" id="wrapper">
     <div class="row">
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">File Uploads</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <div class="row">
+                            <div>
+                                <table class="table table-striped table-condensed">
+                                    <thead>
+                                        <th></th>
+                                        <th style = "text-align: right;">Loaded Thru</th>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in upload_rows %}
+                                            <tr>
+                                                <td>{{row.0}}</td>
+                                                <td align="right">
+                                                    {{row.1}}</a>
+                                                </td>
+                                            </tr>    
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Reconciliation Reports</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a class="btn btn-default" data-toggle="modal" data-target="#NC2Billing">View NC2 Billing</a></li>
+                            <li><a class="btn btn-default" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
+                            <li><a class="btn btn-default" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
+                            <li><a class="btn btn-default" data-toggle="modal" data-target="#shopifyUnpaid">View Unpaid Shopify</a></li>
+                            <li><a class="btn btn-default" data-toggle="modal" data-target="#shopifyComp">View Shopify Payouts</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
         <div class="col-md-12">    
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -24,8 +77,6 @@
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadFirstRepublic">Load First Republic</a></li>
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadMasterCard">Load Mastercard</a></li>
-                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#shopifyUnpaid">View Unpaid Shopify</a></li>
-                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#shopifyComp">View Shopify Payouts</a></li>
                         </ul>
                     </div>
                 
@@ -304,6 +355,28 @@
   </div>
 </div>
 
+<div class="modal fade" id="UPSInvoices" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <h3>UPS Invoices</h3>        
+        {{UPS_invoices}}
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="misUPS" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
+    <div class="modal-content">
+        <h3>Mis-billed UPS charges</h3>        
+        {{mis_UPS}}
+    </div>
+</div>
+
 {% endblock %}
 
 {% block sidebar %}
@@ -318,6 +391,8 @@
     <div class="panel-body">
         <ul class="nav nav-pills nav-stacked">
             <li><a class="btn btn-primary" data-toggle="modal" data-target="#NC2Billing">View NC2 Billing</a></li>
+            <li><a class="btn btn-primary" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
+            <li><a class="btn btn-primary" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
         </ul>
     </div>
 </div>
