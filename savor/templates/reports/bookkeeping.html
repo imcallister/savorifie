@@ -45,7 +45,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">    
+        <div class="col-md-4">    
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Reconciliation Reports</h3>
@@ -53,11 +53,26 @@
                 <div class="panel-body">
                     <div>
                         <ul class="nav nav-pills nav-stacked">
-                            <li><a class="btn btn-default" data-toggle="modal" data-target="#NC2Billing">View NC2 Billing</a></li>
-                            <li><a class="btn btn-default" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
-                            <li><a class="btn btn-default" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
-                            <li><a class="btn btn-default" data-toggle="modal" data-target="#shopifyUnpaid">View Unpaid Shopify</a></li>
-                            <li><a class="btn btn-default" data-toggle="modal" data-target="#shopifyComp">View Shopify Payouts</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#shopifyUnpaid">View Unpaid Shopify</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#shopifyComp">View Shopify Payouts</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Uploads</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadFirstRepublic">Load First Republic</a></li>
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadMasterCard">Load Mastercard</a></li>
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadUPS">Load UPS</a></li>
                         </ul>
                     </div>
                 </div>
@@ -67,50 +82,41 @@
 
 
     <div class="row">
-        <div class="col-md-12">    
+        <div class="col-md-8">    
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">Expenses</h3>
                 </div>
                 <div class="panel-body">
-                    <div class="col-md-3">
-                        <ul class="nav nav-pills nav-stacked">
-                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadFirstRepublic">Load First Republic</a></li>
-                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadMasterCard">Load Mastercard</a></li>
-                        </ul>
-                    </div>
-                
-                    <div class="col-md-8">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="panel panel-danger">
-                                    <div class="panel-heading text-center">
-                                        <h3 class="panel-title">INCOMPLETE</br>EXPENSES</h3>
-                                    </div>
-                                    <div class="panel-body text-center">
-                                        <font size="20"><a href='/admin/base/expense/?unmatched=UNMATCHED'>{{incomplete_expenses}}</a></font>
-                                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="panel panel-danger">
+                                <div class="panel-heading text-center">
+                                    <h3 class="panel-title">INCOMPLETE</br>EXPENSES</h3>
+                                </div>
+                                <div class="panel-body text-center">
+                                    <font size="20"><a href='/admin/base/expense/?unmatched=UNMATCHED'>{{incomplete_expenses}}</a></font>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-md-4">
-                                <div class="panel panel-warning">
-                                    <div class="panel-heading text-center">
-                                        <h3 class="panel-title">INCOMPLETE</br>BANKING ENTRIES</h3>
-                                    </div>
-                                    <div class="panel-body text-center">
-                                        <font size="20"><a href='/admin/base/cashflow/?unmatched=UNMATCHED'>{{incomplete_banking}}</a></font>
-                                    </div>
+                        <div class="col-md-4">
+                            <div class="panel panel-warning">
+                                <div class="panel-heading text-center">
+                                    <h3 class="panel-title">INCOMPLETE</br>BANKING ENTRIES</h3>
+                                </div>
+                                <div class="panel-body text-center">
+                                    <font size="20"><a href='/admin/base/cashflow/?unmatched=UNMATCHED'>{{incomplete_banking}}</a></font>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <div class="panel panel-warning">
-                                    <div class="panel-heading text-center">
-                                        <h3 class="panel-title">INCOMPLETE</br>CREDIT CARD ENTRIES</h3>
-                                    </div>
-                                    <div class="panel-body text-center">
-                                        <font size="20"><a href='/admin/base/creditcardtrans/?unmatched=UNMATCHED'>{{incomplete_mcard}}</a></font>
-                                    </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="panel panel-warning">
+                                <div class="panel-heading text-center">
+                                    <h3 class="panel-title">INCOMPLETE</br>CREDIT CARD ENTRIES</h3>
+                                </div>
+                                <div class="panel-body text-center">
+                                    <font size="20"><a href='/admin/base/creditcardtrans/?unmatched=UNMATCHED'>{{incomplete_mcard}}</a></font>
                                 </div>
                             </div>
                         </div>
@@ -265,6 +271,29 @@
   </div>
 </div>
 
+<div class="modal fade" id="loadUPS" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload UPS charges</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+
+        <form role='form' enctype="multipart/form-data" method="post" action="/importers/ups_upload/">{% csrf_token %}
+            <div class="form-group">    
+                {{upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
 <div class="modal fade" id="loadMasterCard" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -385,15 +414,6 @@
       <a class="btn btn-success btn-lg" data-toggle="modal" data-target="#help">
         <span style="font-size:2em;" class="glyphicon  glyphicon-question-sign" aria-hidden="true"></span>
       </a>
-    </div>
-</div>
-<div class="panel panel-default">
-    <div class="panel-body">
-        <ul class="nav nav-pills nav-stacked">
-            <li><a class="btn btn-primary" data-toggle="modal" data-target="#NC2Billing">View NC2 Billing</a></li>
-            <li><a class="btn btn-primary" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
-            <li><a class="btn btn-primary" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
-        </ul>
     </div>
 </div>
 {% endblock %}
