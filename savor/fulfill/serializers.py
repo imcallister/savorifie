@@ -13,6 +13,7 @@ class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['fulfillment', 'fulfillment__order__channel__counterparty',
                               ]
     fulfillment = serializers.StringRelatedField()
+    fulfillment_id = serializers.SerializerMethodField()
     warehouse = serializers.SerializerMethodField()
     requested_ship_type = serializers.SerializerMethodField()
 
@@ -21,6 +22,12 @@ class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
             return str(obj.fulfillment.warehouse)
         else:
             return ''
+
+    def get_fulfillment_id(self, obj):
+        if obj.fulfillment:
+            return str(obj.fulfillment.id)
+        else:
+            return
 
     def get_requested_ship_type(self, obj):
         if obj.fulfillment:
@@ -32,7 +39,7 @@ class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         model = models.ShippingCharge
         fields = ('account', 'tracking_number', 'invoice_number',
                   'ship_date', 'charge', 'order_related', 'comment',
-                  'fulfillment', 'requested_ship_type', 'warehouse')
+                  'fulfillment', 'fulfillment_id', 'requested_ship_type', 'warehouse')
 
 class FulfillUpdateSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['shipper']

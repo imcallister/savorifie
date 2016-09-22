@@ -28,11 +28,11 @@ def order_drilldown(request, order_id):
 
     context = {}
     context['title'] = 'Orders'
-    context['label'] = sale_info['label']
-    context['channel'] = sale_info['channel']
-    context['items_string'] = sale_info['items_string']
-    context['gift_wrapping'] = sale_info['gift_wrapping']
-    context['unfulfilled'] = sale_info['unfulfilled_string']
+    context['order_id'] = order_id
+
+    order_flds = ['label', 'channel', 'items_string', 'shipping_name',
+                  'shipping_company', 'gift_wrapping', 'unfulfilled_string']
+    context['order_info'] = dict((f, sale_info[f]) for f in order_flds)
 
     context['unit_sales'] = [{'quantity': u['quantity'],
                               'unit_price': u['unit_price'],

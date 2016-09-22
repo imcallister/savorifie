@@ -27,6 +27,19 @@ def UPS_invoices():
             ]
     return get_bstrap_table(data_url, row_defs)
 
+def fulfill_no_shipcharge():
+    data_url = "/api/fulfill/fulfill_no_shipcharge"
+    row_defs = [{'data_field': 'fulfillment_id', 'value': 'Fulfill ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'order', 'value': 'Order', 'formatter': 'nameFormatter'},
+                {'data_field': 'request_date', 'value': 'Request Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'warehouse', 'value': 'Warehouse', 'formatter': 'nameFormatter'},
+                {'data_field': 'ship_type', 'value': 'Ship Type', 'formatter': 'nameFormatter'},
+                {'data_field': 'bill_to', 'value': 'Billing Acct', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_name', 'value': 'Ship Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_company', 'value': 'Ship Company', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
 
 def UPS_wrong_acct():
     data_url = "/api/fulfill/UPS_wrong_acct"

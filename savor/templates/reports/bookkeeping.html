@@ -3,6 +3,26 @@
 {% load humanize %}
 
 
+{% block extrahead %}
+<style>
+    .modal.modal-wide .modal-dialog {
+      width: 90%;
+    }
+    .modal-wide .modal-body {
+      overflow-y: auto;
+    }
+
+    /* irrelevant styling */
+    body { text-align: center; }
+    body p { 
+      max-width: 400px; 
+      margin: 20px auto; 
+    }
+    #tallModal .modal-body p { margin-bottom: 900px }
+</style>
+{% endblock %}
+
+
 {% block breadcrumb %}
 <li class="active">Home</li>
 
@@ -48,23 +68,6 @@
         <div class="col-md-4">    
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Reconciliation Reports</h3>
-                </div>
-                <div class="panel-body">
-                    <div>
-                        <ul class="nav nav-pills nav-stacked">
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#shopifyUnpaid">View Unpaid Shopify</a></li>
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#shopifyComp">View Shopify Payouts</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">    
-            <div class="panel panel-default">
-                <div class="panel-heading">
                     <h3 class="panel-title">Uploads</h3>
                 </div>
                 <div class="panel-body">
@@ -78,6 +81,23 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Shipping Charge Reports</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#fulNoSC">Fulfills with no Shipping Charge</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 
 
@@ -124,6 +144,26 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Shopify Receivables Reports</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li>
+                                <a class="btn btn-info" data-toggle="modal" data-target="#shopifyUnpaid">
+                                    View Unpaid Shopify
+                                </a>
+                            </li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#shopifyComp">View Shopify Payouts</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 
     <div class="row">
@@ -384,27 +424,10 @@
   </div>
 </div>
 
-<div class="modal fade" id="UPSInvoices" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <h3>UPS Invoices</h3>        
-        {{UPS_invoices}}
-      </div>
-      
-    </div>
-  </div>
-</div>
+{{fulfill_no_shipcharge}}
+{{UPS_invoices}}
+{{mis_UPS}}
 
-<div class="modal fade" id="misUPS" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
-    <div class="modal-content">
-        <h3>Mis-billed UPS charges</h3>        
-        {{mis_UPS}}
-    </div>
-</div>
 
 {% endblock %}
 

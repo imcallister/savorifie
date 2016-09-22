@@ -2,11 +2,40 @@ import itertools
 from decimal import Decimal
 
 from .model_api import *
-from fulfill.models import ShippingCharge
-from fulfill.serializers import ShippingChargeSerializer
+from fulfill.models import ShippingCharge, Fulfillment
+from fulfill.serializers import ShippingChargeSerializer, FulfillmentSerializer
+
+
+def fulfill_no_shipcharge(qstring):
+    with_shipcharge = [s['fulfillment_id'] for s in shippingcharge({}) \
+                       if s['fulfillment_id']]
+    qs = Fulfillment.objects \
+                    .exclude(id__in=with_shipcharge) \
+                    .exclude(ship_type__label__in=['BY_HAND'])
+
+    qs = FulfillmentSerializer.setup_eager_loading(qs)
+    data = FulfillmentSerializer(qs, many=True).data
+
+    def _get_row(row):
+        out = {}
+        out['fulfillment_id'] = str(row['id'])
+        out['order'] = row['order']['label']
+        out['request_date'] = row['request_date']
+        out['shipping_name'] = row['order']['shipping_name']
+        out['shipping_company'] = row['order']['shipping_company']
+        try:
+            out['ship_type'] = row.get('ship_type').get('label')
+        except:
+            out['ship_type'] = ''
+        out['warehouse'] = row.get('warehouse')
+        out['bill_to'] = row['bill_to']
+        return out
+
+    return [_get_row(f) for f in data]
+
 
 def UPS_invoices(qstring):
-    ship_charges = sorted(shippingcharge({}), key=lambda x: x['invoice_number'])
+    ship_charges = sorted(shippingcharge({'shipper': 'UPS'}), key=lambda x: x['invoice_number'])
     by_invoice = dict((k, list(v)) for k, v in itertools.groupby(ship_charges, lambda x: x['invoice_number']))
 
     def _get_line(k, v):
@@ -18,7 +47,7 @@ def UPS_invoices(qstring):
 
 
 def UPS_wrong_acct(qstring):
-    flfls = fulfillment({})
+    flfls = fulfillment({'shipper': 'UPS'})
 
     def _filter(flfl):
         if f['bill_to']:

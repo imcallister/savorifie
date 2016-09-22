@@ -17,8 +17,13 @@ logger = logging.getLogger('default')
 
 @dispatch(dict)
 def shippingcharge(qstring):
+
     qs = ShippingCharge.objects \
                        .all()
+
+    if qstring.get('shipper'):
+        qs = qs.filter(shipper__company__id=qstring.get('shipper'))
+
     qs = ShippingChargeSerializer.setup_eager_loading(qs)
     return list(ShippingChargeSerializer(qs, many=True).data)
 
@@ -101,6 +106,9 @@ def fulfillment(qstring):
 
     if qstring.get('warehouse'):
         qs = qs.filter(warehouse__label=qstring.get('warehouse'))
+
+    if qstring.get('shipper'):
+        qs = qs.filter(ship_type__shipper__company__id=qstring.get('shipper'))
 
     if 'status' in qstring:
         qs = qs.filter(status__in=qstring['status'].split(','))

@@ -11,66 +11,44 @@
 
 {% block content %}
 
-<link href="/static/base/css/dashboard_styles.css" rel="stylesheet">
-<!--
-This is where bootstrap starts to get a bit demented.   Surely not all
-these divs are needed.
-
-
--->
-
-<h2>Order Details -- {{label}}</h2>
-
 <div class="container-fluid" id="wrapper">
     <div class="row">
-        <div class="col-md-6">
-            <div class="panel panel-default">
+        <div class="col-md-12">
+            <div class="panel panel-success">
                 <div class="panel-heading">
-                    <div class="panel-title">Order Details</div>
+                    <div class="panel-title">
+                        <h3>Order Details -- {{label}}
+                            <a href="/admin/sales/sale/{{order_id}}">Edit ....</a>
+                        </h3>
+
+                    </div>
                 </div>
                 <div class="panel-body">
-                    <table class="table table-striped table-condensed table-hover table-bordered">
-                        <tr>
-                            <td>Channel</td>
-                            <td>{{channel}}</td>
-                        </tr>
-                        <tr>
-                            <td>SKUS</td>
-                            <td>{{items_string}}</td>
-                        </tr>
-                        <tr>
-                            <td>Unfulfilled items</td>
-                            <td>{{unfulfilled_string}}</td>
-                        </tr>
-                        <tr>
-                            <td>Gift Wrapping</td>
-                            <td>{{gift_wrapping}}</td>
-                        </tr>
-                    </table>
-
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div class="panel-title">Amounts</div>
-                </div>
-                <div class="panel-body">
-                    <table class="table table-striped table-condensed table-hover table-bordered">
-                        <th>
-                            <td>Quantity</td>
-                            <td>Unit Price</td>
-                        </th>
-                        {% for u in unit_sales %}
-                        <tr>
-                            <td>{{u.sku}}</td>
-                            <td>{{u.quantity}}</td>
-                            <td>{{u.unit_price}}</td>
-                        </tr>
-                        {% endfor %}
-                    </table>
-
+                    <div class="col-md-6">
+                        <table class="table table-striped table-condensed table-hover">
+                            {% for k, v in order_info.items %}
+                            <tr>
+                                <td>{{k}}</td>
+                                <td>{{v}}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-striped table-condensed table-hover table-bordered">
+                            <th>
+                                <td>Quantity</td>
+                                <td>Unit Price</td>
+                            </th>
+                            {% for u in unit_sales %}
+                            <tr>
+                                <td>{{u.sku}}</td>
+                                <td>{{u.quantity}}</td>
+                                <td>{{u.unit_price}}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -79,11 +57,21 @@ these divs are needed.
     <div class="row">
         <div class="col-md-12">
             {% for fulfill in fulfillment_list %}
-                <div class="panel panel-default">
+                <div class="panel panel-info">
                     <div class="panel-heading">
-                        <h3>Fulfillment #: {{fulfill.id}}.&nbsp;&nbsp;&nbsp;Batch #: {{fulfill.batch_id}}</h3>
+                        <h3>
+                            Fulfillment #: {{fulfill.id}}
+                            <a href="/admin/fulfill/fulfillment/{{fulfill.id}}">Edit...</a>
+                            /
+                            Batch #: {{fulfill.batch_id}}
+                            <a href="/admin/fulfill/batchrequest/{{fulfill.batch_id}}">Edit...</a>
+                        </h3>
+
+
+                            
                     </div>
                     <div class="panel-body">
+                        
                         <h3>Request</h3>
                         <table class="table table-striped table-condensed table-hover table-bordered">
                             <tr>
