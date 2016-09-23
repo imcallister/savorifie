@@ -1,0 +1,32 @@
+{
+  "name": "savorifie",
+  "version": "1.0.0",
+  "description": "Implementation of a django-based accounting and reporting system with a node backend for the ledger.",
+  "main": "index.js",
+  "directories": {
+    "man": "man"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imcallister/savorifie.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/imcallister/savorifie/issues"
+  },
+  "homepage": "https://github.com/imcallister/savorifie#readme",
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-core": "^6.14.0",
+    "babel-loader": "^6.2.5",
+    "babel-preset-react": "^6.11.1",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "webpack": "^1.13.2",
+    "webpack-bundle-tracker": "0.0.93"
+  }
+}

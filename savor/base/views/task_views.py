@@ -5,7 +5,7 @@ from django.template import RequestContext
 from django.http import JsonResponse
 
 from accountifie.celery import background_task
-from accountifie.celery.celery import app as celery_app
+from accountifie.celery.celery_main import app as celery_app
 
 @celery_app.task
 def tri_11():
