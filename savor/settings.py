@@ -143,6 +143,7 @@ PDFOUT = os.path.join(DATA_ROOT, PDFOUT_PATH)
 # Additional locations of static files
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
+    os.path.join(ENVIRON_DIR, 'assets')
 )
 
 # List of finder classes that know how to find static files in
@@ -163,6 +164,12 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+WEBPACK_LOADER = {
+    'DEFAULT': {
+        'BUNDLE_DIR_NAME': 'bundles/',
+        'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.json'),
+    }
+}
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -217,6 +224,7 @@ INSTALLED_APPS = (
     'accountifie.dashboard',
 
     'djangobower',
+    'webpack_loader',
     
     'django_nose',
     'django_extensions',
