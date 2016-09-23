@@ -24,6 +24,9 @@ def shippingcharge(qstring):
     if qstring.get('shipper'):
         qs = qs.filter(shipper__company__id=qstring.get('shipper'))
 
+    if qstring.get('fulfill'):
+        qs = qs.filter(fulfillment_id=qstring.get('fulfill'))
+
     qs = ShippingChargeSerializer.setup_eager_loading(qs)
     return list(ShippingChargeSerializer(qs, many=True).data)
 
