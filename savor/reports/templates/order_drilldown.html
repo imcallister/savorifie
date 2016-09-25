@@ -26,21 +26,48 @@
                 <div class="panel-body">
                     <div class="col-md-6">
                         <table class="table table-condensed table-hover">
-                            <tr><td>{{sale_label}} //
-                                <a href="/admin/sales/sale/{{order_id}}">Edit</a>
-                            </td></tr>
-                            <tr><td>{{shipping_to}}</td></tr>
-                            <tr><td>{{items}}</td></tr>
-                            <tr><td>{{unfulfilled_items}}</td></tr>
-                            <tr><td>{{sale_date}}</td></tr>
+                            <tr>
+                                <td style="text-align:left;">Sale ID:</td>
+                                <td style="text-align:right;">
+                                    <a href="/admin/sales/sale/{{sale_id}}">{{sale_label}}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Ship to:</td>
+                                <td style="text-align:right;">{{shipping_to}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Items Ordered:</td>
+                                <td style="text-align:right;">{{items}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Items to be Fulfilled:</td>
+                                <td style="text-align:right;">{{unfulfilled_items}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Sale Date:</td>
+                                <td style="text-align:right;">{{sale_date}}</td>
+                            </tr>
                         </table>
                     </div>
                     <div class="col-md-6">
                         <table class="table table-condensed table-hover">
-                            <tr><td>{{special_sale}}</td></tr>
-                            <tr><td>{{giftwrap}}</td></tr>
-                            <tr><td>{{gift_message}}</td></tr>
-                            <tr><td>{{sale_comment}}</td></tr>
+                            <tr>
+                                <td style="text-align:left;">Special Sale:</td>
+                                <td style="text-align:right;">{{special_sale}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Giftwrap:</td>
+                                <td style="text-align:right;">{{giftwrap}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Gift Message:</td>
+                                <td style="text-align:right;">{{gift_message}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Sale Comment:</td>
+                                <td style="text-align:right;">{{sale_comment}}</td>
+                            </tr>
                         </table>
                     </div>
                 </div>
@@ -57,26 +84,60 @@
                     <div class="panel-body">
                         <div class="col-md-6">
                             <table class="table table-condensed table-hover">
-                                <tr><td>Fulfillment #: {{fulfill.id}} //
-                                    <a href="/admin/fulfill/fulfillment/{{fulfill.id}}">Edit</a>
-                                </td></tr>
-                                <tr><td>Batch #: {{fulfill.batch_id}} //
+                                <tr>
+                                    <td style="text-align:left;">
+                                        Fulfillment #:
+                                    </td>
+                                    <td style="text-align:right;">
+                                         {{fulfill.id}} //
+                                        <a href="/admin/fulfill/fulfillment/{{fulfill.id}}">Edit</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">
+                                        Batch #:
+                                    </td>
+                                    <td style="text-align:right;">
+                                        {{fulfill.batch_id}} //
                                         <a href="/admin/fulfill/batchrequest/{{fulfill.batch_id}}">Edit</a>
-                                </td></tr>
-                                <tr><td>{{fulfill.warehouse}}</td></tr>
-                                <tr><td>{{fulfill.request_date}}</td></tr>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Warehouse:</td>
+                                    <td style="text-align:right;">{{fulfill.warehouse}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Requested:</td>
+                                    <td style="text-align:right;">{{fulfill.request_date}}</td>
+                                </tr>
                             </table>
                         </div>
                         <div class="col-md-6">
                             <table class="table table-condensed table-hover">
-                                <tr><td>{{fulfill.items_requested}}</td></tr>
-                                <tr><td>{{fulfill.status}}</td></tr>
-                                <tr><td>{{fulfill.ship_type}}</td></tr>
-                                <tr><td>{{fulfill.bill_to}}</td></tr>
+                                <tr>
+                                    <td style="text-align:left;">Items Requested:</td>
+                                    <td style="text-align:right;">{{fulfill.items_requested}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Status:</td>
+                                    <td style="text-align:right;">{{fulfill.status}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Ship Type:</td>
+                                    <td style="text-align:right;">{{fulfill.ship_type}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Bill to:</td>
+                                    <td style="text-align:right;">{{fulfill.bill_to}}</td>
+                                </tr>
                                 {% if fulfill.ship_info %}
-                                    <tr><td># packages: {{fulfill.num_packages}}
-                                             <a data-toggle="modal" data-target="#shipInfo">View Details</a>
-                                    </td></tr>
+                                    <tr>
+                                        <td style="text-align:left;"># packages:</td>
+                                        <td style="text-align:right;">
+                                            {{fulfill.num_packages}}
+                                            <a data-toggle="modal" data-target="#shipInfo">(View Details)</a>
+                                        </td>
+                                    </tr>
                                 {% else %}
                                     <tr><td>
                                         No shipping info.
@@ -90,13 +151,10 @@
             {% endfor %}
         </div>
     </div><!--/.row-->
-    
-</div>
-    
-
 </div>
 
 
+{{shipInfo}}
 
 
 
@@ -121,58 +179,5 @@
     <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
     <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
     <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
-      
-  
-
-
-    <script type="text/javascript">
-    
-    $(document).ready(cash_bals_chart("{% url 'cash_balances' %}", 'cash_bals_panel'));
-    $(document).ready(expense_trends("{% url 'expense_trends' %}", 'expense_trends_panel'));
-
-    
-    $(function() {
-        $('#easypiechart-BE1').easyPieChart({
-            scaleColor: false,
-            barColor: '#8E4585'
-        });
-    });
-
-    $(function() {
-        $('#easypiechart-BE2').easyPieChart({
-            scaleColor: false,
-            barColor: '#229CE4'
-        });
-    });
-
-    $(function() {
-       $('#easypiechart-BE3').easyPieChart({
-           scaleColor: false,
-           barColor: '#778899'
-       });
-    });
-
-    $(function() {
-        $('#easypiechart-SYE1').easyPieChart({
-            scaleColor: false,
-            barColor: '#8E4585'
-        });
-    });
-
-    $(function() {
-        $('#easypiechart-SYE2').easyPieChart({
-            scaleColor: false,
-            barColor: '#229CE4'
-        });
-    });
-
-    $(function() {
-       $('#easypiechart-SYE3').easyPieChart({
-           scaleColor: false,
-           barColor: '#778899'
-       });
-    });
-
-    </script>
 
 {% endblock %}

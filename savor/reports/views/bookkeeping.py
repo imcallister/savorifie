@@ -3,11 +3,13 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 
 from accountifie.common.api import api_func
+from accountifie.common.view_components import basic_modal, bstrap_table
 from accountifie.query.query_manager import QueryManager
 from accountifie.toolkit.utils import extractDateRange, get_company, get_modal
 from accountifie.toolkit.forms import FileForm
 from accountifie.common.table import get_table
 from accountifie.gl.models import ExternalAccount
+
 from base.models import Expense, Cashflow, CreditCardTrans
 from fulfill.models import ShippingCharge
 from sales.models import ChannelPayouts
@@ -24,18 +26,24 @@ def bookkeeping(request):
     chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
 
-    context['shopify_unpaid'] = get_table('unpaid_channel')('SHOPIFY')
-    context['shopify_comparison'] = get_table('channel_payout_comp')('SHOPIFY')
+    context['shopify_unpaid'] = basic_modal(get_table('unpaid_channel')('SHOPIFY'),
+                                                      'Unpaid Shopify',
+                                                      'shopifyUnpaid')
 
-    context['mis_UPS'] = get_modal(get_table('UPS_wrong_acct')(),
-                                   'Mis-billed UPS charges',
-                                   'misUPS')
-    context['UPS_invoices'] = get_modal(get_table('UPS_invoices')(),
-                                        'UPS Invoices',
-                                        'UPSInvoices')
-    context['fulfill_no_shipcharge'] = get_modal(get_table('fulfill_no_shipcharge')(),
-                                                 'Fulfillments missing shipping charge',
-                                                 'fulNoSC')
+    context['shopify_comparison'] = basic_modal(get_table('channel_payout_comp')('SHOPIFY'),
+                                                'Shopify Comparison',
+                                                'shopifyComp')
+
+    context['mis_UPS'] = basic_modal(bstrap_table('UPS_wrong_acct')(),
+                                     'Mis-billed UPS charges',
+                                     'misUPS')
+
+    context['UPS_invoices'] = basic_modal(bstrap_table('UPS_invoices')(),
+                                          'UPS Invoices',
+                                          'UPSInvoices')
+    context['fulfill_no_shipcharge'] = basic_modal(get_table('fulfill_no_shipcharge')(),
+                                                   'Fulfillments missing shipping charge',
+                                                   'fulNoSC')
 
 
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()

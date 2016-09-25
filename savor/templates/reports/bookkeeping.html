@@ -1,5 +1,6 @@
 {% extends base_template %}
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
 {% load humanize %}
 
 
@@ -13,7 +14,6 @@
     }
 
     /* irrelevant styling */
-    body { text-align: center; }
     body p { 
       max-width: 400px; 
       margin: 20px auto; 
@@ -365,6 +365,10 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
+        <div id="the-help"></div>
+        <div id="the-help2"></div>
+        {% render_bundle 'main' %}
+        <!--
         <h3>Payables and Receivables</h3>        
         Payables and receivables shows net money owed to or from a counterparty. There may be a combination of money due to and from ... e.g. for Shopify there are monthly charges for which expenses must be created and receivables which correspond to the proceeds from sales (after Shopify fees).
 
@@ -382,48 +386,18 @@
             There are no book-keeping entries required -- this report is for help in tracking outstanding amounts owed to Shopify. Bank activity needs to be up to date in order to track this.
 
         </p>
+        -->
       </div>
       
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="unreconciled" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-content">
-        {{unreconciled}}
-    </div>
-</div>
 
 
-<div class="modal fade" id="shopifyUnpaid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-content">
-        {{shopify_unpaid}}
-    </div>
-</div>
-
-
-<div class="modal fade" id="shopifyComp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-content">
-        {{shopify_comparison}}
-    </div>
-</div>
-
-
-<div class="modal fade" id="NC2Billing" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <h3>NC2 Handling Charges</h3>        
-        {{NC2Billing}}
-      </div>
-      
-    </div>
-  </div>
-</div>
-
+<!-- MODAL COMPONENTS -->
+{{shopify_unpaid}}
+{{shopify_comparison}}
 {{fulfill_no_shipcharge}}
 {{UPS_invoices}}
 {{mis_UPS}}
@@ -442,6 +416,9 @@
 {% endblock %}
 
 {% block extrajs %}
+<script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+<!--
+
     <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
     <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
     <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
@@ -455,4 +432,5 @@
     <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
     <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
     <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
+-->
 {% endblock %}
