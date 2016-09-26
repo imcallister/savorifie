@@ -7,7 +7,8 @@
     "man": "man"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build-local": "webpack --config webpack.local.config.js --watch",
+    "build-production": "webpack --config webpack.prod.config.js --progress --colors"
   },
   "repository": {
     "type": "git",
@@ -22,17 +23,15 @@
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-core": "^6.14.0",
-    "babel-loader": "^6.2.5",
+    "babel-loader": "^6.2.1",
+    "babel-preset-es2015": "^6.14.0",
     "babel-preset-react": "^6.11.1",
+    "fixed-data-table": "^0.6.3",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-hot-loader": "^3.0.0-beta.5",
     "webpack": "^1.13.2",
     "webpack-bundle-tracker": "0.0.93",
     "webpack-dev-server": "^1.16.1"
-  },
-  "scripts": {
-    "build-local": "webpack --config webpack.local.config.js --watch",
-    "build-production": "webpack --config webpack.prod.config.js --progress --colors"
   }
 }
