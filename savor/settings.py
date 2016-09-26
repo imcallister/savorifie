@@ -60,6 +60,10 @@ try:
 except ImportError:
     DB_HOST = 'localhost'
 
+# override database variables" line="{{ item }}"
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
