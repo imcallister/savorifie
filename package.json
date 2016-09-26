@@ -30,5 +30,9 @@
     "webpack": "^1.13.2",
     "webpack-bundle-tracker": "0.0.93",
     "webpack-dev-server": "^1.16.1"
+  },
+  "scripts": {
+    "build-local": "webpack --config webpack.local.config.js --watch",
+    "build-production": "webpack --config webpack.prod.config.js --progress --colors"
   }
 }

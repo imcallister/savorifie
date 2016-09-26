@@ -21,3 +21,4 @@ savor/localsettings.py
 load_data.sh
 load_fixtures
 node_modules/
+assets/bundles
