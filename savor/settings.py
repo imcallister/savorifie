@@ -40,7 +40,6 @@ except ImportError:
 
 TEMPLATE_DEBUG = False
 
-
 # DATABASE SETTINGS
 try:
     from localsettings import DB_NAME
@@ -87,14 +86,14 @@ if DEBUG:
     WEBPACK_LOADER = {
         'DEFAULT': {
             'BUNDLE_DIR_NAME': 'bundles/',
-            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.json'),
+            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.local.json'),
         }
     }
 else:
     WEBPACK_LOADER = {
         'DEFAULT': {
             'BUNDLE_DIR_NAME': 'dist/',
-            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats-prod.json'),
+            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.prod.json'),
         }
     }
 

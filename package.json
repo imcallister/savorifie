@@ -28,8 +28,10 @@
     "babel-preset-react": "^6.11.1",
     "fixed-data-table": "^0.6.3",
     "react": "^15.3.2",
+    "react-bootstrap-table": "^2.5.3",
     "react-dom": "^15.3.2",
     "react-hot-loader": "^3.0.0-beta.5",
+    "responsive-fixed-data-table": "^2.0.0",
     "webpack": "^1.13.2",
     "webpack-bundle-tracker": "0.0.93",
     "webpack-dev-server": "^1.16.1"

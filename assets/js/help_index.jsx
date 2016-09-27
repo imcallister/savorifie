@@ -6,6 +6,5 @@ var CommentBox = require('./tutorial')
 var DataTable = require('./fdatatable')
 var BSTable = require('./bstable')
 
-
 ReactDOM.render(<BHelp/>, document.getElementById('the-help'));
 ReactDOM.render(<BSTable/>, document.getElementById('the-help2'));

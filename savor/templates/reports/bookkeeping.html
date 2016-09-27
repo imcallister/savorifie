@@ -5,6 +5,9 @@
 
 
 {% block extrahead %}
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/fixed-data-table.min.css">
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/react-bootstrap-table-all.min.css">
+
 <style>
     .modal.modal-wide .modal-dialog {
       width: 90%;
@@ -18,8 +21,11 @@
       max-width: 400px; 
       margin: 20px auto; 
     }
-    #tallModal .modal-body p { margin-bottom: 900px }
+    #tallModal .modal-body p { margin-bottom: 900px };
+
 </style>
+
+
 {% endblock %}
 
 
@@ -34,7 +40,7 @@
 
 <div class="container-fluid" id="wrapper">
     <div class="row">
-        <div class="col-md-4">    
+        <div class="col-md-4">  
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">File Uploads</h3>
@@ -366,30 +372,10 @@
       </div>
       <div class="modal-body">
         <div id="the-help"></div>
+        <h3>Testing the Bootstrap React component</h3>
         <div id="the-help2"></div>
-        <div id="the-help3"></div>
-        {% render_bundle 'main' %}
-        <!--
-        <h3>Payables and Receivables</h3>        
-        Payables and receivables shows net money owed to or from a counterparty. There may be a combination of money due to and from ... e.g. for Shopify there are monthly charges for which expenses must be created and receivables which correspond to the proceeds from sales (after Shopify fees).
-
-        <h3>Payables</h3>
-        <p>
-            Bank payments are loaded first and so most often we have an outgoing cash payment without the matching expense. This will show up as a negative amount here. When there are no more payables showing here then it is a sign that all necessary expenses have been created.
-            </br>
-            Choosing checkbox and clicking bulk create will create expenses for that counterparty. It will not create duplicates. But we don't create expenses for all counterparties. Positive amounts show that we have net receivables. This should be the minority. The difficult ones normally require some accounting expertise so contact Ian for any that are unclear.
-
-        </p>
-        <h3>Receivables</h3>
-        <p>
-            This will mostly show money due from channels. Clicking on the link will show the history with that channel.
-            </br>
-            There are no book-keeping entries required -- this report is for help in tracking outstanding amounts owed to Shopify. Bank activity needs to be up to date in order to track this.
-
-        </p>
-        -->
+        {% render_bundle 'help' %}
       </div>
-      
     </div>
   </div>
 </div>
