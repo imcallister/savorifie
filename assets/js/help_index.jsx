@@ -6,6 +6,7 @@ var BHelp = require('./help')
 var CommentBox = require('./tutorial') 
 var DataTable = require('./fdatatable')
 var BSTable = require('./remote_table')
+var formatters = require('./helpers/formatters')
 
 ReactDOM.render(<BHelp/>, document.getElementById('the-help'));
 
@@ -18,8 +19,8 @@ function dateFormatter(cell, row){
         };
 
 var tbl_columns = [{'fld': 'invoice_number', 'label': 'Invoice #'},
-                   {'fld': 'last_date', 'label': 'Last Date', formatter: dateFormatter},
-                   {'fld': 'charge', 'label': 'Charge', formatter: priceFormatter}
+                   {'fld': 'last_date', 'label': 'Last Date', formatter: formatters.date},
+                   {'fld': 'charge', 'label': 'Charge', formatter: formatters.price}
                    ]
 
 ReactDOM.render(<BSTable source="/api/fulfill/UPS_invoices/?raw=true"
