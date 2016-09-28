@@ -1,10 +1,9 @@
 var React = require('react')
 var ReactDOM = require('react-dom')
-var App = require('./app')
-var BHelp = require('./help') 
-var CommentBox = require('./tutorial') 
-var DataTable = require('./fdatatable')
-var BSTable = require('./remote_table')
+
+var BHelp = require('../help') 
+var BSTable = require('../acctifieTableContainer')
+
 var formatters = require('./helpers/formatters')
 
 ReactDOM.render(<BHelp/>, document.getElementById('the-help'));
