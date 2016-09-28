@@ -1,5 +1,4 @@
 {% extends base_template %}
-{% load render_bundle from webpack_loader %}
 {% load staticfiles %}
 
 
@@ -11,8 +10,6 @@
 
 
 {% block content %}
-<div id="react-app"></div>
-{% render_bundle 'main' %}
 
 <div class="container-fluid" id="wrapper">
     <div class="row">

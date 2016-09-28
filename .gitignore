@@ -22,3 +22,5 @@ load_data.sh
 load_fixtures
 node_modules/
 assets/bundles
+celerybeat-schedule.db
+npm-debug.log
