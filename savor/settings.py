@@ -1,38 +1,35 @@
 # Project project Django settings.
-import os, sys, json, pandas
+import os
+import sys
+import pandas
 
+
+# CELERY SETUP
 import djcelery
 djcelery.setup_loader()
- 
 BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'json'
 
-#CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
-
-
 # stop those annoying warnings
 pandas.options.mode.chained_assignment = None
 
+# PATH SETUP
 PROJECT_NAME = 'savor'
-LOGO = 'base/img/savor_logo.png'
-SITE_TITLE = 'savorifie'
-
 PROJECT_DIR = os.path.realpath(os.path.dirname(__file__))
 sys.path.append(PROJECT_DIR)
-
 ENVIRON_DIR = os.path.realpath(os.path.join(PROJECT_DIR, '..'))
-
 CLIENT_PROJECT = os.path.split(ENVIRON_DIR)[1]
 
-# can be overrided by setting the accountifie_SVC_URL dyn variable on the /admin/system/variable/ page
-ACCOUNTIFIE_SVC_URL = os.environ.get('ACCOUNTIFIE_SVC_URL', 'http://localhost:5124')
 
-# can be overrided by setting the DEFAULT_GL_STRATEGY dyn variable on the /admin/system/variable/ page
+# ACCOUNTIFIE SERVICE SETUP
+ACCOUNTIFIE_SVC_URL = os.environ.get('ACCOUNTIFIE_SVC_URL', 'http://localhost:5124')
 DEFAULT_GL_STRATEGY = os.environ.get('DEFAULT_GL_STRATEGY', 'remote')
 
+
+# DEBUG SETTINGS
 try:
     from localsettings import LOCAL_DEBUG
     DEBUG = LOCAL_DEBUG
@@ -41,6 +38,9 @@ except ImportError:
     DEBUG = False
     DEVELOP = False
 
+TEMPLATE_DEBUG = False
+
+# DATABASE SETTINGS
 try:
     from localsettings import DB_NAME
 except ImportError:
@@ -59,11 +59,44 @@ try:
 except ImportError:
     DB_HOST = 'localhost'
 
-# override database variables
+# override database variables" line="{{ item }}"
 
-# end of over-rides for ansible lineinfile
 
-TEMPLATE_DEBUG = False
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': '',
+        'OPTIONS': {}
+    },
+}
+
+# TEST SETTINGS
+if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+
+TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
+
+# REACT/WEBPACK SETUP
+if DEBUG:
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': 'bundles/',
+            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.local.json'),
+        }
+    }
+else:
+    WEBPACK_LOADER = {
+        'DEFAULT': {
+            'BUNDLE_DIR_NAME': 'dist/',
+            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.prod.json'),
+        }
+    }
+
 
 ADMINS = (
     ('savor', 'ian@savor.us'),
@@ -79,22 +112,7 @@ ALLOWED_HOSTS = ['*']
 if DEVELOP:
     ALLOWED_HOSTS.extend(['localhost', '127.0.0.1'])
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': DB_NAME,
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST,
-        'PORT': '',
-        'OPTIONS': {}
-    },
-}
 
-if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
-    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
-
-TEST_RUNNER = 'django_behave.runner.DjangoBehaveTestSuiteRunner'
 
 TIME_ZONE = 'America/New_York'
 LANGUAGE_CODE = 'en-gb'
@@ -135,6 +153,8 @@ STATIC_URL = '/static/'
 
 BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_DIR, 'components')
 
+LOGO = 'base/img/savor_logo.png'
+SITE_TITLE = 'savorifie'
 
 PDFOUT_PATH = 'pdfout'
 PDFOUT = os.path.join(DATA_ROOT, PDFOUT_PATH)
@@ -143,6 +163,7 @@ PDFOUT = os.path.join(DATA_ROOT, PDFOUT_PATH)
 # Additional locations of static files
 STATICFILES_DIRS = (
     os.path.join(PROJECT_DIR, 'static'),
+    os.path.join(ENVIRON_DIR, 'assets')
 )
 
 # List of finder classes that know how to find static files in
@@ -160,7 +181,6 @@ SECRET_KEY = '_=s8f!l_t=ys+nbm3q%08ew8zb(7bybf195*rl2dil87p197g$'
 TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
     'django.template.loaders.filesystem.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 
@@ -217,6 +237,7 @@ INSTALLED_APPS = (
     'accountifie.dashboard',
 
     'djangobower',
+    'webpack_loader',
     
     'django_nose',
     'django_extensions',

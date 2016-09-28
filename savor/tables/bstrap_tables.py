@@ -27,6 +27,31 @@ def UPS_invoices():
             ]
     return get_bstrap_table(data_url, row_defs)
 
+def fulfill_no_shipcharge():
+    data_url = "/api/fulfill/fulfill_no_shipcharge"
+    row_defs = [{'data_field': 'fulfillment_id', 'value': 'Fulfill ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'order', 'value': 'Order', 'formatter': 'nameFormatter'},
+                {'data_field': 'request_date', 'value': 'Request Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'warehouse', 'value': 'Warehouse', 'formatter': 'nameFormatter'},
+                {'data_field': 'ship_type', 'value': 'Ship Type', 'formatter': 'nameFormatter'},
+                {'data_field': 'bill_to', 'value': 'Billing Acct', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_name', 'value': 'Ship Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_company', 'value': 'Ship Company', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
+
+def shipping_info(fulfill_id):
+    data_url = "/api/fulfill/shippingcharge/?fulfill=%s" % str(fulfill_id)
+    row_defs = [{'data_field': 'tracking_number', 'value': 'Tracking #', 'formatter': 'nameFormatter'},
+                {'data_field': 'account', 'value': 'Account', 'formatter': 'nameFormatter'},
+                {'data_field': 'invoice_number', 'value': 'Invoice #', 'formatter': 'nameFormatter'},
+                {'data_field': 'charge', 'value': 'Charge', 'formatter': 'nameFormatter'},
+                {'data_field': 'requested_ship_type', 'value': 'Requested Ship Type', 'formatter': 'nameFormatter'},
+                {'data_field': 'warehouse', 'value': 'Warehouse Acct', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
 
 def UPS_wrong_acct():
     data_url = "/api/fulfill/UPS_wrong_acct"
