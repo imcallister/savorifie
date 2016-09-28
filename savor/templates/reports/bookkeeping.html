@@ -1,9 +1,13 @@
 {% extends base_template %}
 {% load staticfiles %}
+{% load render_bundle from webpack_loader %}
 {% load humanize %}
 
 
 {% block extrahead %}
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/fixed-data-table.min.css">
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/react-bootstrap-table-all.min.css">
+
 <style>
     .modal.modal-wide .modal-dialog {
       width: 90%;
@@ -13,13 +17,15 @@
     }
 
     /* irrelevant styling */
-    body { text-align: center; }
     body p { 
       max-width: 400px; 
       margin: 20px auto; 
     }
-    #tallModal .modal-body p { margin-bottom: 900px }
+    #tallModal .modal-body p { margin-bottom: 900px };
+
 </style>
+
+
 {% endblock %}
 
 
@@ -34,7 +40,7 @@
 
 <div class="container-fluid" id="wrapper">
     <div class="row">
-        <div class="col-md-4">    
+        <div class="col-md-4">  
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">File Uploads</h3>
@@ -365,65 +371,20 @@
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
-        <h3>Payables and Receivables</h3>        
-        Payables and receivables shows net money owed to or from a counterparty. There may be a combination of money due to and from ... e.g. for Shopify there are monthly charges for which expenses must be created and receivables which correspond to the proceeds from sales (after Shopify fees).
-
-        <h3>Payables</h3>
-        <p>
-            Bank payments are loaded first and so most often we have an outgoing cash payment without the matching expense. This will show up as a negative amount here. When there are no more payables showing here then it is a sign that all necessary expenses have been created.
-            </br>
-            Choosing checkbox and clicking bulk create will create expenses for that counterparty. It will not create duplicates. But we don't create expenses for all counterparties. Positive amounts show that we have net receivables. This should be the minority. The difficult ones normally require some accounting expertise so contact Ian for any that are unclear.
-
-        </p>
-        <h3>Receivables</h3>
-        <p>
-            This will mostly show money due from channels. Clicking on the link will show the history with that channel.
-            </br>
-            There are no book-keeping entries required -- this report is for help in tracking outstanding amounts owed to Shopify. Bank activity needs to be up to date in order to track this.
-
-        </p>
+        <div id="the-help"></div>
+        <h3>Testing the Bootstrap React component</h3>
+        <div id="the-help2"></div>
+        {% render_bundle 'help' %}
       </div>
-      
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="unreconciled" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-content">
-        {{unreconciled}}
-    </div>
-</div>
 
 
-<div class="modal fade" id="shopifyUnpaid" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-content">
-        {{shopify_unpaid}}
-    </div>
-</div>
-
-
-<div class="modal fade" id="shopifyComp" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-content">
-        {{shopify_comparison}}
-    </div>
-</div>
-
-
-<div class="modal fade" id="NC2Billing" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <h3>NC2 Handling Charges</h3>        
-        {{NC2Billing}}
-      </div>
-      
-    </div>
-  </div>
-</div>
-
+<!-- MODAL COMPONENTS -->
+{{shopify_unpaid}}
+{{shopify_comparison}}
 {{fulfill_no_shipcharge}}
 {{UPS_invoices}}
 {{mis_UPS}}
@@ -442,6 +403,9 @@
 {% endblock %}
 
 {% block extrajs %}
+<script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+<!--
+
     <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
     <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
     <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
@@ -455,4 +419,5 @@
     <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
     <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
     <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
+-->
 {% endblock %}

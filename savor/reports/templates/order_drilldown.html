@@ -1,4 +1,5 @@
 {% extends base_template %}
+{% load render_bundle from webpack_loader %}
 {% load staticfiles %}
 
 
@@ -10,109 +11,150 @@
 
 
 {% block content %}
+<div id="react-app"></div>
+{% render_bundle 'main' %}
 
 <div class="container-fluid" id="wrapper">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             <div class="panel panel-success">
                 <div class="panel-heading">
                     <div class="panel-title">
-                        <h3>Order Details -- {{label}}
-                            <a href="/admin/sales/sale/{{order_id}}">Edit ....</a>
-                        </h3>
-
+                        <h3>Order Info</h3>
                     </div>
                 </div>
                 <div class="panel-body">
                     <div class="col-md-6">
-                        <table class="table table-striped table-condensed table-hover">
-                            {% for k, v in order_info.items %}
+                        <table class="table table-condensed table-hover">
                             <tr>
-                                <td>{{k}}</td>
-                                <td>{{v}}</td>
+                                <td style="text-align:left;">Sale ID:</td>
+                                <td style="text-align:right;">
+                                    <a href="/admin/sales/sale/{{sale_id}}">{{sale_label}}</a>
+                                </td>
                             </tr>
-                            {% endfor %}
+                            <tr>
+                                <td style="text-align:left;">Ship to:</td>
+                                <td style="text-align:right;">{{shipping_to}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Items Ordered:</td>
+                                <td style="text-align:right;">{{items}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Items to be Fulfilled:</td>
+                                <td style="text-align:right;">{{unfulfilled_items}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Sale Date:</td>
+                                <td style="text-align:right;">{{sale_date}}</td>
+                            </tr>
                         </table>
                     </div>
                     <div class="col-md-6">
-                        <table class="table table-striped table-condensed table-hover table-bordered">
-                            <th>
-                                <td>Quantity</td>
-                                <td>Unit Price</td>
-                            </th>
-                            {% for u in unit_sales %}
+                        <table class="table table-condensed table-hover">
                             <tr>
-                                <td>{{u.sku}}</td>
-                                <td>{{u.quantity}}</td>
-                                <td>{{u.unit_price}}</td>
+                                <td style="text-align:left;">Special Sale:</td>
+                                <td style="text-align:right;">{{special_sale}}</td>
                             </tr>
-                            {% endfor %}
+                            <tr>
+                                <td style="text-align:left;">Giftwrap:</td>
+                                <td style="text-align:right;">{{giftwrap}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Gift Message:</td>
+                                <td style="text-align:right;">{{gift_message}}</td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:left;">Sale Comment:</td>
+                                <td style="text-align:right;">{{sale_comment}}</td>
+                            </tr>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             {% for fulfill in fulfillment_list %}
                 <div class="panel panel-info">
                     <div class="panel-heading">
                         <h3>
-                            Fulfillment #: {{fulfill.id}}
-                            <a href="/admin/fulfill/fulfillment/{{fulfill.id}}">Edit...</a>
-                            /
-                            Batch #: {{fulfill.batch_id}}
-                            <a href="/admin/fulfill/batchrequest/{{fulfill.batch_id}}">Edit...</a>
-                        </h3>
-
-
-                            
+                            Fulfillment Info
+                        </h3>                            
                     </div>
                     <div class="panel-body">
-                        
-                        <h3>Request</h3>
-                        <table class="table table-striped table-condensed table-hover table-bordered">
-                            <tr>
-                                {% for col in fulfillment_cols %}
-                                    <td>{{col}}</td>
-                                {% endfor %}
-                            </tr>
-                            <tr>
-                                {% for v in fulfill.fulfill %}
-                                    <td>{{v}}</td>
-                                {% endfor %}
-                            </tr>
-                        </table>
-                        <h4>Warehouse Updates</h4>
-                        <table class="table table-striped table-condensed table-hover table-bordered">
-                            <tr>
-                                {% for col in update_cols %}
-                                    <td>{{col}}</td>
-                                {% endfor %}
-                            </tr>
-                            {% for u in fulfill.updates %}
-                            <tr>
-                                {% for v in u %}
-                                    <td>{{v}}</td>
-                                {% endfor %}
-                            </tr>
-                            {% endfor %}
-                        </table>
+                        <div class="col-md-6">
+                            <table class="table table-condensed table-hover">
+                                <tr>
+                                    <td style="text-align:left;">
+                                        Fulfillment #:
+                                    </td>
+                                    <td style="text-align:right;">
+                                         {{fulfill.id}} //
+                                        <a href="/admin/fulfill/fulfillment/{{fulfill.id}}">Edit</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">
+                                        Batch #:
+                                    </td>
+                                    <td style="text-align:right;">
+                                        {{fulfill.batch_id}} //
+                                        <a href="/admin/fulfill/batchrequest/{{fulfill.batch_id}}">Edit</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Warehouse:</td>
+                                    <td style="text-align:right;">{{fulfill.warehouse}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Requested:</td>
+                                    <td style="text-align:right;">{{fulfill.request_date}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-condensed table-hover">
+                                <tr>
+                                    <td style="text-align:left;">Items Requested:</td>
+                                    <td style="text-align:right;">{{fulfill.items_requested}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Status:</td>
+                                    <td style="text-align:right;">{{fulfill.status}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Ship Type:</td>
+                                    <td style="text-align:right;">{{fulfill.ship_type}}</td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align:left;">Bill to:</td>
+                                    <td style="text-align:right;">{{fulfill.bill_to}}</td>
+                                </tr>
+                                {% if fulfill.ship_info %}
+                                    <tr>
+                                        <td style="text-align:left;"># packages:</td>
+                                        <td style="text-align:right;">
+                                            {{fulfill.num_packages}}
+                                            <a data-toggle="modal" data-target="#shipInfo">(View Details)</a>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr><td>
+                                        No shipping info.
+                                    </td></tr>
+                                {% endif %}
+                            </table>
+                        </div>
                     </div>
                     
                 </div>
             {% endfor %}
         </div>
     </div><!--/.row-->
-    
-</div>
-    
-
 </div>
 
 
+{{shipInfo}}
 
 
 
@@ -137,58 +179,5 @@
     <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
     <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
     <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
-      
-  
-
-
-    <script type="text/javascript">
-    
-    $(document).ready(cash_bals_chart("{% url 'cash_balances' %}", 'cash_bals_panel'));
-    $(document).ready(expense_trends("{% url 'expense_trends' %}", 'expense_trends_panel'));
-
-    
-    $(function() {
-        $('#easypiechart-BE1').easyPieChart({
-            scaleColor: false,
-            barColor: '#8E4585'
-        });
-    });
-
-    $(function() {
-        $('#easypiechart-BE2').easyPieChart({
-            scaleColor: false,
-            barColor: '#229CE4'
-        });
-    });
-
-    $(function() {
-       $('#easypiechart-BE3').easyPieChart({
-           scaleColor: false,
-           barColor: '#778899'
-       });
-    });
-
-    $(function() {
-        $('#easypiechart-SYE1').easyPieChart({
-            scaleColor: false,
-            barColor: '#8E4585'
-        });
-    });
-
-    $(function() {
-        $('#easypiechart-SYE2').easyPieChart({
-            scaleColor: false,
-            barColor: '#229CE4'
-        });
-    });
-
-    $(function() {
-       $('#easypiechart-SYE3').easyPieChart({
-           scaleColor: false,
-           barColor: '#778899'
-       });
-    });
-
-    </script>
 
 {% endblock %}
