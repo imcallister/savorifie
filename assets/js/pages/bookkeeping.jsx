@@ -1,10 +1,9 @@
 var React = require('react')
 var ReactDOM = require('react-dom')
 
-var BHelp = require('../help') 
-var BSTable = require('../acctifieTableContainer')
-
-var formatters = require('./helpers/formatters')
+var BHelp = require('../components/book_help') 
+var BSTable = require('../containers/acctifieTableContainer')
+var formatters = require('../helpers/formatters')
 
 ReactDOM.render(<BHelp/>, document.getElementById('the-help'));
 

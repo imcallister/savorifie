@@ -15,7 +15,7 @@ class DataTable extends React.Component {
     return (
       <BootstrapTable data={this.props.tableData} striped={true} hover={true} search={true}>
         {this.props.columns.map(function(col, index) {
-            renderColumn({col})[]            
+            renderColumn({col})         
         })}
       </BootstrapTable>
     );
@@ -33,6 +33,6 @@ class DataTable extends React.Component {
     return <TableHeaderColumn dataField={col.fld} key={index} {...props} dataSort={true}>{col.label}</TableHeaderColumn> 
   }
 
-});
+};
 
 export default DataTable;

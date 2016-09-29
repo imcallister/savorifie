@@ -7,7 +7,8 @@ config.plugins.push(new BundleTracker({filename: './webpack-stats.local.json'}))
 
 config.entry = {
     index: './assets/js/index',
-    help: './assets/js/help_index'
+    help: './assets/js/help_index',
+    bookkeeping: './assets/js/pages/bookkeeping',
   };
 
 config.output.path = path.resolve('./assets/bundles/');

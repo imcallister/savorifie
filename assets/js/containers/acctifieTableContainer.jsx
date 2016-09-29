@@ -25,8 +25,9 @@ class DataTableContainer extends React.component {
     render() {
       return (
           <AcctifieTable tableData={this.state.tableData} columns={this.props.columns}>
+          </AcctifieTable>
       );
     }
-};
+}
 
-export default DataTableContainer
+export default DataTableContainer;
