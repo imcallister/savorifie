@@ -31,7 +31,6 @@ def company_context(request):
     data['menu_items'] = OrderedDict([('Reports', "/reports/"),
                                      ('Daily', "/daily/"),
                                      ('Inventory', '/inventory'),
-                                     ('Analysis', '/analysis'),
                                      ('Snapshots', '/snapshot/glsnapshots')
                                       ])
 
