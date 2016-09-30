@@ -3,7 +3,7 @@ var React = require('react');
 var AcctifieTable = require('../components/acctifieTable');  
 
 
-class DataTableContainer extends React.component {
+class DataTableContainer extends React.Component {
     constructor() {
       super();
       this.state = { tableData: [] }
@@ -30,4 +30,4 @@ class DataTableContainer extends React.component {
     }
 }
 
-export default DataTableContainer;
+module.exports = DataTableContainer;

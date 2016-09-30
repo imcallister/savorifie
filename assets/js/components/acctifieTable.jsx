@@ -11,28 +11,29 @@ class DataTable extends React.Component {
     super();
   }
 
+  
   render() {
+    
+    var renderColumn = function(col, index) {
+      var props = {};
+
+      props.isKey = (index==0);
+
+      if (col.formatter) {
+        props.dataFormat = col.formatter;
+      }
+      return <TableHeaderColumn dataField={col.fld} key={index} {...props} dataSort={true}>{col.label}</TableHeaderColumn> 
+    }; 
+
+
     return (
       <BootstrapTable data={this.props.tableData} striped={true} hover={true} search={true}>
-        {this.props.columns.map(function(col, index) {
-            renderColumn({col})         
-        })}
+        {this.props.columns.map(renderColumn)}
       </BootstrapTable>
     );
   }
 
-  renderColumn(col) {
-    var props = {};
-    props.isKey = false;
-    if (index==0) {
-      props.isKey = true;
-    }
-    if (col.formatter) {
-      props.dataFormat = col.formatter;
-    }
-    return <TableHeaderColumn dataField={col.fld} key={index} {...props} dataSort={true}>{col.label}</TableHeaderColumn> 
-  }
-
+  
 };
 
-export default DataTable;
+module.exports = DataTable;

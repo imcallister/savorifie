@@ -24,3 +24,5 @@ node_modules/
 assets/bundles
 celerybeat-schedule.db
 npm-debug.log
+pip-selfcheck.json
+selenium/
