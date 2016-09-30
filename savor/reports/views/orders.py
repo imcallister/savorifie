@@ -42,10 +42,10 @@ def order_drilldown(request, order_id):
     context['items'] = sale_info['items_string']
     context['unfulfilled_items'] = sale_info['unfulfilled_string']
     context['sale_date'] = parse(sale_info['sale_date']).strftime('%d-%b-%y')
-    context['special_sale'] = "No"
-    context['sale_comment'] = "Blah di blah di barca"
-    context['giftwrap'] = "No"
-    context['gift_message'] = "None"
+    context['special_sale'] = sku_data['special_sale']
+    context['sale_comment'] = sku_data['memo']
+    context['giftwrap'] = 'Yes' if sku_data['gift_wrapping'] else 'No'
+    context['gift_message'] = sku_data['gift_message']
 
 
     # FULFILL REQUESTS

@@ -1,0 +1,53 @@
+version: '2'
+
+services:
+  redis:
+    image: "redis:latest"
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
+    volumes:
+      - "/Users/ianmcallister/db/mongo:/data/db"
+
+  postgres:
+    image: "postgres:9.5"
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=accountifie
+      - POSTGRES_PASSWORD=o87gb2LF3s
+    volumes:
+      - "/Users/ianmcallister/db/postgres:/var/lib/postgresql/data"
+
+  accountifie:
+    image: savorifie-local
+    command: /savorifie/accountifie.sh
+    ports:
+      - "8000:8000"
+    environment:
+      - ACCOUNTIFIE_MIGRATE=true
+      - PG_USER=accountifie
+      - PG_PASS=o87gb2LF3s
+      - PG_HOST=postgres
+      - PG_PORT=5433
+      - PG_DB=accountifie
+      - "LISTEN_ADDR=0.0.0.0:8000"
+      - "ALLOWED_HOSTS=localhost,127.0.0.1"
+      - DEVELOP=yes
+    volumes:
+      - "/Users/ianmcallister/savorifie:/savorifie"
+
+  accountifiesvc:
+    image: savorifie
+    command: /savorifie/accountifie-svc.sh
+    #ports:
+    #  - "5124:5124"
+    environment:
+      - "MONGO_URL=mongodb://mongo:27017/accountifie"
+
+
+

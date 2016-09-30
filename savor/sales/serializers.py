@@ -208,7 +208,7 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('id', 'label', 'company', 'customer_code', 'channel', 'sale_date',
                   'external_channel_id', 'special_sale', 'discount',
                   'discount_code', 'gift_wrapping', 'gift_wrap_fee',
-                  'gift_message', 'external_routing_id',
+                  'gift_message', 'memo', 'external_routing_id',
                   'shipping_charge', 'notification_email', 'shipping_name',
                   'shipping_company', 'shipping_address1', 'shipping_address2',
                   'shipping_city', 'shipping_zip', 'shipping_province',
