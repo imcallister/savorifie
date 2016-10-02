@@ -9,6 +9,7 @@ from django.utils.safestring import mark_safe
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
+import fulfill.apiv1 as flfl_api
 
 
 def post_button(order_id, back=False):
@@ -132,13 +133,15 @@ def management(request):
     context['missship_columns'], context['missship_rows'] = _miss_ship_list()
     context['missing_shipping'] = len(context['missship_rows'])
 
-    context['MICH_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
-                                              if x['warehouse'] == 'MICH'])
-    context['NC2_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
-                                             if x['warehouse'] == 'NC2'])
-    context['152Frank_unreconciled_count'] = len([x for x in api_func('fulfill', 'requested') 
-                                                  if x['warehouse'] == '152Frank'])
 
+    unrecd = flfl_api.no_warehouse_record({})
+    context['MICH_unreconciled_count'] = len([x for x in unrecd
+                                              if x['warehouse'] == 'MICH'])
+    context['NC2_unreconciled_count'] = len([x for x in unrecd
+                                             if x['warehouse'] == 'NC2'])
+    context['152Frank_unreconciled_count'] = len([x for x in unrecd
+                                                  if x['warehouse'] == '152Frank'])
+    
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
 
     batch_requests = sorted(api_func('fulfill', 'batchrequest'),
@@ -148,8 +151,8 @@ def management(request):
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
-    context['MICH_unreconciled'] = get_table('fulfill_requested')(warehouse='MICH')
-    context['NC2_unreconciled'] = get_table('fulfill_requested')(warehouse='NC2')
-    context['152Frank_unreconciled'] = get_table('fulfill_requested')(warehouse='152Frank')
+    context['MICH_unreconciled'] = get_table('no_warehouse_record')(warehouse='MICH')
+    context['NC2_unreconciled'] = get_table('no_warehouse_record')(warehouse='NC2')
+    context['152Frank_unreconciled'] = get_table('no_warehouse_record')(warehouse='152Frank')
     
     return render_to_response('management.html', context, context_instance = RequestContext(request))

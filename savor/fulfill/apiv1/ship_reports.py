@@ -1,6 +1,8 @@
 import itertools
 from decimal import Decimal
 
+from django.db.models import Q
+
 from .model_api import *
 from fulfill.models import ShippingCharge, Fulfillment
 from fulfill.serializers import ShippingChargeSerializer, FulfillmentSerializer
@@ -9,9 +11,13 @@ from fulfill.serializers import ShippingChargeSerializer, FulfillmentSerializer
 def fulfill_no_shipcharge(qstring):
     with_shipcharge = [s['fulfillment_id'] for s in shippingcharge({}) \
                        if s['fulfillment_id']]
+    
+    SAVOR_UPS_ACCOUNT = '1V06Y4'
+    
     qs = Fulfillment.objects \
                     .exclude(id__in=with_shipcharge) \
-                    .exclude(ship_type__label__in=['BY_HAND'])
+                    .exclude(ship_type__label__in=['BY_HAND', 'FREIGHT', 'FEDEX_2DAY', 'FEDEX_GROUND']) \
+                    .exclude(Q(ship_type__label__in=['UPS_GROUND', '100WEIGHTS']) & ~Q(bill_to__iexact=SAVOR_UPS_ACCOUNT))
 
     qs = FulfillmentSerializer.setup_eager_loading(qs)
     data = FulfillmentSerializer(qs, many=True).data

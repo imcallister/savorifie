@@ -92,7 +92,7 @@ class FullFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type', 'ship_from',
                               'order__channel__counterparty', 'order__customer_code',
                               'ship_type__shipper__company']
-    _PREFETCH_RELATED_FIELDS = ['fulfill_lines',
+    _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'warehousefulfill',
                                 'fulfill_lines__inventory_item',
                                 'fulfill_updates__shipper__company']
 
@@ -112,8 +112,40 @@ class FullFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('id', 'order', 'request_date', 'status',
                   'ship_info', 'warehouse', 'bill_to', 'ship_type',
                   'use_pdf', 'packing_type', 'fulfill_lines',
-                  'ship_from', 'fulfill_updates', 'items_string'
+                  'ship_from', 'fulfill_updates', 'items_string',
                   )
+
+
+class FullFulfillmentSerializer2(serializers.ModelSerializer, EagerLoadingMixin):
+    def get_ship_info(self, obj):
+        return obj.ship_info
+
+    _SELECT_RELATED_FIELDS = ['order', 'warehouse', 'ship_type', 'ship_from',
+                              'order__channel__counterparty', 'order__customer_code',
+                              'ship_type__shipper__company']
+    _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'warehousefulfill',
+                                'fulfill_lines__inventory_item',
+                                ]
+
+    warehouse = serializers.StringRelatedField()
+    ship_type = invslz.ShippingTypeSerializer()
+    fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
+    order = salesslz.ShippingSaleSerializer(read_only=True)
+    ship_from = AddressSerializer(read_only=True)
+    items_string = serializers.SerializerMethodField()
+    warehousefulfill_count = serializers.IntegerField(source='warehousefulfill.count', read_only=True)
+
+    def get_items_string(self, obj):
+        return obj.items_string
+
+    class Meta:
+        model = models.Fulfillment
+        fields = ('id', 'order', 'request_date', 'status',
+                  'ship_info', 'warehouse', 'bill_to', 'ship_type',
+                  'use_pdf', 'packing_type', 'fulfill_lines',
+                  'ship_from', 'items_string', 'warehousefulfill_count',
+                  )
+
 
 class SimpleBatchRequestSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['location']
