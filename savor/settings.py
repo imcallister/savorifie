@@ -4,6 +4,13 @@ import sys
 import pandas
 
 
+from django import get_version as django_version
+from distutils.version import StrictVersion
+DJANGO_19 = StrictVersion(django_version()) >= StrictVersion('1.9')
+DJANGO_18 = not DJANGO_19
+
+
+
 # CELERY SETUP
 import djcelery
 djcelery.setup_loader()
