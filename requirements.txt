@@ -46,4 +46,4 @@ ofxparse==0.14
 django-filter==0.13.0
 graphene[django]
 django-graphiql
--e git+https://github.com/electronifie/accountifie.git#egg=accountifie
+-e git+https://github.com/electronifie/accountifie.git@devel#egg=accountifie
