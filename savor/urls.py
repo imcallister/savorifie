@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.views.generic.base import RedirectView, TemplateView
@@ -13,10 +13,7 @@ admin.autodiscover()
 
 handler500 = 'main_views.custom_500'
 
-urlpatterns = patterns('',
-
-    # main front pages
-    
+urlpatterns = [
     url(r'^$', main_views.home, name='home'),
     url(r'^maintenance/', main_views.maintenance, name='maintenance'),
     url(r'^reports/$', main_views.reports, name='reports'),
@@ -34,4 +31,4 @@ urlpatterns = patterns('',
 
     # general accountifie urls
     url (r'', include('accountifie.urls'))
-)
+]
