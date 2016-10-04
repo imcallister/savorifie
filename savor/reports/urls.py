@@ -1,8 +1,8 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import url
 
 import views
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^cash_balances/', 'reports.charts.cash_balances', name='cash_balances'),
     url(r'^expense_trends/', 'reports.charts.expense_trends', name='expense_trends'),
 
@@ -14,5 +14,4 @@ urlpatterns = patterns('',
     url(r'^inventory/$', views.inventory_counts),
     url(r'^ship_charges/$', views.ship_charges),
     url(r'^bookkeeping/', views.bookkeeping, name='bookkeeping'),
-
-)
+]
