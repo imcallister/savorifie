@@ -277,7 +277,7 @@ INSTALLED_APPS = (
     'djangobower',
     'webpack_loader',
     
-    'django_nose',
+    #'django_nose',
     'django_extensions',
     'simple_history',
 
