@@ -1,6 +1,6 @@
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.contrib import messages
 from django.http import HttpResponseRedirect
@@ -44,8 +44,7 @@ def upload_file(request, file_type, check=False):
     else:
         form = FileForm()
         context = {'form': form, 'file_type': file_type}
-        return render_to_response('base/upload_csv.html', context,
-                                  context_instance=RequestContext(request))
+        return render(request, 'base/upload_csv.html', context)
 
 
 @login_required

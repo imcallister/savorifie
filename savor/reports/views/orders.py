@@ -1,6 +1,6 @@
 from dateutil.parser import parse
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 
 from accountifie.common.api import api_func
@@ -17,9 +17,7 @@ def orders(request):
     context = {}
     context['title'] = 'Orders'
     context['content'] = tables.bstrap_tables.orders_list()
-    return render_to_response('orders_list.html',
-                              context,
-                              context_instance=RequestContext(request))
+    return render(request, 'orders_list.html', context)
 
 @login_required
 def order_drilldown(request, order_id):
@@ -82,6 +80,4 @@ def order_drilldown(request, order_id):
 
         context['fulfillment_list'].append(fulfill_info)
 
-    return render_to_response('order_drilldown.html',
-                              context,
-                              context_instance=RequestContext(request))
+    return render(request, 'order_drilldown.html', context)

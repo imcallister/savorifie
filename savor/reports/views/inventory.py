@@ -1,7 +1,7 @@
 from collections import Counter
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 
 from accountifie.common.table import get_table
@@ -22,4 +22,4 @@ def inventory_counts(request):
 
     context['location_counts'] = api_func('inventory', 'locationinventory')
 
-    return render_to_response('inventory/main.html', context, context_instance = RequestContext(request))
+    return render(request, 'inventory/main.html', context)

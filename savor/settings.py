@@ -184,11 +184,62 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '_=s8f!l_t=ys+nbm3q%08ew8zb(7bybf195*rl2dil87p197g$'
 
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(PROJECT_DIR, 'templates')
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.contrib.messages.context_processors.messages",
+                "accountifie.common.views.base_templates",
+                "base.views.company_context",
+            ],
+        },
+    },
+]
+
+
+##  OLD TEMPLATES
+
 # List of callables that know how to import templates from various sources.
+"""
 TEMPLATE_LOADERS = (
     'django.template.loaders.app_directories.Loader',
     'django.template.loaders.filesystem.Loader',
 )
+
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "accountifie.common.views.base_templates",
+
+    "base.views.company_context",
+    )
+
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_DIR, 'templates'),
+    
+)
+"""
+## END OF OLD TEMPLATES
 
 
 MIDDLEWARE_CLASSES = (
@@ -207,30 +258,10 @@ MIDDLEWARE_CLASSES = (
 
 
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
-    "accountifie.common.views.base_templates",
-
-    "base.views.company_context",
-    )
-
 
 ROOT_URLCONF = PROJECT_NAME + '.urls'
 WSGI_APPLICATION = PROJECT_NAME + '.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_DIR, 'templates'),
-    
-)
 
 INSTALLED_APPS = (
     'django.contrib.sites',

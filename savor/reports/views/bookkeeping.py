@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 
 from accountifie.common.api import api_func
@@ -100,4 +100,4 @@ def bookkeeping(request):
     context['upload_rows'] = [['Shopify Payouts', last_SHOP], ['Citicard', last_CITI],
                               ['First Republic', last_FRB], ['UPS Billing', last_UPS]]
 
-    return render_to_response('reports/bookkeeping.html', context, context_instance = RequestContext(request))
+    return render(request, 'reports/bookkeeping.html', context)

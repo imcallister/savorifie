@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
@@ -38,7 +38,7 @@ def order_upload(request):
         context = {}
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the NC2 file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def process_nc2(file_name):

@@ -1,6 +1,6 @@
 from time import sleep
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import JsonResponse
 
@@ -26,8 +26,7 @@ def tri_10():
 
 
 def long_calc2(request):
-    return render_to_response('long_task2.html',
-                              RequestContext(request, {}))
+    return render(request, 'long_task2.html', {})
 
 
 def long_calc_task(request):
