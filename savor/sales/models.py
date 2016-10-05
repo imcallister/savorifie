@@ -141,6 +141,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                                            help_text='If no ID, leave blank for system-generated ID')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
+    is_return = models.BooleanField(default=False)
 
     shipping_charge = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
     channel_charges = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))

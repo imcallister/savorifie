@@ -41,6 +41,23 @@ def fulfill_no_shipcharge():
     return get_bstrap_table(data_url, row_defs)
 
 
+def whouse_records(fulfill_id):
+    data_url = "api/fulfill/warehousefulfill/?fulfill=%s" % fulfill_id
+    row_defs = [{'data_field': 'warehouse_pack_id', 'value': 'Warehouse ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'fulfillment', 'value': 'Fulfill ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'warehouse', 'value': 'Warehouse', 'formatter': 'nameFormatter'},
+                {'data_field': 'request_date', 'value': 'Request Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'ship_date', 'value': 'Ship Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_type', 'value': 'Ship Type', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_name', 'value': 'Ship Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'ship_email', 'value': 'Ship Email', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_cost', 'value': 'Ship Cost', 'formatter': 'nameFormatter'},
+                {'data_field': 'handling_cost', 'value': 'Handling', 'formatter': 'nameFormatter'},
+                {'data_field': 'tracking_number', 'value': 'Tracking #', 'formatter': 'nameFormatter'},
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
+
 def shipping_info(fulfill_id):
     data_url = "/api/fulfill/shippingcharge/?fulfill=%s" % str(fulfill_id)
     row_defs = [{'data_field': 'tracking_number', 'value': 'Tracking #', 'formatter': 'nameFormatter'},
@@ -213,6 +230,25 @@ def fulfill_requested(warehouse=None):
 
     return get_bstrap_table(data_url, row_defs)
 
+
+def no_warehouse_record(warehouse=None):
+    if warehouse:
+        data_url = "/api/fulfill/no_warehouse_record/?warehouse=%s" % warehouse
+    else:
+        data_url = "/api/fulfill/no_warehouse_record/"
+
+    row_defs = [
+                {'data_field': 'order:external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:id', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'order:channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
+                {'data_field': 'warehouse', 'value': 'Warehouse', 'formatter': 'nameFormatter'},
+                {'data_field': 'items', 'value': 'Items', 'formatter': 'nameFormatter'},
+            ]
+
+    return get_bstrap_table(data_url, row_defs)
 
 def fulfill_confirmed():
     data_url = "/api/fulfill/fulfilled/"

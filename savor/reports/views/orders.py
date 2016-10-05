@@ -42,18 +42,11 @@ def order_drilldown(request, order_id):
     context['items'] = sale_info['items_string']
     context['unfulfilled_items'] = sale_info['unfulfilled_string']
     context['sale_date'] = parse(sale_info['sale_date']).strftime('%d-%b-%y')
-    context['special_sale'] = "No"
-    context['sale_comment'] = "Blah di blah di barca"
-    context['giftwrap'] = "No"
-    context['gift_message'] = "None"
+    context['special_sale'] = sku_data['special_sale']
+    context['sale_comment'] = sku_data['memo']
+    context['giftwrap'] = 'Yes' if sku_data['gift_wrapping'] else 'No'
+    context['gift_message'] = sku_data['gift_message']
 
-
-    # FULFILL REQUESTS
-
-    fulfill_cols = ['request_date', 'items_string', 'status', 'warehouse', 'bill_to']
-    context['fulfillment_cols'] = fulfill_cols
-    update_cols = ['update_date', 'comment', 'status', 'shipper', 'tracking_number']
-    context['update_cols'] = update_cols
 
     context['fulfillment_list'] = []
 
@@ -77,6 +70,15 @@ def order_drilldown(request, order_id):
                                                       'shipInfo')
         else:
             fulfill_info['ship_info'] = False
+
+        print f
+        if f.get('warehousefulfill_count', 0) > 0:
+            fulfill_info['wh_fulfill_info'] = True
+            context['whFulfillInfo'] = get_modal(get_table('whouse_records')(f['id']),
+                                                           'Shipping Info',
+                                                           'whFulfillInfo')
+        else:
+            fulfill_info['wh_fulfill_info'] = False
 
         context['fulfillment_list'].append(fulfill_info)
 

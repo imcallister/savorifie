@@ -81,6 +81,9 @@ def unbatched_fulfillments(qstring):
 def warehousefulfill(qstring):
     qs = WarehouseFulfill.objects.all()
 
+    if qstring.get('fulfill'):
+        qs = qs.filter(fulfillment_id=qstring.get('fulfill'))
+
     qs = WarehouseFulfillSerializer.setup_eager_loading(qs)
     wh_flmts = WarehouseFulfillSerializer(qs, many=True).data
     for f in wh_flmts:
@@ -104,8 +107,18 @@ def warehousefulfill(warehouse_pack_id, qstring):
 
 @dispatch(dict)
 def fulfillment(qstring):
+    view_type = qstring.get('view', 'standard')
+    if type(view_type) == list:
+        view_type = view_type[0]
+
     qs = Fulfillment.objects.all()
-    qs = FulfillmentSerializer.setup_eager_loading(qs)
+
+    if view_type == 'full':
+        serializer = FullFulfillmentSerializer2
+    else:
+        serializer = FulfillmentSerializer
+    
+    qs = serializer.setup_eager_loading(qs)
 
     if qstring.get('warehouse'):
         qs = qs.filter(warehouse__label=qstring.get('warehouse'))
@@ -116,7 +129,7 @@ def fulfillment(qstring):
     if 'status' in qstring:
         qs = qs.filter(status__in=qstring['status'].split(','))
 
-    flfmts = FulfillmentSerializer(qs, many=True).data
+    flfmts = serializer(qs, many=True).data
     if qstring.get('missing_shipping', '').lower() == 'true':
         flfmts = [r for r in flfmts if r['ship_info'] == 'incomplete']
     for f in flfmts:
@@ -134,7 +147,7 @@ def fulfillment(id, qstring):
     qs = Fulfillment.objects.filter(id=id).first()
     
     if view_type == 'full':
-        serializer = FullFulfillmentSerializer
+        serializer = FullFulfillmentSerializer2
     else:
         serializer = FulfillmentSerializer
     
@@ -142,6 +155,35 @@ def fulfillment(id, qstring):
     flfmt['skus'] = dict((l['inventory_item'], l['quantity']) for l in flfmt['fulfill_lines'])
     del flfmt['fulfill_lines']
     return flfmt
+
+
+def no_warehouse_record(qstring):
+    """
+    Find fulfillments which have been batched but have 
+    no associated warehouse fulfillment record
+    """
+    pre_qs = Fulfillment.objects
+
+    if qstring.get('warehouse'):
+        pre_qs = pre_qs.filter(warehouse__label=qstring.get('warehouse'))
+
+    objs = pre_qs.annotate(num_whf=Count('warehousefulfill')) \
+                  .annotate(batched=Count('batchrequest')) \
+                  .values('num_whf', 'batched', 'id')
+
+    nwr = [f['id'] for f in objs if f['batched'] > 0 and f['num_whf']==0]
+    qs = Fulfillment.objects.filter(id__in=nwr)
+    serializer = FulfillmentSerializer
+
+    flfmts = serializer(qs, many=True).data
+    if qstring.get('missing_shipping', '').lower() == 'true':
+        flfmts = [r for r in flfmts if r['ship_info'] == 'incomplete']
+    for f in flfmts:
+        f['skus'] = dict((l['inventory_item'], l['quantity']) for l in f['fulfill_lines'])
+        del f['fulfill_lines']
+
+    data = [dict((str(k), str(v)) for k, v in flatdict.FlatDict(f).iteritems()) for f in flfmts]
+    return data
 
 
 def requested(qstring):

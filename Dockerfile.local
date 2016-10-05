@@ -1,0 +1,19 @@
+FROM electronifie/docker-scientific-python:latest
+MAINTAINER Ian McAllister "https://github.com/imcallister/savorifie"
+
+ENV USERID 5000
+
+RUN groupadd -g $USERID accountifie
+RUN useradd -u $USERID -g accountifie accountifie
+
+RUN mkdir /savorifie
+WORKDIR /savorifie
+
+ADD docker_requirements.txt /tmp
+
+RUN pip install -r /tmp/docker_requirements.txt
+
+RUN pip install docengine==0.8.99 -i https://beta:gammadelta@www.reportlab.com/pypi
+
+RUN npm install accountifie-svc -g
+VOLUME ['/savorifie']

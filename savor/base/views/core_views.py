@@ -26,12 +26,14 @@ def company_context(request):
             'site_title': settings.SITE_TITLE}
 
     data['admin_site_title'] = settings.SITE_TITLE
+    data['DJANGO_18'] = settings.DJANGO_18
+    data['DJANGO_19'] = settings.DJANGO_19
+
     data['company_color'] = api_func('gl', 'company', company_id)['color_code']
 
     data['menu_items'] = OrderedDict([('Reports', "/reports/"),
                                      ('Daily', "/daily/"),
                                      ('Inventory', '/inventory'),
-                                     ('Analysis', '/analysis'),
                                      ('Snapshots', '/snapshot/glsnapshots')
                                       ])
 

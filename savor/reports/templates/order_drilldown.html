@@ -115,10 +115,19 @@
                                     <td style="text-align:left;">Items Requested:</td>
                                     <td style="text-align:right;">{{fulfill.items_requested}}</td>
                                 </tr>
-                                <tr>
-                                    <td style="text-align:left;">Status:</td>
-                                    <td style="text-align:right;">{{fulfill.status}}</td>
-                                </tr>
+                                {% if fulfill.wh_fulfill_info %}
+                                    <tr>
+                                        <td style="text-align:left;">Warehouse Records:</td>
+                                        <td style="text-align:right;">
+                                            <a data-toggle="modal" data-target="#whFulfillInfo">(View Details)</a>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td>Missing warehouse fulfill info.</td>
+                                        <td></td>
+                                    </tr>
+                                {% endif %}
                                 <tr>
                                     <td style="text-align:left;">Ship Type:</td>
                                     <td style="text-align:right;">{{fulfill.ship_type}}</td>
@@ -136,9 +145,10 @@
                                         </td>
                                     </tr>
                                 {% else %}
-                                    <tr><td>
-                                        No shipping info.
-                                    </td></tr>
+                                    <tr>
+                                        <td>No shipping info.</td>
+                                        <td></td>
+                                    </tr>
                                 {% endif %}
                             </table>
                         </div>
@@ -152,7 +162,7 @@
 
 
 {{shipInfo}}
-
+{{whFulfillInfo}}
 
 
 {% endblock %}
@@ -163,6 +173,7 @@
 
 
 {% block extrajs %}
+    
     <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
     <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
     <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
