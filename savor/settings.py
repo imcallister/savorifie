@@ -8,18 +8,13 @@ from distutils.version import StrictVersion
 DJANGO_19 = StrictVersion(django_version()) >= StrictVersion('1.9')
 DJANGO_18 = not DJANGO_19
 
-from django import get_version as django_version
-from distutils.version import StrictVersion
-DJANGO_19 = StrictVersion(django_version()) >= StrictVersion('1.9')
-DJANGO_18 = not DJANGO_19
-
-
 
 # CELERY SETUP
 import djcelery
 djcelery.setup_loader()
+CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+#CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 CELERY_ACCEPT_CONTENT = ['json', 'pickle']
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -254,6 +249,8 @@ INSTALLED_APPS = (
     'django_extensions',
     'simple_history',
 
+    'djcelery',
+    
     'betterforms',
     'base',
     'products',
@@ -287,7 +284,7 @@ INSTALLED_APPS = (
     'django_behave',
 
     'rest_framework',
-    'djcelery',
+    
 )
 
 BOWER_INSTALLED_APPS = (
