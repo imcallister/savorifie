@@ -9,67 +9,120 @@
 
 {% block content %}
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title"><a href="/gl/">Actions</a></h3>
-            </div>
-            <div class="panel-body">
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><a href="/gl/">Actions</a></h3>
+                </div>
+                <div class="panel-body">
 
-                <ul>
-                    <li><a href="/gl/get_transactions/">Download transactions</a></li>
-                    <li><a href="/gl/get_tranlines/">Download tranlines</a></li>
-                    <li><a href="/download_expenses/">Download expenses</a></li>
-                    <li><a href="/assign_COGS/">Assign COGS</a></li>
-                    <li><a href="/recalculate">Recalculate</a></li>
-                    <li><a href="/dump_fixtures">Dump fixtures</a></li>
-                </ul>
-
-                <ul class="nav nav-pills nav-stacked">
-                        <li><button id="start-recalculate" class="btn btn-block btn-info">
-                                Trigger GL Recalc
-                            </button>
-                        </li>
-                </ul>
+                    <ul>
+                        <li><a href="/gl/get_transactions/">Download transactions</a></li>
+                        <li><a href="/gl/get_tranlines/">Download tranlines</a></li>
+                        <li><a href="/download_expenses/">Download expenses</a></li>
+                        <li><a href="/assign_COGS/">Assign COGS</a></li>
+                        <li><a href="/recalculate">Recalculate</a></li>
+                        <li><a href="/dump_fixtures">Dump fixtures</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-md-6">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Dump fixtures</h3>
-            </div>
-            <div class="panel-body">
-                <ul>
-                    <li><a href="/dump_fixtures?fixture=auth.user">User Auth</a></li>
-                    <li><a href="/dump_fixtures?fixture=auth.group">Group Auth</a></li>
-                    <li><a href="/dump_fixtures?fixture=gl.company">Company</a></li>
-                    <li><a href="/dump_fixtures?fixture=gl.department">Department</a></li>
-                    <li><a href="/dump_fixtures?fixture=gl.employee">Employee</a></li>
-                    <li><a href="/dump_fixtures?fixture=gl.counterparty">Counterparty</a></li>
-                    <li><a href="/dump_fixtures?fixture=gl.account">Account</a></li>
-                    <li><a href="/dump_fixtures?fixture=gl.externalaccount">External Account</a></li>
-                    <li><a href="/dump_fixtures?fixture=environment">Environment</a></li>
-                    <li><a href="/dump_fixtures?fixture=audit">Audit</a></li>
-                    <li><a href="/dump_fixtures?fixture=reporting">Reporting</a></li>
-                    <li><a href="/dump_fixtures?fixture=base.cashflow">Cashflows</a></li>
-                    <li><a href="/dump_fixtures?fixture=base.expense">Expense</a></li>
-                </ul>
-            
-
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><a href="/gl/">Tasks</a></h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="nav nav-pills nav-stacked">
+                            <li><button id="start-recalculate" class="btn btn-block btn-info">
+                                    Trigger GL Recalc
+                                </button>
+                            </li>
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#recentTasks">View Recent Tasks</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Dump fixtures</h3>
+                </div>
+                <div class="panel-body">
+                    <ul>
+                        <li><a href="/dump_fixtures?fixture=auth.user">User Auth</a></li>
+                        <li><a href="/dump_fixtures?fixture=auth.group">Group Auth</a></li>
+                        <li><a href="/dump_fixtures?fixture=gl.company">Company</a></li>
+                        <li><a href="/dump_fixtures?fixture=gl.department">Department</a></li>
+                        <li><a href="/dump_fixtures?fixture=gl.employee">Employee</a></li>
+                        <li><a href="/dump_fixtures?fixture=gl.counterparty">Counterparty</a></li>
+                        <li><a href="/dump_fixtures?fixture=gl.account">Account</a></li>
+                        <li><a href="/dump_fixtures?fixture=gl.externalaccount">External Account</a></li>
+                        <li><a href="/dump_fixtures?fixture=environment">Environment</a></li>
+                        <li><a href="/dump_fixtures?fixture=audit">Audit</a></li>
+                        <li><a href="/dump_fixtures?fixture=reporting">Reporting</a></li>
+                        <li><a href="/dump_fixtures?fixture=base.cashflow">Cashflows</a></li>
+                        <li><a href="/dump_fixtures?fixture=base.expense">Expense</a></li>
+                    </ul>
+                
+
+                </div>
+            </div>
+        </div>    
     </div>
 </div>
 
-{% include "celery.html" %}
+
+<!-- MODAL COMPONENTS -->
+{{recent_tasks}}
+
 
 {% endblock %}
 
 {% block extrajs %}
 <script>
+    function start_long_task(event) {
+        task_url = event.data.task;
+
+        // send ajax POST request to start background job
+        $.ajax({
+            type: 'GET',
+            url: task_url,
+            success: function(data, status, request) {
+                status_url = data.status_url;
+                $('#startTask').modal('show');
+                $('#task_results').text('');
+                update_progress(status_url, data.task_id);
+            },
+            error: function() {
+                alert('Unexpected error');
+            }
+        });
+    }
+
+    function update_progress(status_url, task_id) {
+        $('#task_id').text(task_id);
+        
+        $.getJSON(status_url, function(data) {
+            console.log(data);
+            $('#task_progress').text(data['status']);
+            if (['COMPLETED', 'FAILED'].indexOf(data['status']) == -1) {
+                setTimeout(function() {
+                    update_progress(status_url, task_id);
+                }, 2000);
+            }
+            else {
+               $('#task_results').text(JSON.stringify(data)); 
+            }
+            
+        });
+    }
+
     $('#start-recalculate').click({'task': '/celery/recalculate/'}, start_long_task);
 </script>
+<script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
+
 {% endblock %}
 
