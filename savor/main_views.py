@@ -4,6 +4,8 @@ from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.contrib.auth.decorators import login_required
 
+from accountifie.common.view_components import basic_modal
+from accountifie.common.table import get_table
 from accountifie.toolkit.utils import extractDateRange, get_company
 
 
@@ -24,7 +26,12 @@ def custom_500(request):
 
 @login_required
 def maintenance(request):
-    return render_to_response('main_views/maintenance.html', RequestContext(request, {}))
+    context = {}
+    context['recent_tasks'] =  basic_modal(get_table('recent_tasks')(),
+                                                      'Recent Tasks',
+                                                      'recentTasks')
+
+    return render_to_response('main_views/maintenance.html', RequestContext(request, context))
 
 
 @login_required

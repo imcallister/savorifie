@@ -16,12 +16,6 @@ from accountifie.gl.bmo import on_bmo_save
 import accountifie.environment.apiv1 as env_api
 
 
-from djcelery.models import TaskMeta
-class TaskMetaAdmin(admin.ModelAdmin):
-    list_display = ('task_id', 'date_done', 'result',)
-    readonly_fields = ('result',)    
-admin.site.register(TaskMeta, TaskMetaAdmin)
-
 
 class UnmatchedCashflows(SimpleListFilter):
     title = 'unmatched'

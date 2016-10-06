@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from time import sleep
+import datetime
 
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -26,7 +27,7 @@ def tri_11(request):
 # long-running calc
 def tri_10():
     tot = 0
-    for i in range(10):
+    for i in range(20):
         sleep(1)
         tot += i
     return tot
@@ -38,8 +39,7 @@ def long_calc2(request):
 
 
 def long_calc_task(request):
-    
-    task_name = 'long_calc2'
+    task_name = 'long_calc2-%s' % datetime.datetime.now().isoformat()
     task_id = background_task(task=task_name, calc=tri_10).id
     status_url = 'background_task/status/%s' % task_id
     return JsonResponse({'task_id': task_id, 'task_name': task_name, 'status_url': status_url})
