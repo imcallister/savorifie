@@ -1,5 +1,6 @@
 import itertools
 from decimal import Decimal
+import datetime
 
 from django.db.models import Q
 
@@ -13,8 +14,10 @@ def fulfill_no_shipcharge(qstring):
                        if s['fulfillment_id']]
     
     SAVOR_UPS_ACCOUNT = '1V06Y4'
-    
+    CUTOFF = datetime.date(2016,7,1)
     qs = Fulfillment.objects \
+                    .filter(request_date__gte=CUTOFF) \
+                    .exclude(status='back-ordered') \
                     .exclude(id__in=with_shipcharge) \
                     .exclude(ship_type__label__in=['BY_HAND', 'FREIGHT', 'FEDEX_2DAY', 'FEDEX_GROUND']) \
                     .exclude(Q(ship_type__label__in=['UPS_GROUND', '100WEIGHTS']) & ~Q(bill_to__iexact=SAVOR_UPS_ACCOUNT))
