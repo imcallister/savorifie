@@ -19,6 +19,16 @@ def large_expenses(dt):
             ]
     return get_bstrap_table(data_url, row_defs)
 
+def recent_tasks():
+    data_url = "/api/celery/tasks_just_finished"
+    row_defs = [{'data_field': 'task_id', 'value': 'Task ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'date_done', 'value': 'Time Started', 'formatter': 'nameFormatter'},
+                {'data_field': 'task_status', 'value': 'Status', 'formatter': 'nameFormatter'},
+                {'data_field': 'task_name', 'value': 'Name', 'formatter': 'nameFormatter'},
+                {'data_field': 'result', 'value': 'Result', 'formatter': 'nameFormatter'}
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
 def UPS_invoices():
     data_url = "/api/fulfill/UPS_invoices"
     row_defs = [{'data_field': 'invoice_number', 'value': 'Invoice #', 'formatter': 'nameFormatter'},

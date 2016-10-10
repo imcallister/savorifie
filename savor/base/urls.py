@@ -8,4 +8,5 @@ urlpatterns = [
     url(r'^base/bulk_expense_stubs/$', views.bulk_expense_stubs),
     url(r'^long_calc2/$', views.long_calc2),
     url(r'^long_calc_task/$', views.long_calc_task),
+    #url(r'^long_calc_tri_11/$', views.tri_11),
  ]
