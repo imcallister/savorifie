@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 
 from accountifie.common.view_components import basic_modal
 from accountifie.common.table import get_table
-from accountifie.toolkit.utils import extractDateRange, get_company
+from accountifie.toolkit.utils import extractDateRange, get_company, month_tags, year_tags
 
 
 # HTTP Error 500
@@ -37,6 +37,15 @@ def maintenance(request):
 @login_required
 def reports(request):
     d = {}
+    d['this_month_tag'] = month_tags(0)
+    d['last_month_tag'] = month_tags(-1)
+    d['two_month_tag'] = month_tags(-2)
+
+    d['this_year_ann_tag'] = year_tags(0, 'Annual')
+    d['last_year_ann_tag'] = year_tags(-1, 'Annual')
+    d['this_year_mthly_tag'] = year_tags(0, 'Monthly')
+    d['last_year_mthly_tag'] = year_tags(-1, 'Monthly')
+
     return render_to_response('main_views/reports.html', RequestContext(request, d))
 
 
