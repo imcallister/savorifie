@@ -3,12 +3,12 @@ from itertools import groupby
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
 from fulfill.models import WarehouseFulfill, ShippingCharge
-import accountifie.toolkit
+import accountifie.common.uploaders
 from accountifie.toolkit.forms import FileForm
 import inventory.apiv1 as inventory_api
 
@@ -35,7 +35,7 @@ def order_upload(request):
 
     if form.is_valid():
         upload = request.FILES.values()[0]
-        file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
+        file_name_with_timestamp = accountifie.common.uploaders.csv.save_file(upload)
         dupes, new_packs, error_cnt, error_msgs = process_ups(file_name_with_timestamp)
 
         messages.success(request, 'Loaded UPS file: %d new records, \
@@ -51,7 +51,7 @@ def order_upload(request):
         context = {}
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the UPS file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def process_ups(file_name):

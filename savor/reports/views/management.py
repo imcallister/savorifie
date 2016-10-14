@@ -2,7 +2,7 @@ import time
 from dateutil.parser import parse
 
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.utils.safestring import mark_safe
 
@@ -155,4 +155,4 @@ def management(request):
     context['NC2_unreconciled'] = get_table('no_warehouse_record')(warehouse='NC2')
     context['152Frank_unreconciled'] = get_table('no_warehouse_record')(warehouse='152Frank')
     
-    return render_to_response('management.html', context, context_instance = RequestContext(request))
+    return render(request, 'management.html', context)

@@ -6,11 +6,12 @@ from ofxparse import OfxParser
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 
 from accountifie.toolkit.forms import FileForm
 import accountifie.toolkit
 from base.models import CreditCardTrans
+from accountifie.common.uploaders.upload_tools import save_file
 
 DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'data'))
 INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
@@ -25,7 +26,7 @@ def ccard_upload(request):
     if form.is_valid():
         upload = request.FILES.values()[0]
         file_name = upload._name
-        file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
+        file_name_with_timestamp = save_file(upload)
         dupes, new_charges, errors = process_mastercard(file_name_with_timestamp)
         messages.success(request, 'Loaded mastercard file: %d new charges and %d duplicate charges' % (new_charges, dupes))
         messages.warning(request, 'Errors: %d.' % errors)
@@ -34,7 +35,7 @@ def ccard_upload(request):
     else:
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the mastercard file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def process_mastercard(file_name):

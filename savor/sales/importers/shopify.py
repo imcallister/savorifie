@@ -5,13 +5,13 @@ from dateutil.parser import parse
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
 from ..models import Sale, SalesTax, UnitSale, TaxCollector
 import products.models
-import accountifie.toolkit
+import accountifie.common.uploaders.csv
 from accountifie.toolkit.forms import FileForm
 from accountifie.common.api import api_func
 
@@ -53,7 +53,7 @@ def order_upload(request):
     if form.is_valid():
         upload = request.FILES.values()[0]
         file_name = upload._name
-        file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
+        file_name_with_timestamp = accountifie.common.uploaders.csv.save_file(upload)
 
         rslts = process_shopify(file_name_with_timestamp)
         if rslts['status'] == 'ERROR':
@@ -69,7 +69,7 @@ def order_upload(request):
     else:
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the shopify file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def shopify_fee(sale_obj):

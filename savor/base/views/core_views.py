@@ -37,6 +37,12 @@ def company_context(request):
                                      ('Snapshots', '/snapshot/glsnapshots')
                                       ])
 
+    data['power_menu_items'] = OrderedDict([('Admin', "/admin/"),
+                                            ('Maintenance', "/admin/"),
+                                            ('Dashboard', "/dashboard/"),
+                                            ('Logs', "/dashboard/logs/")
+                                            ])
+
     data['company_list'] = [x['id'] for x in api_func('gl', 'company')]
 
     if company_id:
