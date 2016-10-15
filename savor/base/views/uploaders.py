@@ -15,23 +15,7 @@ import base.importers
 def upload_file(request, file_type, check=False):
 
     if request.method == 'POST':
-        if file_type == 'expense':
-            config = dict(file_type=file_type,
-                          model='base.Expense', 
-                          unique=base.importers.unique_expense, 
-                          name_cleaner=base.importers.clean_expense_fields, 
-                          value_cleaner=base.importers.clean_expense_values,
-                          exclude=base.importers.exclude_expense(),
-                          post_process=None)
-        elif file_type == 'frbchecking_old':
-            config = dict(file_type=file_type,
-                          model='base.Cashflow', 
-                          unique=base.importers.unique_frbchecking, 
-                          name_cleaner=base.importers.clean_frbchecking_fields, 
-                          value_cleaner=base.importers.clean_frbchecking_values,
-                          exclude=[],
-                          post_process=None)
-        elif file_type == 'frbchecking':
+        if file_type == 'frbchecking':
             return base.importers.frbchecking.order_upload(request)
         elif file_type == 'shopify':
             return base.importers.shopify.order_upload(request)

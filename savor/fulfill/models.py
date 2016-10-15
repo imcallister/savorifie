@@ -2,16 +2,19 @@
 
 import operator
 import logging
+from decimal import Decimal
 
 from django.db import models
 
-import accountifie.gl.bmo
+from accountifie.gl.bmo import BusinessModelObject
 import accountifie.gl.models
 import accountifie.common.models
+from accountifie.toolkit.utils import get_default_company
 
 
 logger = logging.getLogger('default')
 
+DZERO = Decimal('0')
 
 FULFILL_CHOICES = (
     ('back-ordered', 'back-ordered'),
@@ -27,7 +30,8 @@ PACKING_TYPES = (
 )
 
 
-class ShippingCharge(models.Model):
+class ShippingCharge(models.Model, BusinessModelObject):
+    company = models.ForeignKey('gl.Company', default=get_default_company)
     shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
     account = models.CharField(max_length=25, blank=True, null=True)
     tracking_number = models.CharField(max_length=50, blank=True, null=True)
@@ -37,6 +41,40 @@ class ShippingCharge(models.Model):
     fulfillment = models.ForeignKey('fulfill.Fulfillment', blank=True, null=True)
     order_related = models.BooleanField(default=True)
     comment = models.TextField(null=True, blank=True)
+
+    short_code = 'SHP'
+
+    def save(self):
+        models.Model.save(self)
+        self.update_gl()
+        
+    def delete(self):
+        self.delete_from_gl()
+        models.Model.delete(self)
+
+    def get_gl_transactions(self):
+        tran = dict(
+                    company=self.company,
+                    date=self.ship_date,
+                    date_end=None,
+                    trans_id='%s.%s.%s' % (self.short_code, self.id, 'CHG'),
+                    bmo_id='%s.%s' % (self.short_code, self.id),
+                    comment="%s: %s" % (self.id, self.comment)
+                )
+
+        cp = self.shipper.company
+        
+        # HARD CODE
+        ap_acct = '3006'
+        exp_acct = '5070'
+
+        lines = [(ap_acct, DZERO - Decimal(self.charge), cp, []),
+               (exp_acct, Decimal(self.charge), cp, [])]
+
+        tran['lines'] = lines
+        return [tran]
+
+
 
 
 class Fulfillment(models.Model):
