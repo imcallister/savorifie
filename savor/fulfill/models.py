@@ -53,13 +53,19 @@ class ShippingCharge(models.Model, BusinessModelObject):
         models.Model.delete(self)
 
     def get_gl_transactions(self):
+        comment = '%s. Fulfill %s. %s' % (self.id,
+                                          str(self.fulfillment),
+                                          str(self.shipper))
+        
+        if self.comment:
+            comment += '. %s' % self.comment
         tran = dict(
                     company=self.company,
                     date=self.ship_date,
                     date_end=None,
                     trans_id='%s.%s.%s' % (self.short_code, self.id, 'CHG'),
                     bmo_id='%s.%s' % (self.short_code, self.id),
-                    comment="%s: %s" % (self.id, self.comment)
+                    comment=comment
                 )
 
         cp = self.shipper.company

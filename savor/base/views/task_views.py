@@ -15,7 +15,7 @@ def tri_10(*args, **kwargs):
     for i in range(20):
         sleep(1)
         tot += i
-    return tot
+    return {'return_value': tot}
 
 
 def long_calc2(request):

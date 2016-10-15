@@ -8,6 +8,7 @@ import accountifie.gl.bmo
 
 DZERO = Decimal('0')
 
+CASHFLOW_TRANSTYPE_CHOICES = ['1100', '1250', '3000', '1500', '7090', '3510', '3005', '3006']
 
 class CashflowAllocation(models.Model):
     cashflow = models.ForeignKey('base.Cashflow')
@@ -35,7 +36,9 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
     amount = models.DecimalField(max_digits=11, decimal_places=2)
     description = models.TextField(max_length=200, null=True)
     external_id = models.CharField(max_length=20, null=True)
-    trans_type = models.ForeignKey('gl.Account', null=True, blank=True, help_text="We need to match this up")
+    trans_type = models.ForeignKey('gl.Account', null=True, 
+                                    blank=True, help_text="We need to match this up",
+                                    limit_choices_to={'id__in': CASHFLOW_TRANSTYPE_CHOICES})
     counterparty = models.ForeignKey('gl.Counterparty', null=True, blank=True, help_text="We need to match this up")
     expense_acct = models.ForeignKey('gl.Account', null=True, blank=True,
                                      related_name='expense_acct',
