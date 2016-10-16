@@ -4,7 +4,6 @@ from django import forms
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.db.models import Q
 
@@ -107,10 +106,10 @@ class CreditCardTransDALForm(forms.ModelForm):
 
 class CreditCardTransAdmin(SimpleHistoryAdmin):
     ordering = ('-trans_date',)
-    list_editable = ('counterparty', 'expense_acct',)
-    list_display = ('trans_id', 'card_company', 'trans_date', 'post_date',
-                    'trans_type', 'amount', 'payee', 'counterparty', 
-                    'card_number', 'expense_acct',)
+    list_editable = ('counterparty', 'acct_payable', 'expense_acct',)
+    list_display = ('trans_id', 'card_company', 'trans_date',
+                    'amount', 'payee', 'counterparty', 
+                    'acct_payable', 'expense_acct',)
     list_filter = ('card_number', 'trans_type', UnmatchedCashflows)
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']

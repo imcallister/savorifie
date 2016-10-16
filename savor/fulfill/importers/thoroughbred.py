@@ -5,12 +5,12 @@ from dateutil.parser import parse
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
 from ..models import WarehouseFulfill, WarehouseFulfillLine
-import accountifie.toolkit
+import accountifie.common.uploaders
 from accountifie.toolkit.forms import FileForm
 from accountifie.common.api import api_func
 
@@ -30,18 +30,17 @@ def order_upload(request):
     if form.is_valid():
         upload = request.FILES.values()[0]
         file_name = upload._name
-        file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
+        file_name_with_timestamp = accountifie.common.uploaders.csv.save_file(upload)
         dupes, new_packs, missing_ship_codes = process_thoroughbred(file_name_with_timestamp)
         messages.success(request, 'Loaded thoroughbred file: %d new records and %d duplicate records' % (new_packs, dupes))
         messages.error(request, 'Missing shipping types: %d ' % (missing_ship_codes))
         context = {}
-        #return render_to_response('base/uploaded.html', context, context_instance=RequestContext(request))
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
         context = {}
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the shopify file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def process_thoroughbred(file_name):

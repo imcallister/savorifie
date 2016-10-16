@@ -4,7 +4,7 @@ from django import forms
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.db.models import Q
 
@@ -26,6 +26,7 @@ admin.site.register(Channel, ChannelAdmin)
 
 class TaxCollectorAdmin(admin.ModelAdmin):
     list_display = ('entity',)
+    list_display_links = None
     list_editable = ('entity',)
     search_fields = ('entity',)
 
@@ -85,7 +86,8 @@ class SaleAdmin(SimpleHistoryAdmin):
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),
                                 ('external_channel_id', 'channel_charges',),
-                                ('customer_code', 'special_sale'),
+                                ('customer_code', 'special_sale',),
+                                ( 'is_return',),
                                 ('memo',),
                                 )
                      }),
@@ -186,13 +188,13 @@ class SaleAdmin(SimpleHistoryAdmin):
         if not form:
             form = self.ChooseWarehouseForm(initial={'_selected_action': request.POST.getlist(admin.ACTION_CHECKBOX_NAME)})
 
-        return render_to_response('admin/inventory/choose_warehouse.html',
-                                    {'title': u'Choose warehouse',
-                                     'objects': queryset,
-                                     'form': form,
-                                     'path': request.get_full_path()
-                                     },
-                                    context_instance=RequestContext(request))
+        return render(request,
+                      'admin/inventory/choose_warehouse.html',
+                      {'title': u'Choose warehouse',
+                       'objects': queryset,
+                       'form': form,
+                       'path': request.get_full_path()
+                       })
 
     queue_for_warehouse.short_description = 'Queue for fulfillment'
     queue_for_backorder.short_description = 'Add to back-order queue'

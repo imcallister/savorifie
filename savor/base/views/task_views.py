@@ -3,24 +3,23 @@ from __future__ import absolute_import
 from time import sleep
 import datetime
 
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import JsonResponse
 
 from accountifie.celery import background_task
 
 # long-running calc
-def tri_10():
+def tri_10(*args, **kwargs):
     tot = 0
     for i in range(20):
         sleep(1)
         tot += i
-    return tot
+    return {'return_value': tot}
 
 
 def long_calc2(request):
-    return render_to_response('long_task2.html',
-                              RequestContext(request, {}))
+    return render(request, 'long_task2.html', {})
 
 
 def long_calc_task(request):

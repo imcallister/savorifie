@@ -5,13 +5,15 @@ from dateutil.parser import parse
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 
 
 import accountifie.gl.models
 from savor.base.models import Cashflow
 from accountifie.toolkit.forms import FileForm
+from accountifie.common.uploaders.upload_tools import save_file
+
 
 DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'data'))
 INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
@@ -63,15 +65,15 @@ def order_upload(request):
     if form.is_valid():
         upload = request.FILES.values()[0]
         file_name = upload._name
-        file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
+        file_name_with_timestamp = save_file(upload)
         dupes, new_entries = process_frb(file_name_with_timestamp)
         messages.success(request, 'Loaded FRB file: %d new entries and %d duplicate entries' %(new_entries, dupes))
         context = {}
-        return render_to_response('base/uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'base/uploaded.html', context)
     else:
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the First Republic file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def process_frb(file_name):

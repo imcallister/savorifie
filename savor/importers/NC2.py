@@ -2,12 +2,12 @@ import os
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
 from fulfill.models import WarehouseFulfill, ShippingCharge
-import accountifie.toolkit
+import accountifie.common.uploaders
 from accountifie.toolkit.forms import FileForm
 import inventory.apiv1 as inventory_api
 
@@ -26,7 +26,7 @@ def order_upload(request):
 
     if form.is_valid():
         upload = request.FILES.values()[0]
-        file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
+        file_name_with_timestamp = accountifie.common.uploaders.csv.save_file(upload)
         dupes, new_packs, error_cnt, error_msgs = process_nc2(file_name_with_timestamp)
 
         messages.success(request, 'Loaded NC2 file: %d new records, \
@@ -42,7 +42,7 @@ def order_upload(request):
         context = {}
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the NC2 file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def create_nc2_shippingcharge(wh_flf):
@@ -91,4 +91,6 @@ def process_nc2(file_name):
                 if rec_obj.fulfillment.ship_type.label == 'IFS_BEST':
                     create_nc2_shippingcharge(rec_obj)
 
-    return exist_recs_ctr, new_recs_ctr, errors_cnt, errors
+    summary_msg = 'Loaded NC2 file: %d new records, %d duplicate records, %d bad rows' \
+                                    % (new_recs_ctr, exist_recs_ctr, errors_cnt)
+    return summary_msg, errors

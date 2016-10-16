@@ -5,12 +5,12 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
 from django.contrib import messages
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
 from ..models import WarehouseFulfill
-import accountifie.toolkit
+import accountifie.common.uploaders
 from accountifie.toolkit.forms import FileForm
 import inventory.apiv1 as inventory_api
 
@@ -28,7 +28,7 @@ def order_upload(request):
 
     if form.is_valid():
         upload = request.FILES.values()[0]
-        file_name_with_timestamp = accountifie.toolkit.uploader.save_file(upload)
+        file_name_with_timestamp = accountifie.common.uploaders.csv.save_file(upload)
         dupes, new_packs, missing_ship_codes = process_nc2(file_name_with_timestamp)
         messages.success(request, 'Loaded NC2 file: %d new records and %d duplicate records' % (new_packs, dupes))
         messages.error(request, 'Missing shipping codes: %d ' % (missing_ship_codes))
@@ -38,7 +38,7 @@ def order_upload(request):
         context = {}
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the NC2 file provided, please see below')
-        return render_to_response('uploaded.html', context, context_instance=RequestContext(request))
+        return render(request, 'uploaded.html', context)
 
 
 def process_nc2(file_name):

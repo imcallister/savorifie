@@ -8,6 +8,8 @@ from accountifie.toolkit.utils import get_default_company
 import accountifie.environment.apiv1 as env_api
 
 
+CC_AP_CHOICES = ['3000', '3006']
+
 class CreditCardTrans(models.Model, BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
     card_company = models.ForeignKey('gl.Counterparty', related_name='card_company')
@@ -26,6 +28,10 @@ class CreditCardTrans(models.Model, BusinessModelObject):
     payee = models.CharField(max_length=200, null=True, blank=True)
     card_number = models.CharField(max_length=20, null=True, blank=True)
     expense_comment = models.CharField(max_length=200, null=True, blank=True)
+    acct_payable = models.ForeignKey('gl.Account',
+                                     default='3000',
+                                     limit_choices_to={'id__in': CC_AP_CHOICES},
+                                     related_name='ccard_ap_acct')
     expense_acct = models.ForeignKey('gl.Account', null=True, blank=True,
                                      help_text='Optional. For related expense created from Credit Card Trans')
 
@@ -53,8 +59,6 @@ class CreditCardTrans(models.Model, BusinessModelObject):
         mcard = accountifie.gl.models.Counterparty.objects.get(id='MCARD')
         debit = accountifie.gl.models.Account.objects \
                                              .get(display_name='Mastercard')
-        credit = accountifie.gl.models.Account.objects \
-                                              .get(id=env_api.variable('GL_ACCOUNTS_PAYABLE', {}))
         cp = self.counterparty
         comment= "MasterCard ending #%s trans #%s: %s" % (self.card_number, self.id, cp)
 
@@ -68,7 +72,7 @@ class CreditCardTrans(models.Model, BusinessModelObject):
             long_desc= self.description,
             lines=[ # not sure of signs here
                 (debit, float(self.amount), mcard, []),
-                (credit, 0 - float(self.amount), cp, []),
+                (self.acct_payable, 0 - float(self.amount), cp, []),
                 ]
             ))
 
