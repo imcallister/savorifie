@@ -12,6 +12,7 @@ from accountifie.toolkit.forms import FileForm
 import inventory.apiv1 as inventory_api
 
 from .file_models.NC2 import NC2CSVModel
+from accountifie.common.uploaders.upload_tools import order_upload
 import logging
 logger = logging.getLogger('default')
 
@@ -20,7 +21,14 @@ DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'da
 INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
 PROCESSED_ROOT = os.path.join(DATA_ROOT, 'processed')
 
+def upload(request):
+    processor = process_nc2
+    return order_upload(request,
+                        processor,
+                        label=False)
 
+
+"""
 def order_upload(request):
     form = FileForm(request.POST, request.FILES)
 
@@ -43,6 +51,7 @@ def order_upload(request):
         context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
         messages.error(request, 'Could not process the NC2 file provided, please see below')
         return render(request, 'uploaded.html', context)
+"""
 
 
 def create_nc2_shippingcharge(wh_flf):
