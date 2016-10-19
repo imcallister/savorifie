@@ -28,31 +28,6 @@ def upload(request):
                         label=False)
 
 
-"""
-def order_upload(request):
-    form = FileForm(request.POST, request.FILES)
-
-    if form.is_valid():
-        upload = request.FILES.values()[0]
-        file_name_with_timestamp = accountifie.common.uploaders.csv.save_file(upload)
-        dupes, new_packs, error_cnt, error_msgs = process_nc2(file_name_with_timestamp)
-
-        messages.success(request, 'Loaded NC2 file: %d new records, \
-                                                    %d duplicate records, \
-                                                    %d bad rows'
-                                   % (new_packs, dupes, error_cnt))
-        for e in error_msgs:
-            messages.error(request, e)
-
-        context = {}
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
-    else:
-        context = {}
-        context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
-        messages.error(request, 'Could not process the NC2 file provided, please see below')
-        return render(request, 'uploaded.html', context)
-"""
-
 
 def create_nc2_shippingcharge(wh_flf):
     if ShippingCharge.objects \
