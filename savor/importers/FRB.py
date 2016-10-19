@@ -32,7 +32,7 @@ def process_frb(file_name):
     errors_cnt = len(errors)
 
     # HARDCODE
-    ext_account = ExternalAccount.objects.get(gl_account__id='1001').id
+    ext_account = ExternalAccount.objects.get(gl_account__id='1001')
 
     for rec in cf_records:
         rec['amount'] = rec['debit'] + rec['credit']
