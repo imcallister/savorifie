@@ -35,7 +35,7 @@ def process_frb(file_name):
     ext_account = ExternalAccount.objects.get(gl_account__id='1001')
 
     for rec in cf_records:
-        rec['amount'] = rec['debit'] + rec['credit']
+        rec['amount'] = rec.pop('debit') + rec.pop('credit')
         rec_obj = Cashflow.objects \
                           .filter(post_date=rec['post_date']) \
                           .filter(amount=rec['amount']) \
