@@ -36,6 +36,7 @@ def create_nc2_shippingcharge(wh_flf):
         return 'SHIPPING CHARGE ALREADY EXISTS'
 
     chg = {}
+    shipper = wh_flf.shipping_type.shipper.id
     chg['shipper_id'] = inventory_api.shipper('IFS360', {})['id']
     chg['account'] = 'N/A'
     chg['tracking_number'] = wh_flf.tracking_number
@@ -45,8 +46,11 @@ def create_nc2_shippingcharge(wh_flf):
     chg['fulfillment_id'] = wh_flf.fulfillment.id
     chg['order_related'] = True
     chg['comment'] = ''
-    ShippingCharge(**chg).save()
-    return 'SHIPPING CHARGE CREATED'
+    try:
+        ShippingCharge(**chg).save()
+        return 'SHIPPING CHARGE CREATED'
+    except:
+        return 'SHIPPING CHARGE SAVE FAILED'
 
 
 def process_nc2(file_name):
@@ -72,8 +76,7 @@ def process_nc2(file_name):
             rec_obj.save()
 
             if rec_obj.fulfillment:
-                if rec_obj.fulfillment.ship_type.label == 'IFS_BEST':
-                    create_nc2_shippingcharge(rec_obj)
+                create_nc2_shippingcharge(rec_obj)
 
     summary_msg = 'Loaded NC2 file: %d new records, %d duplicate records, %d bad rows' \
                                     % (new_recs_ctr, exist_recs_ctr, errors_cnt)

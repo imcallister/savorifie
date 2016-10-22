@@ -374,7 +374,7 @@
         <div id="the-help"></div>
         <h3>Testing the Bootstrap React component</h3>
         <div id="the-help2"></div>
-        {% render_bundle 'bookkeeping' %}
+        
       </div>
     </div>
   </div>
@@ -383,12 +383,14 @@
 
 
 <!-- MODAL COMPONENTS -->
-{{shopify_unpaid}}
-{{shopify_comparison}}
+<div id="bookkeeping.unpaidShopify"></div>
+<div id="bookkeeping.shopifyComp"></div>
+<!--{{shopify_comparison}}-->
 {{fulfill_no_shipcharge}}
 {{UPS_invoices}}
 {{mis_UPS}}
 
+{% render_bundle 'bookkeeping' %}
 
 {% endblock %}
 
@@ -404,20 +406,4 @@
 
 {% block extrajs %}
 <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
-<!--
-
-    <script src="{{ STATIC_URL }}highcharts/js/highcharts.js"></script>
-    <script src="{{ STATIC_URL }}highcharts/js/modules/exporting.js"></script>
-    <script src="{{ STATIC_URL }}charts/chartdefs.js"></script>
-    <script src="{{ STATIC_URL }}base/js/easypiechart.js"></script>
-    
-    <script src="{{ STATIC_URL }}base/js/jquery.align-column.js"></script>
-    <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
-    <script src="{{ STATIC_URL }}base/js/bootstrap-table-filter-control.js"></script>
-
-    <script src="{{ STATIC_URL }}base/js/bootstrap-table-editable.js"></script>
-    <script src="{{ STATIC_URL }}base/js/bootstrap-editable.js"></script>
-    <script src="{{ STATIC_URL }}base/js/tableExport.js"></script>
-    <script src="{{ STATIC_URL }}base/js/bootstrap-table-export.js"></script>
--->
 {% endblock %}

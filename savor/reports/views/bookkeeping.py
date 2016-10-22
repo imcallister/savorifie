@@ -26,14 +26,7 @@ def bookkeeping(request):
     chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
 
-    context['shopify_unpaid'] = basic_modal(get_table('unpaid_channel')('SHOPIFY'),
-                                                      'Unpaid Shopify',
-                                                      'shopifyUnpaid')
-
-    context['shopify_comparison'] = basic_modal(get_table('channel_payout_comp')('SHOPIFY'),
-                                                'Shopify Comparison',
-                                                'shopifyComp')
-
+    
     context['mis_UPS'] = basic_modal(bstrap_table('UPS_wrong_acct')(),
                                      'Mis-billed UPS charges',
                                      'misUPS')

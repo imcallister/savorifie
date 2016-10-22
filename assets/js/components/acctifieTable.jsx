@@ -26,7 +26,7 @@ class DataTable extends React.Component {
     };
 
     return (
-      <BootstrapTable data={this.props.tableData} striped={true} hover={true} search={true}>
+      <BootstrapTable data={this.props.tableData} striped={true} hover={true} search={true} pagination={true} sizePerPage={25}>
         {this.props.columns.map(renderColumn)}
       </BootstrapTable>
     );

@@ -1,13 +1,15 @@
 import itertools
 from decimal import Decimal
 import datetime
+import calendar
+from dateutil.parser import parse
 
 from django.db.models import Q
 
 from .model_api import *
 from fulfill.models import ShippingCharge, Fulfillment
 from fulfill.serializers import ShippingChargeSerializer, FulfillmentSerializer
-
+from accountifie.toolkit.utils import monthrange
 
 def fulfill_no_shipcharge(qstring):
     with_shipcharge = [s['fulfillment_id'] for s in shippingcharge({}) \
@@ -49,6 +51,29 @@ def UPS_invoices(qstring):
 
     def _get_line(k, v):
         return {'invoice_number': k,
+                'charge': sum([Decimal(st['charge']) for st in v]),
+                'last_date': max([st['ship_date'] for st in v])}
+    return sorted([_get_line(k, v) for k, v in by_invoice.iteritems()],
+                  key=lambda x: x['last_date'])
+
+
+def IFS_monthly(qstring):
+    # IFS charges ...   aim is to reconcile to their statements
+    #  they report on monthly basis
+    # so generate "statements" based on calendar months
+    # how to calculate? .... do it by shipping carge filtered on shipper==IFS360
+
+    ship_charges = sorted(shippingcharge({'shipper': 'IFS360'}), key=lambda x: x['ship_date'])
+
+    def _get_month(dt):
+        dt = parse(dt).date()
+        return (dt.month, dt.year)
+    
+    by_invoice = dict((k, list(v)) for k, v in itertools.groupby(ship_charges,
+                                                                 lambda x: _get_month(x['ship_date'])))
+
+    def _get_line(k, v):
+        return {'statement_month': '%s %s' % (calendar.month_name[k[0]], k[1]),
                 'charge': sum([Decimal(st['charge']) for st in v]),
                 'last_date': max([st['ship_date'] for st in v])}
     return sorted([_get_line(k, v) for k, v in by_invoice.iteritems()],

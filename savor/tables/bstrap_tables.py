@@ -37,6 +37,15 @@ def UPS_invoices():
             ]
     return get_bstrap_table(data_url, row_defs)
 
+def IFS_monthly():
+    data_url = "/api/fulfill/IFS_monthly"
+    row_defs = [{'data_field': 'statement_month', 'value': 'Invoice #', 'formatter': 'nameFormatter'},
+                {'data_field': 'last_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
+                {'data_field': 'charge', 'value': 'Amount', 'formatter': 'nameFormatter'}
+            ]
+    return get_bstrap_table(data_url, row_defs)
+
+
 def fulfill_no_shipcharge():
     data_url = "/api/fulfill/fulfill_no_shipcharge"
     row_defs = [{'data_field': 'fulfillment_id', 'value': 'Fulfill ID', 'formatter': 'nameFormatter'},
@@ -249,7 +258,7 @@ def no_warehouse_record(warehouse=None):
 
     row_defs = [
                 {'data_field': 'order:external_channel_id', 'value': 'External ID', 'formatter': 'nameFormatter'},
-                {'data_field': 'order:id', 'value': 'Sale ID', 'formatter': 'nameFormatter'},
+                {'data_field': 'id', 'value': 'Fulfill ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'order:shipping_name', 'value': 'Shipping Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'order:customer_code', 'value': 'Customer Code', 'formatter': 'nameFormatter'},
                 {'data_field': 'order:sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
