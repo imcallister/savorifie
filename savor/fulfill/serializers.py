@@ -16,6 +16,7 @@ class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     fulfillment_id = serializers.SerializerMethodField()
     warehouse = serializers.SerializerMethodField()
     requested_ship_type = serializers.SerializerMethodField()
+    shipper = serializers.StringRelatedField()
 
     def get_warehouse(self, obj):
         if obj.fulfillment:
@@ -37,7 +38,7 @@ class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 
     class Meta:
         model = models.ShippingCharge
-        fields = ('account', 'tracking_number', 'invoice_number',
+        fields = ('shipper', 'account', 'tracking_number', 'invoice_number',
                   'ship_date', 'charge', 'order_related', 'comment',
                   'fulfillment', 'fulfillment_id', 'requested_ship_type', 'warehouse')
 

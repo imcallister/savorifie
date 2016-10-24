@@ -34,6 +34,7 @@ class ShippingCharge(models.Model, BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
     shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
     account = models.CharField(max_length=25, blank=True, null=True)
+    external_id = models.CharField(max_length=50, blank=True, null=True)
     tracking_number = models.CharField(max_length=50, blank=True, null=True)
     invoice_number = models.CharField(max_length=25, blank=True, null=True)
     ship_date = models.DateField()

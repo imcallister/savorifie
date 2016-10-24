@@ -58,11 +58,6 @@ def UPS_invoices(qstring):
 
 
 def IFS_monthly(qstring):
-    # IFS charges ...   aim is to reconcile to their statements
-    #  they report on monthly basis
-    # so generate "statements" based on calendar months
-    # how to calculate? .... do it by shipping carge filtered on shipper==IFS360
-
     ship_charges = sorted(shippingcharge({'shipper': 'IFS360'}), key=lambda x: x['ship_date'])
 
     def _get_month(dt):
