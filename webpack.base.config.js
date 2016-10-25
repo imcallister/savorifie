@@ -22,7 +22,11 @@ module.exports = {
           {
             presets: ['es2015','react']
           }
-      }, // to transform JSX into JS
+      },
+      { test: /\.less?$/,
+        exclude: /node_modules/,
+        loader: 'style-loader!css-loader!less-loader',
+      },
     ],
   },
 
