@@ -18,7 +18,9 @@ class Uploader extends React.Component {
                 <div className={'panel panel-default'}>
                   <div className={'panel-body'}>
                     <Dropzone ref={(node) => { this.dropzone = node; }} onDrop={this.props.onDrop}>
-                        <div>Try dropping some files here, or click to select files to upload.</div>
+                        <h3>
+                          Drag files here or click to get finder window
+                        </h3>
                     </Dropzone>
                   </div>
                 </div>
