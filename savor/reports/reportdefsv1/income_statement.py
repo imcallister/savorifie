@@ -34,7 +34,7 @@ class IncomeStatement(Report):
     def calcs(self):
         table_data = []
 
-        top_level_paths = ['equity.retearnings.' + x for x in ['sales', 'opexp']]
+        top_level_paths = ['equity.retearnings.' + x for x in ['sales', 'opexp', 'costofsales']]
 
         path_totals = {}
         for table_path in top_level_paths:
@@ -42,7 +42,6 @@ class IncomeStatement(Report):
             table_data.append(header)
 
 
-            table_list = []
             income = self.query_manager.path_drilldown(self.company_id, self.columns, table_path, excl_contra=['3700'])
             
             if len(income) > 0:

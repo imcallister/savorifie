@@ -14,8 +14,8 @@ from base.models import Expense, Cashflow, CreditCardTrans
 @login_required
 def ship_charges(request):
     from_date, to_date = extractDateRange(request)
-
     context = {'upload_form': FileForm()}
     context['UPS_invoices'] = get_table('UPS_invoices')
+    context['IFS_monthly'] = get_table('IFS_monthly')
 
     return render(request, 'reports/ship_charges.html', context)

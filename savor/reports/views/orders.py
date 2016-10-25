@@ -45,7 +45,6 @@ def order_drilldown(request, order_id):
     context['giftwrap'] = 'Yes' if sku_data['gift_wrapping'] else 'No'
     context['gift_message'] = sku_data['gift_message']
 
-
     context['fulfillment_list'] = []
 
     for f in fulfillments:

@@ -7,11 +7,11 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
 from fulfill.models import WarehouseFulfill, ShippingCharge
-import accountifie.common.uploaders
 from accountifie.toolkit.forms import FileForm
 import inventory.apiv1 as inventory_api
 
 from .file_models.NC2 import NC2CSVModel
+from fulfill.calcs import create_nc2_shippingcharge
 from accountifie.common.uploaders.upload_tools import order_upload
 import logging
 logger = logging.getLogger('default')
@@ -26,27 +26,6 @@ def upload(request):
     return order_upload(request,
                         processor,
                         label=False)
-
-
-
-def create_nc2_shippingcharge(wh_flf):
-    if ShippingCharge.objects \
-                     .filter(invoice_number=wh_flf.warehouse_pack_id) \
-                     .count() > 0:
-        return 'SHIPPING CHARGE ALREADY EXISTS'
-
-    chg = {}
-    chg['shipper_id'] = inventory_api.shipper('IFS360', {})['id']
-    chg['account'] = 'N/A'
-    chg['tracking_number'] = wh_flf.tracking_number
-    chg['invoice_number'] = wh_flf.warehouse_pack_id
-    chg['ship_date'] = wh_flf.ship_date
-    chg['charge'] = wh_flf.shipping_cost
-    chg['fulfillment_id'] = wh_flf.fulfillment.id
-    chg['order_related'] = True
-    chg['comment'] = ''
-    ShippingCharge(**chg).save()
-    return 'SHIPPING CHARGE CREATED'
 
 
 def process_nc2(file_name):
@@ -72,8 +51,7 @@ def process_nc2(file_name):
             rec_obj.save()
 
             if rec_obj.fulfillment:
-                if rec_obj.fulfillment.ship_type.label == 'IFS_BEST':
-                    create_nc2_shippingcharge(rec_obj)
+                create_nc2_shippingcharge(rec_obj)
 
     summary_msg = 'Loaded NC2 file: %d new records, %d duplicate records, %d bad rows' \
                                     % (new_recs_ctr, exist_recs_ctr, errors_cnt)

@@ -23,6 +23,10 @@ class InventoryTransfer(models.Model):
         app_label = 'inventory'
         db_table = 'inventory_inventorytransfer'
 
+    def __unicode__(self):
+        return '%s to %s. %s' % (self.location.label, self.destination.label, self.transfer_date.strftime('%d-%b-%y'))
+
+
 
 class TransferLine(models.Model):
     inventory_item = models.ForeignKey('products.InventoryItem', blank=True, null=True)

@@ -1,10 +1,10 @@
 import logging
 
 from sales.models import Sale
-from fulfill.models import WarehouseFulfill
+from fulfill.models import WarehouseFulfill, Fulfillment, ShippingCharge
 from sales.importers.shopify import shopify_fee
 
-from importers.NC2 import create_nc2_shippingcharge
+from fulfill.calcs import create_nc2_shippingcharge
 
 logger = logging.getLogger('default')
 
@@ -15,12 +15,16 @@ def add_shopify_fees():
     return
 
 def backfill_nc2_shipcharges():
+    # re-do for all NC2 fulfills
+
+    NC2_flf = [wf['id'] for wf in Fulfillment.objects.filter(warehouse__label='NC2').values('id')]
+    ShippingCharge.objects.filter(fulfillment__id__in=NC2_flf).delete()
+
     new_charges = 0
     duplicated_not_saved = 0
     unknown = 0
     for wf in WarehouseFulfill.objects \
-                              .filter(warehouse__label='NC2') \
-                              .filter(fulfillment__ship_type__label='IFS_BEST'):
+                              .filter(warehouse__label='NC2'):
         ret_code = create_nc2_shippingcharge(wf)
         if ret_code == 'SHIPPING CHARGE ALREADY EXISTS':
             duplicated_not_saved += 1

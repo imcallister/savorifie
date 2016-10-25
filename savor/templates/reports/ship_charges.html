@@ -22,23 +22,16 @@
           </div>
       </div>
       <div class="col-md-6">
-          <div class="panel panel-success">
+          <div class="panel panel-default">
               <div class="panel-heading">
-                  <div class="panel-title">Downloads</div>
+                  <div class="panel-title">IFS Invoices</div>
               </div>
-
               <div class="panel-body">
-
-                  <ul>
-                      <li><a href="/download_allsales">All sales</a></li>
-                      <p>Sales Tax Reports (not working yet)
-                      <a href="/download_salestax">2013</a>,
-                  </p>
-                  </ul>
-
+                  {{IFS_monthly}}
               </div>
           </div>
       </div>
+      
   </div>
 </div>
 
@@ -77,11 +70,4 @@
 {% endblock %}
 
 {% block sidebar %}
-<div class="panel panel-default">
-    <div class="panel-body">
-        <ul class="nav nav-pills nav-stacked">
-            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadUPS">Load UPS Charges</a></li>
-        </ul>
-    </div>
-</div>
 {% endblock %}
