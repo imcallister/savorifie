@@ -2,7 +2,8 @@ var React = require('react')
 var ReactDOM = require('react-dom')
 
 var BHelp = require('../help_text/bookkeeping') 
-var UPSHelp = require('../help_text/UPS_upload') 
+var UPSHelp = require('../help_text/UPS_upload')
+var FRBHelp = require('../help_text/FRB_upload')
 var BSTable = require('../containers/acctifieTableContainer')
 var Uploader = require('../containers/uploaderContainer') 
 var formatters = require('../helpers/formatters')
@@ -11,19 +12,18 @@ var ModalCmpnt = require('../components/modalCmpnt')
 
 var help = <BHelp/>
 var UPS_upload_help = <UPSHelp/>
+var FRB_upload_help = <FRBHelp/>
 
 ReactDOM.render(<ModalCmpnt modalId="help" modalTitle="Help" content={help}/>, 
 				document.getElementById('bookkeeping.help'))
 
 
 
-var FRB_uploader = <Uploader instructions={'Expects a csv file with headers: Date, ABA Num, Currency, Account Num, Account Name, Description, BAI Code, Amount, Serial Num, Ref Num'} 
-						 postUrl={'/importers/upload/frb/'}/>
+var FRB_uploader = <Uploader instructions={FRB_upload_help} postUrl={'/importers/upload/frb/'}/>
 ReactDOM.render(<ModalCmpnt modalId="FRBuploader" modalTitle="FRB File Upload" content={FRB_uploader}/>, document.getElementById('bookkeeping.upload.FRB'))
 
 
-var UPS_uploader = <Uploader instructions={UPS_upload_help} 
-						 postUrl={'/importers/upload/ups/'}/>
+var UPS_uploader = <Uploader instructions={UPS_upload_help} postUrl={'/importers/upload/ups/'}/>
 ReactDOM.render(<ModalCmpnt modalId="UPSuploader" modalTitle="UPS File Upload" content={UPS_uploader}/>, document.getElementById('bookkeeping.upload.UPS'))
 
 
@@ -57,7 +57,7 @@ var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
 		                 {'fld': 'diff', 'label': 'Diff'}
 		                 ]
 var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} />
-ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Comparison" content={shopify_comparison}/>, 
+ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Comparison" wide={true} content={shopify_comparison}/>, 
 				document.getElementById('bookkeeping.shopifyComp'))
 
 

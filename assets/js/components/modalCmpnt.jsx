@@ -1,5 +1,5 @@
 var React = require('react');
-
+var classNames = require('classnames');
 
 class modalCmpnt extends React.Component {
   constructor() {
@@ -10,7 +10,7 @@ class modalCmpnt extends React.Component {
   render() {
     return (
       
-    <div className={'modal modal-wide fade'} id={this.props.modalId} style={{'textAlign': 'center'}}>
+    <div className={classNames('modal', 'fade', {'modal-wide': this.props.wide})} id={this.props.modalId}>
       <div className={'modal-dialog'} role="document">
         <div className={'modal-content'}>
           <div className={'modal-header'}>
