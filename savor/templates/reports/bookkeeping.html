@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{{STATIC_URL}}base/css/fixed-data-table.min.css">
 <link rel="stylesheet" href="{{STATIC_URL}}base/css/react-bootstrap-table-all.min.css">
 
+<!--
 <style>
     .modal.modal-wide .modal-dialog {
       width: 90%;
@@ -24,7 +25,7 @@
     #tallModal .modal-body p { margin-bottom: 900px };
 
 </style>
-
+-->
 
 {% endblock %}
 
@@ -79,7 +80,7 @@
                 <div class="panel-body">
                     <div>
                         <ul class="nav nav-pills nav-stacked">
-                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadFirstRepublic">Load First Republic</a></li>
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#FRBuploader">Load First Republic</a></li>
                             <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadMasterCard">Load Mastercard</a></li>
                             <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadUPS">Load UPS</a></li>
                         </ul>
@@ -95,9 +96,9 @@
                 <div class="panel-body">
                     <div>
                         <ul class="nav nav-pills nav-stacked">
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#UPSInvoices">UPS Invoices</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#upsInvoices">UPS Invoices</a></li>
                             <li><a class="btn btn-info" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#fulNoSC">Fulfills with no Shipping Charge</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#noShipcharge">Fulfills with no Shipping Charge</a></li>
                         </ul>
                     </div>
                 </div>
@@ -250,72 +251,7 @@
 
 <!-- Modal -->
 
-<div class="modal fade" id="createTransfer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title" id="myModalLabel">Upload Shopify order file</h3>
-      </div>
-      <div class="modal-body">
-        <p>Please choose a .csv file</p>
 
-        <form role='form' enctype="multipart/form-data" method="post" action="/base/shopify_upload/">{% csrf_token %}
-            <div class="form-group">    
-                {{shopify_upload_form.as_p}}
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <a href='/' class="btn btn-default">Cancel</a>
-        </form>
-
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-
-<div class="modal fade" id="showBatches" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title">Recent Batches</h4>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid" id="wrapper">
-          {% include "splashdict.html" with columns=batch_columns rows=batch_rows %}
-        </div>
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-
-<div class="modal fade" id="loadFirstRepublic" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title" id="myModalLabel">Upload First Republic activity</h3>
-      </div>
-      <div class="modal-body">
-        <p>Please choose a .csv file</p>
-
-        <form role='form' enctype="multipart/form-data" method="post" action="/importers/upload/frb/">{% csrf_token %}
-            <div class="form-group">    
-                {{upload_form.as_p}}
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <a href='/' class="btn btn-default">Cancel</a>
-        </form>
-
-      </div>
-      
-    </div>
-  </div>
-</div>
 
 <div class="modal fade" id="loadUPS" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
@@ -340,6 +276,7 @@
     </div>
   </div>
 </div>
+
 <div class="modal fade" id="loadMasterCard" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -385,10 +322,13 @@
 <!-- MODAL COMPONENTS -->
 <div id="bookkeeping.unpaidShopify"></div>
 <div id="bookkeeping.shopifyComp"></div>
-<!--{{shopify_comparison}}-->
-{{fulfill_no_shipcharge}}
-{{UPS_invoices}}
-{{mis_UPS}}
+<div id="bookkeeping.fulfillNoShipcharge"></div>
+<div id="bookkeeping.upsInvoices"></div>
+<div id="bookkeeping.misBilledUPS"></div>
+
+<div id="bookkeeping.upload.FRB"></div>
+<div id="bookkeeping.upload.UPS"></div>
+
 
 {% render_bundle 'bookkeeping' %}
 

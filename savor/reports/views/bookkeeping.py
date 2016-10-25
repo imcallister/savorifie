@@ -25,20 +25,7 @@ def bookkeeping(request):
     unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
     chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
-
     
-    context['mis_UPS'] = basic_modal(bstrap_table('UPS_wrong_acct')(),
-                                     'Mis-billed UPS charges',
-                                     'misUPS')
-
-    context['UPS_invoices'] = basic_modal(bstrap_table('UPS_invoices')(),
-                                          'UPS Invoices',
-                                          'UPSInvoices')
-    context['fulfill_no_shipcharge'] = basic_modal(get_table('fulfill_no_shipcharge')(),
-                                                   'Fulfillments missing shipping charge',
-                                                   'fulNoSC')
-
-
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
     context['incomplete_banking'] = cashflows.filter(counterparty=None).count()
     context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count() + \
