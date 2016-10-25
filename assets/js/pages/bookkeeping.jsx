@@ -7,28 +7,28 @@ var Uploader = require('../containers/uploaderContainer')
 var formatters = require('../helpers/formatters')
 var ModalCmpnt = require('../components/modalCmpnt')
 
-ReactDOM.render(<BHelp/>, document.getElementById('the-help'));
+
+var help = <BHelp/>
+ReactDOM.render(<ModalCmpnt modalId="help" modalTitle="Help" content={help}/>, 
+				document.getElementById('bookkeeping.help'))
 
 
 
-
-var uploader = <Uploader instructions={'Expects a csv file with headers: Date, ABA Num, Currency, Account Num, Account Name, Description, BAI Code, Amount, Serial Num, Ref Num'} 
+var FRB_uploader = <Uploader instructions={'Expects a csv file with headers: Date, ABA Num, Currency, Account Num, Account Name, Description, BAI Code, Amount, Serial Num, Ref Num'} 
 						 postUrl={'/importers/upload/frb/'}/>
-ReactDOM.render(<ModalCmpnt modalId="FRBuploader" modalTitle="FRB File Upload" content={uploader}/>, document.getElementById('bookkeeping.upload.FRB'))
+ReactDOM.render(<ModalCmpnt modalId="FRBuploader" modalTitle="FRB File Upload" content={FRB_uploader}/>, document.getElementById('bookkeeping.upload.FRB'))
 
 
-var uploader = <Uploader instructions={'Expects a csv file with headers: Date, ABA Num, Currency, Account Num, Account Name, Description, BAI Code, Amount, Serial Num, Ref Num'} 
+var UPS_uploader = <Uploader instructions={'Expects a csv file with headers: Date, ABA Num, Currency, Account Num, Account Name, Description, BAI Code, Amount, Serial Num, Ref Num'} 
 						 postUrl={'/importers/upload/ups/'}/>
-ReactDOM.render(<ModalCmpnt modalId="UPSuploader" modalTitle="UPS File Upload" content={uploader}/>, document.getElementById('bookkeeping.upload.UPS'))
+ReactDOM.render(<ModalCmpnt modalId="UPSuploader" modalTitle="UPS File Upload" content={UPS_uploader}/>, document.getElementById('bookkeeping.upload.UPS'))
 
 
-var tbl_columns = [{'fld': 'invoice_number', 'label': 'Invoice #'},
-                   {'fld': 'last_date', 'label': 'Last Date', formatter: formatters.date},
-                   {'fld': 'charge', 'label': 'Charge', formatter: formatters.price}
-                   ]
+var mcard_uploader = <Uploader instructions={'Expects an ofx or qfx file with headers: Date, ABA Num, Currency, Account Num, Account Name, Description, BAI Code, Amount, Serial Num, Ref Num'} 
+						 postUrl={'/importers/upload/mcard/'}/>
+ReactDOM.render(<ModalCmpnt modalId="MCARDuploader" modalTitle="Mastercard File Upload" content={mcard_uploader}/>, document.getElementById('bookkeeping.upload.MCARD'))
 
-ReactDOM.render(<BSTable source="/api/fulfill/UPS_invoices/?raw=true"
-                         columns={tbl_columns} />, document.getElementById('the-help2'));
+
 
 
 

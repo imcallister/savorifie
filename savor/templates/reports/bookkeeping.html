@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="{{STATIC_URL}}base/css/fixed-data-table.min.css">
 <link rel="stylesheet" href="{{STATIC_URL}}base/css/react-bootstrap-table-all.min.css">
 
-<!--
+
 <style>
     .modal.modal-wide .modal-dialog {
       width: 90%;
@@ -25,7 +25,7 @@
     #tallModal .modal-body p { margin-bottom: 900px };
 
 </style>
--->
+
 
 {% endblock %}
 
@@ -81,8 +81,8 @@
                     <div>
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-warning" data-toggle="modal" data-target="#FRBuploader">Load First Republic</a></li>
-                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadMasterCard">Load Mastercard</a></li>
-                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#loadUPS">Load UPS</a></li>
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#MCARDuploader">Load Mastercard</a></li>
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#UPSuploader">Load UPS</a></li>
                         </ul>
                     </div>
                 </div>
@@ -249,86 +249,24 @@
 </div>
 
 
-<!-- Modal -->
-
-
-
-<div class="modal fade" id="loadUPS" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title" id="myModalLabel">Upload UPS charges</h3>
-      </div>
-      <div class="modal-body">
-        <p>Please choose a .csv file</p>
-
-        <form role='form' enctype="multipart/form-data" method="post" action="/importers/ups_upload/">{% csrf_token %}
-            <div class="form-group">    
-                {{upload_form.as_p}}
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <a href='/' class="btn btn-default">Cancel</a>
-        </form>
-
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="loadMasterCard" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title" id="myModalLabel">Upload Mastercard activity</h3>
-      </div>
-      <div class="modal-body">
-        <p>Please choose a .ofx file</p>
-
-        <form role='form' enctype="multipart/form-data" method="post" action="/base/upload/mastercard/">{% csrf_token %}
-            <div class="form-group">    
-                {{upload_form.as_p}}
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-            <a href='/' class="btn btn-default">Cancel</a>
-        </form>
-
-      </div>
-      
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="help" tabindex="-1" role="dialog" aria-labelledby="helpLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <div id="the-help"></div>
-        <h3>Testing the Bootstrap React component</h3>
-        <div id="the-help2"></div>
-        
-      </div>
-    </div>
-  </div>
-</div>
-
-
 
 <!-- MODAL COMPONENTS -->
+
+<!--help-->
+<div id="bookkeeping.help"></div>
+
+
+<!--tables-->
 <div id="bookkeeping.unpaidShopify"></div>
 <div id="bookkeeping.shopifyComp"></div>
 <div id="bookkeeping.fulfillNoShipcharge"></div>
 <div id="bookkeeping.upsInvoices"></div>
 <div id="bookkeeping.misBilledUPS"></div>
 
+<!--uploaders-->
 <div id="bookkeeping.upload.FRB"></div>
 <div id="bookkeeping.upload.UPS"></div>
-
+<div id="bookkeeping.upload.MCARD"></div>
 
 {% render_bundle 'bookkeeping' %}
 
@@ -344,6 +282,3 @@
 </div>
 {% endblock %}
 
-{% block extrajs %}
-<script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
-{% endblock %}
