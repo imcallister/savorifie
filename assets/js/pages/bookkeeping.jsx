@@ -1,7 +1,8 @@
 var React = require('react')
 var ReactDOM = require('react-dom')
 
-var BHelp = require('../components/book_help') 
+var BHelp = require('../help_text/bookkeeping') 
+var UPSHelp = require('../help_text/UPS_upload') 
 var BSTable = require('../containers/acctifieTableContainer')
 var Uploader = require('../containers/uploaderContainer') 
 var formatters = require('../helpers/formatters')
@@ -9,6 +10,8 @@ var ModalCmpnt = require('../components/modalCmpnt')
 
 
 var help = <BHelp/>
+var UPS_upload_help = <UPSHelp/>
+
 ReactDOM.render(<ModalCmpnt modalId="help" modalTitle="Help" content={help}/>, 
 				document.getElementById('bookkeeping.help'))
 
@@ -19,7 +22,7 @@ var FRB_uploader = <Uploader instructions={'Expects a csv file with headers: Dat
 ReactDOM.render(<ModalCmpnt modalId="FRBuploader" modalTitle="FRB File Upload" content={FRB_uploader}/>, document.getElementById('bookkeeping.upload.FRB'))
 
 
-var UPS_uploader = <Uploader instructions={'Expects a csv file with headers: Date, ABA Num, Currency, Account Num, Account Name, Description, BAI Code, Amount, Serial Num, Ref Num'} 
+var UPS_uploader = <Uploader instructions={UPS_upload_help} 
 						 postUrl={'/importers/upload/ups/'}/>
 ReactDOM.render(<ModalCmpnt modalId="UPSuploader" modalTitle="UPS File Upload" content={UPS_uploader}/>, document.getElementById('bookkeeping.upload.UPS'))
 
