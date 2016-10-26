@@ -30,7 +30,7 @@ def create_nc2_shippingcharge(wh_flf):
         chg = {}
         chg['shipper_id'] = inventory_api.shipper('IFS360', {})['id']
         chg['account'] = 'N/A'
-        chg['tracking_number'] = None
+        chg['tracking_number'] = wh_flf.tracking_number
         chg['external_id'] = flf_str
         chg['invoice_number'] = wh_flf.warehouse_pack_id
         chg['ship_date'] = wh_flf.ship_date
