@@ -50,8 +50,9 @@ def process_ups(file_name):
 
     for rec in aggd_ship_charges:
         rec['shipper_id'] = shipper_id
+        rec['external_id'] = rec['tracking_number']
         rec_obj = ShippingCharge.objects \
-                                .filter(tracking_number=rec['tracking_number']) \
+                                .filter(external_id=rec['external_id']) \
                                 .first()
 
         if rec_obj:

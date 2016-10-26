@@ -15,10 +15,8 @@ def add_shopify_fees():
     return
 
 def backfill_nc2_shipcharges():
-    # re-do for all NC2 fulfills
-
-    NC2_flf = [wf['id'] for wf in Fulfillment.objects.filter(warehouse__label='NC2').values('id')]
-    ShippingCharge.objects.filter(fulfillment__id__in=NC2_flf).delete()
+    # delete the old ones
+    ShippingCharge.objects.filter(shipper__company__id='IFS360').delete()
 
     new_charges = 0
     duplicated_not_saved = 0

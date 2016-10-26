@@ -50,7 +50,8 @@ var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
 			                {'fld': 'items_string', 'label': 'SKUs'}
 			                ]
 
-var unpaid_shopify = <BSTable source="/api/sales/unpaid_channel/SHOPIFY/?raw=true" columns={unpaid_shopify_cols} />
+var unpaid_shopify = <BSTable source="/api/sales/unpaid_channel/SHOPIFY/?raw=true" columns={unpaid_shopify_cols} 
+							  search={true} pagination={true} sizePerPage={true}/>
 ReactDOM.render(<ModalCmpnt modalId="shopifyUnpaid" modalTitle="Unpaid Shopify" content={unpaid_shopify} wide={true}/>, 
 				document.getElementById('bookkeeping.unpaidShopify'))
 
@@ -62,7 +63,8 @@ var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
 		                 {'fld': 'calcd_payout', 'label': 'Savor Calc'},
 		                 {'fld': 'diff', 'label': 'Diff'}
 		                 ]
-var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} />
+var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} 
+								  search={true} pagination={true} sizePerPage={true}/>
 ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Comparison" wide={true} content={shopify_comparison} wide={true}/>, 
 				document.getElementById('bookkeeping.shopifyComp'))
 
@@ -77,7 +79,8 @@ var no_shipcharge_cols = [{'fld': 'fulfillment_id', 'label': 'Fulfill ID'},
 		                 {'fld': 'shipping_company', 'label': 'Shipping Company'}
 		                 ]
 
-var fulfill_no_shipcharge = <BSTable source="/api/fulfill/fulfill_no_shipcharge/?raw=true" columns={no_shipcharge_cols} />
+var fulfill_no_shipcharge = <BSTable source="/api/fulfill/fulfill_no_shipcharge/?raw=true" columns={no_shipcharge_cols} 
+									 search={true} pagination={true} sizePerPage={true}/>
 ReactDOM.render(<ModalCmpnt modalId="noShipcharge" modalTitle="Fulfillments missing shipping charge" content={fulfill_no_shipcharge} wide={true}/>, 
 				document.getElementById('bookkeeping.fulfillNoShipcharge'))
 
@@ -87,7 +90,8 @@ var ups_invoices_cols = [{'fld': 'invoice_number', 'label': 'Invoice #'},
 		                 {'fld': 'charge', 'label': 'Amount'}
 		                 ]
 
-var ups_invoices = <BSTable source="/api/fulfill/UPS_invoices/?raw=true" columns={ups_invoices_cols} />
+var ups_invoices = <BSTable source="/api/fulfill/UPS_invoices/?raw=true" columns={ups_invoices_cols} 
+							search={true} pagination={true} sizePerPage={true}/>
 ReactDOM.render(<ModalCmpnt modalId="upsInvoices" modalTitle="UPS Invoices" content={ups_invoices}/>, 
 				document.getElementById('bookkeeping.upsInvoices'))
 
@@ -103,6 +107,7 @@ var mis_ups_cols = [{'fld': 'tracking_number', 'label': 'Tracking #'},
 		            {'fld': 'warehouse', 'label': 'Warehouse'},
 		                 ]
 
-var mis_ups = <BSTable source="/api/fulfill/UPS_wrong_acct/?raw=true" columns={mis_ups_cols} />
+var mis_ups = <BSTable source="/api/fulfill/UPS_wrong_acct/?raw=true" columns={mis_ups_cols} 
+					   search={true} pagination={true} sizePerPage={true}/>
 ReactDOM.render(<ModalCmpnt modalId="misUPS" modalTitle="Mis-billed UPS charges" content={mis_ups}/>, 
 				document.getElementById('bookkeeping.misBilledUPS'))
