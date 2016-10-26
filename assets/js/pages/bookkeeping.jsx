@@ -33,6 +33,12 @@ ReactDOM.render(<ModalCmpnt modalId="MCARDuploader" modalTitle="Mastercard File 
 
 
 
+var last_uploads_cols  = [{'fld': 'Upload', 'label': 'Upload Name'},
+					 {'fld': 'Last Upload', 'label': 'Uploaded Thru', formatter: formatters.date}
+					 ]
+
+var last_uploads = <BSTable source="/api/reports/last_uploads/?raw=true" columns={last_uploads_cols} />
+ReactDOM.render(last_uploads, document.getElementById('bookkeeping.lastUploads'))
 
 
 var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
@@ -45,7 +51,7 @@ var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
 			                ]
 
 var unpaid_shopify = <BSTable source="/api/sales/unpaid_channel/SHOPIFY/?raw=true" columns={unpaid_shopify_cols} />
-ReactDOM.render(<ModalCmpnt modalId="shopifyUnpaid" modalTitle="Unpaid Shopify" content={unpaid_shopify}/>, 
+ReactDOM.render(<ModalCmpnt modalId="shopifyUnpaid" modalTitle="Unpaid Shopify" content={unpaid_shopify} wide={true}/>, 
 				document.getElementById('bookkeeping.unpaidShopify'))
 
 
@@ -57,7 +63,7 @@ var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
 		                 {'fld': 'diff', 'label': 'Diff'}
 		                 ]
 var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} />
-ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Comparison" wide={true} content={shopify_comparison}/>, 
+ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Comparison" wide={true} content={shopify_comparison} wide={true}/>, 
 				document.getElementById('bookkeeping.shopifyComp'))
 
 
@@ -72,7 +78,7 @@ var no_shipcharge_cols = [{'fld': 'fulfillment_id', 'label': 'Fulfill ID'},
 		                 ]
 
 var fulfill_no_shipcharge = <BSTable source="/api/fulfill/fulfill_no_shipcharge/?raw=true" columns={no_shipcharge_cols} />
-ReactDOM.render(<ModalCmpnt modalId="noShipcharge" modalTitle="Fulfillments missing shipping charge" content={fulfill_no_shipcharge}/>, 
+ReactDOM.render(<ModalCmpnt modalId="noShipcharge" modalTitle="Fulfillments missing shipping charge" content={fulfill_no_shipcharge} wide={true}/>, 
 				document.getElementById('bookkeeping.fulfillNoShipcharge'))
 
 
