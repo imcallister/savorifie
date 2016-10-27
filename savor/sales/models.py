@@ -474,7 +474,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                 tran['lines'].append((discount_acct, Decimal(self.discount), self.customer_code, []))
 
             if self.channel_charges > 0:
-                channel_fees_path = 'equity.retearnings.costofsales.channelfees.%s' % channel_id
+                #HARDCODE
+                channel_fees_path = 'equity.retearnings.opexp.sales.channelfees.%s' % channel_id
                 channel_fees_acct = Account.objects \
                                            .filter(path=channel_fees_path) \
                                            .first()
