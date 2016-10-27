@@ -41,6 +41,21 @@ var last_uploads = <BSTable source="/api/reports/last_uploads/?raw=true" columns
 ReactDOM.render(last_uploads, document.getElementById('bookkeeping.lastUploads'))
 
 
+var payables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},
+					 	  {'fld': 'amount', 'label': 'Amount', formatter: formatters.drill}
+					 	  ]
+
+var payables = <BSTable source="/api/reports/payables/?raw=true" columns={payables_cols} />
+ReactDOM.render(payables, document.getElementById('bookkeeping.payables'))
+
+var receivables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},
+					 	  {'fld': 'amount', 'label': 'Amount', formatter: formatters.drill}
+					 	  ]
+
+var receivables = <BSTable source="/api/reports/receivables/?raw=true" columns={receivables_cols} />
+ReactDOM.render(receivables, document.getElementById('bookkeeping.receivables'))
+
+
 var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
 			                {'fld': 'channel', 'label': 'Channel'},
 			                {'fld': 'sale_date', 'label': 'Date'},

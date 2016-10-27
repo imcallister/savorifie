@@ -72,8 +72,8 @@ class FulfillRequested(SimpleListFilter):
 
 class SaleAdmin(SimpleHistoryAdmin):
     list_display=('external_channel_id', 'sale_date', 'channel',
-                  'customer_code', 'shipping_name', 'special_sale')
-    list_filter = ('channel', FulfillRequested)
+                  'customer_code', 'shipping_name', 'special_sale', 'paid_thru')
+    list_filter = ('channel', 'paid_thru', FulfillRequested)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
     actions = ['delete_model', 'queue_for_warehouse', 'queue_for_backorder']
@@ -87,7 +87,7 @@ class SaleAdmin(SimpleHistoryAdmin):
         ('Details', {'fields': (('channel', 'sale_date',),
                                 ('external_channel_id', 'channel_charges',),
                                 ('customer_code', 'special_sale',),
-                                ( 'is_return',),
+                                ( 'is_return', 'paid_thru',),
                                 ('memo',),
                                 )
                      }),

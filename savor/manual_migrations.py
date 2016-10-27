@@ -1,6 +1,8 @@
 import logging
 
 from sales.models import Sale
+from accountifie.gl.models import Counterparty
+
 from fulfill.models import WarehouseFulfill, Fulfillment, ShippingCharge
 from sales.importers.shopify import shopify_fee
 
@@ -13,6 +15,14 @@ def add_shopify_fees():
         s.channel_charges = shopify_fee(s)
         s.save()
     return
+
+
+def backfill_shopify_payees():
+    shopify = Counterparty.objects.get(id='SHOPIFY')
+    for s in Sale.objects.filter(channel__label='SHOPIFY'):
+        s.paid_thru = shopify
+        s.save()
+
 
 def backfill_nc2_shipcharges():
     # delete the old ones

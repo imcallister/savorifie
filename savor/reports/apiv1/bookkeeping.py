@@ -1,6 +1,33 @@
+from django.utils.safestring import mark_safe
+
+from accountifie.query.query_manager import QueryManager
 from base.models import Cashflow, CreditCardTrans
 from fulfill.models import ShippingCharge
 from sales.models import ChannelPayouts
+
+
+def receivables(qstring):
+    query_manager = QueryManager()
+    ar_table = query_manager.balance_by_cparty('SAV', ['1100'])
+
+    ar_rows = []
+    for cp in ar_table.index:
+        if abs(ar_table.loc[cp]) > 1:
+            drill_url = '/reporting/history/account/1100/?cp=%s' % cp
+            ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ar_table.loc[cp]}})
+    return ar_rows
+
+
+def payables(qstring):
+    query_manager = QueryManager()
+    ap_table = query_manager.balance_by_cparty('SAV', ['3000'])
+
+    ap_rows = []
+    for cp in ap_table.index:
+        if abs(ap_table.loc[cp]) > 1:
+            drill_url = '/reporting/history/account/3000/?cp=%s' % cp
+            ap_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ap_table.loc[cp]}})
+    return ap_rows
 
 
 
