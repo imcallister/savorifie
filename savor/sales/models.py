@@ -145,6 +145,9 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     shipping_charge = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
     channel_charges = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
+    paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
+                                  related_name='paid_thru',
+                                  limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN']})
     discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
     discount_code = models.CharField(max_length=50, blank=True, null=True)
 
@@ -383,6 +386,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def payee(self):
         if self.channel.label == 'SAV':
             return self.customer_code
+        elif self.channel.label == 'SHOPIFY':
+            return self.paid_thru
         else:
             return self.channel.counterparty
 

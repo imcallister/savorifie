@@ -85,6 +85,11 @@ def shopify_fee(sale_obj):
     total += sale_obj.total_sales_tax()
     return total * Decimal('0.029') + Decimal('0.3')
 
+PAID_THRU = {
+    'Shopify Payments': 'SHOPIFY',
+    'PayPal Express Checkout': 'PAYPAL',
+    'Amazon Payments': 'AMZN'
+}
 
 def process_shopify(file_name):
     if file_name.split('.')[-1] != 'csv':
@@ -122,6 +127,7 @@ def process_shopify(file_name):
 
         sale_info['company_id'] = 'SAV'
         sale_info['external_channel_id'] = str(v.iloc[0]['Name'])
+        sale_info['paid_thru'] = PAID_THRU.get(v.iloc[0]['Payment Reference'])
         sale_info['shipping_charge'] = Decimal(str(v.iloc[0]['Shipping']))
         sale_info['discount_code'] = str(v.iloc[0]['Discount Code'])
         if sale_info['discount_code']=='':
