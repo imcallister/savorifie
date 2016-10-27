@@ -24,7 +24,10 @@ class DataTableContainer extends React.Component {
 
     render() {
       return (
-          <AcctifieTable tableData={this.state.tableData} columns={this.props.columns} search={this.props.search} pagination={this.props.pagination} sizePerPage={this.props.pageSize}>
+          <AcctifieTable tableData={this.state.tableData} columns={this.props.columns} 
+                          search={this.props.search} pagination={this.props.pagination} 
+                          sizePerPage={this.props.pageSize} bordered={this.props.bordered}
+                          search={this.props.search} dataSort={this.props.dataSort}>
           </AcctifieTable>
       );
     }

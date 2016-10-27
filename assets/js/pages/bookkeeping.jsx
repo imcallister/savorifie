@@ -34,8 +34,8 @@ ReactDOM.render(<ModalCmpnt modalId="MCARDuploader" modalTitle="Mastercard File 
 
 
 var last_uploads_cols  = [{'fld': 'Upload', 'label': 'Upload Name'},
-					 {'fld': 'Last Upload', 'label': 'Uploaded Thru', formatter: formatters.date}
-					 ]
+					 	  {'fld': 'Last Upload', 'label': 'Uploaded Thru', formatter: formatters.date}
+					 	  ]
 
 var last_uploads = <BSTable source="/api/reports/last_uploads/?raw=true" columns={last_uploads_cols} />
 ReactDOM.render(last_uploads, document.getElementById('bookkeeping.lastUploads'))
@@ -64,7 +64,8 @@ var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
 		                 {'fld': 'diff', 'label': 'Diff'}
 		                 ]
 var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} 
-								  search={true} pagination={true} sizePerPage={true}/>
+								  search={true} pagination={true} sizePerPage={true} bordered={true}
+								  dataSort={true}/>
 ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Comparison" wide={true} content={shopify_comparison} wide={true}/>, 
 				document.getElementById('bookkeeping.shopifyComp'))
 
@@ -80,7 +81,8 @@ var no_shipcharge_cols = [{'fld': 'fulfillment_id', 'label': 'Fulfill ID'},
 		                 ]
 
 var fulfill_no_shipcharge = <BSTable source="/api/fulfill/fulfill_no_shipcharge/?raw=true" columns={no_shipcharge_cols} 
-									 search={true} pagination={true} sizePerPage={true}/>
+									 search={true} pagination={true} sizePerPage={true} bordered={true}
+								  	 dataSort={true}/>
 ReactDOM.render(<ModalCmpnt modalId="noShipcharge" modalTitle="Fulfillments missing shipping charge" content={fulfill_no_shipcharge} wide={true}/>, 
 				document.getElementById('bookkeeping.fulfillNoShipcharge'))
 
@@ -91,7 +93,8 @@ var ups_invoices_cols = [{'fld': 'invoice_number', 'label': 'Invoice #'},
 		                 ]
 
 var ups_invoices = <BSTable source="/api/fulfill/UPS_invoices/?raw=true" columns={ups_invoices_cols} 
-							search={true} pagination={true} sizePerPage={true}/>
+							search={true} pagination={true} sizePerPage={true} bordered={true}
+							dataSort={true}/>
 ReactDOM.render(<ModalCmpnt modalId="upsInvoices" modalTitle="UPS Invoices" content={ups_invoices}/>, 
 				document.getElementById('bookkeeping.upsInvoices'))
 
@@ -108,6 +111,7 @@ var mis_ups_cols = [{'fld': 'tracking_number', 'label': 'Tracking #'},
 		                 ]
 
 var mis_ups = <BSTable source="/api/fulfill/UPS_wrong_acct/?raw=true" columns={mis_ups_cols} 
-					   search={true} pagination={true} sizePerPage={true}/>
+					   search={true} pagination={true} sizePerPage={true} bordered={true}
+					   dataSort={true}/>
 ReactDOM.render(<ModalCmpnt modalId="misUPS" modalTitle="Mis-billed UPS charges" content={mis_ups}/>, 
 				document.getElementById('bookkeeping.misBilledUPS'))

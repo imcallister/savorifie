@@ -13,7 +13,7 @@ class DataTable extends React.Component {
 
   
   render() {
-    
+    var dataSort = this.props.dataSort;
     var renderColumn = function(col, index) {
       var props = {};
 
@@ -22,11 +22,11 @@ class DataTable extends React.Component {
       if (col.formatter) {
         props.dataFormat = col.formatter;
       }
-      return <TableHeaderColumn dataField={col.fld} key={index} {...props} dataSort={true}>{col.label}</TableHeaderColumn> 
+      return <TableHeaderColumn dataField={col.fld} dataSort={dataSort} key={index} {...props} >{col.label}</TableHeaderColumn> 
     };
 
     return (
-      <BootstrapTable data={this.props.tableData} striped={true} hover={true} search={this.props.search} pagination={this.props.pagination} sizePerPage={this.props.pageSize}>
+      <BootstrapTable data={this.props.tableData} striped={true} hover={true} bordered={this.props.bordered} search={this.props.search} pagination={this.props.pagination} sizePerPage={this.props.pageSize}>
         {this.props.columns.map(renderColumn)}
       </BootstrapTable>
     );
