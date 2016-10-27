@@ -38,11 +38,6 @@ def process_mastercard(file_name):
     new_trans_ctr = 0
     error_ctr = 0
     for t in [t for t in transactions if t.id not in dupes]:
-        if 'AUTOPAY' in t.payee:
-            # these will show up in bank cashflow
-            # don't want them double-entered
-            continue
-
         # these should all be new
         try:
             trans_info = {}
