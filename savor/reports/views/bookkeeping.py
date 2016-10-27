@@ -31,53 +31,5 @@ def bookkeeping(request):
     context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count() + \
                                   CreditCardTrans.objects.filter(counterparty_id='unknown').count()
 
-    gl_strategy = request.GET.get('gl_strategy', None)
-    query_manager = QueryManager(gl_strategy=gl_strategy)
-    ap_table = query_manager.balance_by_cparty(company_id, ['3000'])
-    ar_table = query_manager.balance_by_cparty(company_id, ['1100'])
-
-    ap_rows = []
-    for i in ap_table.index:
-        if abs(ap_table.loc[i]) > 1:
-            drilldown = '/reporting/history/account/3000/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
-            ap_rows.append([i, ap_table.loc[i], drilldown])
-
-    ar_rows = []
-    for i in ar_table.index:
-        if abs(ar_table.loc[i]) > 1:
-            drilldown = '/reporting/history/account/1100/?from=%s&to=%s&cp=%s' % (from_date, to_date, i)
-            ar_rows.append([i, ar_table.loc[i], drilldown])
-
-    context['ap_rows'] = ap_rows
-    context['ar_rows'] = ar_rows
-
-    last_FRB = Cashflow.objects.all() \
-                               .order_by('-post_date') \
-                               .first() \
-                               .post_date \
-                               .strftime('%d-%b-%Y')
-
-    last_CITI = CreditCardTrans.objects.all() \
-                                       .order_by('-post_date') \
-                                       .first() \
-                                       .post_date \
-                                       .strftime('%d-%b-%Y')
-
-    last_UPS = ShippingCharge.objects \
-                             .filter(shipper__company_id='UPS') \
-                             .order_by('-ship_date') \
-                             .first() \
-                             .ship_date \
-                             .strftime('%d-%b-%Y')
-
-    last_SHOP = ChannelPayouts.objects \
-                             .filter(channel__counterparty_id='SHOPIFY') \
-                             .order_by('-payout_date') \
-                             .first() \
-                             .payout_date \
-                             .strftime('%d-%b-%Y')
-
-    context['upload_rows'] = [['Shopify Payouts', last_SHOP], ['Citicard', last_CITI],
-                              ['First Republic', last_FRB], ['UPS Billing', last_UPS]]
-
+    
     return render(request, 'reports/bookkeeping.html', context)

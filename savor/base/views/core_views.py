@@ -38,7 +38,7 @@ def company_context(request):
                                       ])
 
     data['power_menu_items'] = OrderedDict([('Admin', "/admin/"),
-                                            ('Maintenance', "/admin/"),
+                                            ('Maintenance', "/maintenance/"),
                                             ('Dashboard', "/dashboard/"),
                                             ('Logs', "/dashboard/logs/")
                                             ])
