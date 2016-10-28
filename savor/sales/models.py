@@ -223,7 +223,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             self.update_gl()
 
         models.Model.save(self)
-
+        
 
     def delete(self):
         self.delete_from_gl()
