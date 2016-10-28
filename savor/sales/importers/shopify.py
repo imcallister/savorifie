@@ -198,7 +198,8 @@ def process_shopify(file_name):
                     unitsale_obj.save()
 
             # add shopify channel charge (2.9% + 0.30)
-            sale_obj.channel_charge = shopify_fee(sale_obj)
+            sale_obj.channel_charges = shopify_fee(sale_obj)
             sale_obj.save()
+            
     return {'status': 'SUCCESS', 'exist_sales_ctr': exist_sales_ctr,
             'new_sales_ctr': new_sales_ctr, 'unknown_cp_ctr': unknown_cp_ctr}

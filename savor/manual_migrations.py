@@ -16,6 +16,13 @@ def add_shopify_fees():
         s.save()
     return
 
+def fix_shopify_fees():
+    # weren't getting calc'd from 15th Sep to 28th Oct
+    to_fix = Sale.objects.filter(channel__label='SHOPIFY').filter(sale_date__gte='2016-09-15')
+    for s in to_fix:
+        s.channel_charges = shopify_fee(s)
+        s.save()
+    return
 
 def backfill_shopify_payees():
     shopify = Counterparty.objects.get(id='SHOPIFY')
