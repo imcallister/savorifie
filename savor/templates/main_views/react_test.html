@@ -1,0 +1,47 @@
+{% extends base_template %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
+
+{% block breadcrumb %}
+<li class="active">Home</li>
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+
+<!--
+This is where bootstrap starts to get a bit demented.   Surely not all
+these divs are needed.
+-->
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Expense Trends</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="highchart.test"></div>
+                </div>    
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Cash Balances</h3>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% render_bundle 'highcharts' %}
+
+{% endblock %}

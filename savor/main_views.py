@@ -51,3 +51,9 @@ def home(request):
     company_id = get_company(request)
     context = dict(company_id=company_id)
     return render(request, 'main_views/home.html', context)
+
+@login_required
+def react_test(request):
+    company_id = get_company(request)
+    context = dict(company_id=company_id)
+    return render(request, 'main_views/react_test.html', context)

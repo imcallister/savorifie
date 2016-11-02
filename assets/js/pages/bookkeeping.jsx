@@ -18,7 +18,6 @@ ReactDOM.render(<ModalCmpnt modalId="help" modalTitle="Help" content={help}/>,
 				document.getElementById('bookkeeping.help'))
 
 
-
 var FRB_uploader = <Uploader instructions={FRB_upload_help} postUrl={'/importers/upload/frb/'}/>
 ReactDOM.render(<ModalCmpnt modalId="FRBuploader" modalTitle="FRB File Upload" content={FRB_uploader}/>, document.getElementById('bookkeeping.upload.FRB'))
 
@@ -54,6 +53,10 @@ var receivables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},
 
 var receivables = <BSTable source="/api/reports/receivables/?raw=true" columns={receivables_cols} />
 ReactDOM.render(receivables, document.getElementById('bookkeeping.receivables'))
+
+
+var future_receivables = <BSTable source="/api/reports/future_receivables/?raw=true" columns={receivables_cols} />
+ReactDOM.render(future_receivables, document.getElementById('bookkeeping.futurereceivables'))
 
 
 var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},

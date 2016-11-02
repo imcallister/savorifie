@@ -18,6 +18,18 @@ def receivables(qstring):
     return ar_rows
 
 
+def future_receivables(qstring):
+    query_manager = QueryManager()
+    ar_table = query_manager.balance_by_cparty('SAV', ['1101'])
+
+    ar_rows = []
+    for cp in ar_table.index:
+        if abs(ar_table.loc[cp]) > 1:
+            drill_url = '/reporting/history/account/1100/?cp=%s' % cp
+            ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ar_table.loc[cp]}})
+    return ar_rows
+
+
 def payables(qstring):
     query_manager = QueryManager()
     ap_table = query_manager.balance_by_cparty('SAV', ['3000'])
