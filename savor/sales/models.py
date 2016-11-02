@@ -391,6 +391,12 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         else:
             return self.channel.counterparty
 
+    def _receiveables_account(self):
+        print 'HELLO', self.channel.label
+        if self.channel.label in ['PAMPHOM', 'GROMMET', 'PAPERSO', 'UNCOMMON']:
+            return Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE_TERMS'))
+        else:
+            return Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE'))
 
     def _get_special_account(self):
         """
@@ -434,7 +440,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[]
                     )
-        accts_rec = Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE'))
+        accts_rec = self._receiveables_account()
 
         shipping_acct = Account.objects.filter(path='liabilities.curr.accrued.shipping').first()
         giftwrap_acct = Account.objects.filter(path='equity.retearnings.sales.extra.giftwrap').first()

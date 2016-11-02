@@ -26,7 +26,9 @@ class DataTable extends React.Component {
     };
 
     return (
-      <BootstrapTable data={this.props.tableData} striped={true} hover={true} bordered={this.props.bordered} search={this.props.search} pagination={this.props.pagination} sizePerPage={this.props.pageSize}>
+      <BootstrapTable data={this.props.tableData} striped={true} hover={true} bordered={this.props.bordered} 
+                      search={this.props.search} pagination={this.props.pagination} sizePerPage={this.props.pageSize}
+                      noDataText={'Waiting for data...'}>
         {this.props.columns.map(renderColumn)}
       </BootstrapTable>
     );

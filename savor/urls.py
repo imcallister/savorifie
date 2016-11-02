@@ -15,6 +15,7 @@ handler500 = 'main_views.custom_500'
 
 urlpatterns = [
     url(r'^$', main_views.home, name='home'),
+    url(r'react-test/', main_views.react_test, name='react_test'),
     url(r'^maintenance/', main_views.maintenance, name='maintenance'),
     url(r'^reports/$', main_views.reports, name='reports'),
     
