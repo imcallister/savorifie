@@ -6,25 +6,9 @@ class Chart extends React.Component {
     super();
   }
 
-  
-  componentDidMount() {
-    var options = this.props.config;
-    options.xAxis = {categories: this.props.data.x_vals};
-    options.series = this.props.data.series;
-    
-    this.chart = new Highcharts["Chart"](
-            this.props.chartName, 
-            this.props.config
-        );
-  }
-
-
   render() {
     if (this.props.loaded) {
-      var options = this.props.config;
-      options.xAxis = {categories: this.props.data.x_vals};
-      options.series = this.props.data.series;
-      this.chart = new Highcharts["Chart"](this.props.chartName, options);
+      this.chart = new Highcharts["Chart"](this.props.chartName, this.props.data);
     }
 
     return <div id={this.props.chartName}></div> 
