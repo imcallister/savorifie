@@ -11,7 +11,9 @@ def inventorycount(qstring):
                              .all() \
                              .values('inventory_item__label') \
                              .annotate(sku_count=Sum('quantity'))
-    return dict((l['inventory_item__label'], l['sku_count']) for l in sku_counts)
+    data = dict((l['inventory_item__label'], l['sku_count']) for l in sku_counts)
+
+    return data
 
 
 def shipmentline(qstring):
