@@ -8,7 +8,8 @@ config.plugins.push(new BundleTracker({filename: './webpack-stats.prod.json'}));
 config.output.path = path.resolve('./assets/dist/');
 
 config.entry = {
-    bookkeeping: './assets/js/pages/bookkeeping'
+    bookkeeping: './assets/js/pages/bookkeeping',
+    highcharts: './assets/js/pages/highcharts'
 };
 
 module.exports = config;

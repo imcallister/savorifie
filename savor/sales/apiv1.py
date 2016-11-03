@@ -7,7 +7,7 @@ from decimal import Decimal
 
 
 from django.conf import settings
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Sum
 
 import products.apiv1 as product_api
 from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts
@@ -211,6 +211,31 @@ def missing_cps(qstring):
 def channel_counts(qstring):
     channels = Channel.objects.all()
     return dict((str(channel), Sale.objects.filter(channel=channel).count()) for channel in channels)
+
+
+def sale_count(qstring):
+    sku_count = UnitSale.objects.values('sku').annotate(cnt=Sum('quantity'))
+    products = product_api.product({})
+
+    item_count = {}
+    for sku in sku_count:
+        product_info = next((p for p in products if p['id'] == sku['sku']), None)
+        for u in product_info['skuunit']:
+            if u['inventory_item'] not in item_count:
+                item_count[u['inventory_item']] = sku['cnt'] * u['quantity']
+            else:
+                item_count[u['inventory_item']] += sku['cnt'] * u['quantity']
+
+    if qstring.get('chart'):
+        sorted_data = sorted(item_count.items(), key=operator.itemgetter(1))
+        chart_data = {}
+        chart_data['x_vals'] = [x[0] for x in sorted_data]
+        series_0 = {'name': 'Unit Sales'}
+        series_0['data'] = [x[1] for x in sorted_data]
+        chart_data['series'] = [series_0]
+        return chart_data
+    else:
+        return item_count
 
 
 def sales_counts(qstring):

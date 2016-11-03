@@ -6,94 +6,28 @@ class Chart extends React.Component {
     super();
   }
 
+  
   componentDidMount() {
-    var data = this.props.data;
-    var occupation = this.props.occupation;
-    $('.hccontainer').highcharts({
-        chart: {
-            type: 'bar'
-        },
-        title: {
-            text: 'StackOverflow 2016 Developer Survey Results for Occupation'
-        },
-        xAxis: {
-            categories: occupation
-        },
-        yAxis: {
-            title: {
-                text: 'Percentage of Respondants'
-            }
-        },
-        plotOptions: {
-          series: {
-            dataLabels: {
-              enabled: true,
-              formatter: function() {
-              return Highcharts.numberFormat(this.y) + '%';
-            }
-            },
-          }
-        },
-        chart: {
-          type: "bar"
-        },
-        series: [{
-            name: 'Developer Occupations',
-            data: data
-        }]
-    });   
+    var options = this.props.config;
+    options.xAxis = {categories: this.props.data.x_vals};
+    options.series = this.props.data.series;
+    
+    this.chart = new Highcharts["Chart"](
+            this.props.chartName, 
+            this.props.config
+        );
   }
 
-  componentWillReceiveProps() {
-    var data = this.props.data;
-    var occupation = this.props.occupation;
-     $('.hccontainer').highcharts({
-        chart: {
-            type: 'bar'
-        },
-        title: {
-            text: 'StackOverflow 2016 Developer Survey Results for Occupation'
-        },
-        xAxis: {
-            categories: occupation
-        },
-        yAxis: {
-            title: {
-                text: 'Percentage of Respondants'
-            }
-        },
-        plotOptions: {
-          series: {
-            dataLabels: {
-              enabled: true,
-              formatter: function() {
-              return Highcharts.numberFormat(this.y) + '%';
-            }
-            },
-          }
-        },
-        chart: {
-          backgroundColor: "#FCFFC5",
-          type: "bar"
-        },
-        series: [{
-            name: 'Developer Occupations',
-            data: data
-        }]
-    });
-  }
-  
+
   render() {
-    var style = {
-      marginTop: "25px",
-      marginBottom: "0px"
-    };
-    return (
-      <div
-        style={style}
-        className="hccontainer">
-      </div>
-    )
+    if (this.props.loaded) {
+      var options = this.props.config;
+      options.xAxis = {categories: this.props.data.x_vals};
+      options.series = this.props.data.series;
+      this.chart = new Highcharts["Chart"](this.props.chartName, options);
+    }
+
+    return <div id={this.props.chartName}></div> 
   }
 }
 
