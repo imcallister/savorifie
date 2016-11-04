@@ -8,6 +8,7 @@ config.plugins.push(new BundleTracker({filename: './webpack-stats.local.json'}))
 config.entry = {
     bookkeeping: './assets/js/pages/bookkeeping',
     highcharts: './assets/js/pages/highcharts',
+    inventory: './assets/js/pages/inventory',
   };
 
 config.output.path = path.resolve('./assets/bundles/');

@@ -1,9 +1,10 @@
 from multipledispatch import dispatch
 from django.db.models import Sum, Prefetch, F
+from itertools import groupby
 
 from .model_views import warehouse
-from inventory.models import ShipmentLine, Shipment, InventoryTransfer
-from fulfill.models import Fulfillment
+from inventory.models import ShipmentLine, Shipment, InventoryTransfer, TransferLine
+from fulfill.models import Fulfillment, FulfillLine
 
 
 def inventorycount(qstring):
@@ -25,63 +26,53 @@ def shipmentline(qstring):
     return list(shpmts)
 
 
+@dispatch(unicode, dict)
+def locationinventory(label, qstring):
+    incoming_shipments =  ShipmentLine.objects.filter(shipment__destination__label=label) \
+                                              .values('inventory_item__label', 'quantity')
+    incoming_transfer = TransferLine.objects.filter(transfer__destination__label=label) \
+                                            .values('inventory_item__label', 'quantity')
+    outgoing_transfer = TransferLine.objects.filter(transfer__location__label=label) \
+                                            .values('inventory_item__label', 'quantity')
+    outgoing_fulfill = FulfillLine.objects.filter(fulfillment__warehouse__label=label) \
+                                          .values('inventory_item__label', 'quantity')
+    
+    incoming = list(incoming_shipments) + list(incoming_transfer)
+    outgoing = list(outgoing_transfer) + list(outgoing_fulfill)
+
+    key_func = lambda x: x['inventory_item__label']
+    
+    incoming_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(incoming, key=key_func), key=key_func))
+    outgoing_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(outgoing, key=key_func), key=key_func))
+
+    total_counts = dict((k, incoming_counts.get(k) - outgoing_counts.get(k)) for k in list(set(incoming_counts.keys() + outgoing_counts.keys())))
+    
+    return total_counts
+
+
+@dispatch(str, dict)
+def locationinventory(label, qstring):
+    incoming_shipments =  ShipmentLine.objects.filter(shipment__destination__label=label) \
+                                              .values('inventory_item__label', 'quantity')
+    incoming_transfer = TransferLine.objects.filter(transfer__destination__label=label) \
+                                            .values('inventory_item__label', 'quantity')
+    outgoing_transfer = TransferLine.objects.filter(transfer__location__label=label) \
+                                            .values('inventory_item__label', 'quantity')
+    outgoing_fulfill = FulfillLine.objects.filter(fulfillment__warehouse__label=label) \
+                                          .values('inventory_item__label', 'quantity')
+    
+    incoming = list(incoming_shipments) + list(incoming_transfer)
+    outgoing = list(outgoing_transfer) + list(outgoing_fulfill)
+
+    key_func = lambda x: x['inventory_item__label']
+    
+    incoming_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(incoming, key=key_func), key=key_func))
+    outgoing_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(outgoing, key=key_func), key=key_func))
+
+    total_counts = dict((k, incoming_counts.get(k) - outgoing_counts.get(k)) for k in list(set(incoming_counts.keys() + outgoing_counts.keys())))
+    
+    return total_counts
+
+@dispatch(dict)
 def locationinventory(qstring):
-    all_shipments = dict((wh['label'], {}) for wh in warehouse({}))
-
-    shipment_qs = Shipment.objects.all() \
-                                  .select_related('destination') \
-                                  .prefetch_related(Prefetch('shipmentline_set__inventory_item'))
-    for shpmnt in shipment_qs:
-        location = shpmnt.destination.label
-        
-        amounts = dict((sl.inventory_item.label, sl.quantity) for sl in shpmnt.shipmentline_set.all())
-        for item in amounts:
-            if item not in all_shipments[location]:
-                all_shipments[location][item] = amounts[item]
-            else:
-                all_shipments[location][item] += amounts[item]
-
-    # now subtract out any outgoing transfers and add incoming transfers
-    transfer_qs = InventoryTransfer.objects.all() \
-                                           .prefetch_related(Prefetch('transferline_set__inventory_item'))
-    for transfer in transfer_qs:
-        outgoing = transfer.location.label
-        incoming = transfer.destination.label
-
-        if outgoing not in all_shipments:
-            all_shipments[outgoing] = {}
-
-        if incoming not in all_shipments:
-            all_shipments[incoming] = {}
-
-        amounts = dict((tl.inventory_item.label, tl.quantity) for tl in transfer.transferline_set.all())
-        for item in amounts:
-            if item not in all_shipments[incoming]:
-                all_shipments[incoming][item] = amounts[item]
-            else:
-                all_shipments[incoming][item] += amounts[item]
-
-            if item not in all_shipments[outgoing]:
-                all_shipments[outgoing][item] = -amounts[item]
-            else:
-                all_shipments[outgoing][item] -= amounts[item]
-
-    # now remove fulfilled
-    fulfill_qs = Fulfillment.objects.all() \
-                                    .select_related('warehouse') \
-                                    .prefetch_related(Prefetch('fulfill_lines__inventory_item'))
-    for fulfill in fulfill_qs:
-        if fulfill.warehouse is None:
-            continue
-        location = fulfill.warehouse.label
-        if location not in all_shipments:
-            all_shipments[location] = {}
-
-        amounts = dict((fl.inventory_item.label, fl.quantity) for fl in fulfill.fulfill_lines.all())
-        for item in amounts:
-            if item not in all_shipments[location]:
-                all_shipments[location][item] = -amounts[item]
-            else:
-                all_shipments[location][item] -= amounts[item]
-
-    return all_shipments
+    return dict((wh['label'], locationinventory(wh['label'], {})) for wh in warehouse({}))

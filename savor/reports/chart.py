@@ -2,32 +2,13 @@ import itertools
 from decimal import Decimal
 
 import sales.apiv1 as sales_api
-
+from accountifie.toolkit.utils import column_chart
 
 def collected_salestax(qstring):
-    chart_data = {
-        'chart': {
-            'type': 'column'
-        },
-        'title': {
-            'text': 'Tax Collected'
-        },
-        'yAxis': {
-            'title': {
-                'text': 'Total'
-            }
-        },
-        'plotOptions': {
-          'series': {
-            'dataLabels': {
-              'enabled': True
-            },
-          }
-        },
-        'credits': {
-            'enabled': False
-        }
-    }
+    chart_data = column_chart(title='Tax Collected',
+                              y_label='Total',
+                              data_labels=True)
+    chart_data['plotOptions']['series']['dataLabels']['format'] = '{point.y:,.2f}'
 
     all_salestax = sorted(sales_api.salestax(qstring), key=lambda x: x['collector'])
     by_collector = itertools.groupby(all_salestax, lambda x: x['collector'])
