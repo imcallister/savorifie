@@ -80,28 +80,50 @@
 	var last_uploads = React.createElement(BSTable, { source: '/api/reports/last_uploads/?raw=true', columns: last_uploads_cols });
 	ReactDOM.render(last_uploads, document.getElementById('bookkeeping.lastUploads'));
 
+	var payables_cols = [{ 'fld': 'counterparty', 'counterparty': 'Upload Name' }, { 'fld': 'amount', 'label': 'Amount', formatter: formatters.drill }];
+
+	var payables = React.createElement(BSTable, { source: '/api/reports/payables/?raw=true', columns: payables_cols });
+	ReactDOM.render(payables, document.getElementById('bookkeeping.payables'));
+
+	var receivables_cols = [{ 'fld': 'counterparty', 'counterparty': 'Upload Name' }, { 'fld': 'amount', 'label': 'Amount', formatter: formatters.drill }];
+
+	var receivables = React.createElement(BSTable, { source: '/api/reports/receivables/?raw=true', columns: receivables_cols });
+	ReactDOM.render(receivables, document.getElementById('bookkeeping.receivables'));
+
+	var future_receivables = React.createElement(BSTable, { source: '/api/reports/future_receivables/?raw=true', columns: receivables_cols });
+	ReactDOM.render(future_receivables, document.getElementById('bookkeeping.futurereceivables'));
+
 	var unpaid_shopify_cols = [{ 'fld': 'label', 'label': 'ID' }, { 'fld': 'channel', 'label': 'Channel' }, { 'fld': 'sale_date', 'label': 'Date' }, { 'fld': 'shipping_name', 'label': 'Name' }, { 'fld': 'shipping_company', 'label': 'Company' }, { 'fld': 'proceeds', 'label': 'Proceeds' }, { 'fld': 'items_string', 'label': 'SKUs' }];
 
-	var unpaid_shopify = React.createElement(BSTable, { source: '/api/sales/unpaid_channel/SHOPIFY/?raw=true', columns: unpaid_shopify_cols });
+	var unpaid_shopify = React.createElement(BSTable, { source: '/api/sales/unpaid_channel/SHOPIFY/?raw=true', columns: unpaid_shopify_cols,
+					search: true, pagination: true, sizePerPage: true });
 	ReactDOM.render(React.createElement(ModalCmpnt, { modalId: 'shopifyUnpaid', modalTitle: 'Unpaid Shopify', content: unpaid_shopify, wide: true }), document.getElementById('bookkeeping.unpaidShopify'));
 
 	var shopify_comp_cols = [{ 'fld': 'id', 'label': 'ID' }, { 'fld': 'date', 'label': 'ID' }, { 'fld': 'label', 'label': 'Description' }, { 'fld': 'payout', 'label': 'Payout' }, { 'fld': 'calcd_payout', 'label': 'Savor Calc' }, { 'fld': 'diff', 'label': 'Diff' }];
-	var shopify_comparison = React.createElement(BSTable, { source: '/api/sales/channel_payout_comp/SHOPIFY/?raw=true', columns: shopify_comp_cols });
+	var shopify_comparison = React.createElement(BSTable, { source: '/api/sales/channel_payout_comp/SHOPIFY/?raw=true', columns: shopify_comp_cols,
+					search: true, pagination: true, sizePerPage: true, bordered: true,
+					dataSort: true });
 	ReactDOM.render(React.createElement(ModalCmpnt, _defineProperty({ modalId: 'shopifyComp', modalTitle: 'Shopify Comparison', wide: true, content: shopify_comparison }, 'wide', true)), document.getElementById('bookkeeping.shopifyComp'));
 
 	var no_shipcharge_cols = [{ 'fld': 'fulfillment_id', 'label': 'Fulfill ID' }, { 'fld': 'order', 'label': 'Order' }, { 'fld': 'request_date', 'label': 'Request Date', formatter: formatters.date }, { 'fld': 'warehouse', 'label': 'Warehouse' }, { 'fld': 'ship_type', 'label': 'Ship Type' }, { 'fld': 'bill_to', 'label': 'Billing Acct' }, { 'fld': 'shipping_name', 'label': 'Ship Name' }, { 'fld': 'shipping_company', 'label': 'Shipping Company' }];
 
-	var fulfill_no_shipcharge = React.createElement(BSTable, { source: '/api/fulfill/fulfill_no_shipcharge/?raw=true', columns: no_shipcharge_cols });
+	var fulfill_no_shipcharge = React.createElement(BSTable, { source: '/api/fulfill/fulfill_no_shipcharge/?raw=true', columns: no_shipcharge_cols,
+					search: true, pagination: true, sizePerPage: true, bordered: true,
+					dataSort: true });
 	ReactDOM.render(React.createElement(ModalCmpnt, { modalId: 'noShipcharge', modalTitle: 'Fulfillments missing shipping charge', content: fulfill_no_shipcharge, wide: true }), document.getElementById('bookkeeping.fulfillNoShipcharge'));
 
 	var ups_invoices_cols = [{ 'fld': 'invoice_number', 'label': 'Invoice #' }, { 'fld': 'last_date', 'label': 'Sale Date', formatter: formatters.date }, { 'fld': 'charge', 'label': 'Amount' }];
 
-	var ups_invoices = React.createElement(BSTable, { source: '/api/fulfill/UPS_invoices/?raw=true', columns: ups_invoices_cols });
+	var ups_invoices = React.createElement(BSTable, { source: '/api/fulfill/UPS_invoices/?raw=true', columns: ups_invoices_cols,
+					search: true, pagination: true, sizePerPage: true, bordered: true,
+					dataSort: true });
 	ReactDOM.render(React.createElement(ModalCmpnt, { modalId: 'upsInvoices', modalTitle: 'UPS Invoices', content: ups_invoices }), document.getElementById('bookkeeping.upsInvoices'));
 
 	var mis_ups_cols = [{ 'fld': 'tracking_number', 'label': 'Tracking #' }, { 'fld': 'invoice_number', 'label': 'Invoice #' }, { 'fld': 'ship_date', 'label': 'Ship Date', formatter: formatters.date }, { 'fld': 'order_related', 'label': 'Amount' }, { 'fld': 'charge', 'label': 'Amount' }, { 'fld': 'fulfillment', 'label': 'Fulfillment' }, { 'fld': 'requested_ship_type', 'label': 'Requested' }, { 'fld': 'warehouse', 'label': 'Warehouse' }];
 
-	var mis_ups = React.createElement(BSTable, { source: '/api/fulfill/UPS_wrong_acct/?raw=true', columns: mis_ups_cols });
+	var mis_ups = React.createElement(BSTable, { source: '/api/fulfill/UPS_wrong_acct/?raw=true', columns: mis_ups_cols,
+					search: true, pagination: true, sizePerPage: true, bordered: true,
+					dataSort: true });
 	ReactDOM.render(React.createElement(ModalCmpnt, { modalId: 'misUPS', modalTitle: 'Mis-billed UPS charges', content: mis_ups }), document.getElementById('bookkeeping.misBilledUPS'));
 
 /***/ },
@@ -21988,6 +22010,8 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -22027,7 +22051,12 @@
 	  }, {
 	    key: 'render',
 	    value: function render() {
-	      return React.createElement(AcctifieTable, { tableData: this.state.tableData, columns: this.props.columns, search: this.props.search, pagination: this.props.pagination, sizePerPage: this.props.pageSize });
+	      var _React$createElement;
+
+	      return React.createElement(AcctifieTable, (_React$createElement = { tableData: this.state.tableData, columns: this.props.columns,
+	        search: this.props.search, pagination: this.props.pagination,
+	        sizePerPage: this.props.pageSize, bordered: this.props.bordered
+	      }, _defineProperty(_React$createElement, 'search', this.props.search), _defineProperty(_React$createElement, 'dataSort', this.props.dataSort), _React$createElement));
 	    }
 	  }]);
 
@@ -22070,7 +22099,7 @@
 	  _createClass(DataTable, [{
 	    key: 'render',
 	    value: function render() {
-
+	      var dataSort = this.props.dataSort;
 	      var renderColumn = function renderColumn(col, index) {
 	        var props = {};
 
@@ -22081,14 +22110,16 @@
 	        }
 	        return React.createElement(
 	          TableHeaderColumn,
-	          _extends({ dataField: col.fld, key: index }, props, { dataSort: true }),
+	          _extends({ dataField: col.fld, dataSort: dataSort, key: index }, props),
 	          col.label
 	        );
 	      };
 
 	      return React.createElement(
 	        BootstrapTable,
-	        { data: this.props.tableData, striped: true, hover: true, search: this.props.search, pagination: this.props.pagination, sizePerPage: this.props.pageSize },
+	        { data: this.props.tableData, striped: true, hover: true, bordered: this.props.bordered,
+	          search: this.props.search, pagination: this.props.pagination, sizePerPage: this.props.pageSize,
+	          noDataText: 'Waiting for data...' },
 	        this.props.columns.map(renderColumn)
 	      );
 	    }
@@ -48723,15 +48754,24 @@
 	var moment = __webpack_require__(232);
 
 	function priceFormatter(cell, row) {
-	                  return '<i class="glyphicon glyphicon-usd"></i> ' + cell;
+	    return '<i class="glyphicon glyphicon-usd"></i> ' + cell;
 	};
 
 	function dateFormatter(cell, row) {
-	                  return moment(cell).format('DD MMM YYYY');
+	    return moment(cell).format('DD MMM YYYY');
 	};
 
+	function drillFormatter(cell, row) {
+	    if (cell.text == 0) {
+	        return '-';
+	    } else {
+	        return '<a href=' + cell.link + '>' + Number(Math.round(cell.text)).toLocaleString('us') + '</a>';
+	    }
+	}
+
 	var formatters = { price: priceFormatter,
-	                  date: dateFormatter
+	    date: dateFormatter,
+	    drill: drillFormatter
 	};
 
 	module.exports = formatters;

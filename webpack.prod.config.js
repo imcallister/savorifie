@@ -9,7 +9,8 @@ config.output.path = path.resolve('./assets/dist/');
 
 config.entry = {
     bookkeeping: './assets/js/pages/bookkeeping',
-    highcharts: './assets/js/pages/highcharts'
+    highcharts: './assets/js/pages/highcharts',
+    inventory: './assets/js/pages/inventory',
 };
 
 module.exports = config;

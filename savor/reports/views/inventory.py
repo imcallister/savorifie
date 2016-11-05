@@ -1,19 +1,14 @@
-from collections import Counter
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.template import RequestContext
 
-from accountifie.common.table import get_table
 from accountifie.common.api import api_func
 
 @login_required
 def inventory_counts(request):
-    user = request.user
     context = {}
-
     inventory_count = api_func('inventory', 'inventorycount')
-    context = dict(('%s_count' % k, v) for k,v in inventory_count.iteritems())
+    context = dict(('%s_count' % k, v) for k, v in inventory_count.iteritems())
 
     sales_counts = api_func('sales', 'sales_counts')
     for sku in sales_counts:
@@ -22,4 +17,4 @@ def inventory_counts(request):
 
     context['location_counts'] = api_func('inventory', 'locationinventory')
 
-    return render(request, 'inventory/main.html', context)
+    return render(request, 'inventory.html', context)

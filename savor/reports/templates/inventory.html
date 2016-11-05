@@ -1,0 +1,76 @@
+{% extends base_template %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
+
+{% block breadcrumb %}
+<li class="active">Home</li>
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+<link href="/static/base/css/dashboard_styles.css" rel="stylesheet">
+<!--
+This is where bootstrap starts to get a bit demented.   Surely not all
+these divs are needed.
+
+
+-->
+
+<h2>Total Units Sold</h2>
+
+<div class="container-fluid" id="wrapper">
+    <div id="inventory.salecount"></div>
+</div>
+    
+</br>
+<div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Units Sold</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="inventory.totalsales"></div>
+                </div>    
+            </div>
+        </div>
+
+</div>
+
+<h2>NC2 inventory</h2>
+
+<div class="container-fluid" id="wrapper">
+    <div id="inventory.NC2.inventory"></div>
+</div>
+
+
+<h2>MICH inventory</h2>
+
+<div class="container-fluid" id="wrapper">
+    <div id="inventory.MICH.inventory"></div>
+</div>
+
+
+
+<h2>152Frank inventory</h2>
+
+<div class="container-fluid" id="wrapper">
+    <div id="inventory.152Frank.inventory"></div>
+</div>
+
+
+
+<h2>SAG inventory</h2>
+
+<div class="container-fluid" id="wrapper">
+    <div id="inventory.SAG.inventory"></div>
+</div>
+
+
+{% render_bundle 'inventory' %}
+
+{% endblock %}

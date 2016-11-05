@@ -5,10 +5,9 @@ from simple_history.models import HistoricalRecords
 import accountifie.gl.models
 from accountifie.gl.bmo import BusinessModelObject
 from accountifie.toolkit.utils import get_default_company
-import accountifie.environment.apiv1 as env_api
 
-
-CC_AP_CHOICES = ['3000', '3006']
+# HARD CODE
+CC_AP_CHOICES = ['1100', '3000', '3006']
 
 class CreditCardTrans(models.Model, BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
