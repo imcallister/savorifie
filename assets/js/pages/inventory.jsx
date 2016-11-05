@@ -12,7 +12,7 @@ var SWATCHES = [{color: 'panel-plum', item: 'SYE1'},
 	            {color: 'panel-slate', item: 'BE3'},
 ]
 
-ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/sales/sale_count/?raw=true' />, document.getElementById("inventory.salecount"));
+
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/NC2/?raw=true' />, document.getElementById("inventory.NC2.inventory"));
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/152Frank/?raw=true' />, document.getElementById("inventory.152Frank.inventory"));
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/MICH/?raw=true' />, document.getElementById("inventory.MICH.inventory"));
