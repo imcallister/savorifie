@@ -22,6 +22,19 @@ these divs are needed.
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
+                    <h3 class="panel-title">Report Builder</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="reportbuilder"></div>
+                </div>    
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
                     <h3 class="panel-title">Expense Trends</h3>
                 </div>
                 <div class="panel-body">
@@ -45,5 +58,5 @@ these divs are needed.
 </div>
 
 {% render_bundle 'highcharts' %}
-
+{% render_bundle 'reports' %}
 {% endblock %}

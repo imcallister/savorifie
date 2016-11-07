@@ -9,6 +9,7 @@ config.entry = {
     bookkeeping: './assets/js/pages/bookkeeping',
     highcharts: './assets/js/pages/highcharts',
     inventory: './assets/js/pages/inventory',
+    reports: './assets/js/pages/reports',
   };
 
 config.output.path = path.resolve('./assets/bundles/');

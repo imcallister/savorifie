@@ -4,12 +4,12 @@ var SwatchRow = require('../containers/swatchRowContainer');
 var Highcharts = require('../containers/highchartContainer');
 
 
-var SWATCHES = [{color: 'panel-plum', item: 'SYE1'},
-	            {color: 'panel-ocean', item: 'SYE2'},
-	            {color: 'panel-slate', item: 'SYE3'},
-	            {color: 'panel-plum', item: 'BE1'},
-	            {color: 'panel-ocean', item: 'BE2'},
-	            {color: 'panel-slate', item: 'BE3'},
+var SWATCHES = [{color: 'dbpanel-plum', item: 'SYE1'},
+	            {color: 'dbpanel-ocean', item: 'SYE2'},
+	            {color: 'dbpanel-slate', item: 'SYE3'},
+	            {color: 'dbpanel-plum', item: 'BE1'},
+	            {color: 'dbpanel-ocean', item: 'BE2'},
+	            {color: 'dbpanel-slate', item: 'BE3'},
 ]
 
 
