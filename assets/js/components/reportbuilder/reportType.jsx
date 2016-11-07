@@ -19,11 +19,11 @@ class ReportType extends React.Component {
       super();
       this.state = {reportType: null, reportLabel: 'Choose report type'};
       this.handleReportTypeSelect = this.handleReportTypeSelect.bind(this);
+      this.nextStep = this.nextStep.bind(this);
     }
 
 
   handleReportTypeSelect(event) {
-    console.log('handleButtonSelect', event);
     this.setState({reportType: event});
     this.setState({reportLabel: choices.find(o => o.key === event).label})
   }
@@ -41,7 +41,7 @@ class ReportType extends React.Component {
           {choices.map(renderMenuItem)}
         </DropdownButton>
 
-        <button className="btn-primary pull-right" onClick={this.props.nextStep}>Save &amp; Continue</button>
+        <button className="btn-primary pull-right" onClick={this.nextStep}>Save &amp; Continue</button>
 
       </div>
     )
