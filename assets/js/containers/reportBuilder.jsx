@@ -1,25 +1,67 @@
 var React = require('react');
 
-var ReportType = require('../components/reportbuilder/reportType')
-var PeriodType = require('../components/reportbuilder/timePeriodType')
+
+var ReportBuilderCmpnt = require('../components/reportbuilder/component');
+
 var request = require('superagent');
 
 var assign  = require('object-assign')
 
 
-var fieldValues = { reportType  : null,
-                    reportLabel : null,
-                    periodType    : null,
-                    quickLink   : null
-                  }
 
+import '../../stylesheets/baseStyles.less';
+
+
+var choices = [{key: 'TrialBalance', label: 'Trial Balance', type: 'as_of'},
+               {key: 'IncBalanceSheet', label: 'Balance Sheet', type: 'as_of'},
+               {key: 'IncomeStatement', label: 'Income Statement', type: 'diff'}
+
+  ];
 
 
 class ReportBuilder extends React.Component {
 
     constructor() {
       super();
-      this.state = {step: 1};
+      this.state = {step: 1,
+                    showModal: false};
+      this.open = this.open.bind(this);
+      this.close = this.close.bind(this);
+      this.fieldValues = { reportType  : null,
+                           reportLabel : null,
+                           periodType  : null,
+                           quickLink   : null
+                        }
+
+      this.handleReportTypeSelect = this.handleReportTypeSelect.bind(this);
+      this.handlePeriodSelect = this.handlePeriodSelect.bind(this);
+      this.handleQuickLinkSelect = this.handleQuickLinkSelect.bind(this);
+      this.nextStep = this.nextStep.bind(this);
+      this.previousStep = this.previousStep.bind(this);
+    }
+
+    close() {
+      this.setState({ showModal: false });
+    }
+
+    open() {
+      this.setState({ showModal: true });
+    }
+
+    handleReportTypeSelect(event) {
+      this.fieldValues.reportType = event;
+      this.fieldValues.reportLabel = choices.find(o => o.key === event).label;
+      this.setState({step: 2});
+    }
+
+    handlePeriodSelect(event) {
+      this.fieldValues.periodType = event;
+      this.fieldValues.quickLink = false;
+    }
+
+    handleQuickLinkSelect(event) {
+      this.fieldValues.periodType = event;
+      this.fieldValues.quickLink = true;
     }
 
     saveValues(field_value) {
@@ -29,15 +71,16 @@ class ReportBuilder extends React.Component {
     }
 
     nextStep() {
-      if (fieldValues.quickLink) {
-        console.log('ok trying it');
-        window.location = '/reports';
-      };
-
-      console.log('nextstep');
-      this.setState({
-        step : this.state.step + 1
-      })
+      if (this.fieldValues.quickLink) {
+        this.setState({
+          step : 4
+        })
+      }
+      else {
+        this.setState({
+          step : this.state.step + 1
+        })
+      }
     }
 
     previousStep() {
@@ -46,37 +89,35 @@ class ReportBuilder extends React.Component {
       })
     }
 
-    showStep() {
-      switch (this.state.step) {
-        case 1:
-          return <ReportType fieldValues={fieldValues}
-                             nextStep={this.nextStep.bind(this)}
-                             previousStep={this.previousStep}
-                             saveValues={this.saveValues} />
-        case 2:
-          return <PeriodType fieldValues={fieldValues}
-                               nextStep={this.nextStep.bind(this)}
-                               previousStep={this.previousStep}
-                               saveValues={this.saveValues} />
-        case 3:
-          console.log('HEY GOING TO 3');
+    generateReport() {
+      this.state.loadingReport = true;
+      window.location = '/reporting/reports/' + this.fieldValues.reportType + '/?col_tag=2016Annual';
+    }
+
+    isActiveState (state) {
+      if (state==this.state.step) {
+        return "active"
+      }
+      else {
+        return ""
       }
     }
 
-    render() {
-      
-      var style = {
-        width : (this.state.step / 4 * 100) + '%'
-      }
-
-
+    
+    render() { 
       return (
-        <main>
-          <span className="progress-step">{fieldValues.reportLabel}</span>
-          <progress className="progress" style={style}></progress>
-          {this.showStep()}
-        </main>
-      )
+        <div>
+          <ReportBuilderCmpnt step={this.state.step}
+                              previousStep={this.previousStep}
+                              nextStep={this.nextStep}
+                              fieldValues={this.fieldValues}
+                              saveValues={this.saveValues} 
+                              handleReportTypeSelect={this.handleReportTypeSelect} 
+                              handlePeriodSelect={this.handlePeriodSelect}
+                              handleQuickLinkSelect={this.handleQuickLinkSelect} 
+                              choices={choices} />
+        </div>
+        )
     }
 }
 

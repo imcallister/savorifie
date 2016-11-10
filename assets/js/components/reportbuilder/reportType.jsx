@@ -4,53 +4,39 @@ var MenuItem = require('react-bootstrap/lib/MenuItem');
 
 
 
-var choices = [{key: 'trialbal', label: 'Trial Balance'},
-               {key: 'balsheet', label: 'Balance Sheet'},
-               {key: 'incstate', label: 'Income Statement'}
-
-  ];
-
-
 
 class ReportType extends React.Component {
-
-  
   constructor() {
       super();
-      this.state = {reportType: null, reportLabel: 'Choose report type'};
-      this.handleReportTypeSelect = this.handleReportTypeSelect.bind(this);
-      this.nextStep = this.nextStep.bind(this);
+      this.select = this.select.bind(this);
+      if (this.props) {
+        this.state = { reportLabel: this.props.fieldValues.reportLabel};
+      }
+      else {
+        this.state = { reportLabel: "Choose report"};
+      }
     }
-
-
-  handleReportTypeSelect(event) {
-    this.setState({reportType: event});
-    this.setState({reportLabel: choices.find(o => o.key === event).label})
-  }
 
   render() {
 
-    
     function renderMenuItem(i) {
-      return <MenuItem eventKey={i.key}>{i.label}</MenuItem>
+      return <MenuItem key={i.key} eventKey={i.key}>{i.label}</MenuItem>
     }
 
     return (
       <div>
-        <DropdownButton onSelect={this.handleReportTypeSelect} title={this.state.reportLabel} >
-          {choices.map(renderMenuItem)}
-        </DropdownButton>
-
-        <button className="btn-primary pull-right" onClick={this.nextStep}>Save &amp; Continue</button>
-
+        <h3>Report:
+          <DropdownButton id='reportType.dropdown' onSelect={this.select} title={this.state.reportLabel} >
+            {this.props.choices.map(renderMenuItem)}
+          </DropdownButton>
+        </h3>
       </div>
     )
   }
 
-  nextStep(e) {
-    e.preventDefault()
-    this.props.saveValues(this.state)
-    this.props.nextStep()
+  select(e) {
+    this.props.handleReportTypeSelect(e);
+    this.setState({ reportLabel: this.props.fieldValues.reportLabel});
   }
 }
 

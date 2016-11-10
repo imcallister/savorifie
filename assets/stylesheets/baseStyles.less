@@ -1,0 +1,71 @@
+
+@color-alert: red; // red
+@color-buy: #47a447;   // green
+@color-sell: #d9534f;  // red
+@color-hidden: #428bca; // blue
+@color-highlight: #2f88f9; // brightish blue
+@color-matching-session: #fc8624; // orange
+@color-auction: @color-hidden; //#72bcf5;
+
+@color-window-header: rgb(28, 28, 28);
+@color-window-background: rgb(54, 52, 53);
+
+
+.progress-breadcrumb {
+    margin-bottom: 0;
+    padding: 0;
+    display: flex;
+    background-color: white;
+
+    span {
+      padding: 6px 6px 6px 12px;
+      position: relative;
+      border-top: none;
+      border-bottom: 1px solid #EEE;
+      text-transform: uppercase;
+      flex-grow: 1;
+      flex-basis: 33%;
+
+      &.active {
+        font-weight: bold;
+        background-color: @color-highlight;
+        color: white;
+
+        &:not(:last-child):after {
+          border-left: 10px solid @color-highlight;
+        }
+      }
+
+      &:not(:last-child):before {
+        content: " ";
+        display: block;
+        width: 0;
+        height: 0;
+        border-top: 17px solid transparent;
+        border-bottom: 17px solid transparent;
+        border-left: 10px solid #CCC;
+        position: absolute;
+        top: 50%;
+        margin-top: -17px;
+        margin-left: 1px;
+        left: 100%;
+        z-index: 3;
+      }
+
+      &:not(:last-child):after {
+        content: " ";
+        display: block;
+        width: 0;
+        height: 0;
+        border-top: 17px solid transparent;
+        border-bottom: 17px solid transparent;
+        border-left: 10px solid white;
+        position: absolute;
+        top: 50%;
+        margin-top: -17px;
+        left: 100%;
+        z-index: 3;
+      }
+
+    }
+  }
