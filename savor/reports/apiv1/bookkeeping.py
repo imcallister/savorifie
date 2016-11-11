@@ -9,25 +9,27 @@ from sales.models import ChannelPayouts
 
 
 def receivables(qstring):
+    today = datetime.datetime.now().date()
     query_manager = QueryManager()
-    ar_table = query_manager.balance_by_cparty('SAV', ['1100'])
+    ar_table = query_manager.balance_by_cparty('SAV', ['1100'], to_date=today)
 
     ar_rows = []
     for cp in ar_table.index:
         if abs(ar_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/1100/?cp=%s' % cp
+            drill_url = '/reporting/history/account/1100/?cp=%s&to=%s' % (cp, today.isoformat())
             ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ar_table.loc[cp]}})
     return ar_rows
 
 
 def future_receivables(qstring):
+    today = datetime.datetime.now().date()
     query_manager = QueryManager()
-    ar_table = query_manager.balance_by_cparty('SAV', ['1101'])
+    ar_table = query_manager.balance_by_cparty('SAV', ['1101'], to_date=today)
 
     ar_rows = []
     for cp in ar_table.index:
         if abs(ar_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/1101/?cp=%s&to=%s' % (cp, datetime.datetime.now().date().isoformat())
+            drill_url = '/reporting/history/account/1101/?cp=%s&to=%s' % (cp, today.isoformat())
             ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ar_table.loc[cp]}})
     return ar_rows
 
@@ -39,7 +41,7 @@ def payables(qstring):
     ap_rows = []
     for cp in ap_table.index:
         if abs(ap_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/3000/?cp=%s&to=%s' % (cp, datetime.datetime.now().date().isoformat())
+            drill_url = '/reporting/history/account/3000/?cp=%s' % cp
             ap_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ap_table.loc[cp]}})
     return ap_rows
 
