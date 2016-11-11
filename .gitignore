@@ -26,3 +26,4 @@ celerybeat-schedule.db
 npm-debug.log
 pip-selfcheck.json
 selenium/
+webpack-stats.local.json
