@@ -6,7 +6,7 @@ import '../../stylesheets/dashboardStyles.less';
 module.exports = React.createClass({
     render: function(){
        return (
-            <div className={classNames('panel', this.props.color, 'row', 'no-padding')}>
+            <div className={classNames('dbpanel', this.props.color, 'row', 'no-padding')}>
                 <div className={classNames('col-md-5', 'widget-left')}>
                     <svg></svg>
                 </div>

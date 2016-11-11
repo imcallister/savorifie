@@ -1,3 +1,5 @@
+import datetime
+
 from django.utils.safestring import mark_safe
 
 from accountifie.query.query_manager import QueryManager
@@ -25,7 +27,7 @@ def future_receivables(qstring):
     ar_rows = []
     for cp in ar_table.index:
         if abs(ar_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/1100/?cp=%s' % cp
+            drill_url = '/reporting/history/account/1101/?cp=%s&to=%s' % (cp, datetime.datetime.now().date().isoformat())
             ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ar_table.loc[cp]}})
     return ar_rows
 
@@ -37,7 +39,7 @@ def payables(qstring):
     ap_rows = []
     for cp in ap_table.index:
         if abs(ap_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/3000/?cp=%s' % cp
+            drill_url = '/reporting/history/account/3000/?cp=%s&to=%s' % (cp, datetime.datetime.now().date().isoformat())
             ap_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ap_table.loc[cp]}})
     return ap_rows
 
