@@ -68,7 +68,6 @@ class PeriodBuilder extends React.Component {
   }
 
   renderPeriodBuilder() {
-    console.log('renderPeriodBuilder', this.props.fieldValues);
     switch (this.props.fieldValues.periodType) {
         case "year":
           return renderYearBuilder();

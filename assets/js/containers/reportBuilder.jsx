@@ -60,6 +60,7 @@ class ReportBuilder extends React.Component {
     }
 
     handleQuickLinkSelect(event) {
+      console.log('handleQuickLinkSelect', event);
       this.fieldValues.periodType = event;
       this.fieldValues.quickLink = true;
     }

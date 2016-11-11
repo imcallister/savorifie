@@ -43,8 +43,7 @@ class ReportBuilderComponent extends React.Component {
           <div className="progress-breadcrumb">
             <span className={this.isActiveState(1)}>Choose Report</span>
             <span className={this.isActiveState(2)}>Choose Period</span>
-            <span className={this.isActiveState(3)}>Add Params</span>
-            <span className={this.isActiveState(4)}>Generating</span>
+            <span className={this.isActiveState(3)}>Generating</span>
           </div>
       )
     }
