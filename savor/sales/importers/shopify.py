@@ -88,7 +88,7 @@ def shopify_fee(sale_obj):
 PAID_THRU = {
     'Shopify Payments': 'SHOPIFY',
     'PayPal Express Checkout': 'PAYPAL',
-    'Amazon Payments': 'AMZN'
+    'Amazon Payments': 'AMZN_PMTS'
 }
 
 def process_shopify(file_name):
