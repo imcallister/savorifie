@@ -127,7 +127,7 @@ def process_shopify(file_name):
 
         sale_info['company_id'] = 'SAV'
         sale_info['external_channel_id'] = str(v.iloc[0]['Name'])
-        sale_info['paid_thru'] = PAID_THRU.get(v.iloc[0]['Payment Reference'])
+        sale_info['paid_thru_id'] = PAID_THRU.get(v.iloc[0]['Payment Method'])
         sale_info['shipping_charge'] = Decimal(str(v.iloc[0]['Shipping']))
         sale_info['discount_code'] = str(v.iloc[0]['Discount Code'])
         if sale_info['discount_code']=='':
