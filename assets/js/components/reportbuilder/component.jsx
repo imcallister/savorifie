@@ -93,19 +93,6 @@ class ReportBuilderComponent extends React.Component {
         </div>
       )
 		} else if (this.props.step==3) {
-  		return (
-      	<div>
-	      	<PeriodBuilder fieldValues={this.props.fieldValues}
-                     		nextStep={this.props.nextStep}
-                     		previousStep={this.props.previousStep}
-                     		handlePeriodSelect={this.props.handlePeriodSelect}
-                     		handleQuickLinkSelect={this.props.handleQuickLinkSelect} 
-                     		saveValues={this.props.saveValues}
-                     		choices={this.props.choices} />
-        </div>
-      )
-  	}
-		else if (this.props.step==4) {
   		window.location = '/reporting/reports/' + this.props.fieldValues.reportType + '/?col_tag=2016Annual';
     	return <h2>LOADING REPORT</h2>
   	} 

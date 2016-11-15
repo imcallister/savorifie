@@ -12,19 +12,14 @@ var assign  = require('object-assign')
 import '../../stylesheets/baseStyles.less';
 
 
-var choices = [{key: 'TrialBalance', label: 'Trial Balance', type: 'as_of'},
-               {key: 'IncBalanceSheet', label: 'Balance Sheet', type: 'as_of'},
-               {key: 'IncomeStatement', label: 'Income Statement', type: 'diff'}
-
-  ];
-
-
 class ReportBuilder extends React.Component {
 
     constructor() {
       super();
       this.state = {step: 1,
-                    showModal: false};
+                    showModal: false,
+                    reports: []};
+
       this.open = this.open.bind(this);
       this.close = this.close.bind(this);
       this.fieldValues = { reportType  : null,
@@ -38,6 +33,20 @@ class ReportBuilder extends React.Component {
       this.handleQuickLinkSelect = this.handleQuickLinkSelect.bind(this);
       this.nextStep = this.nextStep.bind(this);
       this.previousStep = this.previousStep.bind(this);
+      this.setReports = this.setReports.bind(this);
+
+      
+    }
+
+    componentDidMount() {
+      request
+        .get('/api/reporting/reportdef/?raw=true')
+        .end(this.setReports);
+    }
+
+    setReports(err, res) {
+      this.setState({'reports': JSON.parse(res.text)
+                                    .map((x) => ({key: x.name, label: x.description, type: 'as_of'}))});
     }
 
     close() {
@@ -50,7 +59,7 @@ class ReportBuilder extends React.Component {
 
     handleReportTypeSelect(event) {
       this.fieldValues.reportType = event;
-      this.fieldValues.reportLabel = choices.find(o => o.key === event).label;
+      this.fieldValues.reportLabel = this.state.reports.find(o => o.key === event).label;
       this.setState({step: 2});
     }
 
@@ -61,8 +70,7 @@ class ReportBuilder extends React.Component {
 
     handleQuickLinkSelect(event) {
       console.log('handleQuickLinkSelect', event);
-      this.fieldValues.periodType = event;
-      this.fieldValues.quickLink = true;
+      this.generateReport(event);
     }
 
     saveValues(field_value) {
@@ -90,9 +98,11 @@ class ReportBuilder extends React.Component {
       })
     }
 
-    generateReport() {
+    generateReport(colTag) {
+      this.setState({step: 3});
       this.state.loadingReport = true;
-      window.location = '/reporting/reports/' + this.fieldValues.reportType + '/?col_tag=2016Annual';
+      console.log(this);
+      window.location = '/reporting/reports/' + this.fieldValues.reportType + '/?date=' + colTag;
     }
 
     isActiveState (state) {
@@ -105,7 +115,7 @@ class ReportBuilder extends React.Component {
     }
 
     
-    render() { 
+    render() {
       return (
         <div>
           <ReportBuilderCmpnt step={this.state.step}
@@ -116,7 +126,7 @@ class ReportBuilder extends React.Component {
                               handleReportTypeSelect={this.handleReportTypeSelect} 
                               handlePeriodSelect={this.handlePeriodSelect}
                               handleQuickLinkSelect={this.handleQuickLinkSelect} 
-                              choices={choices} />
+                              choices={this.state.reports} />
         </div>
         )
     }
