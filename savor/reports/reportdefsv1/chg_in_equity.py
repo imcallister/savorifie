@@ -10,6 +10,8 @@ import accountifie.gl.models
 from accountifie.toolkit.utils import DZERO, fmt
 import accountifie.toolkit.utils as utils
 import reports.stock_tables as stock_tables
+import accountifie.reporting.rptutils as rptutils
+import accountifie.toolkit.utils.datefuncs as datefuncs
 
 
 COL_LABELS = {'start': "Shareholder Equity at Start of Period",
@@ -31,29 +33,25 @@ ROW_FORMATS = {'item': ITEM, 'minor_total': MINOR_TOTAL, 'major_total': MAJOR_TO
 
 class ChgInEquityStatement(Report):
     def __init__(self, company_id, date=None):
+        config = {'description': "Statement of Changes in Shareholder Equity",
+                  'calc_type': 'as_of',
+                  'date': date}
+        
+        super(ChgInEquityStatement, self).__init__(company_id, **config)
 
-        self.date = date
-        self.dflt_title = "Statement of Changes in Shareholder Equity"
-        self.description = self.dflt_title
-        self.company_id = company_id
-        self.columns = {'Preferred Par Value': 'equity.prefstock', 
-                        'Preferred Shares': 'preferred_par',
-                        'Common Par Value': 'equity.commonstock', 
+        self.columns = {'Common Par Value': 'equity.commonstock', 
                         'Common Shares': 'common_par',
                         'APIC': 'equity.apic', 
                         'Retained Earnings': 'equity.retearnings', 
                         'Total Shareholder Equity': 'Total'}
         
-        self.column_order = ['Preferred Shares', 'Preferred Par Value', 'Common Shares', 'Common Par Value',
+        self.column_order = ['Common Shares', 'Common Par Value',
                                 'APIC', 'Retained Earnings', 'Total Shareholder Equity']
         
-        self.calc_type = 'as_of'
-        self.set_company()
-        self.works_for = ['SAV']
-
         self.link_map = lambda x: ''
         self.label_map = lambda x: COL_LABELS[x]
         self.dates = None
+        self.works_for = ['SAV']
         
 
     
@@ -61,11 +59,36 @@ class ChgInEquityStatement(Report):
         # columns are fixed... don't mistakenly adjust to dates
         pass
 
-    def configure(self, as_of=None, col_tag=None, path=None):
-        config = utils.config_fromcoltag(col_tag, self.description, self.calc_type)
-        self.title = config['title']
-        self.dates= config['columns']
-        self.date_order = config['column_order']
+    def configure(self, config, path=None):
+        qs_matches = rptutils.qs_parse(config)
+
+        if len(qs_matches) == 0:
+            raise ValueError('Unexpected query string: %s' % repr(config))
+        elif len(qs_matches) > 1:
+            raise ValueError('Unexpected query string: %s' % repr(config))
+        else:
+            config['config_type'] = qs_matches[0]
+
+
+        if config['config_type'] == 'shortcut':
+            config.pop('config_type')
+            config.update(rptutils.parse_shortcut(config['col_tag']))
+
+        if config['config_type'] == 'date':
+            dt = rptutils.date_from_shortcut(config['date'])
+            config.update(rptutils.config_fromdate(self.calc_type, self.description, dt))
+        elif config['config_type'] == 'period':
+            config.update(rptutils.config_fromperiod(self.calc_type, self.description, config))
+        elif config['config_type'] == 'date_range':
+            config.update(rptutils.config_fromdaterange(self.calc_type, self.description, config))
+        
+        #self.set_columns(config['columns'], column_order=config.get('column_order'))
+        self.dates = config.get('columns')
+        self.date = config.get('date')
+        self.path = config.get('path')
+        self.title = 'Change in Equity'
+
+        self.date_order = self.column_order
         
     
     def calcs(self):

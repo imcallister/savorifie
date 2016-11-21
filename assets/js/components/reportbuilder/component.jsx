@@ -1,8 +1,8 @@
 var React = require('react')
 
 var ReportType = require('./reportType')
-var PeriodType = require('./timePeriodType')
-var PeriodBuilder = require('./periodBuilder')
+var PeriodType = require('./periodType')
+
 
 var Popover = require('react-bootstrap/lib/Popover');
 var Tooltip = require('react-bootstrap/lib/Tooltip');
@@ -49,72 +49,62 @@ class ReportBuilderComponent extends React.Component {
     }
 
     renderTypeSection() {
-    	if (this.props.step==1) {
-	      return (
-	      	      	<div>
-	      		      	<ReportType key="reportType"
-	      	      					fieldValues={this.props.fieldValues}
-	      	                        nextStep={this.props.nextStep}
-	      	                        previousStep={this.props.previousStep}
-	      	                        saveValues={this.props.saveValues} 
-	                           		handleReportTypeSelect={this.props.handleReportTypeSelect}
-	                           		choices={this.props.choices}/>
-	      	        </div>
-	      	        )
-    	} else {
-    		return (<h3>Report: {this.props.fieldValues.reportLabel}</h3>)
-    	}
-	}
+      if (this.props.step==1) {
+        return (
+                  <div>
+                    <ReportType key="reportType"
+                                reportLabel={this.props.reportLabel}
+                                nextStep={this.props.nextStep}
+                                previousStep={this.props.previousStep}
+                                handleReportTypeSelect={this.props.handleReportTypeSelect}
+                                choices={this.props.choices}/>
+                  </div>
+                  )
+      } else {
+        return (<h3>Report: {this.props.fieldValues.reportLabel}</h3>)
+      }
+  }
 
-	renderFooter() {
-    	if (this.props.step!=1) {
-	      return (
-	      	      	<div>
-	      		      	<Button className="btn -primary pull-left" onClick={this.props.previousStep}>Back</Button>
-              			<Button className="btn -primary pull-right" onClick={this.props.nextStep}>Next</Button>
-	      	        </div>
-	      	        )
-    	} else {
-    		return (<div></div>)
-    	}
-	}
+  renderFooter() {
+      if (this.props.step!=1) {
+        return (
+                  <div>
+                    <Button className="btn btn-warning pull-left" onClick={this.props.goBack}>Back</Button>
+                    <Button className="btn btn-success pull-right" onClick={this.props.generateReport}>Generate</Button>
+                  </div>
+                  )
+      } else {
+        return (<div></div>)
+      }
+  }
 
-	renderPeriodSection() {
-		if (this.props.step==2) {
+  renderPeriodSection() {
+    if (this.props.step==2) {
       return (
-      	<div>
-	      	<PeriodType fieldValues={this.props.fieldValues}
-                     		nextStep={this.props.nextStep}
-                     		previousStep={this.props.previousStep}
-                     		handlePeriodSelect={this.props.handlePeriodSelect}
-                     		handleQuickLinkSelect={this.props.handleQuickLinkSelect} 
-                     		saveValues={this.props.saveValues}
-                     		choices={this.props.choices} />
+        <div>
+          <PeriodType reportType={this.props.reportType}
+                      nextStep={this.props.nextStep}
+                      year={this.props.year}
+                      half={this.props.half}
+                      quarter={this.props.quarter}
+                      month={this.props.month}
+                      by={this.props.by}
+                      periodType={this.props.periodType}
+                      previousStep={this.props.previousStep}
+                      handlePeriodSelect={this.props.handlePeriodSelect}
+                      handleQuickLinkSelect={this.props.handleQuickLinkSelect}
+                      choices={this.props.choices} />
         </div>
       )
-		} else if (this.props.step==3) {
-  		return (
-      	<div>
-	      	<PeriodBuilder fieldValues={this.props.fieldValues}
-                     		nextStep={this.props.nextStep}
-                     		previousStep={this.props.previousStep}
-                     		handlePeriodSelect={this.props.handlePeriodSelect}
-                     		handleQuickLinkSelect={this.props.handleQuickLinkSelect} 
-                     		saveValues={this.props.saveValues}
-                     		choices={this.props.choices} />
-        </div>
-      )
-  	}
-		else if (this.props.step==4) {
-  		window.location = '/reporting/reports/' + this.props.fieldValues.reportType + '/?col_tag=2016Annual';
-    	return <h2>LOADING REPORT</h2>
-  	} 
-    	else {
-    		return (<div></div>)
-    	}
-	}
+    } else if (this.props.step==3) {
+      return <h2>LOADING REPORT</h2>
+    } 
+      else {
+        return (<div></div>)
+      }
+  }
 
-	render() { 
+  render() { 
       return (
         <div>
           <Button
@@ -141,14 +131,14 @@ class ReportBuilderComponent extends React.Component {
                 <div className="row">
                   <div className="panel panel-default">
                     <div className="panel-body">
-			      		{this.renderTypeSection()}
+                {this.renderTypeSection()}
                     </div>
                   </div>
                 </div>
                 <div className="row">
                   <div className="panel panel-default">
                     <div className="panel-body">
-			      		{this.renderPeriodSection()}
+                     {this.renderPeriodSection()}
                     </div>
                   </div>
                 </div>

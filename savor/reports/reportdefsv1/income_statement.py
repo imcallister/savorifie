@@ -11,18 +11,14 @@ import accountifie.toolkit.utils as utils
 class IncomeStatement(Report):
     
     def __init__(self, company_id, date=None):
+        config = {'description': 'Income Statement',
+                  'calc_type': 'diff',
+                  'date': date}
+        
+        super(IncomeStatement, self).__init__(company_id, **config)
 
-        self.date = date
-        self.description = 'Income Statement'
-        self.title = None
-        self.company_id = company_id
-        self.columns = None
-        self.column_order = None
-        self.calc_type = 'diff'
-        self.set_company()
         self.label_map = utils.get_alias
         self.link_map = utils.path_history_link
-
         self.works_for = ['SAV']
 
     
