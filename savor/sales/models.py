@@ -392,7 +392,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             return self.channel.counterparty
 
     def _receiveables_account(self):
-        print 'HELLO', self.channel.label
         if self.channel.label in ['PAMPHOM', 'GROMMET', 'PAPERSO', 'UNCOMMON']:
             return Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE_TERMS'))
         else:
