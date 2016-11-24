@@ -11,19 +11,16 @@ import accountifie.toolkit.utils as utils
 class Cashflow(Report):
     
     def __init__(self, company_id, date=None):
+        config = {'description': 'Statement of Cash Flows',
+                  'calc_type': 'diff',
+                  'date': date}
+        
+        super(Cashflow, self).__init__(company_id, **config)
 
-        self.date = date
-        self.description = 'Statement of Cash Flows'
-        self.title = None
-        self.company_id = company_id
-        self.columns = {}
-        self.column_order = []
-        self.set_company()
-        self.calc_type = 'diff'
         self.label_map = utils.get_alias
         self.link_map = utils.path_history_link
-    
         self.works_for = ['SAV']
+
     
     def calcs(self):
         table_data = []
@@ -144,8 +141,8 @@ class Cashflow(Report):
             period_tag = self.columns[title]
             end_periods[title] = utils.end_of_period(period_tag)
 
-        start_cashbal = self.query_manager.pd_path_balances(self.company_id, start_periods, ['assets.curr.cashandeq'], assets=True).loc['assets.curr.cashandeq']
-        end_cashbal = self.query_manager.pd_path_balances(self.company_id, end_periods, ['assets.curr.cashandeq'], assets=True).loc['assets.curr.cashandeq']
+        start_cashbal = self.query_manager.pd_path_balances(self.company_id, start_periods, ['assets.curr.cash'], assets=True).loc['assets.curr.cash']
+        end_cashbal = self.query_manager.pd_path_balances(self.company_id, end_periods, ['assets.curr.cash'], assets=True).loc['assets.curr.cash']
 
         start_cashbal['fmt_tag'] = 'item'
         start_cashbal['label'] = 'Cash at start of period'
