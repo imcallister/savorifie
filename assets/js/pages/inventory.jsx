@@ -15,8 +15,7 @@ var SWATCHES = [{color: 'dbpanel-plum', item: 'SYE1'},
 
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/NC2/?raw=true' />, document.getElementById("inventory.NC2.inventory"));
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/152Frank/?raw=true' />, document.getElementById("inventory.152Frank.inventory"));
-ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/MICH/?raw=true' />, document.getElementById("inventory.MICH.inventory"));
-ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/SAG/?raw=true' />, document.getElementById("inventory.SAG.inventory"));
+ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/LAPort/?raw=true' />, document.getElementById("inventory.LAPort.inventory"));
 
 ReactDOM.render(<Highcharts chartName="inventory.totalsales" source="/chart/sales/sale_count/"/>, document.getElementById("inventory.totalsales"));
 
