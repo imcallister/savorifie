@@ -40,6 +40,9 @@ class ChannelPayouts(models.Model):
     payout_date = models.DateField()
     payout = models.DecimalField(max_digits=8, decimal_places=2)
     sales = models.ManyToManyField('sales.Sale', blank=True)
+    paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
+                                  related_name='payout_paid_thru',
+                                  limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
 
     def __unicode__(self):
         if self.sales.count() == 0:

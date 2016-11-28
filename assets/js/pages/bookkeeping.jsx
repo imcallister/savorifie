@@ -60,7 +60,7 @@ ReactDOM.render(future_receivables, document.getElementById('bookkeeping.futurer
 
 
 var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
-			                {'fld': 'channel', 'label': 'Channel'},
+			                {'fld': 'paid_thru', 'label': 'Paid Via'},
 			                {'fld': 'sale_date', 'label': 'Date'},
 			                {'fld': 'shipping_name', 'label': 'Name'},
 			                {'fld': 'shipping_company', 'label': 'Company'},

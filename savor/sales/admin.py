@@ -203,7 +203,7 @@ class SaleAdmin(SimpleHistoryAdmin):
 admin.site.register(Sale, SaleAdmin)
 
 class ChannelPayoutsAdmin(admin.ModelAdmin):
-    list_display = ('__unicode__', 'payout_date', 'payout', 'channel',)
+    list_display = ('__unicode__', 'payout_date', 'payout', 'paid_thru', 'channel',)
     filter_horizontal = ('sales',)
     
 admin.site.register(ChannelPayouts, ChannelPayoutsAdmin)
