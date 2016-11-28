@@ -104,7 +104,7 @@ class SaleProceedsSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     proceeds = serializers.SerializerMethodField()
     items_string = serializers.SerializerMethodField()
 
-    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
+    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'paid_thru__id', 'channel', 'customer_code']
     _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
 
     def get_proceeds(self, obj):
@@ -117,11 +117,12 @@ class SaleProceedsSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         return obj.items_string
 
     channel = serializers.StringRelatedField()
+    paid_thru = serializers.StringRelatedField()
     customer_code = serializers.StringRelatedField()
 
     class Meta:
         model = Sale
-        fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
+        fields = ('id', 'label', 'customer_code', 'channel', 'paid_thru', 'sale_date',
                   'external_channel_id', 'shipping_name', 'proceeds',
                   'shipping_company', 'items_string')
 
