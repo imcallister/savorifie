@@ -61,7 +61,7 @@ ReactDOM.render(future_receivables, document.getElementById('bookkeeping.futurer
 
 var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
 			                {'fld': 'paid_thru', 'label': 'Paid Via'},
-			                {'fld': 'sale_date', 'label': 'Date'},
+			                {'fld': 'sale_date', 'label': 'Date', formatter: formatters.date},
 			                {'fld': 'shipping_name', 'label': 'Name'},
 			                {'fld': 'shipping_company', 'label': 'Company'},
 			                {'fld': 'proceeds', 'label': 'Proceeds'},
@@ -69,13 +69,13 @@ var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
 			                ]
 
 var unpaid_shopify = <BSTable source="/api/sales/unpaid_channel/SHOPIFY/?raw=true" columns={unpaid_shopify_cols} 
-							  search={true} pagination={true} sizePerPage={true}/>
+							  search={true} pagination={true} sizePerPage={true} dataSort={true}/>
 ReactDOM.render(<ModalCmpnt modalId="shopifyUnpaid" modalTitle="Unpaid Shopify" content={unpaid_shopify} wide={true}/>, 
 				document.getElementById('bookkeeping.unpaidShopify'))
 
 
 var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
-		                 {'fld': 'date', 'label': 'ID'},
+		                 {'fld': 'date', 'label': 'ID', formatter: formatters.date},
 		                 {'fld': 'label', 'label': 'Description'},
 		                 {'fld': 'payout', 'label': 'Payout'},
 		                 {'fld': 'calcd_payout', 'label': 'Savor Calc'},
@@ -84,7 +84,7 @@ var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
 var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} 
 								  search={true} pagination={true} sizePerPage={true} bordered={true}
 								  dataSort={true}/>
-ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Comparison" wide={true} content={shopify_comparison} wide={true}/>, 
+ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Mismatched Shopify Payouts" wide={true} content={shopify_comparison} wide={true}/>, 
 				document.getElementById('bookkeeping.shopifyComp'))
 
 

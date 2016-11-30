@@ -252,11 +252,16 @@ def sales_counts(qstring):
 
     return sales_counts
 
-
+def channel_payout_drilldown(payout_id, qstring):
+    qs = ChannelPayouts.objects.get(id=payout_id).sales
+    qs = SaleProceedsSerializer.setup_eager_loading(qs)
+    return SaleProceedsSerializer(qs, many=True).data
+    
 def channel_payout_comp(channel_lbl, qstring):
     qs = ChannelPayouts.objects.filter(channel__counterparty_id=channel_lbl)
     qs = ChannelPayoutSerializer.setup_eager_loading(qs)
-    return ChannelPayoutSerializer(qs, many=True).data
+    output = ChannelPayoutSerializer(qs, many=True).data
+    return [x for x in output if abs(x['diff']) > 1.0]
     
 
 def unpaid_channel(channel_lbl, qstring):

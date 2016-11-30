@@ -36,6 +36,7 @@ class FulfillUpdateInline(admin.TabularInline):
 
 
 class FulfillmentAdmin(admin.ModelAdmin):
+    ordering = ('-request_date',)
     list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
     list_filter = ('warehouse', 'status', ShippingMissing,)
     inlines = [FulfillLineInline, FulfillUpdateInline]
@@ -68,6 +69,7 @@ class WarehouseFulfillLineInline(admin.TabularInline):
 
 
 class WarehouseFulfillAdmin(admin.ModelAdmin):
+    ordering = ('-ship_date',)
     list_display = ('fulfillment', 'warehouse',
                     'warehouse_pack_id', 'ship_date', 'shipping_type',
                     'tracking_number', 'shipping_zip',)

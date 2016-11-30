@@ -62,6 +62,8 @@ class CashflowDALForm(forms.ModelForm):
 
 
 class CashflowAdmin(SimpleHistoryAdmin):
+    ordering = ('-post_date',)
+
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty',
                     'trans_type', 'expense_acct')
     list_filter = ('ext_account', UnmatchedCashflows)
