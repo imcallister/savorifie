@@ -93,17 +93,17 @@
 	var future_receivables = React.createElement(BSTable, { source: '/api/reports/future_receivables/?raw=true', columns: receivables_cols });
 	ReactDOM.render(future_receivables, document.getElementById('bookkeeping.futurereceivables'));
 
-	var unpaid_shopify_cols = [{ 'fld': 'label', 'label': 'ID' }, { 'fld': 'paid_thru', 'label': 'Paid Via' }, { 'fld': 'sale_date', 'label': 'Date' }, { 'fld': 'shipping_name', 'label': 'Name' }, { 'fld': 'shipping_company', 'label': 'Company' }, { 'fld': 'proceeds', 'label': 'Proceeds' }, { 'fld': 'items_string', 'label': 'SKUs' }];
+	var unpaid_shopify_cols = [{ 'fld': 'label', 'label': 'ID' }, { 'fld': 'paid_thru', 'label': 'Paid Via' }, { 'fld': 'sale_date', 'label': 'Date', formatter: formatters.date }, { 'fld': 'shipping_name', 'label': 'Name' }, { 'fld': 'shipping_company', 'label': 'Company' }, { 'fld': 'proceeds', 'label': 'Proceeds' }, { 'fld': 'items_string', 'label': 'SKUs' }];
 
 	var unpaid_shopify = React.createElement(BSTable, { source: '/api/sales/unpaid_channel/SHOPIFY/?raw=true', columns: unpaid_shopify_cols,
-					search: true, pagination: true, sizePerPage: true });
+					search: true, pagination: true, sizePerPage: true, dataSort: true });
 	ReactDOM.render(React.createElement(ModalCmpnt, { modalId: 'shopifyUnpaid', modalTitle: 'Unpaid Shopify', content: unpaid_shopify, wide: true }), document.getElementById('bookkeeping.unpaidShopify'));
 
-	var shopify_comp_cols = [{ 'fld': 'id', 'label': 'ID' }, { 'fld': 'date', 'label': 'ID' }, { 'fld': 'label', 'label': 'Description' }, { 'fld': 'payout', 'label': 'Payout' }, { 'fld': 'calcd_payout', 'label': 'Savor Calc' }, { 'fld': 'diff', 'label': 'Diff' }];
+	var shopify_comp_cols = [{ 'fld': 'id', 'label': 'ID' }, { 'fld': 'date', 'label': 'ID', formatter: formatters.date }, { 'fld': 'label', 'label': 'Description' }, { 'fld': 'payout', 'label': 'Payout' }, { 'fld': 'calcd_payout', 'label': 'Savor Calc' }, { 'fld': 'diff', 'label': 'Diff' }];
 	var shopify_comparison = React.createElement(BSTable, { source: '/api/sales/channel_payout_comp/SHOPIFY/?raw=true', columns: shopify_comp_cols,
 					search: true, pagination: true, sizePerPage: true, bordered: true,
 					dataSort: true });
-	ReactDOM.render(React.createElement(ModalCmpnt, _defineProperty({ modalId: 'shopifyComp', modalTitle: 'Shopify Comparison', wide: true, content: shopify_comparison }, 'wide', true)), document.getElementById('bookkeeping.shopifyComp'));
+	ReactDOM.render(React.createElement(ModalCmpnt, _defineProperty({ modalId: 'shopifyComp', modalTitle: 'Mismatched Shopify Payouts', wide: true, content: shopify_comparison }, 'wide', true)), document.getElementById('bookkeeping.shopifyComp'));
 
 	var no_shipcharge_cols = [{ 'fld': 'fulfillment_id', 'label': 'Fulfill ID' }, { 'fld': 'order', 'label': 'Order' }, { 'fld': 'request_date', 'label': 'Request Date', formatter: formatters.date }, { 'fld': 'warehouse', 'label': 'Warehouse' }, { 'fld': 'ship_type', 'label': 'Ship Type' }, { 'fld': 'bill_to', 'label': 'Billing Acct' }, { 'fld': 'shipping_name', 'label': 'Ship Name' }, { 'fld': 'shipping_company', 'label': 'Shipping Company' }];
 

@@ -71,6 +71,7 @@ class FulfillRequested(SimpleListFilter):
 
 
 class SaleAdmin(SimpleHistoryAdmin):
+    ordering = ('-sale_date',)
     list_display=('external_channel_id', 'sale_date', 'channel',
                   'customer_code', 'shipping_name', 'special_sale', 'paid_thru')
     list_filter = ('channel', 'paid_thru', FulfillRequested)
@@ -203,6 +204,7 @@ class SaleAdmin(SimpleHistoryAdmin):
 admin.site.register(Sale, SaleAdmin)
 
 class ChannelPayoutsAdmin(admin.ModelAdmin):
+    ordering = ('-payout_date',)
     list_display = ('__unicode__', 'payout_date', 'payout', 'paid_thru', 'channel',)
     filter_horizontal = ('sales',)
     

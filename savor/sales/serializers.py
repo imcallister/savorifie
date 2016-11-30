@@ -241,3 +241,4 @@ class ChannelPayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = ChannelPayouts
         fields = ('id', 'date', 'label', 'channel', 'payout', 'calcd_payout', 'diff')
+
