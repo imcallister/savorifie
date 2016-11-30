@@ -77,7 +77,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
         return super(CashflowAdmin, self).get_queryset(request)\
                                          .select_related('company',
                                                          'ext_account', 
-                                                         'counterparty__name',
+                                                         'counterparty',
                                                          'trans_type',
                                                          )
 

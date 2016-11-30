@@ -134,7 +134,7 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     drilldown = serializers.SerializerMethodField()
     fulfillment_ids = serializers.SerializerMethodField()
 
-    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
+    _SELECT_RELATED_FIELDS = ['channel__counterparty', 'channel', 'customer_code']
     _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item', 'fulfillments__fulfill_lines__inventory_item']
 
     def get_label(self, obj):
