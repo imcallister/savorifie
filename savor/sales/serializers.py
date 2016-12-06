@@ -16,7 +16,7 @@ class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 
 
 class SalesTaxSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['sale__channel__counterparty__id', 'collector__entity']
+    _SELECT_RELATED_FIELDS = ['sale__channel__counterparty', 'collector']
 
     sale_date = serializers.SerializerMethodField()
     taxable = serializers.SerializerMethodField()
@@ -81,7 +81,7 @@ class SalesTaxSerializer2(serializers.ModelSerializer, EagerLoadingMixin):
 class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     items_string = serializers.SerializerMethodField()
 
-    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'channel', 'customer_code']
+    _SELECT_RELATED_FIELDS = ['channel__counterparty', 'channel', 'customer_code']
     _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
 
     def get_label(self, obj):
@@ -104,7 +104,7 @@ class SaleProceedsSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     proceeds = serializers.SerializerMethodField()
     items_string = serializers.SerializerMethodField()
 
-    _SELECT_RELATED_FIELDS = ['channel__counterparty__id', 'paid_thru__id', 'channel', 'customer_code']
+    _SELECT_RELATED_FIELDS = ['channel__counterparty', 'paid_thru', 'channel', 'customer_code']
     _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
 
     def get_proceeds(self, obj):
@@ -234,7 +234,7 @@ class ChannelPayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     def get_diff(self, obj):
         return obj.payout - obj.calcd_payout()
 
-    _SELECT_RELATED_FIELDS = ['channel__counterparty__id',]
+    _SELECT_RELATED_FIELDS = ['channel__counterparty',]
     _PREFETCH_RELATED_FIELDS = ['sales__unit_sale__sku__skuunit__inventory_item',
                                 'sales__sales_tax__collector', 'sales__channel__counterparty']
 

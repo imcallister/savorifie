@@ -1,8 +1,6 @@
 import datetime
 
-from django.utils.safestring import mark_safe
-
-from accountifie.query.query_manager import QueryManager
+import accountifie.query.apiv1 as query_api
 from base.models import Cashflow, CreditCardTrans
 from fulfill.models import ShippingCharge
 from sales.models import ChannelPayouts
@@ -10,41 +8,41 @@ from sales.models import ChannelPayouts
 
 def receivables(qstring):
     today = datetime.datetime.now().date()
-    query_manager = QueryManager()
-    ar_table = query_manager.balance_by_cparty('SAV', ['1100'], to_date=today)
+    rcvbles = query_api.cp_balances('SAV', {'account': '1100', 'date': today})
 
     ar_rows = []
-    for cp in ar_table.index:
-        if abs(ar_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/1100/?cp=%s&to=%s' % (cp, today.isoformat())
-            ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ar_table.loc[cp]}})
+    for rcv in rcvbles:
+        cp = rcv['cp']
+        amount = rcv['total']
+        drill_url = '/reporting/history/account/1100/?cp=%s&to=%s' % (cp, today.isoformat())
+        ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
     return ar_rows
 
 
 def future_receivables(qstring):
     today = datetime.datetime.now().date()
-    query_manager = QueryManager()
-    ar_table = query_manager.balance_by_cparty('SAV', ['1101'], to_date=today)
+    rcvbles = query_api.cp_balances('SAV', {'account': '1101', 'date': today})
 
     ar_rows = []
-    for cp in ar_table.index:
-        if abs(ar_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/1101/?cp=%s&to=%s' % (cp, today.isoformat())
-            ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ar_table.loc[cp]}})
+    for rcv in rcvbles:
+        cp = rcv['cp']
+        amount = rcv['total']
+        drill_url = '/reporting/history/account/1101/?cp=%s&to=%s' % (cp, today.isoformat())
+        ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
     return ar_rows
 
 
 def payables(qstring):
-    query_manager = QueryManager()
-    ap_table = query_manager.balance_by_cparty('SAV', ['3000'])
+    today = datetime.datetime.now().date()
+    pbles = query_api.cp_balances('SAV', {'account': '3000', 'date': today})
 
     ap_rows = []
-    for cp in ap_table.index:
-        if abs(ap_table.loc[cp]) > 1:
-            drill_url = '/reporting/history/account/3000/?cp=%s' % cp
-            ap_rows.append({'counterparty': cp, 'amount': {'link': drill_url , 'text': ap_table.loc[cp]}})
+    for pbl in pbles:
+        cp = pbl['cp']
+        amount = pbl['total']
+        drill_url = '/reporting/history/account/3000/?cp=%s&to=%s' % (cp, today.isoformat())
+        ap_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
     return ap_rows
-
 
 
 def last_uploads(qstring):
