@@ -12,6 +12,7 @@ from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 import accounting.models
 from accountifie.gl.models import Account, Counterparty
+from accounting.serializers import COGSAssignmentSerializer
 
 
 DZERO = Decimal('0')
@@ -86,6 +87,20 @@ class UnitSale(models.Model):
             to_be_fifod = self.fifo_check()
             if len(to_be_fifod) > 0:
                 accounting.models.fifo_assign(self.id, to_be_fifod)
+
+
+    def fifo_assignments(self):
+        qs = self.cogsassignment_set.all()
+        qs = COGSAssignmentSerializer.setup_eager_loading(qs)
+        return COGSAssignmentSerializer(qs, many=True).data
+
+
+    def COGS(self):
+        qs = self.cogsassignment_set.all()
+        assignments = COGSAssignmentSerializer(qs, many=True).data
+        key_func = lambda x: x['unit_label']
+        gps = itertools.groupby(sorted(assignments, key=key_func), key=key_func)
+        return [{'label': k, 'COGS': sum(a['quantity'] * a['cost'] for a in v)} for k, v in gps]
 
 
     def fifo_check(self):
@@ -217,12 +232,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     max_id = max(used_ids)
                 self.external_channel_id = '%s.%d' % (ch_lbl, max_id + 1)
         if update_gl:
-            # fifo check
-            for u in self.unit_sale.all():
-                to_be_fifod = u.fifo_check()
-                if len(to_be_fifod) > 0:
-                    accounting.models.fifo_assign(u.id, to_be_fifod)
-
             self.update_gl()
 
         models.Model.save(self)
@@ -278,7 +287,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def fulfilled_items(self):
         items = [(str(l.inventory_item), l.quantity) for f in self.fulfillments.all() \
                                                      for l in f.fulfill_lines.all()]
-        all_items = list(itertools.chain.from_iterable(items))
         g = itertools.groupby(sorted(items, key=lambda x: x[0]), key=lambda x: x[0])
         fulf = dict((k, sum([i[1] for i in list(v)])) for k, v in g if v > 0)
         if len(fulf) > 0:
@@ -304,29 +312,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def label(self):
         return str(self)
 
-
-    def _get_unitsales(self):
-        unitsales = self.unit_sale.all()
-
-        unitsale_lines = []
-        for unit in unitsales:
-            unit
-
-        running_total = DZERO
-        if len(allocations) > 0:
-            for allocation in allocations:
-                if allocation.project is None:
-                    tags = []
-                else:
-                    tags = ['project_%s' % allocation.project.id]
-
-                alloc_lines.append((allocation.trans_type, DZERO - Decimal(allocation.amount), allocation.counterparty, tags))
-                running_total += Decimal(allocation.amount)
-
-        if abs(Decimal(self.amount) - running_total) >= Decimal('0.005'):
-            alloc_lines.append((self.ext_account.gl_account, DZERO - (Decimal(self.amount) - running_total), None, []))
-
-        return alloc_lines
 
     def _get_salestaxes(self):
         allocations = self.salestax_set.all()
@@ -425,6 +410,13 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         self.__sale_amts = dict((s,0) for s in skus)
         for s in self.__unit_sales:
             self.__sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
+
+
+    def COGS(self):
+        all_items = list(itertools.chain.from_iterable(u.COGS() for u in self.unit_sale.all()))
+        key_func = lambda x: x['label']
+        gps = itertools.groupby(sorted(all_items, key=key_func), key=key_func)
+        return [{'label': k, 'COGS': sum(a['COGS'] for a in v)} for k, v in gps]
 
 
     def get_gl_transactions(self):

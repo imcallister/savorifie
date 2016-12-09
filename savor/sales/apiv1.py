@@ -13,7 +13,9 @@ import products.apiv1 as product_api
 from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
-    SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer
+    SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer, UnitSaleSerializer
+from accounting.serializers import COGSAssignmentSerializer
+
 
 
 @dispatch(str, dict)
@@ -66,6 +68,17 @@ def salestax2(qstring):
     serializer = SalesTaxSerializer2
     qs = serializer.setup_eager_loading(qs)
     return list(serializer(qs, many=True).data)
+
+
+def unitsale( qstring):
+    qs = UnitSale.objects.all()
+    qs = UnitSaleSerializer.setup_eager_loading(qs)
+    return UnitSaleSerializer(qs, many=True).data
+
+
+def unitsale_COGS(unitsale_id, qstring):
+    qs = UnitSale.objects.get(id=unitsale_id).cogsassignment_set.all()
+    return COGSAssignmentSerializer(qs, many=True).data
 
 @dispatch(dict)
 def sale(qstring):

@@ -39,3 +39,24 @@ class WarehouseSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Warehouse
         fields = ('id', 'label', 'description',)
+
+
+class ShipmentLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['inventory_item__product_line', 'inventory_item', 'shipment']
+
+    unit_label = serializers.SerializerMethodField()
+    productline = serializers.SerializerMethodField()
+    shipment_label = serializers.SerializerMethodField()
+    
+    def get_unit_label(self, obj):
+        return obj.inventory_item.label
+
+    def get_productline(self, obj):
+        return obj.inventory_item.product_line.label
+
+    def get_shipment_label(self, obj):
+        return obj.shipment.label
+
+    class Meta:
+        model = models.ShipmentLine
+        fields = ('id', 'unit_label', 'quantity', 'shipment_label', 'productline')
