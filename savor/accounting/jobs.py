@@ -57,8 +57,8 @@ def _assign_FIFO_job(*args, **kwargs):
         flds['shipment_line_id'] = all_shipments[new_fifo['item'] + new_fifo['order']]
         flds['unit_sale_id'] = new_fifo['unit_sale']
         flds['quantity'] = new_fifo['qty']
-        COGSAssignment(**flds).save()
-
+        output = COGSAssignment(**flds).save()
+    
     # 6 force a gl entry calc for all affected Sale objects
     for sale_id in set([u['sale'] for u in new_fifo_list]):
         Sale.objects.get(id=sale_id).update_gl()
