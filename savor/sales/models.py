@@ -12,6 +12,7 @@ from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 import accounting.models
 from accountifie.gl.models import Account, Counterparty
+from accounting.serializers import COGSAssignmentSerializer
 
 
 DZERO = Decimal('0')
@@ -78,34 +79,20 @@ class UnitSale(models.Model):
     def __unicode__(self):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)
 
-    def save(self, update_gl=True):
-        models.Model.save(self)
-        
-        if update_gl:
-            # need to do FIFO assignment
-            to_be_fifod = self.fifo_check()
-            if len(to_be_fifod) > 0:
-                accounting.models.fifo_assign(self.id, to_be_fifod)
+
+    def fifo_assignments(self):
+        qs = self.cogsassignment_set.all()
+        qs = COGSAssignmentSerializer.setup_eager_loading(qs)
+        return COGSAssignmentSerializer(qs, many=True).data
 
 
-    def fifo_check(self):
-        if self.id:
-            fifos = api_func('accounting', 'fifo_assignment', self.id)
-        else:
-            fifos = []
+    def COGS(self):
+        qs = self.cogsassignment_set.all()
+        assignments = COGSAssignmentSerializer(qs, many=True).data
+        key_func = lambda x: x['unit_label']
+        gps = itertools.groupby(sorted(assignments, key=key_func), key=key_func)
+        return [{'label': k, 'COGS': sum(a['quantity'] * a['cost'] for a in v)} for k, v in gps]
 
-        # tally the count by SKU
-        # (there may be SKUs assigned to different shipments etc)
-        fifo_skus = list(set([x['sku'] for x in fifos]))
-        fifo_sku_count = dict((s, 0) for s in fifo_skus)
-
-        for fifo in fifos:
-            fifo_sku_count[fifo['sku']] += fifo['quantity']
-
-        sku_items = self.inventory_items()
-        diff = dict((s, sku_items.get(s, 0) - fifo_sku_count.get(s, 0)) for s in sku_items)
-        diff = dict((k,v) for k,v in diff.iteritems() if v>0)
-        return diff
 
     def inventory_items(self):
         return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit.all())
@@ -217,12 +204,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     max_id = max(used_ids)
                 self.external_channel_id = '%s.%d' % (ch_lbl, max_id + 1)
         if update_gl:
-            # fifo check
-            for u in self.unit_sale.all():
-                to_be_fifod = u.fifo_check()
-                if len(to_be_fifod) > 0:
-                    accounting.models.fifo_assign(u.id, to_be_fifod)
-
             self.update_gl()
 
         models.Model.save(self)
@@ -278,7 +259,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def fulfilled_items(self):
         items = [(str(l.inventory_item), l.quantity) for f in self.fulfillments.all() \
                                                      for l in f.fulfill_lines.all()]
-        all_items = list(itertools.chain.from_iterable(items))
         g = itertools.groupby(sorted(items, key=lambda x: x[0]), key=lambda x: x[0])
         fulf = dict((k, sum([i[1] for i in list(v)])) for k, v in g if v > 0)
         if len(fulf) > 0:
@@ -304,29 +284,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def label(self):
         return str(self)
 
-
-    def _get_unitsales(self):
-        unitsales = self.unit_sale.all()
-
-        unitsale_lines = []
-        for unit in unitsales:
-            unit
-
-        running_total = DZERO
-        if len(allocations) > 0:
-            for allocation in allocations:
-                if allocation.project is None:
-                    tags = []
-                else:
-                    tags = ['project_%s' % allocation.project.id]
-
-                alloc_lines.append((allocation.trans_type, DZERO - Decimal(allocation.amount), allocation.counterparty, tags))
-                running_total += Decimal(allocation.amount)
-
-        if abs(Decimal(self.amount) - running_total) >= Decimal('0.005'):
-            alloc_lines.append((self.ext_account.gl_account, DZERO - (Decimal(self.amount) - running_total), None, []))
-
-        return alloc_lines
 
     def _get_salestaxes(self):
         allocations = self.salestax_set.all()
@@ -427,6 +384,13 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             self.__sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
 
 
+    def COGS(self):
+        all_items = list(itertools.chain.from_iterable(u.COGS() for u in self.unit_sale.all()))
+        key_func = lambda x: x['label']
+        gps = itertools.groupby(sorted(all_items, key=key_func), key=key_func)
+        return dict((k, sum(a['COGS'] for a in v)) for k, v in gps)
+
+
     def get_gl_transactions(self):
 
         # collect all the info first
@@ -454,17 +418,15 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         if self.special_sale:
             sample_exp_acct = self._get_special_account()
-            for u_sale in self.__unit_sales:
-                inv_items = u_sale.inventory_items()
-                for ii in inv_items:
-                    product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-                    inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
-                    inv_acct = Account.objects.filter(path=inv_acct_path).first()
 
-                    COGS = accounting.models.total_COGS(u_sale, ii)
-                    qty = inv_items[ii]
-                    tran['lines'].append((inv_acct, -COGS * qty, self.customer_code, []))
-                    tran['lines'].append((sample_exp_acct, COGS * qty, self.customer_code, []))
+            # get COGS
+            COGS_amounts = self.COGS()
+            for ii in COGS_amounts:
+                product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
+                inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
+                inv_acct = Account.objects.filter(path=inv_acct_path).first()
+                tran['lines'].append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
+                tran['lines'].append((sample_exp_acct, COGS_amounts[ii], self.customer_code, []))
         else:
             # ACCOUNTS RECEIVABLE
             tran['lines'].append((accts_rec, self.total_receivable(), self.payee(), []))
@@ -496,24 +458,27 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                                       Decimal(self.channel_charges),
                                       channel_id, []))
 
-            # INVENTORY, GROSS SALES & COGS
+            # get COGS
+            COGS_amounts = self.COGS()
+            for ii in COGS_amounts:
+                product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
+
+                inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
+                inv_acct = Account.objects.filter(path=inv_acct_path).first()
+
+                COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (channel_id, product_line)
+                COGS_acct = Account.objects.filter(path=COGS_acct_path).first()
+
+                tran['lines'].append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
+                tran['lines'].append((COGS_acct, COGS_amounts[ii], self.customer_code, []))
+
+            # GROSS SALES
             for u_sale in self.__unit_sales:
                 inv_items = u_sale.get_gross_sales()
                 for ii in inv_items:
-
                     product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-                    inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
-                    inv_acct = Account.objects.filter(path=inv_acct_path).first()
-
-                    COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (channel_id, product_line)
-                    COGS_acct = Account.objects.filter(path=COGS_acct_path).first()
-                    COGS = accounting.models.total_COGS(u_sale, ii)
-
                     gross_sales_acct_path = 'equity.retearnings.sales.gross.%s.%s' % (channel_id, product_line)
                     gross_sales_acct = Account.objects.filter(path=gross_sales_acct_path).first()
-
-                    tran['lines'].append((inv_acct, -COGS, self.customer_code, []))
-                    tran['lines'].append((COGS_acct, COGS, self.customer_code, []))
                     tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
         return [tran]

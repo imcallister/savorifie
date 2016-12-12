@@ -1,0 +1,103 @@
+{% extends base_template %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+{% load humanize %}
+
+
+{% block extrahead %}
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/fixed-data-table.min.css">
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/react-bootstrap-table-all.min.css">
+
+
+<style>
+    .modal.modal-wide .modal-dialog {
+      width: 90%;
+    }
+    .modal-wide .modal-body {
+      overflow-y: auto;
+    }
+
+    /* irrelevant styling */
+    body p { 
+      max-width: 400px; 
+      margin: 20px auto; 
+    }
+    #tallModal .modal-body p { margin-bottom: 900px };
+
+</style>
+
+
+{% endblock %}
+
+
+{% block breadcrumb %}
+<li class="active">Home</li>
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+        <div class="col-md-8"> 
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Cost of Goods</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="cogs.COGS"></div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Shipments</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="cogs.shipmentCounts"></div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">FIFO Assignments</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="cogs.fifoCounts"></div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">FIFO Available</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="cogs.fifoAvailable"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><a href="/gl/">Tasks</a></h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li>
+                            <a href="/celery/recalculate/" class="btn btn-block btn-info role="button">
+                                Assign COGS
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+
+    </div>
+</div>
+
+
+{% render_bundle 'cogs' %}
+
+{% endblock %}
+

@@ -36,11 +36,12 @@
                 </div>
                 <div class="panel-body">
                     <ul class="nav nav-pills nav-stacked">
-                            <li><button id="start-recalculate" class="btn btn-block btn-info">
-                                    Trigger GL Recalc
-                                </button>
-                            </li>
-                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#recentTasks">View Recent Tasks</a></li>
+                        <li>
+                            <a href="/celery/recalculate/" class="btn btn-block btn-info role="button">
+                                Trigger GL Recalc
+                            </a>
+                        </li>
+                        <li><a class="btn btn-warning" data-toggle="modal" data-target="#recentTasks">View Recent Tasks</a></li>
                     </ul>
                 </div>
             </div>
@@ -82,46 +83,7 @@
 {% endblock %}
 
 {% block extrajs %}
-<script>
-    function start_long_task(event) {
-        task_url = event.data.task;
 
-        // send ajax POST request to start background job
-        $.ajax({
-            type: 'GET',
-            url: task_url,
-            success: function(data, status, request) {
-                status_url = data.status_url;
-                $('#startTask').modal('show');
-                $('#task_results').text('');
-                update_progress(status_url, data.task_id);
-            },
-            error: function() {
-                alert('Unexpected error');
-            }
-        });
-    }
-
-    function update_progress(status_url, task_id) {
-        $('#task_id').text(task_id);
-        
-        $.getJSON(status_url, function(data) {
-            console.log(data);
-            $('#task_progress').text(data['status']);
-            if (['COMPLETED', 'FAILED'].indexOf(data['status']) == -1) {
-                setTimeout(function() {
-                    update_progress(status_url, task_id);
-                }, 2000);
-            }
-            else {
-               $('#task_results').text(JSON.stringify(data)); 
-            }
-            
-        });
-    }
-
-    $('#start-recalculate').click({'task': '/celery/recalculate/'}, start_long_task);
-</script>
 <script src="{{ STATIC_URL }}base/js/bootstrap-table.js"></script>
 
 {% endblock %}

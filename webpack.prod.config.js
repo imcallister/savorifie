@@ -11,7 +11,8 @@ config.entry = {
     bookkeeping: './assets/js/pages/bookkeeping',
     highcharts: './assets/js/pages/highcharts',
     inventory: './assets/js/pages/inventory',
-    reports: './assets/js/pages/reports'
+    reports: './assets/js/pages/reports',
+    cogs: './assets/js/pages/cogs'
 };
 
 module.exports = config;
