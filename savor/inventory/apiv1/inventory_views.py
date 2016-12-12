@@ -1,9 +1,11 @@
 from multipledispatch import dispatch
 from django.db.models import Sum, Prefetch, F
 from itertools import groupby
+from collections import defaultdict
 
 from .model_views import warehouse
 from inventory.models import ShipmentLine, Shipment, InventoryTransfer, TransferLine
+from inventory.serializers import ShipmentLineSerializer
 from fulfill.models import Fulfillment, FulfillLine
 
 
@@ -16,15 +18,20 @@ def inventorycount(qstring):
 
     return data
 
+def shipmentcounts(qstring):
+    qs = ShipmentLine.objects.all()
+    qs = ShipmentLineSerializer.setup_eager_loading(qs)
+    sl_data = ShipmentLineSerializer(qs, many=True).data
+    order_keys = list(set(row['shipment_label'] for row in sl_data))
+    item_keys = list(set(row['unit_label'] for row in sl_data))
 
-def shipmentline(qstring):
-    shpmts = ShipmentLine.objects \
-                         .annotate(inventory_item_label=F('inventory_item__label')) \
-                         .annotate(shipment_label=F('shipment__label')) \
-                         .all() \
-                         .values()
-    return list(shpmts)
-
+    tbl = []
+    for o in order_keys:
+        row = {'order': o}
+        for i in item_keys:
+          row[i] = sum([x['quantity'] for x in sl_data if x['unit_label'] == i and x['shipment_label'] == o])
+        tbl.append(row)
+    return tbl
 
 @dispatch(unicode, dict)
 def locationinventory(label, qstring):

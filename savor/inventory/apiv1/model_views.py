@@ -50,3 +50,7 @@ def shippingtype(qstring):
 def shippingtype(label, qstring):
     qs = ShippingType.objects.filter(label=label).first()
     return ShippingTypeSerializer(qs).data
+
+def shipmentline(qstring):
+    qs = ShipmentLine.objects.all()
+    return ShipmentLineSerializer(qs, many=True).data
