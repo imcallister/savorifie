@@ -32,12 +32,16 @@ def _assign_FIFO_job(*args, **kwargs):
     #3 loop thru the COGS needed and pull from FIFO as necessary using oldest first
     new_fifo_list = []
     for u in to_do:
+        logger.info('starting on %s' % str(u))
         for item, qty in u['unassigned'].iteritems():
+            logger.info('item & qty: %s, %d' % (item, qty))
             if qty > 0:
                 rmg_qty = qty
                 for i in available.index:
+                    logger.info('index: %s' % str(i))
                     if available.loc[i, item] > 0:
                         use_cnt = min(available.loc[i, item], rmg_qty)
+                        logger.info('using %d from %s' % (use_cnt, i))
                         new_fifo_list.append({'order': available.loc[i, 'order'],
                                               'item': item,
                                               'qty': use_cnt,
