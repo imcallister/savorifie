@@ -15,6 +15,20 @@ class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
 
 
+class UnitSaleItemSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    _SELECT_RELATED_FIELDS = ['sku__label', 'sku__description']
+    _PREFETCH_RELATED_FIELDS = ['sku__skuunit', 'sku__skuunit__inventory_item']
+    
+    items = serializers.SerializerMethodField()
+
+    def get_items(self, obj):
+        return dict((i.inventory_item.label, obj.quantity * i.quantity) for i in obj.sku.skuunit.all())
+
+    class Meta:
+        model = UnitSale
+        fields = ('id', 'sale', 'items', 'unit_price')
+
+
 class SalesTaxSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['sale__channel__counterparty', 'collector']
 

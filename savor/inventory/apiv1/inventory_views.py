@@ -15,8 +15,8 @@ def inventorycount(qstring):
                              .values('inventory_item__label') \
                              .annotate(sku_count=Sum('quantity'))
     data = dict((l['inventory_item__label'], l['sku_count']) for l in sku_counts)
-
     return data
+
 
 def shipmentcounts(qstring):
     qs = ShipmentLine.objects.all()
@@ -29,9 +29,31 @@ def shipmentcounts(qstring):
     for o in order_keys:
         row = {'order': o}
         for i in item_keys:
-          row[i] = sum([x['quantity'] for x in sl_data if x['unit_label'] == i and x['shipment_label'] == o])
+            # get arrival date
+            row['arrival_date'] = next((sl['arrival_date'] for sl in sl_data if sl['shipment_label'] == o and sl['unit_label'] == i), 'unknown')
+            row[i] = sum([x['quantity'] for x in sl_data if x['unit_label'] == i and x['shipment_label'] == o])
         tbl.append(row)
-    return tbl
+
+    return sorted(tbl, key=lambda x: x['arrival_date'])
+
+def COGS(qstring):
+    qs = ShipmentLine.objects.all()
+    qs = ShipmentLineSerializer.setup_eager_loading(qs)
+    sl_data = ShipmentLineSerializer(qs, many=True).data
+    order_keys = list(set(row['shipment_label'] for row in sl_data))
+    item_keys = list(set(row['unit_label'] for row in sl_data))
+
+    tbl = []
+    for o in order_keys:
+        row = {'order': o}
+        for i in item_keys:
+            # get arrival date
+            row['arrival_date'] = next((sl['arrival_date'] for sl in sl_data if sl['shipment_label'] == o and sl['unit_label'] == i), 'unknown')
+            row[i] = [x['cost'] for x in sl_data if x['unit_label'] == i and x['shipment_label'] == o][0]
+        tbl.append(row)
+
+    return sorted(tbl, key=lambda x: x['arrival_date'])
+
 
 @dispatch(unicode, dict)
 def locationinventory(label, qstring):

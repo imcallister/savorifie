@@ -13,6 +13,9 @@ var shipmentcount_cols  = [{'fld': 'order', 'label': 'Shipment'},
 			                {'fld': 'SYE3', 'label': 'SYE3'}
 			                ]
 
+ReactDOM.render(<BSTable source="/api/inventory/COGS/?raw=true" columns={shipmentcount_cols} />, 
+				document.getElementById('cogs.COGS'))
+
 ReactDOM.render(<BSTable source="/api/inventory/shipmentcounts/?raw=true" columns={shipmentcount_cols} />, 
 				document.getElementById('cogs.shipmentCounts'))
 
@@ -20,3 +23,6 @@ ReactDOM.render(<BSTable source="/api/inventory/shipmentcounts/?raw=true" column
 ReactDOM.render(<BSTable source="/api/accounting/fifo_counts/?raw=true" columns={shipmentcount_cols} />, 
 				document.getElementById('cogs.fifoCounts'))
 
+
+ReactDOM.render(<BSTable source="/api/accounting/fifo_available/?raw=true" columns={shipmentcount_cols} />, 
+				document.getElementById('cogs.fifoAvailable'))
