@@ -12,7 +12,8 @@ class COGSAssignmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     shipment_label = serializers.SerializerMethodField()
     unit_label = serializers.SerializerMethodField()
     cost = serializers.SerializerMethodField()
-    order_id = serializers.SerializerMethodField() 
+    order_id = serializers.SerializerMethodField()
+    unitsale_id = serializers.SerializerMethodField()
     
     def get_cost(self, obj):
         return obj.shipment_line.cost
@@ -26,7 +27,10 @@ class COGSAssignmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     def get_order_id(self, obj):
         return obj.unit_sale.sale.external_channel_id
 
+    def get_unitsale_id(self, obj):
+        return obj.unit_sale.id
+
     class Meta:
         model = models.COGSAssignment
-        fields = ['id', 'shipment_label', 'quantity', 'cost', 'unit_label', 'order_id']
+        fields = ['id', 'shipment_label', 'quantity', 'cost', 'unit_label', 'unitsale_id', 'order_id']
 

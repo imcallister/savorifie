@@ -47,6 +47,7 @@ class ShipmentLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     unit_label = serializers.SerializerMethodField()
     productline = serializers.SerializerMethodField()
     shipment_label = serializers.SerializerMethodField()
+    arrival_date = serializers.SerializerMethodField()
     
     def get_unit_label(self, obj):
         return obj.inventory_item.label
@@ -57,6 +58,10 @@ class ShipmentLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     def get_shipment_label(self, obj):
         return obj.shipment.label
 
+    def get_arrival_date(self, obj):
+        return obj.shipment.arrival_date
+
+
     class Meta:
         model = models.ShipmentLine
-        fields = ('id', 'unit_label', 'quantity', 'shipment_label', 'productline')
+        fields = ('id', 'arrival_date', 'unit_label', 'quantity', 'cost', 'shipment_label', 'productline')
