@@ -43,7 +43,7 @@
     "webpack-dev-server": "^1.16.1"
   },
   "dependencies": {
-    "accountifie-svc": "1.1.4",
+    "accountifie-svc": "1.1.5",
     "highcharts": "^5.0.2",
     "js-cookie": "^2.1.3",
     "lodash": "^4.17.2",
