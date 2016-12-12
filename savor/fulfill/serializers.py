@@ -190,7 +190,7 @@ class WarehouseFulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMi
 
 class WarehouseFulfillSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['savor_order', 'savor_transfer', 'savor_order__customer_code',
-                              'savor_order__channel', 'savor_order__channel__counterparty__id', 
+                              'savor_order__channel', 'savor_order__channel__counterparty', 
                               'warehouse', 'shipping_type']
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'fulfill_lines__inventory_item']
     _PREFETCH_RELATED_FIELDS += ['savor_order__unit_sale__sku__skuunit__inventory_item']

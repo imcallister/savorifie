@@ -75,7 +75,7 @@ ReactDOM.render(<ModalCmpnt modalId="shopifyUnpaid" modalTitle="Unpaid Shopify" 
 
 
 var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
-		                 {'fld': 'date', 'label': 'ID', formatter: formatters.date},
+		                 {'fld': 'date', 'label': 'Date', formatter: formatters.date},
 		                 {'fld': 'label', 'label': 'Description'},
 		                 {'fld': 'payout', 'label': 'Payout'},
 		                 {'fld': 'calcd_payout', 'label': 'Savor Calc'},
