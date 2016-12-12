@@ -51,15 +51,17 @@ def _assign_FIFO_job(*args, **kwargs):
     # 4 get all the shipment lines that we will need
     all_shipments = dict((sl['unit_label'] + sl['shipment_label'], sl['id']) for sl in inv_api.shipmentline({}))
 
+    logger.info('new FIFO list length %d' % len(new_fifo_list))
     # 5 save the COGS assignments
-    for new_fifo in new_fifo_list:
+    for new_fifo in new_fifo_list[:20]:
         flds = {}
         flds['shipment_line_id'] = all_shipments[new_fifo['item'] + new_fifo['order']]
         flds['unit_sale_id'] = new_fifo['unit_sale']
         flds['quantity'] = new_fifo['qty']
-        COGSAssignment(**flds).save()
+        output = COGSAssignment(**flds).save()
+        logger.info('tried %s with result %s' % (str(flds), output))
 
     # 6 force a gl entry calc for all affected Sale objects
-    for sale_id in set([u['sale'] for u in new_fifo_list]):
+    for sale_id in set([u['sale'] for u in new_fifo_list[:20]]):
         Sale.objects.get(id=sale_id).update_gl()
     return
