@@ -49,7 +49,7 @@ def COGS(qstring):
         for i in item_keys:
             # get arrival date
             row['arrival_date'] = next((sl['arrival_date'] for sl in sl_data if sl['shipment_label'] == o and sl['unit_label'] == i), 'unknown')
-            row[i] = [x['cost'] for x in sl_data if x['unit_label'] == i and x['shipment_label'] == o][0]
+            row[i] = next((sl['cost'] for sl in sl_data if sl['unit_label'] == i and sl['shipment_label'] == o), '-')
         tbl.append(row)
 
     return sorted(tbl, key=lambda x: x['arrival_date'])
