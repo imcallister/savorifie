@@ -25,6 +25,7 @@ def fifo_counts(qstring):
         for i in item_keys:
           row[i] = sum([x['quantity'] for x in data if x['unit_label'] == i and x['shipment_label'] == o])
         tbl.append(row)
+
     return sorted(tbl, key=lambda x: x['arrival_date'])
 
 def fifo_unassigned(qstring):

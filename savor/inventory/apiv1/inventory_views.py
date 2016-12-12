@@ -28,9 +28,9 @@ def shipmentcounts(qstring):
     tbl = []
     for o in order_keys:
         row = {'order': o}
+        row['arrival_date'] = next((sl['arrival_date'] for sl in sl_data if sl['shipment_label'] == o), 'unknown')
         for i in item_keys:
             # get arrival date
-            row['arrival_date'] = next((sl['arrival_date'] for sl in sl_data if sl['shipment_label'] == o and sl['unit_label'] == i), 'unknown')
             row[i] = sum([x['quantity'] for x in sl_data if x['unit_label'] == i and x['shipment_label'] == o])
         tbl.append(row)
 
