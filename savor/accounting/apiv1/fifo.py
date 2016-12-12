@@ -36,9 +36,13 @@ def fifo_unassigned(qstring):
         output = dict((k, d1.get(str(k), 0) - d2.get(str(k), 0)) for k in keys)
         return dict((k, v) for k, v in output.iteritems() if v != 0)
 
+    key_func2 = lambda x: x['unit_label']
+    def _agg_items(lst):
+        return dict((k, sum(l['quantity'] for l in v)) for k,v in itertools.groupby(sorted(lst, key=key_func2), key=key_func2))
+
     # group assigned by unit sale id
     key_func = lambda x: x['unitsale_id']
-    assigned = dict((str(k), dict((l['unit_label'], l['quantity']) for l in v)) \
+    assigned = dict((str(k), _agg_items(list(v))) \
                        for k,v in itertools.groupby(sorted(cogsassignment({}), key=key_func), key=key_func))
 
     for u in u_sales:
