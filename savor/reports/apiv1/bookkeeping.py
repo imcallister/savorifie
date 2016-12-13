@@ -16,7 +16,7 @@ def receivables(qstring):
         amount = rcv['total']
         drill_url = '/reporting/history/account/1100/?cp=%s&to=%s' % (cp, today.isoformat())
         ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
-    return ar_rows
+    return sorted(ar_rows, key=lambda x: float(x['amount']['text']), reverse=True)
 
 
 def future_receivables(qstring):
@@ -29,7 +29,7 @@ def future_receivables(qstring):
         amount = rcv['total']
         drill_url = '/reporting/history/account/1101/?cp=%s&to=%s' % (cp, today.isoformat())
         ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
-    return ar_rows
+    return sorted(ar_rows, key=lambda x: float(x['amount']['text']), reverse=True)
 
 
 def payables(qstring):
@@ -42,7 +42,7 @@ def payables(qstring):
         amount = pbl['total']
         drill_url = '/reporting/history/account/3000/?cp=%s&to=%s' % (cp, today.isoformat())
         ap_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
-    return ap_rows
+    return sorted(ap_rows, key=lambda x: float(x['amount']['text']), reverse=True)
 
 
 def last_uploads(qstring):
