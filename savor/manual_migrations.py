@@ -60,6 +60,7 @@ def backfill_nc2_packing_ids():
     for sc in ShippingCharge.objects.filter(shipper__company__id='IFS360'):
         try:
             sc.packing_id = sc.invoice_number
+            sc.invoice_number = None
             sc.save()
             success_ctr += 1
         except:

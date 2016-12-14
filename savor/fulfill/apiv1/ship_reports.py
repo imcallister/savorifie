@@ -58,17 +58,12 @@ def UPS_invoices(qstring):
 
 
 def IFS_monthly(qstring):
-    ship_charges = sorted(shippingcharge({'shipper': 'IFS360'}), key=lambda x: x['ship_date'])
-
-    def _get_month(dt):
-        dt = parse(dt).date()
-        return (dt.month, dt.year)
-    
+    ship_charges = sorted(shippingcharge({'shipper': 'IFS360'}), key=lambda x: x['invoice_number'])
     by_invoice = dict((k, list(v)) for k, v in itertools.groupby(ship_charges,
-                                                                 lambda x: _get_month(x['ship_date'])))
+                                                                 lambda x: x['invoice_number']))
 
     def _get_line(k, v):
-        return {'statement_month': '%s %s' % (calendar.month_name[k[0]], k[1]),
+        return {'invoice_number': k,
                 'charge': sum([Decimal(st['charge']) for st in v]),
                 'last_date': max([st['ship_date'] for st in v])}
     return sorted([_get_line(k, v) for k, v in by_invoice.iteritems()],
