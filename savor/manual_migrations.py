@@ -52,3 +52,20 @@ def backfill_nc2_shipcharges():
     logger.info('%s new shipping charges, %s duplicated not saved, %s unknown' \
                 % (new_charges, duplicated_not_saved, unknown))
     return
+
+def backfill_nc2_packing_ids():
+    success_ctr = 0
+    error_ctr = 0
+    
+    for sc in ShippingCharge.objects.filter(shipper__company__id='IFS360'):
+        try:
+            sc.packing_id = sc.invoice_number
+            sc.save()
+            success_ctr += 1
+        except:
+            error_ctr += 1
+
+    logger.info('Manual Migration: backfill_nc2_packing_ids')
+    logger.info('%s shipping charges amended, %s errors' \
+                % (success_ctr, error_ctr))
+    return    

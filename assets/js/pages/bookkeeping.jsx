@@ -31,6 +31,10 @@ var mcard_uploader = <Uploader instructions={'Expects an ofx or qfx file with he
 ReactDOM.render(<ModalCmpnt modalId="MCARDuploader" modalTitle="Mastercard File Upload" content={mcard_uploader}/>, document.getElementById('bookkeeping.upload.MCARD'))
 
 
+var IFS_uploader = <Uploader instructions={'Expects a csv file with at least following headers: ID Reg (*) and Statement Number'} 
+						 postUrl={'/importers/upload/IFSmonthly/'}/>
+ReactDOM.render(<ModalCmpnt modalId="IFSuploader" modalTitle="IFS Statement Upload" content={IFS_uploader}/>, document.getElementById('bookkeeping.upload.IFS'))
+
 
 var last_uploads_cols  = [{'fld': 'Upload', 'label': 'Upload Name'},
 					 	  {'fld': 'Last Upload', 'label': 'Uploaded Thru', formatter: formatters.date}
