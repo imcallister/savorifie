@@ -3,6 +3,10 @@ from decimal import Decimal
 from .models import ShippingCharge
 import inventory.apiv1 as inventory_api
 
+import logging
+
+logger = logging.getLogger('default')
+
 NC2_PER_FULFILL = Decimal('1.5')
 NC2_PER_BOX = Decimal('0.5')
 
@@ -10,15 +14,16 @@ NC2_PER_BOX = Decimal('0.5')
 def map_invoice_number(assignments):
     mapped_ctr = 0
     error_ctr = 0
-
+    qs = ShippingCharge.objects.filter(invoice_number__isnull=True)
     for rec_id, invoice_id in assignments.iteritems():
-        ship_charges = ShippingCharge.objects.filter(packing_id=rec_id)
+        ship_charges = qs.filter(packing_id=rec_id)
         for sc in ship_charges:
             try:
                 sc.invoice_number = invoice_id
-                sc.save()
+                sc.save(update_gl=False)
                 mapped_ctr += 1
             except:
+                logger.error('Failed to map invoice number for %s' % str(rec_id))
                 error_ctr += 1
     return mapped_ctr, error_ctr
 
