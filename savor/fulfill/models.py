@@ -46,9 +46,10 @@ class ShippingCharge(models.Model, BusinessModelObject):
 
     short_code = 'SHP'
 
-    def save(self):
+    def save(self, update_gl=True):
         models.Model.save(self)
-        self.update_gl()
+        if update_gl:
+            self.update_gl()
         
     def delete(self):
         self.delete_from_gl()
