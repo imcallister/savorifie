@@ -39,9 +39,10 @@ def UPS_invoices():
 
 def IFS_monthly():
     data_url = "/api/fulfill/IFS_monthly"
-    row_defs = [{'data_field': 'statement_month', 'value': 'Invoice #', 'formatter': 'nameFormatter'},
+    row_defs = [{'data_field': 'invoice_number', 'value': 'Invoice #', 'formatter': 'nameFormatter'},
                 {'data_field': 'last_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
-                {'data_field': 'charge', 'value': 'Amount', 'formatter': 'nameFormatter'}
+                {'data_field': 'charge', 'value': 'Amount', 'formatter': 'nameFormatter'},
+                {'data_field': 'drilldown', 'value': 'Details', 'formatter': 'nameFormatter'}
             ]
     return get_bstrap_table(data_url, row_defs)
 

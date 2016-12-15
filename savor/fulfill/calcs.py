@@ -6,6 +6,22 @@ import inventory.apiv1 as inventory_api
 NC2_PER_FULFILL = Decimal('1.5')
 NC2_PER_BOX = Decimal('0.5')
 
+
+def map_invoice_number(assignments):
+    mapped_ctr = 0
+    error_ctr = 0
+
+    for rec_id, invoice_id in assignments.iteritems():
+        ship_charges = ShippingCharge.objects.filter(packing_id=rec_id)
+        for sc in ship_charges:
+            try:
+                sc.invoice_number = invoice_id
+                sc.save()
+                mapped_ctr += 1
+            except:
+                error_ctr += 1
+    return mapped_ctr, error_ctr
+
 def create_nc2_shippingcharge(wh_flf):
     
     if wh_flf.fulfillment.ship_type.label == 'IFS_BEST':
@@ -16,7 +32,6 @@ def create_nc2_shippingcharge(wh_flf):
             chg['account'] = 'N/A'
             chg['tracking_number'] = wh_flf.tracking_number
             chg['external_id'] = wh_flf.tracking_number
-            chg['invoice_number'] = wh_flf.warehouse_pack_id
             chg['ship_date'] = wh_flf.ship_date
             chg['charge'] = wh_flf.shipping_cost
             chg['fulfillment_id'] = wh_flf.fulfillment.id
@@ -32,7 +47,6 @@ def create_nc2_shippingcharge(wh_flf):
         chg['account'] = 'N/A'
         chg['tracking_number'] = wh_flf.tracking_number
         chg['external_id'] = flf_str
-        chg['invoice_number'] = wh_flf.warehouse_pack_id
         chg['ship_date'] = wh_flf.ship_date
         chg['charge'] = NC2_PER_FULFILL
         chg['fulfillment_id'] = wh_flf.fulfillment.id
@@ -47,7 +61,6 @@ def create_nc2_shippingcharge(wh_flf):
         chg['account'] = 'N/A'
         chg['tracking_number'] = wh_flf.tracking_number
         chg['external_id'] = wh_flf.warehouse_pack_id
-        chg['invoice_number'] = wh_flf.warehouse_pack_id
         chg['ship_date'] = wh_flf.ship_date
         chg['charge'] = NC2_PER_BOX
         chg['fulfillment_id'] = wh_flf.fulfillment.id

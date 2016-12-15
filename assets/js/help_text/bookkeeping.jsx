@@ -3,7 +3,7 @@ var React = require('react')
 module.exports = React.createClass({
     render: function(){
        return <div>
-        <h3>Payables and Receivables</h3>
+        <h3>Payables and Receivables YO</h3>
         <p>
             Payables and receivables shows net money owed to or from a counterparty.
              There may be a combination of money due to and from ... e.g. for Shopify there are monthly charges for which expenses must be created and receivables which correspond to the proceeds from sales (after Shopify fees).
