@@ -62,10 +62,17 @@ def IFS_monthly(qstring):
     by_invoice = dict((k, list(v)) for k, v in itertools.groupby(ship_charges,
                                                                  lambda x: x['invoice_number']))
 
+    drill_url = '/api/fulfill/shippingcharge?shipper=IFS360&invoice_number='
+
+    def _drill_url(invoice_number, text):
+        return '<a href=' + drill_url + invoice_number + '>' + text + '</a>';
+
+
     def _get_line(k, v):
         return {'invoice_number': k,
                 'charge': sum([Decimal(st['charge']) for st in v]),
-                'last_date': max([st['ship_date'] for st in v])}
+                'last_date': max([st['ship_date'] for st in v]),
+                'drilldown': _drill_url(k, 'Details') if k else '-'}
     return sorted([_get_line(k, v) for k, v in by_invoice.iteritems()],
                   key=lambda x: x['last_date'])
 

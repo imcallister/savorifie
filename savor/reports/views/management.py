@@ -116,7 +116,6 @@ def _backorder_list(qstring=None):
 
 @login_required
 def management(request):
-    start = time.time()
     context = {'shopify_upload_form': FileForm()}
 
     context['incomplete_orders'] = api_func('sales', 'incomplete_sales_count')

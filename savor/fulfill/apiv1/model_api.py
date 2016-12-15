@@ -27,6 +27,9 @@ def shippingcharge(qstring):
     if qstring.get('fulfill'):
         qs = qs.filter(fulfillment_id=qstring.get('fulfill'))
 
+    if qstring.get('invoice_number'):
+        qs = qs.filter(invoice_number=qstring.get('invoice_number'))        
+
     qs = ShippingChargeSerializer.setup_eager_loading(qs)
     return list(ShippingChargeSerializer(qs, many=True).data)
 
@@ -173,9 +176,8 @@ def no_warehouse_record(qstring):
 
     nwr = [f['id'] for f in objs if f['batched'] > 0 and f['num_whf']==0]
     qs = Fulfillment.objects.filter(id__in=nwr)
-    serializer = FulfillmentSerializer
-
-    flfmts = serializer(qs, many=True).data
+    qs = FulfillmentSerializer.setup_eager_loading(qs)
+    flfmts = FulfillmentSerializer(qs, many=True).data
     if qstring.get('missing_shipping', '').lower() == 'true':
         flfmts = [r for r in flfmts if r['ship_info'] == 'incomplete']
     for f in flfmts:
