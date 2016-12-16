@@ -144,7 +144,7 @@ class FulfillUpdate(models.Model):
 
 class FulfillLine(models.Model):
     inventory_item = models.ForeignKey('products.InventoryItem', blank=True, null=True)
-    quantity = models.PositiveIntegerField(default=0)
+    quantity = models.IntegerField(default=0)
     fulfillment = models.ForeignKey(Fulfillment, related_name='fulfill_lines')
 
     class Meta:
