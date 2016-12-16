@@ -69,7 +69,7 @@ class TaxCollector(models.Model):
 class UnitSale(models.Model):
     sale = models.ForeignKey('sales.Sale', related_name='unit_sale')
     sku = models.ForeignKey('products.Product', null=True, blank=True)
-    quantity = models.PositiveIntegerField(default=0)
+    quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
 
     class Meta:
