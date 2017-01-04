@@ -7,7 +7,7 @@ from accountifie.gl.bmo import BusinessModelObject
 from accountifie.toolkit.utils import get_default_company
 
 # HARD CODE
-CC_AP_CHOICES = ['1100', '3000', '3006']
+CC_AP_CHOICES = ['1100', '1250', '3000', '3006']
 
 class CreditCardTrans(models.Model, BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
