@@ -39,7 +39,7 @@ class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = models.ShippingCharge
         fields = ('shipper', 'account', 'tracking_number', 'invoice_number',
-                  'ship_date', 'charge', 'order_related', 'comment', 'packing_id',
+                  'ship_date', 'charge', 'order_related', 'external_id', 'comment', 'packing_id',
                   'fulfillment', 'fulfillment_id', 'requested_ship_type', 'warehouse')
 
 class FulfillUpdateSerializer(serializers.ModelSerializer, EagerLoadingMixin):

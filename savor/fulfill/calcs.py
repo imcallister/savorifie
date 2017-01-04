@@ -9,6 +9,7 @@ logger = logging.getLogger('default')
 
 NC2_PER_FULFILL = Decimal('1.5')
 NC2_PER_BOX = Decimal('0.5')
+NC2_NOT_IFS_PER_BOX = Decimal('0.85')
 
 
 def map_invoice_number(assignments):
@@ -68,6 +69,8 @@ def create_nc2_shippingcharge(wh_flf):
         chg['external_id'] = wh_flf.warehouse_pack_id
         chg['ship_date'] = wh_flf.ship_date
         chg['charge'] = NC2_PER_BOX
+        if wh_flf.fulfillment.ship_type.label != 'IFS_BEST':
+            chg['charge'] += NC2_NOT_IFS_PER_BOX
         chg['fulfillment_id'] = wh_flf.fulfillment.id
         chg['order_related'] = True
         chg['comment'] = ''
