@@ -223,9 +223,9 @@ def sales_by_channel(qstring):
 
 
 def missing_cps(qstring):
-    qs = Sale.objects.filter(customer_code__id='unknown')
+    qs = Sale.objects.filter(customer_code='unknown')
     qs = SimpleSaleSerializer.setup_eager_loading(qs)
-    return SimpleSaleSerializer(qs).data
+    return SimpleSaleSerializer(qs, many=True).data
 
 
 def channel_counts(qstring):

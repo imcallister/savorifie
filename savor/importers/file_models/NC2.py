@@ -22,6 +22,11 @@ def tracking_parse(tr):
     except:
         return tr.upper()
 
+def parse_decimal(x):
+    if x == '':
+        return '0'
+    else:
+        return x
 
 class NC2CSVModel(CsvModel):
     warehouse_pack_id = CharField(match="ShipNum")
@@ -37,9 +42,9 @@ class NC2CSVModel(CsvModel):
     shipping_country = CharField(match="Country")
     ship_email = CharField(match="Email")
     tracking_number = CharField(match="Tracking#", transform=tracking_parse)
-    weight = DecimalField(match='Weight [Lbs.]')
-    shipping_cost = DecimalField(match='ShippingCost')
-    handling_cost = DecimalField(match='HandlingCost')
+    weight = DecimalField(match='Weight [Lbs.]', transform=parse_decimal)
+    shipping_cost = DecimalField(match='ShippingCost', transform=parse_decimal)
+    handling_cost = DecimalField(match='HandlingCost', transform=parse_decimal)
     shipping_type = DjangoModelField(ShippingType,
                                      match="ShipMethod",
                                      transform=lambda x: SHIP_MAP.get(x),
