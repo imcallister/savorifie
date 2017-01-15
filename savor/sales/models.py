@@ -66,11 +66,16 @@ class TaxCollector(models.Model):
         db_table = 'base_taxcollector'
 
 
+UNITSALE_TAGS = (
+    ('RETURN', 'Return'),
+)
+
 class UnitSale(models.Model):
     sale = models.ForeignKey('sales.Sale', related_name='unit_sale')
     sku = models.ForeignKey('products.Product', null=True, blank=True)
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
+    tag = models.CharField(max_length=20, choices=UNITSALE_TAGS, blank=True, null=True)
 
     class Meta:
         app_label = 'sales'
