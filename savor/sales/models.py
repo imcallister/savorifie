@@ -278,7 +278,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         d2 = self.fulfilled_items
         if d2:
             unf = {k: int(d1.get(k, 0)) - int(d2.get(k,0)) for k in set(d1) | set(d2) }
-            unf = dict((k, v) for k,v in unf.iteritems() if v > 0)
+            unf = dict((k, v) for k,v in unf.iteritems() if v != 0)
             if len(unf) > 0:
                 return unf
             else:
