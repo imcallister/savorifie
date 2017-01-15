@@ -12,7 +12,7 @@ def inventory_counts(request):
 
     sales_counts = api_func('sales', 'sales_counts')
     for sku in sales_counts:
-        context['%s_percent_sold' % sku] = int(100.0 * float(sales_counts[sku]) / float(inventory_count[sku]))
+        context['%s_percent_sold' % sku] = int(100.0 * float(sales_counts.get(sku, 0)) / float(inventory_count.get(sku, 0)))
         context['%s_sold' % sku] = sales_counts[sku]
 
     context['location_counts'] = api_func('inventory', 'locationinventory')
