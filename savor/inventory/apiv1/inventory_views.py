@@ -72,7 +72,7 @@ def locationinventory(label, qstring):
     incoming_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(incoming, key=key_func), key=key_func))
     outgoing_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(outgoing, key=key_func), key=key_func))
 
-    total_counts = dict((k, incoming_counts.get(k) - outgoing_counts.get(k)) for k in list(set(incoming_counts.keys() + outgoing_counts.keys())))
+    total_counts = dict((k, incoming_counts.get(k, 0) - outgoing_counts.get(k, 0)) for k in list(set(incoming_counts.keys() + outgoing_counts.keys())))
     
     return total_counts
 
@@ -96,7 +96,7 @@ def locationinventory(label, qstring):
     incoming_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(incoming, key=key_func), key=key_func))
     outgoing_counts = dict((k, sum(i['quantity'] for i in v)) for k,v in groupby(sorted(outgoing, key=key_func), key=key_func))
 
-    total_counts = dict((k, incoming_counts.get(k) - outgoing_counts.get(k)) for k in list(set(incoming_counts.keys() + outgoing_counts.keys())))
+    total_counts = dict((k, incoming_counts.get(k, 0) - outgoing_counts.get(k, 0)) for k in list(set(incoming_counts.keys() + outgoing_counts.keys())))
     
     return total_counts
 
