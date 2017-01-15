@@ -68,6 +68,7 @@ class TaxCollector(models.Model):
 
 UNITSALE_TAGS = (
     ('RETURN', 'Return'),
+    ('REPLACEMENT', 'Replacement'),
 )
 
 class UnitSale(models.Model):
