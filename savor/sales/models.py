@@ -313,7 +313,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
 
     def gross_sale_proceeds(self):
-        return sum([v for k,v in self.__sale_amts.iteritems()])
+        return sum([v for k, v in self.__sale_amts.iteritems()])
 
 
     def total_sales_tax(self):
