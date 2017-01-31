@@ -125,6 +125,7 @@ SPECIAL_SALES = (
     ('consignment', 'Consignment'),
     ('prize', 'Gift/Prize'),
     ('retailer', 'Retailer Sample'),
+    ('payment', 'Payment'),
 )
 
 class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
@@ -350,10 +351,10 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         return total
 
     def payee(self):
-        if self.channel.label == 'SAV':
-            return self.customer_code
-        elif self.channel.label == 'SHOPIFY':
+        if self.paid_thru:
             return self.paid_thru
+        elif self.channel.label == 'SAV':
+            return self.customer_code
         else:
             return self.channel.counterparty
 
