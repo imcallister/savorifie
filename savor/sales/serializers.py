@@ -2,7 +2,7 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.serializers import EagerLoadingMixin
 
-from .models import UnitSale, Sale, SalesTax, ChannelPayouts
+from .models import UnitSale, Sale, SalesTax, ChannelPayouts, Payout
 from rest_framework import serializers
 
 
@@ -228,6 +228,25 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'shipping_company', 'shipping_address1', 'shipping_address2',
                   'shipping_city', 'shipping_zip', 'shipping_province',
                   'shipping_country', 'shipping_phone', 'items_string', 'unit_sale')
+
+
+class PayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    calcd_payout = serializers.SerializerMethodField()
+    diff = serializers.SerializerMethodField()
+    
+    def get_label(self, obj):
+        return str(obj)
+
+    def get_calcd_payout(self, obj):
+        return obj.calcd_payout()
+
+    def get_diff(self, obj):
+        return obj.payout - obj.calcd_payout()
+
+    class Meta:
+        model = Payout
+        fields = ('id', 'payout_date', 'channel', 'payout', 'calcd_payout', 'diff')
+
 
 
 class ChannelPayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
