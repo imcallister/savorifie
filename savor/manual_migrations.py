@@ -4,6 +4,7 @@ from sales.models import Sale
 from accountifie.gl.models import Counterparty
 
 from fulfill.models import WarehouseFulfill, Fulfillment, ShippingCharge
+from sales.models import ChannelPayouts, Payout, PayoutLine
 from sales.importers.shopify import shopify_fee
 
 from fulfill.calcs import create_nc2_shippingcharge
@@ -70,3 +71,25 @@ def backfill_nc2_packing_ids():
     logger.info('%s shipping charges amended, %s errors' \
                 % (success_ctr, error_ctr))
     return    
+
+def backfill_payouts():
+    old_payouts = ChannelPayouts.objects.all()
+
+    for op in old_payouts:
+        np = Payout()
+        np.payout = op.payout
+        np.channel = op.channel
+        np.payout_date = op.payout_date
+        np.paid_thru = op.paid_thru
+        np.save()
+
+        for s in op.sales.all():
+            npl = PayoutLine()
+            npl.payout = np
+            npl.sale = s
+            npl.amount = s.total_receivable()
+            npl.save()
+
+
+
+
