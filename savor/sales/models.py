@@ -428,11 +428,10 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         # need to make as a sales so as to not be reloaded
         # but GL entries should just be a conversion of receivables
         if self.special_sale == 'payment':
-            tran['lines'].append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
-            tran['lines'].append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
-
-
-        if self.special_sale:
+            amount = self.total_receivable()
+            tran['lines'].append((accts_rec, -amount, self.customer_code, []))
+            tran['lines'].append((accts_rec, amount, self.payee(), []))
+        elif self.special_sale:
             sample_exp_acct = self._get_special_account()
 
             # get COGS
