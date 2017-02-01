@@ -69,6 +69,7 @@ class TaxCollector(models.Model):
 UNITSALE_TAGS = (
     ('RETURN', 'Return'),
     ('REPLACEMENT', 'Replacement'),
+    ('PAYMENT', 'Payment'),
 )
 
 class UnitSale(models.Model):
@@ -423,7 +424,14 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                                             % channel_id) \
                                .first()
 
-        if self.special_sale:
+        # special case for payments via Shopify
+        # need to make as a sales so as to not be reloaded
+        # but GL entries should just be a conversion of receivables
+        if self.special_sale == 'payment':
+            amount = self.total_receivable()
+            tran['lines'].append((accts_rec, -amount, self.customer_code, []))
+            tran['lines'].append((accts_rec, amount, self.payee(), []))
+        elif self.special_sale:
             sample_exp_acct = self._get_special_account()
 
             # get COGS
