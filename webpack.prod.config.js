@@ -9,6 +9,7 @@ config.output.path = path.resolve('./assets/dist/');
 
 config.entry = {
     bookkeeping: './assets/js/pages/bookkeeping',
+    receivables: './assets/js/pages/receivables',
     highcharts: './assets/js/pages/highcharts',
     inventory: './assets/js/pages/inventory',
     reports: './assets/js/pages/reports',
