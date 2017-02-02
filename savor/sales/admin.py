@@ -237,11 +237,12 @@ class PayoutAdmin(SimpleHistoryAdmin):
     
     inlines = [PayoutLineInline]
     
+    """
     def response_change(self, request, new_object):
         "They saved a change - send signal"
         payout_saved.send(new_object)
         return admin.ModelAdmin.response_change(self, request, new_object)
-
+    
     def response_add(self, request, obj):
         "They added a new payout - send signal"
         res = admin.ModelAdmin.response_add(self, request, obj)
@@ -249,5 +250,6 @@ class PayoutAdmin(SimpleHistoryAdmin):
             return HttpResponseRedirect(request.GET['next'])
         else:
             return res
+    """
 
 admin.site.register(Payout, PayoutAdmin)
