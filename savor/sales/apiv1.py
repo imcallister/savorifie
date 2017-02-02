@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db.models import Prefetch, Sum
 
 import products.apiv1 as product_api
-from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts, Payout
+from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts, Payout, PayoutLine
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
     SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer, \
@@ -289,6 +289,31 @@ def payout_comp(channel_lbl, qstring):
     qs = PayoutSerializer.setup_eager_loading(qs)
     output = PayoutSerializer(qs, many=True).data
     return [x for x in output if abs(x['diff']) > 1.0]
+
+
+def unpaid_sales(channel_lbl, qstring):
+    """
+    For sales in a given channel aggregate all the payoutlines
+    and report on those where aggregated payouts do not match
+    the total receivable on the order
+    """
+    pls = PayoutLine.objects.filter(payout__channel__counterparty_id=channel_lbl) \
+                            .values('sale_id') \
+                            .annotate(total=Sum('amount'))
+    sale_ids = [t['sale_id'] for t in pls]
+    rcvbls = dict((s.id, s.total_receivable()) for s in Sale.objects.filter(id__in=sale_ids))
+    payouts = dict((s['sale_id'], s['total']) for s in pls)
+
+    output =  [{'sale_id': s,
+                'receivable': rcvbls.get(s, Decimal('0')),
+                'received': payouts.get(s, Decimal('0')),
+                'diff': rcvbls.get(s, Decimal('0')) - payouts.get(s, Decimal('0'))
+                }
+                for s in set(rcvbls.keys() + payouts.keys())]
+    #return [o for o in output if abs(o['diff'] > Decimal('1'))]
+    return output
+
+
 
 
 def unpaid_channel(channel_lbl, qstring):
