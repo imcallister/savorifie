@@ -10,7 +10,7 @@ from django.db.models import Q
 
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, ChannelPayouts
+from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, ChannelPayouts, Payout, PayoutLine
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
@@ -210,3 +210,50 @@ class ChannelPayoutsAdmin(admin.ModelAdmin):
     
 admin.site.register(ChannelPayouts, ChannelPayoutsAdmin)
 
+
+
+
+
+class PayoutLineInlineFormset(forms.models.BaseInlineFormSet):
+    def clean(self):
+        pass
+
+class PayoutLineInline(admin.TabularInline):
+    model = PayoutLine
+    can_delete = True
+    extra = 0
+
+    def formfield_for_foreignkey(self, db_field, request=None,**kwargs):
+        field = super(PayoutLineInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'sale':
+            field.queryset = field.queryset.select_related('channel__counterparty')
+        return field
+
+# special signal as normal GL update doesn't work with NominalTransaction
+payout_saved = django.dispatch.Signal(providing_args=[])
+payout_saved.connect(on_bmo_save)
+
+
+
+class PayoutAdmin(SimpleHistoryAdmin):
+    ordering = ('-payout_date',)
+    list_display = ('__unicode__', 'payout_date', 'payout', 'paid_thru', 'channel',)
+    list_filter = ('channel', 'paid_thru',)
+    list_select_related = ('channel', 'paid_thru')
+    
+    inlines = [PayoutLineInline]
+    
+    def response_change(self, request, new_object):
+        "They saved a change - send signal"
+        payout_saved.send(new_object)
+        return admin.ModelAdmin.response_change(self, request, new_object)
+
+    def response_add(self, request, obj):
+        "They added a new payout - send signal"
+        res = admin.ModelAdmin.response_add(self, request, obj)
+        if "next" in request.GET:
+            return HttpResponseRedirect(request.GET['next'])
+        else:
+            return res
+
+admin.site.register(Payout, PayoutAdmin)

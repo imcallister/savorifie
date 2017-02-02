@@ -1,0 +1,114 @@
+{% extends base_template %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+{% load humanize %}
+
+
+{% block extrahead %}
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/fixed-data-table.min.css">
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/react-bootstrap-table-all.min.css">
+
+
+<style>
+    .modal.modal-wide .modal-dialog {
+      width: 90%;
+    }
+    .modal-wide .modal-body {
+      overflow-y: auto;
+    }
+
+    /* irrelevant styling */
+    body p { 
+      max-width: 400px; 
+      margin: 20px auto; 
+    }
+    #tallModal .modal-body p { margin-bottom: 900px };
+
+</style>
+
+
+{% endblock %}
+
+
+{% block breadcrumb %}
+    <li class="active">Home</li>
+    {{ block.super }}
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid" id="wrapper">
+    <div class="row">
+        <div class="col-md-8">    
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Receivables</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div id="bookkeeping.receivables"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    <h3 class="panel-title">Upcoming Receivables</h3>
+                                </div>
+                                <div class="panel-body">
+                                    <div id="bookkeeping.futurereceivables"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Shopify Receivables Reports</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li>
+                                <a class="btn btn-info" data-toggle="modal" data-target="#shopifyUnpaid">
+                                    View Unpaid Shopify
+                                </a>
+                            </li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#shopifyComp">Mismatched Shopify Payouts</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- MODAL COMPONENTS -->
+
+<!--help-->
+<div id="bookkeeping.help"></div>
+
+
+<!--tables-->
+<div id="bookkeeping.unpaidShopify"></div>
+<div id="bookkeeping.shopifyComp"></div>
+
+
+{% render_bundle 'receivables' %}
+
+{% endblock %}
+
+{% block sidebar %}
+
+{% endblock %}
+

@@ -55,6 +55,7 @@ class CashflowDALForm(forms.ModelForm):
                                                                        rel,
                                                                        admin.site)
 
+    
     class Meta:
         model = Cashflow
         fields = ('__all__')
@@ -79,6 +80,7 @@ class CashflowAdmin(SimpleHistoryAdmin):
                                                          'ext_account', 
                                                          'counterparty',
                                                          'trans_type',
+                                                         'expense_acct'
                                                          )
 
     def get_changelist_form(self, request, **kwargs):

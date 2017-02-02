@@ -10,11 +10,11 @@ from django.conf import settings
 from django.db.models import Prefetch, Sum
 
 import products.apiv1 as product_api
-from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts
+from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts, Payout
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
     SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer, \
-    UnitSaleSerializer, UnitSaleItemSerializer
+    UnitSaleSerializer, UnitSaleItemSerializer, PayoutSerializer
 from accounting.serializers import COGSAssignmentSerializer
 
 
@@ -283,6 +283,13 @@ def channel_payout_comp(channel_lbl, qstring):
     output = ChannelPayoutSerializer(qs, many=True).data
     return [x for x in output if abs(x['diff']) > 1.0]
     
+
+def payout_comp(channel_lbl, qstring):
+    qs = Payout.objects.filter(channel__counterparty_id=channel_lbl)
+    qs = PayoutSerializer.setup_eager_loading(qs)
+    output = PayoutSerializer(qs, many=True).data
+    return [x for x in output if abs(x['diff']) > 1.0]
+
 
 def unpaid_channel(channel_lbl, qstring):
     # find Shopify sales which are not in a channel payout batch
