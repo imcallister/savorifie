@@ -239,6 +239,7 @@ class PayoutAdmin(SimpleHistoryAdmin):
     ordering = ('-payout_date',)
     list_display = ('__unicode__', 'payout_date', 'payout', 'paid_thru', 'channel',)
     list_filter = ('channel', 'paid_thru',)
+    list_select_related = ('channel', 'paid_thru')
     
     inlines = [PayoutLineInline]
     

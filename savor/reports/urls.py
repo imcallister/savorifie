@@ -14,5 +14,6 @@ urlpatterns = [
     url(r'^inventory/management/$', views.management),
     url(r'^inventory/$', views.inventory_counts),
     url(r'^ship_charges/$', views.ship_charges),
-    url(r'^bookkeeping/', views.bookkeeping, name='bookkeeping')
+    url(r'^bookkeeping/', views.bookkeeping, name='bookkeeping'),
+    url(r'^receivables/', views.receivables, name='receivables')
 ]

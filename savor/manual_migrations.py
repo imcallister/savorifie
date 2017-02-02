@@ -80,7 +80,11 @@ def backfill_payouts():
         np.payout = op.payout
         np.channel = op.channel
         np.payout_date = op.payout_date
-        np.paid_thru = op.paid_thru
+        if op.paid_thru:
+            np.paid_thru = op.paid_thru
+        else:
+            np.paid_thru = op.channel
+        
         np.save()
 
         for s in op.sales.all():

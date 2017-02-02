@@ -40,7 +40,7 @@ class FulfillmentAdmin(admin.ModelAdmin):
     list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
     list_filter = ('warehouse', 'status', ShippingMissing,)
     inlines = [FulfillLineInline, FulfillUpdateInline]
-
+    
 admin.site.register(Fulfillment, FulfillmentAdmin)
 
 

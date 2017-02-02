@@ -51,45 +51,6 @@ var payables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},
 var payables = <BSTable source="/api/reports/payables/?raw=true" columns={payables_cols} />
 ReactDOM.render(payables, document.getElementById('bookkeeping.payables'))
 
-var receivables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},
-					 	  {'fld': 'amount', 'label': 'Amount', formatter: formatters.drill}
-					 	  ]
-
-var receivables = <BSTable source="/api/reports/receivables/?raw=true" columns={receivables_cols} />
-ReactDOM.render(receivables, document.getElementById('bookkeeping.receivables'))
-
-
-var future_receivables = <BSTable source="/api/reports/future_receivables/?raw=true" columns={receivables_cols} />
-ReactDOM.render(future_receivables, document.getElementById('bookkeeping.futurereceivables'))
-
-
-var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
-			                {'fld': 'paid_thru', 'label': 'Paid Via'},
-			                {'fld': 'sale_date', 'label': 'Date', formatter: formatters.date},
-			                {'fld': 'shipping_name', 'label': 'Name'},
-			                {'fld': 'shipping_company', 'label': 'Company'},
-			                {'fld': 'proceeds', 'label': 'Proceeds'},
-			                {'fld': 'items_string', 'label': 'SKUs'}
-			                ]
-
-var unpaid_shopify = <BSTable source="/api/sales/unpaid_channel/SHOPIFY/?raw=true" columns={unpaid_shopify_cols} 
-							  search={true} pagination={true} sizePerPage={true} dataSort={true}/>
-ReactDOM.render(<ModalCmpnt modalId="shopifyUnpaid" modalTitle="Unpaid Shopify" content={unpaid_shopify} wide={true}/>, 
-				document.getElementById('bookkeeping.unpaidShopify'))
-
-
-var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
-		                 {'fld': 'date', 'label': 'Date', formatter: formatters.date},
-		                 {'fld': 'label', 'label': 'Description'},
-		                 {'fld': 'payout', 'label': 'Payout'},
-		                 {'fld': 'calcd_payout', 'label': 'Savor Calc'},
-		                 {'fld': 'diff', 'label': 'Diff'}
-		                 ]
-var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} 
-								  search={true} pagination={true} sizePerPage={true} bordered={true}
-								  dataSort={true}/>
-ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Mismatched Shopify Payouts" wide={true} content={shopify_comparison} wide={true}/>, 
-				document.getElementById('bookkeeping.shopifyComp'))
 
 
 var no_shipcharge_cols = [{'fld': 'fulfillment_id', 'label': 'Fulfill ID'},
