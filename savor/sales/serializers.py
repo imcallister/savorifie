@@ -233,6 +233,7 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 class PayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     calcd_payout = serializers.SerializerMethodField()
     diff = serializers.SerializerMethodField()
+    label = serializers.SerializerMethodField()
     
     def get_label(self, obj):
         return str(obj)
@@ -245,7 +246,7 @@ class PayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 
     class Meta:
         model = Payout
-        fields = ('id', 'payout_date', 'channel', 'payout', 'calcd_payout', 'diff')
+        fields = ('label', 'payout_date', 'channel', 'payout', 'calcd_payout', 'diff')
 
 
 

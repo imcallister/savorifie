@@ -16,11 +16,15 @@ function drillFormatter(cell, row) {
         }
     }
 
+function numberFormatter(cell, row) {
+          return Number(Math.round(cell)).toLocaleString('us');
+    }
 
 
 var formatters = {price: priceFormatter,
                   date: dateFormatter,
-                  drill: drillFormatter
+                  drill: drillFormatter,
+                  number: numberFormatter
                   };
 
 module.exports = formatters;
