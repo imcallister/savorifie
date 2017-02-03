@@ -300,17 +300,27 @@ def unpaid_sales(channel_lbl, qstring):
     pls = PayoutLine.objects.filter(payout__channel__counterparty_id=channel_lbl) \
                             .values('sale_id') \
                             .annotate(total=Sum('amount'))
+    payout_lines = dict((p['sale_id'], p['total']) for p in pls)
+    
     sale_ids = [t['sale_id'] for t in pls]
-    rcvbls = dict((s.id, s.total_receivable()) for s in Sale.objects.filter(id__in=sale_ids))
-    payouts = dict((s['sale_id'], s['total']) for s in pls)
+    qs = Sale.objects.filter(id__in=sale_ids)
+    qs = SaleProceedsSerializer.setup_eager_loading(qs)
+    proceeds = SaleProceedsSerializer(qs, many=True).data
 
-    output =  [{'sale_id': s,
-                'receivable': rcvbls.get(s, Decimal('0')),
-                'received': payouts.get(s, Decimal('0')),
-                'diff': rcvbls.get(s, Decimal('0')) - payouts.get(s, Decimal('0'))
-                }
-                for s in set(rcvbls.keys() + payouts.keys())]
-    #return [o for o in output if abs(o['diff'] > Decimal('1'))]
+    cols = ['label', 'sale_date', 'paid_thru', 'shipping_name', 'proceeds', 'items_string']
+
+    def _get_row(raw):
+        row = dict((k, raw.get(k)) for k in cols)
+        if not row['proceeds']:
+            row['proceeds'] = Decimal('0')
+
+        row['received'] = payout_lines.get(raw['id'], Decimal('0'))
+        row['diff'] = row['proceeds'] - row['received']
+        return row
+
+    output = [_get_row(r) for r in proceeds]
+    output = [r for r in output if abs(r['diff']) > Decimal('1')]
+
     return output
 
 

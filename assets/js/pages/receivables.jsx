@@ -34,27 +34,16 @@ var unpaid_shopify_cols  = [{'fld': 'label', 'label': 'ID'},
 			                {'fld': 'paid_thru', 'label': 'Paid Via'},
 			                {'fld': 'sale_date', 'label': 'Date', formatter: formatters.date},
 			                {'fld': 'shipping_name', 'label': 'Name'},
-			                {'fld': 'shipping_company', 'label': 'Company'},
 			                {'fld': 'proceeds', 'label': 'Proceeds'},
+			                {'fld': 'received', 'label': 'Received'},
+			                {'fld': 'diff', 'label': 'Difference'},
 			                {'fld': 'items_string', 'label': 'SKUs'}
 			                ]
 
-var unpaid_shopify = <BSTable source="/api/sales/unpaid_channel/SHOPIFY/?raw=true" columns={unpaid_shopify_cols} 
+var unpaid_shopify = <BSTable source="/api/sales/unpaid_sales/SHOPIFY/?raw=true" columns={unpaid_shopify_cols} 
 							  search={true} pagination={true} sizePerPage={true} dataSort={true}/>
 ReactDOM.render(<ModalCmpnt modalId="shopifyUnpaid" modalTitle="Unpaid Shopify" content={unpaid_shopify} wide={true}/>, 
 				document.getElementById('bookkeeping.unpaidShopify'))
-
-
-var unrecd_shopify_cols  = [{'fld': 'sale_id', 'label': 'ID'},
-			                {'fld': 'receivable', 'label': 'Due'},
-			                {'fld': 'received', 'label': 'Received'},
-			                {'fld': 'diff', 'label': 'Diff'},
-			                ]
-
-var unrecd_shopify = <BSTable source="/api/sales/unpaid_sales/SHOPIFY/?raw=true" columns={unrecd_shopify_cols} 
-							  search={true} pagination={true} sizePerPage={true} dataSort={true}/>
-ReactDOM.render(<ModalCmpnt modalId="shopifyUnrecd" modalTitle="Unreconciled Shopify" content={unrecd_shopify} wide={true}/>, 
-				document.getElementById('bookkeeping.unrecdShopify'))
 
 
 var shopify_comp_cols = [{'fld': 'label', 'label': 'Label'},
