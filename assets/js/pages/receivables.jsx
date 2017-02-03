@@ -57,15 +57,14 @@ ReactDOM.render(<ModalCmpnt modalId="shopifyUnrecd" modalTitle="Unreconciled Sho
 				document.getElementById('bookkeeping.unrecdShopify'))
 
 
-var shopify_comp_cols = [{'fld': 'id', 'label': 'ID'},
-		                 {'fld': 'date', 'label': 'Date', formatter: formatters.date},
-		                 {'fld': 'label', 'label': 'Description'},
-		                 {'fld': 'payout', 'label': 'Payout'},
-		                 {'fld': 'calcd_payout', 'label': 'Savor Calc'},
-		                 {'fld': 'diff', 'label': 'Diff'}
+var shopify_comp_cols = [{'fld': 'label', 'label': 'Label'},
+		                 {'fld': 'payout_date', 'label': 'Date', formatter: formatters.date},
+		                 {'fld': 'payout', 'label': 'Payout', formatter: formatters.number},
+		                 {'fld': 'calcd_payout', 'label': 'Savor Calc', formatter: formatters.number},
+		                 {'fld': 'diff', 'label': 'Diff', formatter: formatters.number}
 		                 ]
-var shopify_comparison = <BSTable source="/api/sales/channel_payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} 
+var shopify_comparison = <BSTable source="/api/sales/payout_comp/SHOPIFY/?raw=true" columns={shopify_comp_cols} 
 								  search={true} pagination={true} sizePerPage={true} bordered={true}
 								  dataSort={true}/>
-ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Mismatched Shopify Payouts" wide={true} content={shopify_comparison} wide={true}/>, 
+ReactDOM.render(<ModalCmpnt modalId="shopifyComp" modalTitle="Shopify Payouts" wide={true} content={shopify_comparison} wide={true}/>, 
 				document.getElementById('bookkeeping.shopifyComp'))
