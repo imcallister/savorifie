@@ -360,7 +360,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         else:
             return Decimal('0')
 
-    def total_receivable(self):
+    def total_receivable(self, incl_ch_fees=True):
         self._get_unit_sales()
         self._get_sales_taxes()
         total = self.gross_sale_proceeds()
@@ -371,7 +371,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         if self.gift_wrap_fee:
             total += Decimal(self.gift_wrap_fee)
         total += self.total_sales_tax()
-        total -= self.channel_charges
+        if incl_ch_fees:
+            total -= self.channel_charges
         return total
 
     def taxable_proceeds(self):
@@ -463,9 +464,18 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         # need to make as a sales so as to not be reloaded
         # but GL entries should just be a conversion of receivables
         if self.special_sale == 'payment':
-            amount = self.total_receivable()
+            amount = self.total_receivable(incl_ch_fees=False)
             tran['lines'].append((accts_rec, -amount, self.customer_code, []))
-            tran['lines'].append((accts_rec, amount, self.payee(), []))
+            tran['lines'].append((accts_rec, amount - Decimal(self.channel_charges), self.payee(), []))
+            if self.channel_charges > 0:
+                #HARDCODE
+                channel_fees_path = 'equity.retearnings.opexp.sales.channelfees.%s' % channel_id
+                channel_fees_acct = Account.objects \
+                                           .filter(path=channel_fees_path) \
+                                           .first()
+                tran['lines'].append((channel_fees_acct,
+                                      Decimal(self.channel_charges),
+                                      channel_id, []))
         elif self.special_sale:
             sample_exp_acct = self._get_special_account()
 
