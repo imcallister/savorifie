@@ -40,6 +40,12 @@ class FulfillmentAdmin(admin.ModelAdmin):
     list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
     list_filter = ('warehouse', 'status', ShippingMissing,)
     inlines = [FulfillLineInline, FulfillUpdateInline]
+
+    def formfield_for_foreignkey(self, db_field, request=None,**kwargs):
+        field = super(FulfillmentAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'order':
+            field.queryset = field.queryset.select_related('channel__counterparty')
+        return field
     
 admin.site.register(Fulfillment, FulfillmentAdmin)
 
