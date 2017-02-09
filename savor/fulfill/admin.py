@@ -82,4 +82,13 @@ class WarehouseFulfillAdmin(admin.ModelAdmin):
     list_filter = ('warehouse', )
     inlines = [WarehouseFulfillLineInline,]
 
+    def formfield_for_foreignkey(self, db_field, request=None,**kwargs):
+        field = super(WarehouseFulfillAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'fulfillment':
+            field.queryset = field.queryset.select_related('order__channel__counterparty')
+        elif db_field.name == 'savor_order':
+            field.queryset = field.queryset.select_related('channel__counterparty')
+        return field
+    
+
 admin.site.register(WarehouseFulfill, WarehouseFulfillAdmin)

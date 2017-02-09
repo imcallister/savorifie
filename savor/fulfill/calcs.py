@@ -77,3 +77,21 @@ def create_nc2_shippingcharge(wh_flf):
         ShippingCharge(**chg).save()
 
     return
+
+def create_frank_shippingcharge(wh_flf):
+    
+    if ShippingCharge.objects.filter(external_id=wh_flf.tracking_number).count() == 0:
+        # i.e. doesn't already exist
+        chg = {}
+        chg['shipper_id'] = inventory_api.shippingtype(str(wh_flf.shipping_type.label), {})['shipper']['id']
+        chg['account'] = 'N/A'
+        chg['tracking_number'] = wh_flf.tracking_number
+        chg['external_id'] = wh_flf.tracking_number
+        chg['ship_date'] = wh_flf.ship_date
+        chg['charge'] = wh_flf.shipping_cost
+        chg['fulfillment_id'] = wh_flf.fulfillment.id
+        chg['order_related'] = True
+        chg['comment'] = ''
+        ShippingCharge(**chg).save()
+
+    return
