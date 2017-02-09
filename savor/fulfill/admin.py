@@ -51,11 +51,17 @@ admin.site.register(Fulfillment, FulfillmentAdmin)
 
 
 class ShippingChargeAdmin(admin.ModelAdmin):
-    list_display = ('shipper', 'tracking_number', 'external_id', 'packing_id', 'invoice_number', 'ship_date',
+    list_display = ('id', 'shipper', 'tracking_number', 'external_id', 'packing_id', 'invoice_number', 'ship_date',
                     'charge', 'fulfillment', 'account', 'order_related')
     list_filter = ('order_related',)
     search_fields = ('external_id', 'tracking_number', 'invoice_number',)
     ordering = ('-ship_date',)
+
+    def formfield_for_foreignkey(self, db_field, request=None,**kwargs):
+        field = super(ShippingChargeAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == 'fulfillment':
+            field.queryset = field.queryset.select_related('order__channel__counterparty')
+        return field
     
 admin.site.register(ShippingCharge, ShippingChargeAdmin)
 
