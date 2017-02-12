@@ -13,7 +13,8 @@ config.entry = {
     highcharts: './assets/js/pages/highcharts',
     inventory: './assets/js/pages/inventory',
     reports: './assets/js/pages/reports',
-    cogs: './assets/js/pages/cogs'
+    cogs: './assets/js/pages/cogs',
+    shippingcosts: './assets/js/pages/shippingcosts',
 };
 
 module.exports = config;

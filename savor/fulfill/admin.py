@@ -85,6 +85,8 @@ class WarehouseFulfillAdmin(admin.ModelAdmin):
     list_display = ('fulfillment', 'warehouse',
                     'warehouse_pack_id', 'ship_date', 'shipping_type',
                     'tracking_number', 'shipping_zip',)
+    search_fields = ('tracking_number', 'shipping_zip',)
+    
     list_filter = ('warehouse', )
     inlines = [WarehouseFulfillLineInline,]
 

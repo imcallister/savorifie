@@ -66,30 +66,11 @@
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-warning" data-toggle="modal" data-target="#FRBuploader">Load First Republic</a></li>
                             <li><a class="btn btn-warning" data-toggle="modal" data-target="#MCARDuploader">Load Mastercard</a></li>
-                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#UPSuploader">Load UPS</a></li>
-                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#IFSuploader">Load IFS Statement</a></li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">    
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Shipping Charge Reports</h3>
-                </div>
-                <div class="panel-body">
-                    <div>
-                        <ul class="nav nav-pills nav-stacked">
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#upsInvoices">UPS Invoices</a></li>
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
-                            <li><a class="btn btn-info" data-toggle="modal" data-target="#noShipcharge">Fulfills with no Shipping Charge</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
     </div>
 
 
@@ -157,16 +138,9 @@
 <div id="bookkeeping.help"></div>
 
 
-<!--tables-->
-<div id="bookkeeping.fulfillNoShipcharge"></div>
-<div id="bookkeeping.upsInvoices"></div>
-<div id="bookkeeping.misBilledUPS"></div>
-
 <!--uploaders-->
 <div id="bookkeeping.upload.FRB"></div>
-<div id="bookkeeping.upload.UPS"></div>
 <div id="bookkeeping.upload.MCARD"></div>
-<div id="bookkeeping.upload.IFS"></div>
 
 {% render_bundle 'bookkeeping' %}
 
