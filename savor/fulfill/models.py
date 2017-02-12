@@ -75,10 +75,15 @@ class ShippingCharge(models.Model, BusinessModelObject):
         
         # HARD CODE
         ap_acct = '3006'
-        exp_acct = '5070'
+        order_exp_acct = '5070'
+        non_order_exp_acct = '6072'
 
-        lines = [(ap_acct, DZERO - Decimal(self.charge), cp, []),
-               (exp_acct, Decimal(self.charge), cp, [])]
+        if self.order_related:
+            lines = [(ap_acct, DZERO - Decimal(self.charge), cp, []),
+                     (order_exp_acct, Decimal(self.charge), cp, [])]
+        else:
+            lines = [(ap_acct, DZERO - Decimal(self.charge), cp, []),
+                     (non_order_exp_acct, Decimal(self.charge), cp, [])]
 
         tran['lines'] = lines
         return [tran]
