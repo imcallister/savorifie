@@ -156,6 +156,7 @@ def orders_list():
                 {'data_field': 'shipping_company', 'value': 'Company', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_city', 'value': 'Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_zip', 'value': 'Company', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_province', 'value': 'Company', 'formatter': 'nameFormatter'},
                 {'data_field': 'items_string', 'value': 'SKUs', 'formatter': 'nameFormatter'},
                 {'data_field': 'unfulfilled_string', 'value': 'Unfulfilled', 'formatter': 'nameFormatter'},
             ]

@@ -176,7 +176,7 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         model = Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date', 'drilldown',
                   'external_channel_id', 'shipping_name', 'shipping_company', 'shipping_city',
-                  'shipping_zip', 'items_string', 'unfulfilled_string', 'unfulfilled_items',
+                  'shipping_zip', 'shipping_province', 'items_string', 'unfulfilled_string', 'unfulfilled_items',
                   'fulfillment_ids', 'gift_wrapping'
                   )
 
