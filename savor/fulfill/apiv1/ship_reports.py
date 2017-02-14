@@ -45,6 +45,15 @@ def fulfill_no_shipcharge(qstring):
     return [_get_row(f) for f in data]
 
 
+def shipcharge_no_fulfill(qstring):
+    qs = ShippingCharge.objects.filter(order_related=True) \
+                               .filter(fulfillment=None)
+    qs = ShippingChargeSerializer.setup_eager_loading(qs)
+    data = ShippingChargeSerializer(qs, many=True).data
+    return data
+                       
+
+
 def UPS_invoices(qstring):
     ship_charges = sorted(shippingcharge({'shipper': 'UPS'}), key=lambda x: x['invoice_number'])
     by_invoice = dict((k, list(v)) for k, v in itertools.groupby(ship_charges, lambda x: x['invoice_number']))
