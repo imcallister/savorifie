@@ -18,6 +18,10 @@ var IFS_uploader = <Uploader instructions={'Expects a csv file with at least fol
 						 postUrl={'/importers/upload/IFSmonthly/'}/>
 ReactDOM.render(<ModalCmpnt modalId="IFSuploader" modalTitle="IFS Statement Upload" content={IFS_uploader}/>, document.getElementById('shippingcosts.upload.IFS'))
 
+var bulkShip_uploader = <Uploader instructions={'Expects a csv file with at least following headers: .......'} 
+						 postUrl={'/importers/upload/bulk_shipping/'}/>
+ReactDOM.render(<ModalCmpnt modalId="BulkShipuploader" modalTitle="IFS Statement Upload" content={bulkShip_uploader}/>, document.getElementById('shippingcosts.upload.bulkShip'))
+
 
 var last_uploads_cols  = [{'fld': 'Upload', 'label': 'Upload Name'},
 					 	  {'fld': 'Last Upload', 'label': 'Uploaded Thru', formatter: formatters.date}
