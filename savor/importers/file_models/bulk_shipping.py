@@ -26,6 +26,12 @@ def parse_decimal(x):
     else:
         return x
 
+def boolean_parse(b):
+    if (str(b).lower() == 'true'):
+        return 'True'
+    else:
+        return 'False'
+
 class BulkShippingCSVModel(CsvModel):
     shipper = DjangoModelField(Shipper, match='Shipper', transform=shipper_parse)
     external_id = CharField(match="External ID", transform=tracking_parse)
@@ -37,7 +43,7 @@ class BulkShippingCSVModel(CsvModel):
                                    match="FulfillmentID",
                                    transform=lambda x: x.split('_')[0].replace('FLF', '')
                                    )
-    order_related = BooleanField(match="ShipDate", transform=date_parse)
+    order_related = BooleanField(match="OrderRelated", transform=boolean_parse)
     
     class Meta:
         delimiter = ','
