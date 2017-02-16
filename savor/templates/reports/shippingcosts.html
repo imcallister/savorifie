@@ -66,6 +66,7 @@
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-warning" data-toggle="modal" data-target="#UPSuploader">Load UPS</a></li>
                             <li><a class="btn btn-warning" data-toggle="modal" data-target="#IFSuploader">Load IFS Statement</a></li>
+                            <li><a class="btn btn-warning" data-toggle="modal" data-target="#BulkShipuploader">Load Bulk Shipping Charges</a></li>
                         </ul>
                     </div>
                 </div>
@@ -82,6 +83,7 @@
                             <li><a class="btn btn-info" data-toggle="modal" data-target="#upsInvoices">UPS Invoices</a></li>
                             <li><a class="btn btn-info" data-toggle="modal" data-target="#misUPS">UPS Mis-Billed</a></li>
                             <li><a class="btn btn-info" data-toggle="modal" data-target="#noShipcharge">Fulfills with no Shipping Charge</a></li>
+                            <li><a class="btn btn-info" data-toggle="modal" data-target="#shipchargeNoFulfill">Shipping Charge with no Fulfill</a></li>
                         </ul>
                     </div>
                 </div>
@@ -96,6 +98,7 @@
 <!-- MODAL COMPONENTS -->
 
 <!--tables-->
+<div id="shippingcosts.shipchargeNoFulfill"></div>
 <div id="shippingcosts.fulfillNoShipcharge"></div>
 <div id="shippingcosts.upsInvoices"></div>
 <div id="shippingcosts.misBilledUPS"></div>
@@ -103,6 +106,7 @@
 <!--uploaders-->
 <div id="shippingcosts.upload.UPS"></div>
 <div id="shippingcosts.upload.IFS"></div>
+<div id="shippingcosts.upload.bulkShip"></div>
 
 {% render_bundle 'shippingcosts' %}
 

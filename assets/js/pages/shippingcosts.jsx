@@ -18,6 +18,10 @@ var IFS_uploader = <Uploader instructions={'Expects a csv file with at least fol
 						 postUrl={'/importers/upload/IFSmonthly/'}/>
 ReactDOM.render(<ModalCmpnt modalId="IFSuploader" modalTitle="IFS Statement Upload" content={IFS_uploader}/>, document.getElementById('shippingcosts.upload.IFS'))
 
+var bulkShip_uploader = <Uploader instructions={'Expects a csv file with at least following headers: .......'} 
+						 postUrl={'/importers/upload/bulk_shipping/'}/>
+ReactDOM.render(<ModalCmpnt modalId="BulkShipuploader" modalTitle="IFS Statement Upload" content={bulkShip_uploader}/>, document.getElementById('shippingcosts.upload.bulkShip'))
+
 
 var last_uploads_cols  = [{'fld': 'Upload', 'label': 'Upload Name'},
 					 	  {'fld': 'Last Upload', 'label': 'Uploaded Thru', formatter: formatters.date}
@@ -26,6 +30,18 @@ var last_uploads_cols  = [{'fld': 'Upload', 'label': 'Upload Name'},
 var last_uploads = <BSTable source="/api/reports/last_uploads/?raw=true" columns={last_uploads_cols} />
 ReactDOM.render(last_uploads, document.getElementById('shippingcosts.lastUploads'))
 
+
+
+var shipcharge_no_fulfill_cols = [{'fld': 'tracking_number', 'label': 'Tracking Number'},
+					              {'fld': 'shipper', 'label': 'Shipper'},
+					              {'fld': 'ship_date', 'label': 'Ship Date'},
+					              {'fld': 'charge', 'label': 'Charge'}
+					            ]
+var shipcharge_no_fulfill = <BSTable source="/api/fulfill/shipcharge_no_fulfill/?raw=true" columns={shipcharge_no_fulfill_cols} 
+									 search={true} pagination={true} sizePerPage={true} bordered={true}
+								  	 dataSort={true}/>    
+ReactDOM.render(<ModalCmpnt modalId="shipchargeNoFulfill" modalTitle="Shipping charges missing fulfillment" content={shipcharge_no_fulfill} wide={true}/>, 
+				document.getElementById('shippingcosts.shipchargeNoFulfill'))
 
 
 var no_shipcharge_cols = [{'fld': 'fulfillment_id', 'label': 'Fulfill ID'},
