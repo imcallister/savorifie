@@ -114,6 +114,9 @@ class ExpenseAllocation(models.Model):
         return '%.2f: Project %s' %(self.amount, self.project)
 
 
+# HARDCODE
+PAID_FROM_CHOICES = [1001, 1002, 1003, 3000, 3005, 3006, 3010, 3020, 3250, 20100]
+
 class Expense(models.Model, BusinessModelObject):
     
     company = models.ForeignKey('gl.Company', default=get_default_company)
@@ -139,7 +142,7 @@ class Expense(models.Model, BusinessModelObject):
 
     paid_from = models.ForeignKey('gl.Account', null=True, blank=True,
                                   help_text="shows the account this was paid from, or is owed to",
-                                  limit_choices_to={'id__in': [1001, 1002, 1003, 3000, 3010, 3020, 3250, 20100]},
+                                  limit_choices_to={'id__in': PAID_FROM_CHOICES},
                                   related_name='paid_from')
     comment = models.CharField(max_length=200, blank=True, null=True, help_text="Details of any modifications/notes added in Django")    
 
