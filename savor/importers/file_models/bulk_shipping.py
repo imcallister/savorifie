@@ -32,7 +32,7 @@ def boolean_parse(b):
 
 def parse_fulfillment(fl):
     try:
-        return x.split('_')[0].replace('FLF', '')
+        return fl.split('_')[0].replace('FLF', '')
     except:
         return None
 
