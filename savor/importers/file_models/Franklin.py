@@ -12,10 +12,8 @@ def date_parse(dt):
 
 
 def tracking_parse(tr):
-    try:
-        return '{0:.0f}'.format(float(tr))
-    except:
-        return tr.upper()
+    tr = str(tr.split(':')[1])
+    return tr.upper()
 
 def parse_decimal(x):
     if x == '':
