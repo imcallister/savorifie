@@ -222,7 +222,7 @@ class Expense(models.Model, BusinessModelObject):
         """
 
         capitalize_it, debit, acc_asset_dep, months  = self._capitalize(self.account)
-        ACCTS_PAYABLE = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_ACCOUNTS_PAYABLE', {}))
+        ACCTS_PAYABLE = self.paid_from
         PREPAID_EXP = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_PREPAID_EXP', {}))
         ACCRUED_LIAB = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_ACCRUED_LIAB', {}))
         

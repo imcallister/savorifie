@@ -30,6 +30,13 @@ def boolean_parse(b):
     else:
         return 'False'
 
+def parse_fulfillment(fl):
+    try:
+        return x.split('_')[0].replace('FLF', '')
+    except:
+        return None
+
+
 class BulkShippingCSVModel(CsvModel):
     shipper = DjangoModelField(Shipper, match='Shipper', transform=shipper_parse)
     external_id = CharField(match="External ID", transform=tracking_parse)
@@ -39,7 +46,7 @@ class BulkShippingCSVModel(CsvModel):
     invoice_number = CharField(match="Invoice#")
     fulfillment = DjangoModelField(Fulfillment,
                                    match="FulfillmentID",
-                                   transform=lambda x: x.split('_')[0].replace('FLF', '')
+                                   transform=parse_fulfillment
                                    )
     order_related = BooleanField(match="OrderRelated", transform=boolean_parse)
     
