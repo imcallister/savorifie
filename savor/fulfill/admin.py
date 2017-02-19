@@ -39,6 +39,7 @@ class FulfillmentAdmin(admin.ModelAdmin):
     ordering = ('-request_date',)
     list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
     list_filter = ('warehouse', 'status', ShippingMissing,)
+    list_select_related = ('order__channel__counterparty',)
     inlines = [FulfillLineInline, FulfillUpdateInline]
 
     def formfield_for_foreignkey(self, db_field, request=None,**kwargs):
@@ -54,6 +55,8 @@ class ShippingChargeAdmin(admin.ModelAdmin):
     list_display = ('id', 'shipper', 'tracking_number', 'external_id', 'packing_id', 'invoice_number', 'ship_date',
                     'charge', 'fulfillment', 'account', 'order_related')
     list_filter = ('order_related',)
+    list_select_related = ('fulfillment__order', 'shipper__company', 'fulfillment__order__channel__counterparty',)
+
     search_fields = ('external_id', 'tracking_number', 'invoice_number',)
     ordering = ('-ship_date',)
 
