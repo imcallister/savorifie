@@ -9,6 +9,7 @@ from accountifie.common.api import api_func
 
 from .models import SalesTax, Sale
 import importers.shopify
+import importers.buybuy
 
 
 def assign_COGS(request):
@@ -19,6 +20,9 @@ def assign_COGS(request):
 def shopify_upload(request):
     return importers.shopify.order_upload(request)
 
+@login_required
+def buybuy_upload(request):
+    return importers.buybuy.order_upload(request)
 
 def __get_salestax_data(obj):
     d = {}
