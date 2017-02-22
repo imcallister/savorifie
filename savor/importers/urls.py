@@ -6,6 +6,7 @@ import FRB
 import mcard
 import IFS_monthly
 import bulk_shipping
+import buybuy
 
 
 urlpatterns = [
@@ -16,4 +17,5 @@ urlpatterns = [
     url(r'importers/upload/frb/$', FRB.upload),
     url(r'importers/upload/mcard/$', mcard.upload),
     url(r'importers/upload/IFSmonthly/$', IFS_monthly.upload),
+    url(r'importers/upload/buybuy/$', buybuy.upload),
 ]

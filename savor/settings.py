@@ -290,7 +290,9 @@ INSTALLED_APPS = (
     'fulfill',
     'reports',
     'accounting',
+    'importers',
     'testsuite',
+
 
     'accountifie.celery',
     'accountifie.common',

@@ -312,7 +312,7 @@
       <div class="modal-body">
         <p>Please choose a .csv file</p>
 
-        <form role='form' enctype="multipart/form-data" method="post" action="/sales/buybuy_upload/">{% csrf_token %}
+        <form role='form' enctype="multipart/form-data" method="post" action="/importers/upload/buybuy/">{% csrf_token %}
             <div class="form-group">    
                 {{buybuy_upload_form.as_p}}
             </div>
