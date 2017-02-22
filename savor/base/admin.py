@@ -156,7 +156,7 @@ class ExpenseAdmin(SimpleHistoryAdmin):
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['id', 'counterparty__id', 'account__id']
     list_editable = ('account', 'comment', 'counterparty',)
-
+    
     form = ExpenseDALForm
 
     def get_changelist_form(self, request, **kwargs):
