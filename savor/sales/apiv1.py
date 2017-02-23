@@ -106,6 +106,8 @@ def sale(qstring):
         serializer = ShippingSaleSerializer
     elif view_type == 'fulfillment':
         serializer = SaleFulfillmentSerializer
+    elif view_type == 'proceeds':
+        serializer = SaleProceedsSerializer
     else:
         serializer = FullSaleSerializer
 
