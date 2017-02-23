@@ -21,7 +21,7 @@ def fulfill_no_shipcharge(qstring):
                     .filter(request_date__gte=CUTOFF) \
                     .exclude(status='back-ordered') \
                     .exclude(id__in=with_shipcharge) \
-                    .exclude(ship_type__label__in=['BY_HAND', 'FREIGHT', 'FEDEX_2DAY', 'FEDEX_GROUND']) \
+                    .exclude(ship_type__label__in=['BY_HAND', 'FREIGHT', 'FEDEX_2DAY', 'FEDEX_GROUND', 'CUSTOMER_ACCOUNT']) \
                     .exclude(Q(ship_type__label__in=['UPS_GROUND', '100WEIGHTS']) & ~Q(bill_to__iexact=SAVOR_UPS_ACCOUNT))
 
     qs = FulfillmentSerializer.setup_eager_loading(qs)

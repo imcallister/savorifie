@@ -61,7 +61,7 @@ def allsales_dump(request):
     response['Content-Disposition'] = 'attachment; filename="allsales.csv"'
     writer = csv.writer(response)
 
-    all_sales = api_func('base', 'sale')
+    all_sales = api_func('sales', 'sale')
 
     header_row = ['label', 'channel', 'customer_code', 'shipping_name',
                   'items_string', 'sale_date', 'shipping_company',

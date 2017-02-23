@@ -9,7 +9,7 @@ from fulfill.models import Fulfillment
 
 SHIP_MAP = {'FEG': 'FEDEX_GROUND', 'PMD': 'USPS_PRIORITY', 'GRND': 'UPS_GROUND',
             'FDXHD': 'FEDEX_GROUND', 'UPSGC': 'UPS_GROUND', 'LTL': 'FREIGHT',
-            'UPSLTL': 'FREIGHT'}
+            'UPSLTL': 'FREIGHT', 'PPD': 'CUSTOMER_ACCOUNT'}
 
 
 def date_parse(dt):
