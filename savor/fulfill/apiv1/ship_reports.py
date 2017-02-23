@@ -1,8 +1,6 @@
 import itertools
 from decimal import Decimal
 import datetime
-import calendar
-from dateutil.parser import parse
 
 from django.db.models import Q
 
@@ -14,19 +12,18 @@ from accountifie.toolkit.utils import monthrange
 def fulfill_no_shipcharge(qstring):
     with_shipcharge = [s['fulfillment_id'] for s in shippingcharge({}) \
                        if s['fulfillment_id']]
-    
     SAVOR_UPS_ACCOUNT = '1V06Y4'
     CUTOFF = datetime.date(2016,7,1)
     qs = Fulfillment.objects \
                     .filter(request_date__gte=CUTOFF) \
                     .exclude(status='back-ordered') \
+                    .exclude(warehouse__label='WRITEOFF') \
                     .exclude(id__in=with_shipcharge) \
                     .exclude(ship_type__label__in=['BY_HAND', 'FREIGHT', 'FEDEX_2DAY', 'FEDEX_GROUND', 'CUSTOMER_ACCOUNT']) \
                     .exclude(Q(ship_type__label__in=['UPS_GROUND', '100WEIGHTS']) & ~Q(bill_to__iexact=SAVOR_UPS_ACCOUNT))
 
     qs = FulfillmentSerializer.setup_eager_loading(qs)
     data = FulfillmentSerializer(qs, many=True).data
-
     def _get_row(row):
         out = {}
         out['fulfillment_id'] = str(row['id'])

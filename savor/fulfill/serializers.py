@@ -10,7 +10,9 @@ import inventory.serializers as invslz
 
 
 class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['fulfillment', 'fulfillment__order__channel__counterparty',
+    _SELECT_RELATED_FIELDS = ['fulfillment', 'fulfillment__order__channel__counterparty', 
+                              'shipper__company', 'fulfillment__warehouse',
+                              'fulfillment__ship_type', 'fulfillment__bill_to'
                               ]
     fulfillment = serializers.StringRelatedField()
     fulfillment_id = serializers.SerializerMethodField()
