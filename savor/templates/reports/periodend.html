@@ -1,0 +1,99 @@
+{% extends base_template %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+{% load humanize %}
+
+
+{% block extrahead %}
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/fixed-data-table.min.css">
+<link rel="stylesheet" href="{{STATIC_URL}}base/css/react-bootstrap-table-all.min.css">
+
+
+<style>
+    .modal.modal-wide .modal-dialog {
+      width: 90%;
+    }
+    .modal-wide .modal-body {
+      overflow-y: auto;
+    }
+
+    /* irrelevant styling */
+    body p { 
+      max-width: 400px; 
+      margin: 20px auto; 
+    }
+    #tallModal .modal-body p { margin-bottom: 900px };
+
+</style>
+
+
+{% endblock %}
+
+
+{% block breadcrumb %}
+<h3>Period End -- {{ as_of|date}} </h3>
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid" id="wrapper">
+    
+    <div class="row">
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Receivables</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="periodend.receivables" date={{as_of|date:"Y-m-d"}}></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Future Receivables</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="periodend.futurereceivables" date={{as_of|date:"Y-m-d"}}></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Payables</h3>
+                </div>
+                <div class="panel-body">
+                    <div id="periodend.payables" date={{as_of|date:"Y-m-d"}}></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- MODAL COMPONENTS -->
+
+<!--help-->
+<div id="periodend.help"></div>
+
+{% render_bundle 'periodend' %}
+
+{% endblock %}
+
+{% block sidebar %}
+<div class="panel panel-default">
+    <div class="panel-body">
+      <a class="btn btn-success btn-lg" data-toggle="modal" data-target="#help">
+        <span style="font-size:2em;" class="glyphicon  glyphicon-question-sign" aria-hidden="true"></span>
+      </a>
+    </div>
+</div>
+{% endblock %}
+
