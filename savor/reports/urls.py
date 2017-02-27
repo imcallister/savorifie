@@ -17,4 +17,5 @@ urlpatterns = [
     url(r'^bookkeeping/', views.bookkeeping, name='bookkeeping'),
     url(r'^receivables/', views.receivables, name='receivables'),
     url(r'^shippingcosts/', views.shippingcosts, name='shippingcosts'),
+    url(r'^periodend/', views.periodend, name='periodend'),
 ]

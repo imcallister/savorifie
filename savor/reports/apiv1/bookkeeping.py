@@ -1,4 +1,5 @@
 import datetime
+from dateutil.parser import parse
 
 import accountifie.query.apiv1 as query_api
 from base.models import Cashflow, CreditCardTrans
@@ -7,14 +8,17 @@ from sales.models import ChannelPayouts
 
 
 def receivables(qstring):
-    today = datetime.datetime.now().date()
-    rcvbles = query_api.cp_balances('SAV', {'account': '1100', 'date': today})
+    if qstring.get('as_of'):
+        as_of = parse(qstring.get('as_of')).date()
+    else:
+        as_of = datetime.datetime.now().date()
+    rcvbles = query_api.cp_balances('SAV', {'account': '1100', 'date': as_of})
 
     ar_rows = []
     for rcv in rcvbles:
         cp = rcv['cp']
         amount = rcv['total']
-        drill_url = '/reporting/history/account/1100/?cp=%s&to=%s' % (cp, today.isoformat())
+        drill_url = '/reporting/history/account/1100/?cp=%s&to=%s' % (cp, as_of.isoformat())
         ar_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
     return sorted(ar_rows, key=lambda x: float(x['amount']['text']), reverse=True)
 
@@ -33,14 +37,17 @@ def future_receivables(qstring):
 
 
 def payables(qstring):
-    today = datetime.datetime.now().date()
-    pbles = query_api.cp_balances('SAV', {'account': '3000', 'date': today})
+    if qstring.get('as_of'):
+        as_of = parse(qstring.get('as_of')).date()
+    else:
+        as_of = datetime.datetime.now().date()
+    pbles = query_api.cp_balances('SAV', {'account': '3000', 'date': as_of})
 
     ap_rows = []
     for pbl in pbles:
         cp = pbl['cp']
         amount = pbl['total']
-        drill_url = '/reporting/history/account/3000/?cp=%s&to=%s' % (cp, today.isoformat())
+        drill_url = '/reporting/history/account/3000/?cp=%s&to=%s' % (cp, as_of.isoformat())
         ap_rows.append({'counterparty': cp, 'amount': {'link': drill_url, 'text': amount}})
     return sorted(ap_rows, key=lambda x: float(x['amount']['text']), reverse=True)
 
