@@ -81,6 +81,7 @@ def _miss_ship_list(qstring=None):
 
 def _unbatched_fulfill_list(qstring=None):
     fulfills = api_func('fulfill', 'unbatched_fulfillments')
+    fulfills = [f for f in fulfills if f['warehouse'] not in ['WRITEOFF', 'CONSIGN', '152Frank']]
 
     def get_items(f):
         return ','.join(['%d %s' % (l['quantity'], l['inventory_item']) for l in f['fulfill_lines']])

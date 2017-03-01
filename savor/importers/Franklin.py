@@ -40,6 +40,7 @@ def process_152frank(file_name):
     
     for rec in wh_records:
         rec['warehouse_id'] = wh_id
+        rec['request_date'] = rec['ship_date']
         rec['warehouse_pack_id'] = 'FLF%s:%s' % (rec['fulfillment'].id, rec['tracking_number'])
         rec_obj = WarehouseFulfill.objects \
                                   .filter(warehouse_pack_id=rec['warehouse_pack_id']) \
