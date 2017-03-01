@@ -12,7 +12,8 @@ def date_parse(dt):
 
 
 def tracking_parse(tr):
-    tr = str(tr.split(':')[1])
+    if ':' in tr:
+        tr = str(tr.split(':')[1])
     return tr.upper()
 
 def parse_decimal(x):
@@ -26,7 +27,6 @@ class FranklinCSVModel(CsvModel):
                                    match="FulfillmentID",
                                    transform=lambda x: x.split('_')[0].replace('FLF', '')
                                    )
-    request_date = DateField(match="ShipDate", transform=date_parse)
     ship_date = DateField(match="ShipDate", transform=date_parse)
     tracking_number = CharField(match="Tracking#", transform=tracking_parse)
     shipping_cost = DecimalField(match='ShippingCost', transform=parse_decimal)
