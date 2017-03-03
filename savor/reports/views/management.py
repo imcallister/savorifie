@@ -81,7 +81,7 @@ def _miss_ship_list(qstring=None):
 
 def _unbatched_fulfill_list(qstring=None):
     fulfills = api_func('fulfill', 'unbatched_fulfillments')
-    fulfills = [f for f in fulfills if f['warehouse'] not in ['WRITEOFF', 'CONSIGN', '152Frank']]
+    fulfills = [f for f in fulfills if f['warehouse'] not in ['WRITEOFF', 'CONSIGN', '152Frank', 'FBA']]
 
     def get_items(f):
         return ','.join(['%d %s' % (l['quantity'], l['inventory_item']) for l in f['fulfill_lines']])
@@ -119,6 +119,7 @@ def _backorder_list(qstring=None):
 def management(request):
     context = {'shopify_upload_form': FileForm()}
     context['buybuy_upload_form'] = FileForm()
+    context['amazon_upload_form'] = FileForm()
 
     context['incomplete_orders'] = api_func('sales', 'incomplete_sales_count')
 
@@ -136,8 +137,8 @@ def management(request):
 
 
     unrecd = flfl_api.no_warehouse_record({})
-    context['MICH_unreconciled_count'] = len([x for x in unrecd
-                                              if x['warehouse'] == 'MICH'])
+    context['FBA_unreconciled_count'] = len([x for x in unrecd
+                                              if x['warehouse'] == 'FBA'])
     context['NC2_unreconciled_count'] = len([x for x in unrecd
                                              if x['warehouse'] == 'NC2'])
     context['152Frank_unreconciled_count'] = len([x for x in unrecd
@@ -152,7 +153,7 @@ def management(request):
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
-    context['MICH_unreconciled'] = get_table('no_warehouse_record')(warehouse='MICH')
+    context['FBA_unreconciled'] = get_table('no_warehouse_record')(warehouse='FBA')
     context['NC2_unreconciled'] = get_table('no_warehouse_record')(warehouse='NC2')
     context['152Frank_unreconciled'] = get_table('no_warehouse_record')(warehouse='152Frank')
     

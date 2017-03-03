@@ -174,7 +174,8 @@ def no_warehouse_record(qstring):
                   .annotate(batched=Count('batchrequest')) \
                   .values('num_whf', 'batched', 'id')
 
-    nwr = [f['id'] for f in objs if f['batched'] > 0 and f['num_whf']==0]
+    nwr = [f['id'] for f in objs if  f['num_whf']==0]
+    
     qs = Fulfillment.objects.filter(id__in=nwr)
     qs = FulfillmentSerializer.setup_eager_loading(qs)
     flfmts = FulfillmentSerializer(qs, many=True).data

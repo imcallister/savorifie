@@ -106,10 +106,6 @@ def UPS_wrong_acct():
 
 
 def unpaid_channel(label):
-    print '=' * 20
-
-    print 'unpaid channel'
-    print '=' * 20
     data_url = "/api/sales/unpaid_channel/%s/" % label
     row_defs = [{'data_field': 'label', 'value': 'ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'paid_thru', 'value': 'Paid Via', 'formatter': 'nameFormatter'},

@@ -305,23 +305,23 @@ def NC2_pick_list(request, data, label='MICH_batch'):
         f['ship']['id'] = 'FLF%s' % f['ship']['id']
 
     headers = OrderedDict([('SAVOR ID', 'id'),
-                           ('Customer Reference', 'order:external_routing_id'),
-                           ('Ship Type', 'ifs_ship_type'),
-                           ('Gift Message', 'order:gift_message'),
-                           ('Email', 'order:notification_email'),
-                           ('Shipping Phone', 'order:shipping_phone'),
-                           ('Name', 'order:shipping_name'),
-                           ('Shipping Company', 'order:shipping_company'),
-                           ('Shipping Address1', 'order:shipping_address1'),
-                           ('Shipping Address2', 'order:shipping_address2'),
-                           ('Shipping City', 'order:shipping_city'),
-                           ('Shipping Province', 'order:shipping_province'),
-                           ('Shipping Zip', 'order:shipping_zip'),
-                           ('Shipping Country', 'order:shipping_country'),
+                           ('CUSTOMER REFERENCE', 'order:external_routing_id'),
+                           ('SHIP TYPE', 'ifs_ship_type'),
+                           ('GIFT MESSAGE', 'order:gift_message'),
+                           ('CUSTOMER E-MAIL', 'order:notification_email'),
+                           ('SHIPPING PHONE', 'order:shipping_phone'),
+                           ('NAME', 'order:shipping_name'),
+                           ('SHIPPING COMPANY', 'order:shipping_company'),
+                           ('SHIPPING ADDRESS 1', 'order:shipping_address1'),
+                           ('SHIPPING ADDRESS 2', 'order:shipping_address2'),
+                           ('SHIPPING CITY', 'order:shipping_city'),
+                           ('SHIPPING PROVIENCE', 'order:shipping_province'),
+                           ('SHIPPING ZIP', 'order:shipping_zip'),
+                           ('SHIPPING Country', 'order:shipping_country'),
                            ])
 
     header_row = headers.keys()
-    header_row += [u'Item', u'Item Name', u'Quantity']
+    header_row += [u'ITEM NAME', u'ITEM QTY']
     writer.writerow(header_row)
 
     for flf in flf_data:
@@ -329,7 +329,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
         for i in range(0, len(opt_skus)):
             line = [flf['ship'].get(headers[col], '') for col in headers]
             label = opt_skus[i]['inventory_item']
-            line += [label, sku_names[label], opt_skus[i]['quantity']]
+            line += [label, opt_skus[i]['quantity']]
             writer.writerow(line)
 
     return response
