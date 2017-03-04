@@ -7,7 +7,7 @@ import mcard
 import IFS_monthly
 import bulk_shipping
 import buybuy
-
+import AMZN_orders
 
 urlpatterns = [
     url(r'importers/nc2_upload/$', NC2.upload),
@@ -18,4 +18,5 @@ urlpatterns = [
     url(r'importers/upload/mcard/$', mcard.upload),
     url(r'importers/upload/IFSmonthly/$', IFS_monthly.upload),
     url(r'importers/upload/buybuy/$', buybuy.upload),
+    url(r'importers/upload/AMZN_orders/$', AMZN_orders.upload),
 ]

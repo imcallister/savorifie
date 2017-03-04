@@ -25,6 +25,7 @@
                         <ul class="nav nav-pills nav-stacked">
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadShopify">Load Shopify</a></li>
                             <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadBuyBuy">Load BuyBuy</a></li>
+                            <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadAmazon">Load Amazon Orders</a></li>
                             <li><a class="btn btn-primary" href="/admin/sales/sale/add/?next=/inventory/management/" role="button">Create Manual order</a></li>
                         </ul>
                     </div>
@@ -139,7 +140,7 @@
                 
                     <div class="col-md-8">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="panel panel-default">
                                     <div class="panel-heading text-center">
                                         <h3 class="panel-title">NC2</h3>
@@ -151,7 +152,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="panel panel-warning">
                                     <div class="panel-heading text-center">
                                         <h3 class="panel-title">152Frank</h3>
@@ -159,6 +160,18 @@
                                     <div class="panel-body text-center">
                                         <font size="20">
                                             <a data-toggle="modal" href="#unreconciled_152Frank" type="submit" name="unreconciled">{{152Frank_unreconciled_count}}</a>
+                                        </font>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="panel panel-success">
+                                    <div class="panel-heading text-center">
+                                        <h3 class="panel-title">FBA</h3>
+                                    </div>
+                                    <div class="panel-body text-center">
+                                        <font size="20">
+                                            <a data-toggle="modal" href="#unreconciled_FBA" type="submit" name="unreconciled">{{FBA_unreconciled_count}}</a>
                                         </font>
                                     </div>
                                 </div>
@@ -326,19 +339,19 @@
   </div>
 </div>
 
-<div class="modal fade" id="loadThoroughbred" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+<div class="modal fade" id="loadAmazon" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h3 class="modal-title" id="myModalLabel">Upload Thoroughbred fulfillment file</h3>
+        <h3 class="modal-title" id="myModalLabel">Upload Amazon order file</h3>
       </div>
       <div class="modal-body">
         <p>Please choose a .csv file</p>
 
-        <form role='form' enctype="multipart/form-data" method="post" action="/fulfill/thoroughbred_upload/">{% csrf_token %}
+        <form role='form' enctype="multipart/form-data" method="post" action="/importers/upload/AMZN_orders/">{% csrf_token %}
             <div class="form-group">    
-                {{shopify_upload_form.as_p}}
+                {{amazon_upload_form.as_p}}
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
             <a href='/' class="btn btn-default">Cancel</a>
@@ -349,6 +362,7 @@
     </div>
   </div>
 </div>
+
 
 <div class="modal fade" id="loadNC2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
@@ -418,6 +432,14 @@
         {{152Frank_unreconciled}}
     </div>
 </div>
+
+<div class="modal fade" id="unreconciled_FBA" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-content">
+        {{FBA_unreconciled}}
+    </div>
+</div>
+
+
 {% endblock %}
 
 {% block sidebar %}

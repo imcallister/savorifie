@@ -203,15 +203,6 @@ class SaleAdmin(SimpleHistoryAdmin):
 
 admin.site.register(Sale, SaleAdmin)
 
-class ChannelPayoutsAdmin(admin.ModelAdmin):
-    ordering = ('-payout_date',)
-    list_display = ('__unicode__', 'payout_date', 'payout', 'paid_thru', 'channel',)
-    filter_horizontal = ('sales',)
-    
-admin.site.register(ChannelPayouts, ChannelPayoutsAdmin)
-
-
-
 
 
 class PayoutLineInlineFormset(forms.models.BaseInlineFormSet):
