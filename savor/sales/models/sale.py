@@ -10,150 +10,13 @@ from simple_history.models import HistoricalRecords
 import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
-import accounting.models
-from accountifie.gl.models import Account, Counterparty
-from accounting.serializers import COGSAssignmentSerializer
+from accountifie.gl.models import Account
+
 
 
 DZERO = Decimal('0')
 
 logger = logging.getLogger('default')
-
-
-class Channel(models.Model):
-    label = models.CharField(max_length=20)
-    counterparty = models.ForeignKey(Counterparty)
-
-    class Meta:
-        app_label = 'sales'
-        db_table = 'base_channel'
-
-    def __unicode__(self):
-        return self.label
-
-CHANNELS = [
-    ['shopify', "Shopify"],
-]
-
-
-PAYOUT_TAGS = (
-    ('STANDALONE', 'Standalone'),
-    ('REFUND', 'Refund')
-    )
-
-class PayoutLine(models.Model):
-    sale = models.ForeignKey('sales.Sale', related_name='payoutline_sale', null=True, blank=True)
-    amount = models.DecimalField(max_digits=8, decimal_places=2)
-    tag = models.CharField(max_length=20, choices=PAYOUT_TAGS, blank=True, null=True)
-    payout = models.ForeignKey('sales.Payout', related_name='payout_line')
-
-
-    class Meta:
-        app_label = 'sales'
-        db_table = 'sales_payoutline'
-
-    def __unicode__(self):
-        return '%s:%s' % (self.payout, self.id)
-
-
-class Payout(models.Model):
-    channel = models.ForeignKey(Channel)
-    payout_date = models.DateField()
-    payout = models.DecimalField(max_digits=8, decimal_places=2)
-    paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
-                                  related_name='ch_payout_paid_thru',
-                                  limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
-
-    def __unicode__(self):
-        return '%s:%s:%s' % (self.channel, self.paid_thru, self.id)
-
-    def calcd_payout(self):
-        return sum([s.amount for s in self.payout_line.all()])
-
-
-class ChannelPayouts(models.Model):
-    channel = models.ForeignKey(Channel)
-    payout_date = models.DateField()
-    payout = models.DecimalField(max_digits=8, decimal_places=2)
-    sales = models.ManyToManyField('sales.Sale', blank=True)
-    paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
-                                  related_name='payout_paid_thru',
-                                  limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
-
-    def __unicode__(self):
-        if self.sales.count() == 0:
-            return 'ADJUST.%s' % self.id
-        else:
-            return ','.join([str(s) for s in self.sales.all()])
-
-    def calcd_payout(self):
-        return sum([s.total_receivable() for s in self.sales.all()])
-
-
-class TaxCollector(models.Model):
-    entity = models.CharField(max_length=100)
-
-    def __unicode__(self):
-        return self.entity
-
-    class Meta:
-        app_label = 'sales'
-        db_table = 'base_taxcollector'
-
-
-UNITSALE_TAGS = (
-    ('RETURN', 'Return'),
-    ('REPLACEMENT', 'Replacement'),
-    ('PAYMENT', 'Payment'),
-)
-
-class UnitSale(models.Model):
-    sale = models.ForeignKey('sales.Sale', related_name='unit_sale')
-    sku = models.ForeignKey('products.Product', null=True, blank=True)
-    quantity = models.IntegerField(default=0)
-    unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
-    tag = models.CharField(max_length=20, choices=UNITSALE_TAGS, blank=True, null=True)
-
-    class Meta:
-        app_label = 'sales'
-        db_table = 'base_unitsale'
-
-    def __unicode__(self):
-        return '%s - %s:%s' % (self.id, self.sale, self.sku)
-
-
-    def fifo_assignments(self):
-        qs = self.cogsassignment_set.all()
-        qs = COGSAssignmentSerializer.setup_eager_loading(qs)
-        return COGSAssignmentSerializer(qs, many=True).data
-
-
-    def COGS(self):
-        qs = self.cogsassignment_set.all()
-        assignments = COGSAssignmentSerializer(qs, many=True).data
-        key_func = lambda x: x['unit_label']
-        gps = itertools.groupby(sorted(assignments, key=key_func), key=key_func)
-        return [{'label': k, 'COGS': sum(a['quantity'] * a['cost'] for a in v)} for k, v in gps]
-
-
-    def inventory_items(self):
-        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit.all())
-
-    def get_inventory_items(self):
-        return dict((u.inventory_item.label, u.quantity * self.quantity) for u in self.sku.skuunit.all())
-
-    def get_gross_sales(self):
-        return dict((u.inventory_item.label,
-                     u.quantity * self.quantity * self.unit_price * Decimal(u.rev_percent)/Decimal(100)) \
-                    for u in self.sku.skuunit.all())
-
-    @property
-    def items_string(self):
-        items = [(u.quantity * self.quantity, u.inventory_item.label) for u in self.sku.skuunit.all()]
-        items = sorted(items, key=lambda x: x[1])
-        return ','.join(['%s %s' % (i[0], i[1]) for i in items])
-
-
 
 
 SPECIAL_SALES = (
@@ -167,7 +30,7 @@ SPECIAL_SALES = (
 class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     company = models.ForeignKey('gl.Company', default=get_default_company)
 
-    channel = models.ForeignKey(Channel, blank=True, null=True)
+    channel = models.ForeignKey('sales.Channel', blank=True, null=True)
     sale_date = models.DateField()
     external_channel_id = models.CharField(max_length=50, unique=True,
                                            blank=True, null=True,
@@ -255,16 +118,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def delete(self):
         self.delete_from_gl()
         models.Model.delete(self)
-
-    @property
-    def fulfill_requested(self):
-        fulfillment_labels = [x['order'] for x in api_func('inventory', 'fulfillment')]
-        order_label = api_func('base', 'sale', unicode(order_id))['label']
-
-        if order_label in fulfillment_labels:
-            return True
-        else:
-            return False
 
     @property
     def id_link(self):
@@ -542,16 +395,3 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
 
         return [tran]
-
-class SalesTax(models.Model):
-    sale = models.ForeignKey(Sale, related_name='sales_tax')
-    collector = models.ForeignKey(TaxCollector)
-    tax = models.DecimalField(max_digits=11, decimal_places=2)
-
-    class Meta:
-        app_label = 'sales'
-        db_table = 'base_salestax'
-
-    def __unicode__(self):
-        return '%s: %s' % (self.sale, self.collector)
-

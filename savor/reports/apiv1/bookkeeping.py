@@ -4,7 +4,7 @@ from dateutil.parser import parse
 import accountifie.query.apiv1 as query_api
 from base.models import Cashflow, CreditCardTrans
 from fulfill.models import ShippingCharge
-from sales.models import ChannelPayouts
+from sales.models import Payout
 
 
 def receivables(qstring):
@@ -72,7 +72,7 @@ def last_uploads(qstring):
                                 .ship_date
     output.append({'Upload': 'UPS', 'Last Upload': UPS})
 
-    shopify = ChannelPayouts.objects.filter(channel__counterparty_id='SHOPIFY') \
+    shopify = Payout.objects.filter(channel__counterparty_id='SHOPIFY') \
                                     .order_by('-payout_date') \
                                     .first() \
                                     .payout_date

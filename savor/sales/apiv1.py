@@ -10,10 +10,10 @@ from django.conf import settings
 from django.db.models import Prefetch, Sum
 
 import products.apiv1 as product_api
-from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts, Payout, PayoutLine
+from .models import Sale, UnitSale, Channel, SalesTax, Payout, PayoutLine
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
-    SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer, \
+    SaleProceedsSerializer, SalesTaxSerializer2, \
     UnitSaleSerializer, UnitSaleItemSerializer, PayoutSerializer
 from accounting.serializers import COGSAssignmentSerializer
 
@@ -273,17 +273,6 @@ def sales_counts(qstring):
             sales_counts[sku] += u_sale_counts[sku]
 
     return sales_counts
-
-def channel_payout_drilldown(payout_id, qstring):
-    qs = ChannelPayouts.objects.get(id=payout_id).sales
-    qs = SaleProceedsSerializer.setup_eager_loading(qs)
-    return SaleProceedsSerializer(qs, many=True).data
-    
-def channel_payout_comp(channel_lbl, qstring):
-    qs = ChannelPayouts.objects.filter(channel__counterparty_id=channel_lbl)
-    qs = ChannelPayoutSerializer.setup_eager_loading(qs)
-    output = ChannelPayoutSerializer(qs, many=True).data
-    return [x for x in output if abs(x['diff']) > 1.0]
     
 
 def payout_comp(channel_lbl, qstring):
@@ -302,6 +291,7 @@ def unpaid_sales(channel_lbl, qstring):
     pls = PayoutLine.objects.filter(payout__channel__counterparty_id=channel_lbl) \
                             .values('sale_id') \
                             .annotate(total=Sum('amount'))
+    
     payout_lines = dict((p['sale_id'], p['total']) for p in pls)
     
     sale_ids = [t['sale_id'] for t in pls]
@@ -331,7 +321,7 @@ def unpaid_sales(channel_lbl, qstring):
 def unpaid_channel(channel_lbl, qstring):
     # find Shopify sales which are not in a channel payout batch
     paidout_sales = []
-    for cpt in ChannelPayouts.objects.filter(channel__counterparty_id=channel_lbl):
+    for cpt in Payout.objects.filter(channel__counterparty_id=channel_lbl):
         paidout_sales += [s.id for s in cpt.sales.all()]
 
     qs = Sale.objects.filter(channel__counterparty_id='SHOPIFY') \

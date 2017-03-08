@@ -10,7 +10,7 @@ from django.db.models import Q
 
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, ChannelPayouts, Payout, PayoutLine
+from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, Payout, PayoutLine, ProceedsAdjustment
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
@@ -54,6 +54,11 @@ class SalesTaxInline(admin.TabularInline):
     can_delete = True
     extra = 0
 
+class ProceedsAdjustmentInline(admin.TabularInline):
+    model = ProceedsAdjustment
+    can_delete = True
+    extra = 0
+
 
 class FulfillRequested(SimpleListFilter):
     title = 'requested'
@@ -80,7 +85,8 @@ class SaleAdmin(SimpleHistoryAdmin):
     actions = ['delete_model', 'queue_for_warehouse', 'queue_for_backorder']
     inlines = [
         UnitSaleInline,
-        SalesTaxInline
+        SalesTaxInline,
+        ProceedsAdjustmentInline
     ]
     list_select_related = ('channel__counterparty', 'channel',)
 
