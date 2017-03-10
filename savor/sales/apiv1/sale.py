@@ -10,82 +10,19 @@ from django.conf import settings
 from django.db.models import Prefetch, Sum
 
 import products.apiv1 as product_api
-from .models import Sale, UnitSale, Channel, SalesTax, Payout, PayoutLine
+from sales.models import Sale, UnitSale, Channel, Payout, PayoutLine
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
-    ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
-    SaleProceedsSerializer, SalesTaxSerializer2, \
-    UnitSaleSerializer, UnitSaleItemSerializer, PayoutSerializer
-from accounting.serializers import COGSAssignmentSerializer
+    ShippingSaleSerializer, SaleFulfillmentSerializer, SaleProceedsSerializer,\
+    PayoutSerializer, SaleIDSerializer
 
 
+def external_ids(qstring):
+    qs = Sale.objects
+    filter_string = qstring.get('filter', None)
+    if filter_string:
+        qs = qs.filter(external_channel_id__icontains=filter_string)
+    return list(SaleIDSerializer(qs, many=True).data)
 
-@dispatch(str, dict)
-def channel(channel_id, qstring):
-    channel = Channel.objects.get(label=channel_id)
-    data = {'id': channel.id, 'counterparty_id': channel.counterparty.id}
-    return data
-
-
-# how to take str or unicode??
-@dispatch(unicode, dict)
-def channel(channel_id, qstring):
-    channel = Channel.objects.get(label=channel_id)
-    data = {'id': channel.id, 'counterparty_id': channel.counterparty.id}
-    return data
-
-
-@dispatch(dict)
-def channel(qstring):
-    channels = Channel.objects.all()
-
-    data = [{'id': channel.id, 'counterparty_id': channel.counterparty.id} for channel in channels]
-    return data
-
-
-def salestax(qstring):
-    start_date = qstring.get('from_date', settings.DATE_EARLY)
-    end_date = qstring.get('to_date', datetime.datetime.now().date())
-    if type(start_date) != datetime.date:
-        start_date = parse(start_date).date()
-    if type(end_date) != datetime.date:
-        end_date = parse(end_date).date()
-    qs = SalesTax.objects.filter(sale__sale_date__gte=start_date,
-                                 sale__sale_date__lte=end_date)
-
-    serializer = SalesTaxSerializer
-    qs = serializer.setup_eager_loading(qs)
-    return list(serializer(qs, many=True).data)
-
-def salestax2(qstring):
-    start_date = qstring.get('from_date', settings.DATE_EARLY)
-    end_date = qstring.get('to_date', datetime.datetime.now().date())
-    if type(start_date) != datetime.date:
-        start_date = parse(start_date).date()
-    if type(end_date) != datetime.date:
-        end_date = parse(end_date).date()
-    qs = Sale.objects.filter(sale_date__gte=start_date,
-                             sale_date__lte=end_date)
-
-    serializer = SalesTaxSerializer2
-    qs = serializer.setup_eager_loading(qs)
-    return list(serializer(qs, many=True).data)
-
-
-def unitsale( qstring):
-    qs = UnitSale.objects.all()
-    qs = UnitSaleSerializer.setup_eager_loading(qs)
-    return UnitSaleSerializer(qs, many=True).data
-
-
-def unitsaleitems( qstring):
-    qs = UnitSale.objects.all()
-    qs = UnitSaleItemSerializer.setup_eager_loading(qs)
-    return UnitSaleItemSerializer(qs, many=True).data
-
-
-def unitsale_COGS(unitsale_id, qstring):
-    qs = UnitSale.objects.get(id=unitsale_id).cogsassignment_set.all()
-    return COGSAssignmentSerializer(qs, many=True).data
 
 @dispatch(dict)
 def sale(qstring):
@@ -129,8 +66,6 @@ def sale(id, qstring):
         serializer = ShippingSaleSerializer
     elif view_type == 'fulfillment':
         serializer = SaleFulfillmentSerializer
-    elif view_type == 'drilldown':
-        serializer = SaleDrilldownSerializer
     else:
         serializer = FullSaleSerializer
 

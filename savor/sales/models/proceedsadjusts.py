@@ -28,4 +28,4 @@ class ProceedsAdjustment(models.Model):
         db_table = 'sales_proceedsadjustment'
 
     def __unicode__(self):
-        return self.id
+        return str(self.id)

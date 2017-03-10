@@ -1,10 +1,11 @@
 import logging
+from decimal import Decimal
 
 from sales.models import Sale
 from accountifie.gl.models import Counterparty
 
 from fulfill.models import WarehouseFulfill, Fulfillment, ShippingCharge
-from sales.models import ChannelPayouts, Payout, PayoutLine
+from sales.models import Payout, PayoutLine, UnitSale, SalesTax, ProceedsAdjustment
 from sales.importers.shopify import shopify_fee
 
 from fulfill.calcs import create_nc2_shippingcharge
@@ -95,5 +96,65 @@ def backfill_payouts():
             npl.save()
 
 
+def backfill_unitsale_dates():
+    unit_sales = UnitSale.objects.all()
+
+    for us in unit_sales:
+        us.date = us.sale.sale_date
+        us.save()
 
 
+def backfill_salestax_dates():
+    sales_taxes = SalesTax.objects.all()
+
+    for st in sales_taxes:
+        st.date = st.sale.sale_date
+        st.save()
+
+def backfill_channel_charge_proceeds():
+    sales = Sale.objects.all()
+
+    for s in sales:
+        if s.channel_charges > Decimal('0'):
+            pa = ProceedsAdjustment()
+            pa.sale = s
+            pa.date = s.sale_date
+            pa.amount = s.channel_charges
+            pa.adjust_type = 'CHANNEL_FEES'
+            pa.save()
+
+def backfill_shipping_charge_proceeds():
+    sales = Sale.objects.all()
+
+    for s in sales:
+        if s.shipping_charge > Decimal('0'):
+            pa = ProceedsAdjustment()
+            pa.sale = s
+            pa.date = s.sale_date
+            pa.amount = s.shipping_charge
+            pa.adjust_type = 'SHIPPING_CHARGE'
+            pa.save()
+
+def backfill_gift_wrap_fee_proceeds():
+    sales = Sale.objects.all()
+
+    for s in sales:
+        if s.gift_wrap_fee > Decimal('0'):
+            pa = ProceedsAdjustment()
+            pa.sale = s
+            pa.date = s.sale_date
+            pa.amount = s.gift_wrap_fee
+            pa.adjust_type = 'GIFTWRAP_FEES'
+            pa.save()
+
+def backfill_discount_proceeds():
+    sales = Sale.objects.all()
+
+    for s in sales:
+        if s.discount > Decimal('0'):
+            pa = ProceedsAdjustment()
+            pa.sale = s
+            pa.date = s.sale_date
+            pa.amount = s.discount
+            pa.adjust_type = 'DISCOUNT'
+            pa.save()

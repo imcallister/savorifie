@@ -12,6 +12,7 @@ from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
 from accountifie.gl.models import Account
 
+import sales_funcs
 
 
 DZERO = Decimal('0')
@@ -69,12 +70,10 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     short_code = 'SALE'
 
     def __unicode__(self):
-        if self.external_channel_id:
-            sale_id = self.external_channel_id
+        if self.channel.counterparty.id == 'SAV':
+            return self.external_channel_id
         else:
-            sale_id = 'SAV.' + str(self.id)
-
-        return '%s: %s' % (self.channel.counterparty.id, sale_id)
+            return '%s: %s' % (self.channel.counterparty.id, self.external_channel_id)
 
     class Meta:
         app_label = 'sales'
@@ -82,33 +81,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     def save(self, update_gl=True):
         if not self.external_channel_id:
-            if self.special_sale:
-                sample_ids = [s['external_channel_id'].lower() for s in Sale.objects \
-                                                     .filter(external_channel_id__icontains='sample') \
-                                                     .values('external_channel_id')]
-                special_ids = [s['external_channel_id'].lower() for s in Sale.objects \
-                                                      .filter(external_channel_id__icontains='special') \
-                                                      .values('external_channel_id')]
+            self.external_channel_id = sales_funcs.create_external_channel_id(self.special_sale, str(self.channel))
 
-                sample_ids = [int(s.replace('sample', '')) for s in sample_ids]
-                special_ids = [int(s.replace('special', '')) for s in special_ids]
-                used_ids = sample_ids + special_ids
-                if len(used_ids) == 0:
-                    max_id = 0
-                else:
-                    max_id = max(used_ids)
-                self.external_channel_id = 'SPECIAL%d' % (max_id + 1)
-            else:
-                ch_lbl = str(self.channel)
-                auto_ids = [s['external_channel_id'] for s in Sale.objects \
-                                                      .filter(external_channel_id__icontains=ch_lbl) \
-                                                      .values('external_channel_id')]
-                used_ids = [int(s.replace(ch_lbl + '.', '')) for s in auto_ids]
-                if len(used_ids) == 0:
-                    max_id = 0
-                else:
-                    max_id = max(used_ids)
-                self.external_channel_id = '%s.%d' % (ch_lbl, max_id + 1)
         if update_gl:
             self.update_gl()
 
@@ -181,27 +155,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         return str(self)
 
 
-    def _get_salestaxes(self):
-        allocations = self.salestax_set.all()
-
-        alloc_lines = []
-        running_total = DZERO
-        if len(allocations) > 0:
-            for allocation in allocations:
-                if allocation.project is None:
-                    tags = []
-                else:
-                    tags = ['project_%s' % allocation.project.id]
-
-                alloc_lines.append((allocation.trans_type, DZERO - Decimal(allocation.amount), allocation.counterparty, tags))
-                running_total += Decimal(allocation.amount)
-
-        if abs(Decimal(self.amount) - running_total) >= Decimal('0.005'):
-            alloc_lines.append((self.ext_account.gl_account, DZERO - (Decimal(self.amount) - running_total), None, []))
-
-        return alloc_lines
-
-
     def gross_sale_proceeds(self):
         return sum([v for k, v in self.__sale_amts.iteritems()])
 
@@ -248,12 +201,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         else:
             return self.channel.counterparty
 
-    def _receiveables_account(self):
-        if self.channel.label in ['PAMPHOM', 'GROMMET', 'PAPERSO', 'UNCOMMON']:
-            return Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE_TERMS'))
-        else:
-            return Account.objects.get(id=api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE'))
-
+    
     def _get_special_account(self):
         """
         Get account to book special sale to
@@ -288,14 +236,118 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         return dict((k, sum(a['COGS'] for a in v)) for k, v in gps)
 
 
+    def get_payment_lines(self):
+        channel_id = self.channel.counterparty.id
+        amount = self.total_receivable(incl_ch_fees=False)
+        accts_rec = sales_funcs.get_receiveables_account(channel_id)
+        channel_fees_acct = sales_funcs.get_channelfees_account(channel_id)
+
+        lines = []
+
+        lines.append((accts_rec, -amount, self.customer_code, []))
+        lines.append((accts_rec, amount - Decimal(self.channel_charges), self.payee(), []))
+        if self.channel_charges > 0:
+            lines.append((channel_fees_acct,
+                          Decimal(self.channel_charges),
+                          channel_id, []))
+        return lines
+
+    def get_specialsale_lines(self):
+        lines = []
+        sample_exp_acct = self._get_special_account()
+
+        # get COGS
+        COGS_amounts = self.COGS()
+        for ii in COGS_amounts:
+            product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
+            inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
+            inv_acct = Account.objects.filter(path=inv_acct_path).first()
+            lines.append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
+            lines.append((sample_exp_acct, COGS_amounts[ii], self.customer_code, []))
+        return lines
+
+    def get_acctrec_lines(self):
+        lines = []
+        accts_rec = sales_funcs.get_receiveables_account(self.channel.label)
+        lines.append((accts_rec, self.total_receivable(), self.payee(), []))
+        return lines
+
+    def get_shippingcharge_lines(self):
+        lines = []
+        if self.shipping_charge > 0:
+            shipping_acct = sales_funcs.get_shipping_account()
+            lines.append((shipping_acct, - self.shipping_charge, self.customer_code, []))
+        return lines
+
+    def get_salestax_lines(self):
+        lines = []
+        salestax_acct = sales_funcs.get_salestax_account()
+        if self.total_sales_tax() > 0:
+            for entity in self.__tax_amts:
+                lines.append((salestax_acct, -self.__tax_amts[entity], entity, []))
+        return lines
+
+    def get_giftwrap_lines(self):
+        lines = []
+        giftwrap_acct = sales_funcs.get_giftwrap_account()
+        if self.gift_wrapping:
+            lines.append((giftwrap_acct, -self.gift_wrap_fee, self.customer_code, []))
+        return lines
+
+    def get_discount_lines(self):
+        lines = []
+        discount_acct = sales_funcs.get_discount_account(self.channel.label)
+        if self.discount and self.discount > 0:
+            lines.append((discount_acct, Decimal(self.discount), self.customer_code, []))
+        return lines
+
+    def get_channelfee_lines(self):
+        lines = []
+        channel_id = self.channel.counterparty.id
+        if self.channel_charges > 0:
+            channelfees_acct = sales_funcs.get_channelfees_account(channel_id)
+            lines.append((channelfees_acct,
+                          Decimal(self.channel_charges),
+                          channel_id, []))
+
+    def get_COGS_lines(self):
+        lines = []
+        COGS_amounts = self.COGS()
+
+        for ii in COGS_amounts:
+            product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
+
+            inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
+            inv_acct = Account.objects.filter(path=inv_acct_path).first()
+
+            COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (self.channel.counterparty.id, product_line)
+            COGS_acct = Account.objects.filter(path=COGS_acct_path).first()
+
+            lines.append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
+            lines.append((COGS_acct, COGS_amounts[ii], self.customer_code, []))
+        return lines
+
+    def get_grosssales_lines(self):
+        lines = []
+        channel_id = self.channel.counterparty.id
+        for u_sale in self.__unit_sales:
+            inv_items = u_sale.get_gross_sales()
+            for ii in inv_items:
+                product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
+                gross_sales_acct_path = 'equity.retearnings.sales.gross.%s.%s' % (channel_id, product_line)
+                gross_sales_acct = Account.objects.filter(path=gross_sales_acct_path).first()
+                lines.append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
+        return lines
+
+
+
     def get_gl_transactions(self):
 
         # collect all the info first
         # TO DO have to make sure about order here
         self._get_unit_sales()
         self._get_sales_taxes()
-        channel_id = self.channel.counterparty.id
-
+        
         tran = dict(company=self.company,
                     date=self.sale_date,
                     comment= "%s: %s" % (self.channel, self.external_channel_id),
@@ -303,95 +355,19 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     lines=[]
                     )
-        accts_rec = self._receiveables_account()
-
-        shipping_acct = Account.objects.filter(path='liabilities.curr.accrued.shipping').first()
-        giftwrap_acct = Account.objects.filter(path='equity.retearnings.sales.extra.giftwrap').first()
-        sales_tax_acct = Account.objects.filter(path='liabilities.curr.accrued.salestax').first()
-        discount_acct = Account.objects \
-                               .filter(path='equity.retearnings.sales.discounts.%s' \
-                                            % channel_id) \
-                               .first()
-
-        # special case for payments via Shopify
-        # need to make as a sales so as to not be reloaded
-        # but GL entries should just be a conversion of receivables
+        
         if self.special_sale == 'payment':
-            amount = self.total_receivable(incl_ch_fees=False)
-            tran['lines'].append((accts_rec, -amount, self.customer_code, []))
-            tran['lines'].append((accts_rec, amount - Decimal(self.channel_charges), self.payee(), []))
-            if self.channel_charges > 0:
-                #HARDCODE
-                channel_fees_path = 'equity.retearnings.opexp.sales.channelfees.%s' % channel_id
-                channel_fees_acct = Account.objects \
-                                           .filter(path=channel_fees_path) \
-                                           .first()
-                tran['lines'].append((channel_fees_acct,
-                                      Decimal(self.channel_charges),
-                                      channel_id, []))
+            tran['lines'] += self.get_payment_lines()
         elif self.special_sale:
-            sample_exp_acct = self._get_special_account()
-
-            # get COGS
-            COGS_amounts = self.COGS()
-            for ii in COGS_amounts:
-                product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-                inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
-                inv_acct = Account.objects.filter(path=inv_acct_path).first()
-                tran['lines'].append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
-                tran['lines'].append((sample_exp_acct, COGS_amounts[ii], self.customer_code, []))
+            tran['lines'] += self.get_specialsale_lines()
         else:
-            # ACCOUNTS RECEIVABLE
-            tran['lines'].append((accts_rec, self.total_receivable(), self.payee(), []))
-
-            # SHIPPING
-            if self.shipping_charge > 0:
-                tran['lines'].append((shipping_acct, - self.shipping_charge, self.customer_code, []))
-
-            # GIFT-WRAPPING
-            if self.gift_wrapping:
-                tran['lines'].append((giftwrap_acct, -self.gift_wrap_fee, self.customer_code, []))
-
-            # TAXES
-            if self.total_sales_tax() > 0:
-                for entity in self.__tax_amts:
-                    tran['lines'].append((sales_tax_acct, -self.__tax_amts[entity], entity, []))
-
-            # DISCOUNTS
-            if self.discount and self.discount > 0:
-                tran['lines'].append((discount_acct, Decimal(self.discount), self.customer_code, []))
-
-            if self.channel_charges > 0:
-                #HARDCODE
-                channel_fees_path = 'equity.retearnings.opexp.sales.channelfees.%s' % channel_id
-                channel_fees_acct = Account.objects \
-                                           .filter(path=channel_fees_path) \
-                                           .first()
-                tran['lines'].append((channel_fees_acct,
-                                      Decimal(self.channel_charges),
-                                      channel_id, []))
-
-            # get COGS
-            COGS_amounts = self.COGS()
-            for ii in COGS_amounts:
-                product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-
-                inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
-                inv_acct = Account.objects.filter(path=inv_acct_path).first()
-
-                COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (channel_id, product_line)
-                COGS_acct = Account.objects.filter(path=COGS_acct_path).first()
-
-                tran['lines'].append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
-                tran['lines'].append((COGS_acct, COGS_amounts[ii], self.customer_code, []))
-
-            # GROSS SALES
-            for u_sale in self.__unit_sales:
-                inv_items = u_sale.get_gross_sales()
-                for ii in inv_items:
-                    product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-                    gross_sales_acct_path = 'equity.retearnings.sales.gross.%s.%s' % (channel_id, product_line)
-                    gross_sales_acct = Account.objects.filter(path=gross_sales_acct_path).first()
-                    tran['lines'].append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
-
+            tran['lines'] += self.get_acctrec_lines()
+            tran['lines'] += self.get_shippingcharge_lines()
+            tran['lines'] += self.get_salestax_lines()
+            tran['lines'] += self.get_giftwrap_lines()
+            tran['lines'] += self.get_discount_lines()
+            tran['lines'] += self.get_channelfee_lines()
+            tran['lines'] += self.get_COGS_lines()
+            tran['lines'] += self.get_grosssales_lines()
+            
         return [tran]

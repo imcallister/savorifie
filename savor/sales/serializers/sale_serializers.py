@@ -2,98 +2,17 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.serializers import EagerLoadingMixin
 
-from .models import UnitSale, Sale, SalesTax, Payout
+from ..models import  Sale
+from unitsale_serializers import UnitSaleSerializer
 from rest_framework import serializers
 
 
-class UnitSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['sku__label', 'sku__description']
-    sku = serializers.StringRelatedField()
 
-    class Meta:
-        model = UnitSale
-        fields = ('id', 'sale', 'sku', 'quantity', 'unit_price')
-
-
-class UnitSaleItemSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['sku__label', 'sku__description', 'sale__sale_date']
-    _PREFETCH_RELATED_FIELDS = ['sku__skuunit', 'sku__skuunit__inventory_item']
+class SaleIDSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     
-    items = serializers.SerializerMethodField()
-    sale_date = serializers.SerializerMethodField()
-
-    def get_items(self, obj):
-        return dict((i.inventory_item.label, obj.quantity * i.quantity) for i in obj.sku.skuunit.all())
-
-    def get_sale_date(self, obj):
-        return obj.sale.sale_date
-
-    class Meta:
-        model = UnitSale
-        fields = ('id', 'sale', 'sale_date', 'items', 'unit_price')
-
-
-class SalesTaxSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['sale__channel__counterparty', 'collector']
-
-    sale_date = serializers.SerializerMethodField()
-    taxable = serializers.SerializerMethodField()
-    sale = serializers.StringRelatedField()
-    collector = serializers.StringRelatedField()
-
-    def get_sale_date(self, obj):
-        return obj.sale.sale_date
-
-    def get_taxable(self, obj):
-        return obj.sale.taxable_proceeds()
-
-    class Meta:
-        model = SalesTax
-        fields = ('sale_date', 'sale', 'collector', 'taxable', 'tax',)
-
-
-class SalesTaxSerializer2(serializers.ModelSerializer, EagerLoadingMixin):
-
-    taxable = serializers.SerializerMethodField()
-    salestax1 = serializers.SerializerMethodField()
-    salestax2 = serializers.SerializerMethodField()
-    collector1 = serializers.SerializerMethodField()
-    collector2 = serializers.SerializerMethodField()
-
-    def get_taxable(self, obj):
-        return obj.taxable_proceeds()
-
-    def get_collector1(self, obj):
-        sales_taxes = obj.sales_tax.all()
-        if len(sales_taxes) > 0:
-            return str(sales_taxes[0].collector)
-        else:
-            return ''
-
-    def get_salestax1(self, obj):
-        sales_taxes = obj.sales_tax.all()
-        if len(sales_taxes) > 0:
-            return sales_taxes[0].tax
-        else:
-            return 0
-
-    def get_collector2(self, obj):
-        sales_taxes = obj.sales_tax.all()
-        if len(sales_taxes) > 1:
-            return str(sales_taxes[1].collector)
-        else:
-            return ''
-
-    def get_salestax2(self, obj):
-        sales_taxes = obj.sales_tax.all()
-        if len(sales_taxes) > 1:
-            return sales_taxes[1].tax
-        else:
-            return 0
-
     class Meta:
         model = Sale
-        fields = ('sale_date', 'label', 'taxable', 'collector1', 'salestax1', 'collector2', 'salestax2',)
+        fields = ('external_channel_id',)
 
 
 class SimpleSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
@@ -233,22 +152,4 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'shipping_city', 'shipping_zip', 'shipping_province',
                   'shipping_country', 'shipping_phone', 'items_string', 'unit_sale')
 
-
-class PayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    calcd_payout = serializers.SerializerMethodField()
-    diff = serializers.SerializerMethodField()
-    label = serializers.SerializerMethodField()
-    
-    def get_label(self, obj):
-        return str(obj)
-
-    def get_calcd_payout(self, obj):
-        return obj.calcd_payout()
-
-    def get_diff(self, obj):
-        return obj.payout - obj.calcd_payout()
-
-    class Meta:
-        model = Payout
-        fields = ('label', 'payout_date', 'channel', 'payout', 'calcd_payout', 'diff')
 

@@ -58,6 +58,7 @@ def process_buybuy(file_name):
                 us['sku_id'] = Product.objects.get(label=us['sku']).id
                 del us['sku']
                 us_obj = UnitSale(**us)
+                us_obj.date = sale_obj.sale_date
                 us_obj.save()
 
     summary_msg = 'Loaded Buy Buy file: %d new records, %d duplicate records, %d bad rows' \
