@@ -81,7 +81,14 @@ class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         return obj.items_string
 
     def get_unfulfilled_string(self, obj):
-        return obj.unfulfilled_items_string
+        unf = obj.unfulfilled_items
+        if unf:
+            items = [(k, v) for k, v in unf.iteritems()]
+            items = sorted(items, key=lambda x: x[0])
+            return ','.join(['%s %s' % (i[1], i[0]) for i in items])
+        else:
+            return ''
+
 
     def get_unfulfilled_items(self, obj):
         return obj.unfulfilled_items

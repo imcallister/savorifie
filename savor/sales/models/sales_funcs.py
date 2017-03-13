@@ -34,6 +34,9 @@ def get_receiveables_account(channel):
         else:
             return api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
 
+def get_special_account(special_sale):
+    return api_func('gl', 'account', 'equity.retearnings.sales.samples.%s' % special_sale)['id']
+
 def get_shipping_account():
     return api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
 
@@ -48,3 +51,18 @@ def get_discount_account(channel):
 
 def get_channelfees_account(channel):
     return api_func('gl', 'account', 'equity.retearnings.opexp.sales.channelfees.%s' % channel)['id']
+
+def get_grosssales_account(inv_item, channel):
+    product_line = api_func('products', 'inventoryitem', inv_item)['product_line']['label']
+    gross_sales_acct_path = 'equity.retearnings.sales.gross.%s.%s' % (channel, product_line)
+    return api_func('gl', 'account', gross_sales_acct_path)['id']
+
+def get_inventory_account(inv_item):
+    product_line = api_func('products', 'inventoryitem', inv_item)['product_line']['label']
+    inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, inv_item)
+    return api_func('gl', 'account', inv_acct_path)['id']
+
+def get_COGS_account(inv_item, channel):
+    product_line = api_func('products', 'inventoryitem', inv_item)['product_line']['label']
+    COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (channel, product_line)
+    return api_func('gl', 'account', COGS_acct_path)['id']

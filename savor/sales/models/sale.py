@@ -14,7 +14,6 @@ from accountifie.gl.models import Account
 
 import sales_funcs
 
-
 DZERO = Decimal('0')
 
 logger = logging.getLogger('default')
@@ -88,14 +87,10 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         models.Model.save(self)
         
-
     def delete(self):
         self.delete_from_gl()
         models.Model.delete(self)
 
-    @property
-    def id_link(self):
-        return mark_safe('<a href="/admin/sales/sale/%s">%s</a>' % (self.id, self.id))
 
     @property
     def channel_name(self):
@@ -106,16 +101,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         items = [(k, v) for k, v in self.inventory_items.iteritems()]
         items = sorted(items, key=lambda x: x[0])
         return ','.join(['%s %s' % (i[1], i[0]) for i in items])
-
-    @property
-    def unfulfilled_items_string(self):
-        unf = self.unfulfilled_items
-        if unf:
-            items = [(k, v) for k, v in unf.iteritems()]
-            items = sorted(items, key=lambda x: x[0])
-            return ','.join(['%s %s' % (i[1], i[0]) for i in items])
-        else:
-            return ''
 
     @property
     def inventory_items(self):
@@ -141,8 +126,8 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         d1 = self.inventory_items
         d2 = self.fulfilled_items
         if d2:
-            unf = {k: int(d1.get(k, 0)) - int(d2.get(k,0)) for k in set(d1) | set(d2) }
-            unf = dict((k, v) for k,v in unf.iteritems() if v != 0)
+            unf = {k: int(d1.get(k, 0)) - int(d2.get(k, 0)) for k in set(d1) | set(d2)}
+            unf = dict((k, v) for k, v in unf.iteritems() if v != 0)
             if len(unf) > 0:
                 return unf
             else:
@@ -155,20 +140,11 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
         return str(self)
 
 
-    def gross_sale_proceeds(self):
-        return sum([v for k, v in self.__sale_amts.iteritems()])
-
-
     def total_sales_tax(self):
-        sales_tax = sum([v for k, v in self.__tax_amts.iteritems()])
-        if sales_tax:
-            return sales_tax
-        else:
-            return Decimal('0')
+        tax_amts = self.get_sales_taxes()
+        return Decimal(sum([v for k, v in tax_amts.iteritems()]))
 
     def total_receivable(self, incl_ch_fees=True):
-        self._get_unit_sales()
-        self._get_sales_taxes()
         total = self.gross_sale_proceeds()
         if self.discount:
             total -= Decimal(self.discount)
@@ -176,14 +152,15 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             total += Decimal(self.shipping_charge)
         if self.gift_wrap_fee:
             total += Decimal(self.gift_wrap_fee)
-        total += self.total_sales_tax()
+        
+        tax_amts = self.get_sales_taxes()
+        total += sum([v for k, v in tax_amts.iteritems()])
+        
         if incl_ch_fees:
             total -= self.channel_charges
         return total
 
     def taxable_proceeds(self):
-        self._get_unit_sales()
-        self._get_sales_taxes()
         total = self.gross_sale_proceeds()
         if self.discount:
             total -= Decimal(self.discount)
@@ -202,39 +179,29 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             return self.channel.counterparty
 
     
-    def _get_special_account(self):
-        """
-        Get account to book special sale to
-        """
-        if self.special_sale:
-            path = 'equity.retearnings.sales.samples.%s' % self.special_sale
-            return Account.objects \
-                          .filter(path=path) \
-                          .first()
-        else:
-            return None
-
-    def _get_sales_taxes(self):
+    def get_sales_taxes(self):
         sales_taxes = self.sales_tax.all()
         tax_collectors = list(set([t.collector.entity for t in sales_taxes]))
-        self.__tax_amts = dict((p,0) for p in tax_collectors)
+        tax_amts = dict((p, 0) for p in tax_collectors)
         for t in sales_taxes:
-            self.__tax_amts[t.collector.entity] += Decimal(t.tax)
-
-    def _get_unit_sales(self):
-        self.__unit_sales = self.unit_sale.all()
-        skus = list(set([x.sku for x in self.__unit_sales]))
-        self.__sale_amts = dict((s,0) for s in skus)
-        for s in self.__unit_sales:
-            self.__sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
+            tax_amts[t.collector.entity] += Decimal(t.tax)
+        return tax_amts
 
 
-    def COGS(self):
-        all_items = list(itertools.chain.from_iterable(u.COGS() for u in self.unit_sale.all()))
-        key_func = lambda x: x['label']
-        gps = itertools.groupby(sorted(all_items, key=key_func), key=key_func)
-        return dict((k, sum(a['COGS'] for a in v)) for k, v in gps)
+    def get_unit_sales(self):
+        unit_sales = self.unit_sale.all()
+        skus = list(set([x.sku for x in unit_sales]))
+        
+        sale_amts = dict((s, 0) for s in skus)
+        for s in unit_sales:
+            sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
+        return sale_amts
 
+    def gross_sale_proceeds(self):
+        return sum([v for k, v in self.get_unit_sales().iteritems()])
+
+
+    
 
     def get_payment_lines(self):
         channel_id = self.channel.counterparty.id
@@ -254,14 +221,12 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     def get_specialsale_lines(self):
         lines = []
-        sample_exp_acct = self._get_special_account()
+        sample_exp_acct = sales_funcs.get_special_account(self.special_sale)
 
         # get COGS
         COGS_amounts = self.COGS()
         for ii in COGS_amounts:
-            product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-            inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
-            inv_acct = Account.objects.filter(path=inv_acct_path).first()
+            inv_acct = sales_funcs.get_inventory_account(ii)
             lines.append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
             lines.append((sample_exp_acct, COGS_amounts[ii], self.customer_code, []))
         return lines
@@ -282,9 +247,9 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def get_salestax_lines(self):
         lines = []
         salestax_acct = sales_funcs.get_salestax_account()
-        if self.total_sales_tax() > 0:
-            for entity in self.__tax_amts:
-                lines.append((salestax_acct, -self.__tax_amts[entity], entity, []))
+        tax_amts = self.get_sales_taxes()
+        for entity in tax_amts:
+            lines.append((salestax_acct, -tax_amts[entity], entity, []))
         return lines
 
     def get_giftwrap_lines(self):
@@ -309,65 +274,91 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
             lines.append((channelfees_acct,
                           Decimal(self.channel_charges),
                           channel_id, []))
+        return lines
 
-    def get_COGS_lines(self):
+
+    def COGS(self):
+        all_items = list(itertools.chain.from_iterable(u.COGS() for u in self.unit_sale.all()))
+        key_func = lambda x: x['label']
+        gps = itertools.groupby(sorted(all_items, key=key_func), key=key_func)
+        return dict((k, sum(a['COGS'] for a in v)) for k, v in gps)
+
+
+    def get_COGS_lines(self, tag_filter=None):
         lines = []
         COGS_amounts = self.COGS()
+        channel_id = self.channel.counterparty.id
 
         for ii in COGS_amounts:
-            product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-
-            inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, ii)
-            inv_acct = Account.objects.filter(path=inv_acct_path).first()
-
-            COGS_acct_path = 'equity.retearnings.sales.COGS.%s.%s' % (self.channel.counterparty.id, product_line)
-            COGS_acct = Account.objects.filter(path=COGS_acct_path).first()
-
+            inv_acct = sales_funcs.get_inventory_account(ii)
+            COGS_acct = sales_funcs.get_COGS_account(ii, channel_id)
             lines.append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
             lines.append((COGS_acct, COGS_amounts[ii], self.customer_code, []))
         return lines
 
-    def get_grosssales_lines(self):
+
+    def get_grosssales_lines(self, tag_filter=None):
         lines = []
-        channel_id = self.channel.counterparty.id
-        for u_sale in self.__unit_sales:
+        channel_id = self.channel.label
+        customer_code = self.customer_code
+        
+        if not tag_filter:
+            unit_sales = self.unit_sale.all()
+        elif tag_filter == 'original':
+            unit_sales = self.unit_sale.filter(tag__isnull=True)
+        else:
+            unit_sales = self.unit_sale.filter(tag=tag_filter)
+
+        for u_sale in unit_sales:
             inv_items = u_sale.get_gross_sales()
             for ii in inv_items:
-                product_line = api_func('products', 'inventoryitem', ii)['product_line']['label']
-                gross_sales_acct_path = 'equity.retearnings.sales.gross.%s.%s' % (channel_id, product_line)
-                gross_sales_acct = Account.objects.filter(path=gross_sales_acct_path).first()
-                lines.append((gross_sales_acct, -inv_items[ii], self.customer_code, []))
+                gross_sales_acct = sales_funcs.get_grosssales_account(ii, channel_id)
+                lines.append((gross_sales_acct, -inv_items[ii], customer_code, []))
         return lines
 
 
+    def get_adjustments(self, date):
+        return self.proceedsadjustment_sale.filter(date=self.sale_date)
+
 
     def get_gl_transactions(self):
+        base_tran = dict(company=self.company,
+                         date=self.sale_date,
+                         bmo_id='%s.%s' % (self.short_code, self.id),
+                         lines=[]
+                       )
 
-        # collect all the info first
-        # TO DO have to make sure about order here
-        self._get_unit_sales()
-        self._get_sales_taxes()
-        
-        tran = dict(company=self.company,
-                    date=self.sale_date,
-                    comment= "%s: %s" % (self.channel, self.external_channel_id),
-                    trans_id='%s.%s.%s' % (self.short_code, self.id, 'SALE'),
-                    bmo_id='%s.%s' % (self.short_code, self.id),
-                    lines=[]
-                    )
-        
         if self.special_sale == 'payment':
+            tran = dict((k, v) for k, v in base_tran.iteritems())
+            tran['comment'] = "Payment - %s: %s" % (self.channel, self.external_channel_id)
+            tran['trans_id']='%s.%s.%s' % (self.short_code, self.id, 'SALE')
             tran['lines'] += self.get_payment_lines()
+            return [tran]
         elif self.special_sale:
+            tran = dict((k, v) for k, v in base_tran.iteritems())
+            tran['comment'] = "%s - %s: %s" % (self.special_sale, self.channel, self.external_channel_id)
+            tran['trans_id'] ='%s.%s.%s' % (self.short_code, self.id, 'SALE')
             tran['lines'] += self.get_specialsale_lines()
+            return [tran]
         else:
+            # 1 get original sale
+            orig_tran = dict((k, v) for k, v in base_tran.iteritems())
+            orig_tran['comment'] = "%s: %s" % (self.channel, self.external_channel_id),
+            orig_tran['trans_id'] = '%s.%s.%s' % (self.short_code, self.id, 'SALE'),
+                         
+            orig_tran['lines'] += self.get_grosssales_lines(tag_filter='original')
+            orig_tran['lines'] += self.get_COGS_lines(tag_filter='original')
+
+            
             tran['lines'] += self.get_acctrec_lines()
             tran['lines'] += self.get_shippingcharge_lines()
             tran['lines'] += self.get_salestax_lines()
             tran['lines'] += self.get_giftwrap_lines()
             tran['lines'] += self.get_discount_lines()
+            
             tran['lines'] += self.get_channelfee_lines()
-            tran['lines'] += self.get_COGS_lines()
-            tran['lines'] += self.get_grosssales_lines()
+            
+            # 2 get subsequent adjustments, grouped by date
+
             
         return [tran]
