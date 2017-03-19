@@ -4,6 +4,10 @@ from decimal import Decimal
 from sales.models import Sale
 from accountifie.gl.models import Counterparty
 
+import accountifie.gl.apiv1 as gl_api
+import accountifie.reporting.apiv1 as rptg_api
+
+
 from fulfill.models import WarehouseFulfill, Fulfillment, ShippingCharge
 from sales.models import Payout, PayoutLine, UnitSale, SalesTax, ProceedsAdjustment
 from sales.importers.shopify import shopify_fee
@@ -73,6 +77,7 @@ def backfill_nc2_packing_ids():
                 % (success_ctr, error_ctr))
     return    
 
+"""
 def backfill_payouts():
     old_payouts = ChannelPayouts.objects.all()
 
@@ -94,6 +99,45 @@ def backfill_payouts():
             npl.sale = s
             npl.amount = s.total_receivable()
             npl.save()
+"""
+
+def year_end_entries():
+    bals = rptg_api.balances('SAV', {'as_of': '2016-12-31'})
+    accounts = gl_api.account({})
+    
+    acct_paths = dict((a['id'], a['path']) for a in accounts if 'equity.retearnings.' in a['path'])
+    RET_EARNINGS = [a['id'] for a in accounts if a['path'] == 'equity.retearnings'][0]
+
+    noml = {'company_id': 'SAV',
+            'date': '2017-01-01',
+            'comment': 'Year end to retained earnings'}
+
+    noml_obj = NominalTransaction(**noml)
+    noml_obj.save()
+
+    total_amount = Decimal('0')
+
+    # now create nominal tran lines
+    for a_id in acct_paths.keys():
+        noml_line = {}
+        noml_line['transaction'] = noml_obj
+        noml_line['account_id'] = a_id
+        noml_line['counterparty_id'] = 'SAV'
+        amount = Decimal('%.2f' % bals.get(a_id, 0))
+        total_amount += amount
+        noml_line['amount'] = -amount
+        NominalTranLine(**noml_line).save()
+
+    # now save the balancing entry
+    noml_line = {}
+    noml_line['transaction'] = noml_obj
+    noml_line['account_id'] = RET_EARNINGS
+    noml_line['counterparty_id'] = 'SAV'
+    noml_line['amount'] = total_amount
+    NominalTranLine(**noml_line).save()
+
+    # fprce GL entries to be sent
+    noml_obj.save() 
 
 
 def backfill_unitsale_dates():
