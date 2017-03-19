@@ -2,7 +2,7 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.serializers import EagerLoadingMixin
 
-from .models import UnitSale, Sale, SalesTax, ChannelPayouts, Payout
+from .models import UnitSale, Sale, SalesTax, Payout
 from rest_framework import serializers
 
 
@@ -252,31 +252,4 @@ class PayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         model = Payout
         fields = ('label', 'payout_date', 'channel', 'payout', 'calcd_payout', 'diff')
 
-
-
-class ChannelPayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    calcd_payout = serializers.SerializerMethodField()
-    label = serializers.SerializerMethodField()
-    diff = serializers.SerializerMethodField()
-    date = serializers.SerializerMethodField()
-
-    def get_label(self, obj):
-        return str(obj)
-
-    def get_calcd_payout(self, obj):
-        return obj.calcd_payout()
-
-    def get_date(self, obj):
-        return obj.payout_date.strftime('%d-%b-%Y')
-
-    def get_diff(self, obj):
-        return obj.payout - obj.calcd_payout()
-
-    _SELECT_RELATED_FIELDS = ['channel__counterparty',]
-    _PREFETCH_RELATED_FIELDS = ['sales__unit_sale__sku__skuunit__inventory_item',
-                                'sales__sales_tax__collector', 'sales__channel__counterparty']
-
-    class Meta:
-        model = ChannelPayouts
-        fields = ('id', 'date', 'label', 'channel', 'payout', 'calcd_payout', 'diff')
 

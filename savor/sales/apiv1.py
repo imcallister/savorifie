@@ -10,7 +10,7 @@ from django.conf import settings
 from django.db.models import Prefetch, Sum
 
 import products.apiv1 as product_api
-from .models import Sale, UnitSale, Channel, SalesTax, ChannelPayouts, Payout, PayoutLine
+from .models import Sale, UnitSale, Channel, SalesTax, Payout, PayoutLine
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
     SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer, \
@@ -273,17 +273,6 @@ def sales_counts(qstring):
             sales_counts[sku] += u_sale_counts[sku]
 
     return sales_counts
-
-def channel_payout_drilldown(payout_id, qstring):
-    qs = ChannelPayouts.objects.get(id=payout_id).sales
-    qs = SaleProceedsSerializer.setup_eager_loading(qs)
-    return SaleProceedsSerializer(qs, many=True).data
-    
-def channel_payout_comp(channel_lbl, qstring):
-    qs = ChannelPayouts.objects.filter(channel__counterparty_id=channel_lbl)
-    qs = ChannelPayoutSerializer.setup_eager_loading(qs)
-    output = ChannelPayoutSerializer(qs, many=True).data
-    return [x for x in output if abs(x['diff']) > 1.0]
     
 
 def payout_comp(channel_lbl, qstring):

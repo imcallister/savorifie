@@ -10,7 +10,7 @@ from django.db.models import Q
 
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, ChannelPayouts, Payout, PayoutLine
+from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, Payout, PayoutLine
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
