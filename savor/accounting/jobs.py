@@ -28,7 +28,7 @@ def _assign_FIFO_job(*args, **kwargs):
     
     # 2 get an order list of FIFO's available
     available =  pd.DataFrame(acctg_api.fifo_available({})).sort_index(by='arrival_date')
-
+    
     #3 loop thru the COGS needed and pull from FIFO as necessary using oldest first
     new_fifo_list = []
     for u in to_do:
@@ -47,18 +47,25 @@ def _assign_FIFO_job(*args, **kwargs):
                         rmg_qty -= use_cnt
                         if rmg_qty == 0:
                             break
-                        
+            elif qty < 0: # returns
+                for i in available.index:
+                    if available.loc[i, item] > 0: # active order
+                        new_fifo_list.append({'order': available.loc[i, 'order'],
+                                              'item': item,
+                                              'qty': qty,
+                                              'unit_sale': u['id'],
+                                              'sale': u['sale']})
+                        break
+
     # 4 get all the shipment lines that we will need
     all_shipments = dict((sl['unit_label'] + sl['shipment_label'], sl['id']) for sl in inv_api.shipmentline({}))
-
     # 5 save the COGS assignments
     for new_fifo in new_fifo_list:
         flds = {}
         flds['shipment_line_id'] = all_shipments[new_fifo['item'] + new_fifo['order']]
         flds['unit_sale_id'] = new_fifo['unit_sale']
         flds['quantity'] = new_fifo['qty']
-        output = COGSAssignment(**flds).save()
-    
+        COGSAssignment(**flds).save()
     # 6 force a gl entry calc for all affected Sale objects
     for sale_id in set([u['sale'] for u in new_fifo_list]):
         Sale.objects.get(id=sale_id).update_gl()

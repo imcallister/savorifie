@@ -2,7 +2,7 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.serializers import EagerLoadingMixin
 
-from ..models import  Sale
+from ..models import Sale, Payout
 from unitsale_serializers import UnitSaleSerializer
 from rest_framework import serializers
 
@@ -160,8 +160,6 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'shipping_country', 'shipping_phone', 'items_string', 'unit_sale')
 
 
-<<<<<<< HEAD:savor/sales/serializers/sale_serializers.py
-=======
 class PayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     calcd_payout = serializers.SerializerMethodField()
     diff = serializers.SerializerMethodField()
@@ -180,5 +178,3 @@ class PayoutSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         model = Payout
         fields = ('label', 'payout_date', 'channel', 'payout', 'calcd_payout', 'diff')
 
-
->>>>>>> devel:savor/sales/serializers.py
