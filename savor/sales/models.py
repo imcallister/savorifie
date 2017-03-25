@@ -5,12 +5,10 @@ import itertools
 
 from django.db import models
 
-from simple_history.models import HistoricalRecords
 
 import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
-import accounting.models
 from accountifie.gl.models import Account, Counterparty
 from accounting.serializers import COGSAssignmentSerializer
 
@@ -202,7 +200,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     shipping_country = models.CharField(max_length=30, blank=True, null=True)
     shipping_phone = models.CharField(max_length=30, blank=True, null=True)
 
-    history = HistoricalRecords()
     short_code = 'SALE'
 
     def __unicode__(self):

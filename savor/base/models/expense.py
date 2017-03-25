@@ -8,7 +8,6 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 
 from decimal import Decimal
-from simple_history.models import HistoricalRecords
 from dateutil.relativedelta import relativedelta
 
 from accountifie.gl.bmo import BusinessModelObject
@@ -85,22 +84,6 @@ def make_stubs_from_ccard(cc_data):
     return {'new': new_stubs, 'duplicates': len(cc_data) - new_stubs}
 
 
-def get_changed(dt):
-    cutoff = datetime.datetime(dt.year, dt.month, dt.day, tzinfo=EASTERN)
-    qs_list = [exp.history.get_queryset()[0] for exp in Expense.objects.all()]
-    history = [exp.__dict__ for exp in qs_list if exp.history_user_id and exp.history_date > cutoff]
-
-    cols = ['comment', 'last_name', 'process_date', 'id', 'first_name',
-            'employee_id', 'dept_name', 'company_id', 'expense_date',
-            'history_date', 'start_date', 'department_id', 'glcode',
-            'expense_report_name', 'vendor', 'end_date', 'history_id',
-            'approver', 'ccard', 'dept_code', 'expense_category', 'reason',
-            'history_type', 'reimbursable', 'counterparty_id',
-            'paid_from_id', 'e_mail', 'history_user_id', 'amount', 'processor']
-
-    filt_history = [dict((k,str(v)) for k,v in exp.iteritems() if k in cols) for exp in history]
-    return json.dumps(filt_history)
-
 class ExpenseAllocation(models.Model):
     expense = models.ForeignKey('base.Expense')
     project = models.ForeignKey('gl.Project')
@@ -146,7 +129,6 @@ class Expense(models.Model, BusinessModelObject):
                                   related_name='paid_from')
     comment = models.CharField(max_length=200, blank=True, null=True, help_text="Details of any modifications/notes added in Django")    
 
-    history = HistoricalRecords()
     short_code = 'EXP'
 
     class Meta:
