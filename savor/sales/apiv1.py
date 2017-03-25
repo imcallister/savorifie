@@ -13,7 +13,7 @@ import products.apiv1 as product_api
 from .models import Sale, UnitSale, Channel, SalesTax, Payout, PayoutLine
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SalesTaxSerializer, \
-    SaleProceedsSerializer, SalesTaxSerializer2, ChannelPayoutSerializer, \
+    SaleProceedsSerializer, SalesTaxSerializer2, \
     UnitSaleSerializer, UnitSaleItemSerializer, PayoutSerializer
 from accounting.serializers import COGSAssignmentSerializer
 

@@ -3,7 +3,6 @@ from decimal import Decimal
 from django.db import models
 from django.http import HttpResponseRedirect
 
-from simple_history.models import HistoricalRecords
 import accountifie.gl.bmo
 
 DZERO = Decimal('0')
@@ -18,8 +17,6 @@ class CashflowAllocation(models.Model):
     project = models.ForeignKey('gl.Project', null=True, blank=True)
     tag = models.CharField(max_length=30, null=True, blank=True)
     
-    history = HistoricalRecords()
-
     class Meta:
         app_label = 'base'
         db_table = 'base_cashflowallocation'
@@ -46,7 +43,6 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     tag = models.CharField(max_length=30, null=True, blank=True)
     
-    history = HistoricalRecords()
     short_code = 'CFLOW'
 
     class Meta:

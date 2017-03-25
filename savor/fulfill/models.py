@@ -46,6 +46,11 @@ class ShippingCharge(models.Model, BusinessModelObject):
 
     short_code = 'SHP'
 
+    class Meta:
+        app_label = 'fulfill'
+        db_table = 'fulfill_shippingcharge'
+
+
     def save(self, update_gl=True):
         models.Model.save(self)
         if update_gl:
@@ -108,7 +113,7 @@ class Fulfillment(models.Model):
 
     class Meta:
         app_label = 'fulfill'
-        db_table = 'inventory_fulfillment'
+        db_table = 'fulfill_fulfillment'
 
     @property
     def ship_info(self):
@@ -144,7 +149,7 @@ class FulfillUpdate(models.Model):
 
     class Meta:
         app_label = 'fulfill'
-        db_table = 'inventory_fulfillupdate'
+        db_table = 'fulfill_fulfillupdate'
 
 
 class FulfillLine(models.Model):
@@ -154,7 +159,7 @@ class FulfillLine(models.Model):
 
     class Meta:
         app_label = 'fulfill'
-        db_table = 'inventory_fulfillline'
+        db_table = 'fulfill_fulfillline'
 
 
 class WarehouseFulfill(models.Model):
@@ -190,7 +195,7 @@ class WarehouseFulfill(models.Model):
 
     class Meta:
         app_label = 'fulfill'
-        db_table = 'inventory_warehousefulfill'
+        db_table = 'fulfill_warehousefulfill'
 
 
 class WarehouseFulfillLine(models.Model):
@@ -207,7 +212,7 @@ class WarehouseFulfillLine(models.Model):
 
     class Meta:
         app_label = 'fulfill'
-        db_table = 'inventory_warehousefulfillline'
+        db_table = 'fulfill_warehousefulfillline'
 
 
 class BatchRequest(models.Model):
@@ -220,7 +225,7 @@ class BatchRequest(models.Model):
 
     class Meta:
         app_label = 'fulfill'
-        db_table = 'inventory_batchrequest'
+        db_table = 'fulfill_batchrequest'
 
     @property
     def fulfillment_count(self):
