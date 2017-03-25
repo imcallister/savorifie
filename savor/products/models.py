@@ -10,7 +10,7 @@ class ProductLine(models.Model):
 
     class Meta:
         app_label = 'products'
-        db_table = 'inventory_productline'
+        db_table = 'products_productline'
 
 
 class InventoryItem(models.Model):
@@ -24,7 +24,7 @@ class InventoryItem(models.Model):
 
     class Meta:
         app_label = 'products'
-        db_table = 'inventory_inventoryitem'
+        db_table = 'products_inventoryitem'
 
 
 class Product(models.Model):
@@ -36,7 +36,7 @@ class Product(models.Model):
 
     class Meta:
         app_label = 'products'
-        db_table = 'inventory_product'
+        db_table = 'products_product'
 
 
 class SKUUnit(models.Model):
@@ -50,4 +50,4 @@ class SKUUnit(models.Model):
 
     class Meta:
         app_label = 'products'
-        db_table = 'inventory_skuunit'
+        db_table = 'products_skuunit'
