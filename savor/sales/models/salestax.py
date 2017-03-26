@@ -10,7 +10,7 @@ class TaxCollector(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_taxcollector'
+        db_table = 'sales_taxcollector'
 
 
 class SalesTax(models.Model):
@@ -21,7 +21,7 @@ class SalesTax(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_salestax'
+        db_table = 'sales_salestax'
 
     def __unicode__(self):
         return '%s: %s' % (self.sale, self.collector)

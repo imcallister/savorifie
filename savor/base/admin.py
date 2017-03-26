@@ -1,13 +1,11 @@
-from django.contrib import admin, messages
+from django.contrib import admin
 import django.dispatch
 from django import forms
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
-from django.template import RequestContext
 from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
 from django.db.models import Q
 
-from simple_history.admin import SimpleHistoryAdmin
 
 from .models import *
 import accountifie.gl.widgets
@@ -62,7 +60,7 @@ class CashflowDALForm(forms.ModelForm):
 
 
 
-class CashflowAdmin(SimpleHistoryAdmin):
+class CashflowAdmin(admin.ModelAdmin):
     ordering = ('-post_date',)
 
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty',
@@ -108,7 +106,7 @@ class CreditCardTransDALForm(forms.ModelForm):
         fields = ('__all__')
 
 
-class CreditCardTransAdmin(SimpleHistoryAdmin):
+class CreditCardTransAdmin(admin.ModelAdmin):
     ordering = ('-trans_date',)
     list_editable = ('counterparty', 'acct_payable', 'expense_acct',)
     list_display = ('trans_id', 'card_company', 'trans_date',
@@ -148,7 +146,7 @@ class ExpenseDALForm(forms.ModelForm):
         fields = ('__all__')
 
 
-class ExpenseAdmin(SimpleHistoryAdmin):
+class ExpenseAdmin(admin.ModelAdmin):
     ordering = ('-expense_date',)
     actions = ['delete_model']
     list_display = ('id', 'account', 'expense_date', 'comment',
@@ -179,7 +177,7 @@ class ExpenseAdmin(SimpleHistoryAdmin):
 admin.site.register(Expense, ExpenseAdmin)
 
 
-class StockEntryAdmin(SimpleHistoryAdmin):
+class StockEntryAdmin(admin.ModelAdmin):
     list_display = ('date', 'quantity','share_class', 'gl_acct',)
     list_filter = ('share_class', 'gl_acct',)
     search_fields = ('date', 'quantity','share_class', 'gl_acct',)
@@ -217,7 +215,7 @@ class NominalTranLineInline(admin.TabularInline):
     formset = NominalInlineFormset
 
 
-class NominalTransactionAdmin(SimpleHistoryAdmin):
+class NominalTransactionAdmin(admin.ModelAdmin):
     list_display=('company', 'id', 'date',  'comment')
     list_filter = ('company',)
     search_fields = ('comment','id')

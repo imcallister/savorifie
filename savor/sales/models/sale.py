@@ -5,12 +5,9 @@ import copy
 
 from django.db import models
 
-from simple_history.models import HistoricalRecords
 
 import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
-from accountifie.common.api import api_func
-from accountifie.gl.models import Account
 
 import sales_funcs
 from sale_gl_mixin import SaleGLMixin
@@ -66,7 +63,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
     shipping_country = models.CharField(max_length=30, blank=True, null=True)
     shipping_phone = models.CharField(max_length=30, blank=True, null=True)
 
-    history = HistoricalRecords()
     short_code = 'SALE'
 
     def __unicode__(self):
@@ -77,7 +73,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_sale'
+        db_table = 'sales_sale'
 
     def save(self, update_gl=True):
         if not self.external_channel_id:

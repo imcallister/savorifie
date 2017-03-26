@@ -51,8 +51,7 @@ def expense_trends(request):
     # pull out top 5
     total_exp = raw_data.sum(axis=1)
     total_exp.sort()
-    print raw_data
-
+    
     tbl_data = raw_data.loc[total_exp.index[:5]]
     tbl_data.loc['rest'] = raw_data.loc[total_exp.index[5:]].sum(axis=0)
     tbl_data.index = tbl_data.index.map(display_name)

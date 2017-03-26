@@ -15,7 +15,7 @@ class Channel(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_channel'
+        db_table = 'sales_channel'
 
     def __unicode__(self):
         return self.label
@@ -52,6 +52,10 @@ class Payout(models.Model):
     paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
                                   related_name='ch_payout_paid_thru',
                                   limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
+
+    class Meta:
+        app_label = 'sales'
+        db_table = 'sales_payout'
 
     def __unicode__(self):
         return '%s:%s:%s' % (self.channel, self.paid_thru, self.id)

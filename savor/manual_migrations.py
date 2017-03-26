@@ -7,7 +7,7 @@ from accountifie.gl.models import Counterparty
 import accountifie.gl.apiv1 as gl_api
 import accountifie.reporting.apiv1 as rptg_api
 
-
+from savor.base.models import NominalTransaction, NominalTranLine
 from fulfill.models import WarehouseFulfill, Fulfillment, ShippingCharge
 from sales.models import Payout, PayoutLine, UnitSale, SalesTax, ProceedsAdjustment
 from sales.importers.shopify import shopify_fee

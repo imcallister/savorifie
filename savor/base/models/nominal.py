@@ -1,30 +1,11 @@
-import pytz
-import json
-import datetime
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 
-from simple_history.models import HistoricalRecords
-
 from accountifie.gl.bmo import BusinessModelObject
 from accountifie.toolkit.utils import get_default_company
-
-
-EASTERN = pytz.timezone('US/Eastern')
-
-def get_changed(dt):
-    cutoff = datetime.datetime(dt.year, dt.month, dt.day, tzinfo=EASTERN)
-    qs_list = [nom.history.get_queryset()[0] for nom in NominalTransaction.objects.all()]
-    history = [nom.__dict__ for nom in qs_list if nom.history_user_id and nom.history_date > cutoff]
-
-    cols = ['comment', 'history_type', 'date_end', 'company_id', 'object_id', 'history_user_id', 'date', 'history_id', 'id', 'history_date']
-
-    filt_history = [dict((k,str(v)) for k,v in nom.iteritems() if k in cols) for nom in history]
-    return json.dumps(filt_history)
-
 
 
 class NominalTranLine(models.Model):
@@ -57,7 +38,6 @@ class NominalTransaction(models.Model, BusinessModelObject):
 
     comment = models.CharField(max_length=200, default="None")
 
-    history = HistoricalRecords()
     short_code = 'NOML'
 
     class Meta:

@@ -22,7 +22,7 @@ class UnitSale(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_unitsale'
+        db_table = 'sales_unitsale'
 
     def __unicode__(self):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)

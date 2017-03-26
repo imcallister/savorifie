@@ -15,7 +15,6 @@ from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SaleProceedsSerializer,\
     PayoutSerializer, SaleIDSerializer
 
-
 def external_ids(qstring):
     qs = Sale.objects
     filter_string = qstring.get('filter', None)
