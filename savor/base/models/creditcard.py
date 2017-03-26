@@ -1,7 +1,5 @@
 from django.db import models
 
-from simple_history.models import HistoricalRecords
-
 import accountifie.gl.models
 from accountifie.gl.bmo import BusinessModelObject
 from accountifie.toolkit.utils import get_default_company
@@ -43,7 +41,6 @@ class CreditCardTrans(models.Model, BusinessModelObject):
         verbose_name_plural = "Credit Card Transactions"
         db_table = 'base_creditcardtransactions'
 
-    history = HistoricalRecords()
     short_code = 'CCARD'
 
     def save(self):

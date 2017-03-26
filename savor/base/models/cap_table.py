@@ -1,7 +1,5 @@
 from django.db import models
 
-from simple_history.models import HistoricalRecords
-
 
 
 SHARE_CLASSES = [
@@ -14,8 +12,6 @@ class StockEntry(models.Model):
     quantity = models.IntegerField()
     share_class = models.CharField(choices=SHARE_CLASSES, max_length=20)
     gl_acct = models.ForeignKey('gl.Account')
-
-    history = HistoricalRecords()
 
     class Meta:
         app_label = 'base'

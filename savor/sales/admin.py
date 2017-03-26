@@ -3,14 +3,9 @@ import django.dispatch
 from django import forms
 from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
-from django.template import RequestContext
 from django.shortcuts import render
-from django.contrib.admin.widgets import RelatedFieldWidgetWrapper
-from django.db.models import Q
 
-from simple_history.admin import SimpleHistoryAdmin
-
-from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, ChannelPayouts, Payout, PayoutLine
+from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, Payout, PayoutLine
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
@@ -70,7 +65,7 @@ class FulfillRequested(SimpleListFilter):
             return qs.exclude(id__in=fulfillment_ids)
 
 
-class SaleAdmin(SimpleHistoryAdmin):
+class SaleAdmin(admin.ModelAdmin):
     ordering = ('-sale_date',)
     list_display=('external_channel_id', 'sale_date', 'channel',
                   'customer_code', 'shipping_name', 'special_sale', 'paid_thru')
@@ -220,7 +215,7 @@ class PayoutLineInline(admin.TabularInline):
             field.queryset = field.queryset.select_related('channel__counterparty')
         return field
 
-class PayoutAdmin(SimpleHistoryAdmin):
+class PayoutAdmin(admin.ModelAdmin):
     ordering = ('-payout_date',)
     list_display = ('__unicode__', 'payout_date', 'payout', 'paid_thru', 'channel',)
     list_filter = ('channel', 'paid_thru',)

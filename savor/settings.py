@@ -251,7 +251,6 @@ MIDDLEWARE_CLASSES = (
     'djangosecure.middleware.SecurityMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'accountifie.middleware.ssl.SSLRedirect',
-    'simple_history.middleware.HistoryRequestMiddleware',
     'accountifie.toolkit.error_handling.StandardExceptionMiddleware',
 )
 
@@ -278,8 +277,7 @@ INSTALLED_APPS = (
     
     #'django_nose',
     'django_extensions',
-    'simple_history',
-
+    
     'djcelery',
     
     'betterforms',

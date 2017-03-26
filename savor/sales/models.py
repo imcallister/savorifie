@@ -5,12 +5,10 @@ import itertools
 
 from django.db import models
 
-from simple_history.models import HistoricalRecords
 
 import accountifie.gl.bmo
 from accountifie.toolkit.utils import get_default_company
 from accountifie.common.api import api_func
-import accounting.models
 from accountifie.gl.models import Account, Counterparty
 from accounting.serializers import COGSAssignmentSerializer
 
@@ -26,7 +24,7 @@ class Channel(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_channel'
+        db_table = 'sales_channel'
 
     def __unicode__(self):
         return self.label
@@ -64,6 +62,10 @@ class Payout(models.Model):
                                   related_name='ch_payout_paid_thru',
                                   limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
 
+    class Meta:
+        app_label = 'sales'
+        db_table = 'sales_payout'
+
     def __unicode__(self):
         return '%s:%s:%s' % (self.channel, self.paid_thru, self.id)
 
@@ -98,7 +100,7 @@ class TaxCollector(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_taxcollector'
+        db_table = 'sales_taxcollector'
 
 
 UNITSALE_TAGS = (
@@ -116,7 +118,7 @@ class UnitSale(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_unitsale'
+        db_table = 'sales_unitsale'
 
     def __unicode__(self):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)
@@ -202,7 +204,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
     shipping_country = models.CharField(max_length=30, blank=True, null=True)
     shipping_phone = models.CharField(max_length=30, blank=True, null=True)
 
-    history = HistoricalRecords()
     short_code = 'SALE'
 
     def __unicode__(self):
@@ -215,7 +216,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_sale'
+        db_table = 'sales_sale'
 
     def save(self, update_gl=True):
         if not self.external_channel_id:
@@ -550,7 +551,7 @@ class SalesTax(models.Model):
 
     class Meta:
         app_label = 'sales'
-        db_table = 'base_salestax'
+        db_table = 'sales_salestax'
 
     def __unicode__(self):
         return '%s: %s' % (self.sale, self.collector)
