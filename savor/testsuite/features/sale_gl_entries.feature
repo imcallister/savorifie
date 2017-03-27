@@ -76,8 +76,8 @@ Scenario: Regular Sale GL entries
         |  id  |  company  |  channel   |  customer_code  | shipping_charge | sale_date   |
         |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |      0          |  2016-03-20 |
     And new unitsales:
-        |   id  |   sale   |    sku    |  quantity  | unit_price |
-        |   1   |    1     |   PR001   |     1      |    80      |
+        |   id  |   sale   |    sku    |  quantity  | unit_price |  date      |
+        |   1   |    1     |   PR001   |     1      |    80      | 2016-03-20 |
     
     When we calculate the BMO GL entries
     
@@ -94,8 +94,8 @@ Scenario: Free sample. Savor pays all shipping costs
         |  id  |  company  |  channel   |  customer_code | counterparty | special_sale | shipping_charge | sale_date  |
         |   1  |  TEST     |  SHOPIFY   |  press         |     TESTCP   |   press      |       0         | 2016-03-20 |
     And new unitsales:
-        |   id  |   sale   |    sku    |  quantity  | unit_price |
-        |   1   |    1     |   PR001   |     1      |    80      |
+        |   id  |   sale   |    sku    |  quantity  | unit_price |   date     |
+        |   1   |    1     |   PR001   |     1      |    80      | 2017-03-20 |
     
     When we calculate the BMO GL entries
     
@@ -110,8 +110,8 @@ Scenario: Sale with Discount GL entries
         |  id  |  company  |  channel   |  customer_code  | discount | shipping_charge  | sale_date  |
         |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |   10     |       0          | 2016-03-20 |
     And new unitsales:
-        |   id  |   sale   |    sku    |  quantity  | unit_price |
-        |   1   |    1     |   PR001   |     1      |    80      |
+        |   id  |   sale   |    sku    |  quantity  | unit_price |  date      |
+        |   1   |    1     |   PR001   |     1      |    80      | 2016-03-20 |
     
     When we calculate the BMO GL entries
     

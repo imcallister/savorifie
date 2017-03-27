@@ -30,8 +30,8 @@ Background: There are accounts and companies and counterparties in the system
 @expense_gl
 Scenario: Single-date expense creates expected GL entries
     Given a new expense:
-        |  company  |  amount   |  account  | expense_date  | counterparty |
-        |  TSTCO   |  122.21    |  7654     |  2016-1-1     |    TESTCP    |
+        |  company  |  amount   |  account  | expense_date  | counterparty | paid_from |
+        |  TSTCO   |  122.21    |  7654     |  2016-1-1     |    TESTCP    |  3000     |
     
     When we calculate the BMO GL entries
     

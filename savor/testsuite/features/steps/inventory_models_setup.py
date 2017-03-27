@@ -1,7 +1,9 @@
-from behave import *
+from decimal import Decimal
+from behave import given
 
-from inventory.models import *
-from base.models import *
+from products.models import Product, ProductLine, InventoryItem, SKUUnit
+from inventory.models import Warehouse, Shipment, ShipmentLine
+from sales.models import Channel
 from accountifie.gl.models import Counterparty
 
 @given(u'there are productlines')
@@ -14,7 +16,7 @@ def impl(context):
 @given(u'there are channels')
 def impl(context):
     for row in context.table:
-        Channel(counterparty_id=row['counterparty']).save()
+        Channel(counterparty_id=row['counterparty'], label='SHOPIFY').save()
 
 
 @given(u'there are inventoryitems')

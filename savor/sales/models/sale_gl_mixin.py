@@ -34,8 +34,8 @@ class SaleGLMixin():
         for ii in COGS_amounts:
             inv_acct = sales_funcs.get_inventory_account(ii)
             COGS_acct = sales_funcs.get_COGS_account(ii, channel_id)
-            lines.append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
-            lines.append((COGS_acct, COGS_amounts[ii], self.customer_code, []))
+            lines.append((inv_acct, -COGS_amounts[ii], self.customer_code.id, []))
+            lines.append((COGS_acct, COGS_amounts[ii], self.customer_code.id, []))
         return lines
 
 
@@ -63,14 +63,14 @@ class SaleGLMixin():
         COGS_amounts = self.COGS(self.sale_date)
         for ii in COGS_amounts:
             inv_acct = sales_funcs.get_inventory_account(ii)
-            lines.append((inv_acct, -COGS_amounts[ii], self.customer_code, []))
-            lines.append((sample_exp_acct, COGS_amounts[ii], self.customer_code, []))
+            lines.append((inv_acct, -COGS_amounts[ii], self.customer_code.id, []))
+            lines.append((sample_exp_acct, COGS_amounts[ii], self.customer_code.id, []))
         return lines
 
     def get_acctrec_lines(self, lines):
         accts_rec = sales_funcs.get_receiveables_account(self.channel.label)
         rcvbl = -sum(l[1] for l in lines)
-        return [(accts_rec, rcvbl, self.payee(), [])]
+        return [(accts_rec, rcvbl, self.payee().id, [])]
 
 
 
@@ -89,7 +89,7 @@ class SaleGLMixin():
         lines = []
         if adj.amount > 0:
             shipping_acct = sales_funcs.get_shipping_account()
-            lines.append((shipping_acct, -Decimal(adj.amount), self.customer_code, []))
+            lines.append((shipping_acct, -Decimal(adj.amount), self.customer_code.id, []))
         return lines
 
 
@@ -97,14 +97,14 @@ class SaleGLMixin():
         lines = []
         discount_acct = sales_funcs.get_discount_account(self.channel.label)
         if adj.amount > 0:
-            lines.append((discount_acct, Decimal(adj.amount), self.customer_code, []))
+            lines.append((discount_acct, Decimal(adj.amount), self.customer_code.id, []))
         return lines
 
     def get_giftwrap_lines(self, adj):
         lines = []
         giftwrap_acct = sales_funcs.get_giftwrap_account()
         if self.gift_wrapping:
-            lines.append((giftwrap_acct, -Decimal(adj.amount), self.customer_code, []))
+            lines.append((giftwrap_acct, -Decimal(adj.amount), self.customer_code.id, []))
         return lines
 
     
@@ -116,7 +116,7 @@ class SaleGLMixin():
     def get_grosssales_lines(self, date):
         lines = []
         channel_id = self.channel.label
-        customer_code = self.customer_code
+        customer_code = self.customer_code.id
         unit_sales = self.unit_sale.filter(date=date)
         
         for u_sale in unit_sales:

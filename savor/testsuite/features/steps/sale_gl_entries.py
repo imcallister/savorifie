@@ -1,8 +1,8 @@
 from behave import *
 from decimal import Decimal
 
-from base.models import Sale, UnitSale, Channel
-from inventory.models import Product
+from sales.models import Sale, UnitSale, Channel
+from products.models import Product
 from accounting.models import COGSAssignment
 
 import logging
@@ -30,7 +30,8 @@ def impl(context):
              sale_id=row['sale'],
              sku=pr,
              quantity=int(row['quantity']),
-             unit_price=Decimal(row['unit_price'])).save()
+             unit_price=Decimal(row['unit_price']),
+             date=row['date']).save()
 
 
 

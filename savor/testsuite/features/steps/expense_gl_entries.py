@@ -18,4 +18,5 @@ def impl(context):
                           expense_date=row['expense_date'],
                           start_date=row.get('start_date', row['expense_date']),
                           end_date=row.get('end_date', None),
-                          counterparty_id=row['counterparty'])
+                          counterparty_id=row['counterparty'],
+                          paid_from_id=row['paid_from'])
