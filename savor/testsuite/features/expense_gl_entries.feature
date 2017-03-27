@@ -43,8 +43,8 @@ Scenario: Single-date expense creates expected GL entries
 @expense_gl
 Scenario: Small multi-date expense creates expected GL entries
     Given a new expense:
-        |  company  |  amount   |  account  | start_date  | end_date  | expense_date  | counterparty |
-        |  TSTCO   |  122.21    |  7654     | 2016-1-1    |  2016-1-31 |  2016-1-1     |    TESTCP    |
+        |  company  |  amount   |  account  | start_date  | end_date   | expense_date  | counterparty | paid_from |
+        |  TSTCO   |  122.21    |  7654     | 2016-1-1    |  2016-1-31 |  2016-1-1     |    TESTCP    |  3000      |
     
     When we calculate the BMO GL entries
     
@@ -56,8 +56,8 @@ Scenario: Small multi-date expense creates expected GL entries
 @expense_gl
 Scenario: Large multi-date expense with expense date at start creates expected GL entries
     Given a new expense:
-        |  company  |  amount   |  account  | start_date  | end_date  | expense_date  | counterparty |
-        |  TSTCO    |  500.1    |  7654     | 2016-1-1    |  2016-1-31 |  2016-1-1     |    TESTCP    |
+        |  company  |  amount   |  account  | start_date  | end_date   | expense_date  | counterparty |  paid_from |
+        |  TSTCO    |  500.1    |  7654     | 2016-1-1    |  2016-1-31 |  2016-1-1     |    TESTCP    |    3000    |
     
     When we calculate the BMO GL entries
     

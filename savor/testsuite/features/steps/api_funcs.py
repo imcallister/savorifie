@@ -1,5 +1,5 @@
-from behave import *
-from hamcrest import *
+from behave import when, then, given
+from hamcrest import assert_that, equal_to
 from decimal import Decimal
 import flatdict
 
@@ -42,11 +42,13 @@ def impl(context):
 
 @then(u'the api results should be')
 def impl(context):
-    rslts = [flatdict.FlatDict(d) for d in context.api_results]
-    expected = [(row['label'],
-                 row['customer_code'],
-                 row['external_channel_id'],
-                 row['sale_date']
-                 )
+    flds = ['label', 'customer_code', 'external_channel_id', 'sale_date']
+    
+    rslts = [dict((f, d[f]) for f in flds) for d in context.api_results]
+    print('=' * 20)
+    print(rslts)
+    print('=' * 20)
+    expected = [dict((f, row[f]) for f in flds)
                 for row in context.table]
-    assert_that(dict(context.api_results), equal_to((expected)))
+    print(expected)
+    assert_that(rslts, equal_to((expected)))
