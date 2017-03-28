@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 
 from accountifie.common.models import Address
 from inventory.models import Warehouse, ShippingType
-from fulfill.models import BatchRequest, Fulfillment, FulfillLine, FulfillUpdate
+from fulfill.models import BatchRequest, Fulfillment, FulfillLine
 import fulfill.serializers as flfslz
 import inventory.apiv1 as inventory_api
 import fulfill.apiv1 as fulfill_api
@@ -26,15 +26,6 @@ EASTERN = pytz.timezone('US/Eastern')
 
 def get_today():
     return datetime.datetime.utcnow().replace(tzinfo=UTC).astimezone(EASTERN).date()
-
-
-def post_fulfill_update(data):
-    fulfill_obj = Fulfillment.objects.get(id=data['fulfillment_id'])
-    fulfill_obj.status = data['status']
-    fulfill_obj.save()
-
-    FulfillUpdate(**data).save()
-    return
 
 
 @login_required
@@ -155,13 +146,6 @@ def backorder_to_requested(warehouse, fulfill_id):
     fulfill_obj.status = 'requested'
     fulfill_obj.warehouse = Warehouse.objects.get(label=warehouse)
     fulfill_obj.save()
-
-    update = FulfillUpdate()
-    update.update_date = get_today()
-    update.comment = 'back-ordered to requested'
-    update.status = 'requested'
-    update.fulfillment = fulfill_obj
-    update.save()
     return 'BACKORDER_REQUESTED'
 
 

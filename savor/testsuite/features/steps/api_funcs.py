@@ -1,7 +1,6 @@
 from behave import when, then, given
 from hamcrest import assert_that, equal_to
 from decimal import Decimal
-import flatdict
 
 from accountifie.common.api import api_func
 from sales.models import Sale, UnitSale, Channel
@@ -45,10 +44,6 @@ def impl(context):
     flds = ['label', 'customer_code', 'external_channel_id', 'sale_date']
     
     rslts = [dict((f, d[f]) for f in flds) for d in context.api_results]
-    print('=' * 20)
-    print(rslts)
-    print('=' * 20)
     expected = [dict((f, row[f]) for f in flds)
                 for row in context.table]
-    print(expected)
     assert_that(rslts, equal_to((expected)))
