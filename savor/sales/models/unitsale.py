@@ -6,6 +6,7 @@ from django.db import models
 from accounting.serializers import COGSAssignmentSerializer
 
 
+
 UNITSALE_TAGS = (
     ('RETURN', 'Return'),
     ('REPLACEMENT', 'Replacement'),
@@ -27,13 +28,28 @@ class UnitSale(models.Model):
     def __unicode__(self):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)
 
+    def save(self):
+        models.Model.save(self)
+        self.assignCOGS()
 
-    def fifo_assignments(self):
+    def assignCOGS(self):
+        import accounting.jobs
+        accounting.jobs.fifo_assign(self.id, self.unassigned_COGS())
+
+
+    def unassigned_COGS(self):
         qs = self.cogsassignment_set.all()
-        qs = COGSAssignmentSerializer.setup_eager_loading(qs)
-        return COGSAssignmentSerializer(qs, many=True).data
+        assignments = COGSAssignmentSerializer(qs, many=True).data
+        key_func = lambda x: x['unit_label']
+        gps = itertools.groupby(sorted(assignments, key=key_func), key=key_func)
+        
+        assigned = dict((k, sum(e['quantity'] for e in list(g))) for k, g in gps)
+        items = self.inventory_items()
 
+        unassigned = dict((k, items.get(k, 0) - assigned.get(k, 0)) for k in list(set(assigned.keys() + items.keys())))
+        return dict((k, v) for k, v in unassigned.iteritems() if v != 0)
 
+        
     def COGS(self):
         qs = self.cogsassignment_set.all()
         assignments = COGSAssignmentSerializer(qs, many=True).data

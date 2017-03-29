@@ -73,8 +73,8 @@ Background: There are accounts and companies and counterparties in the system
 
 Scenario: Regular Sale GL entries
     Given a new sale:
-        |  id  |  company  |  channel   |  customer_code  | shipping_charge | sale_date   |
-        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |      0          |  2016-03-20 |
+        |  id  |  company  |  channel   |  customer_code  |  sale_date   |
+        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |  2016-03-20  |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |  date      |
         |   1   |    1     |   PR001   |     1      |    80      | 2016-03-20 |
@@ -95,7 +95,7 @@ Scenario: Free sample. Savor pays all shipping costs
         |   1  |  TEST     |  SHOPIFY   |  press         |     TESTCP   |   press      |       0         | 2016-03-20 |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |   date     |
-        |   1   |    1     |   PR001   |     1      |    80      | 2017-03-20 |
+        |   1   |    1     |   PR001   |     1      |    80      | 2016-03-20 |
     
     When we calculate the BMO GL entries
     
@@ -107,11 +107,15 @@ Scenario: Free sample. Savor pays all shipping costs
 
 Scenario: Sale with Discount GL entries
     Given a new sale:
-        |  id  |  company  |  channel   |  customer_code  | discount | shipping_charge  | sale_date  |
-        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |   10     |       0          | 2016-03-20 |
+        |  id  |  company  |  channel   |  customer_code  | sale_date  |
+        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   | 2016-03-20 |
     And new unitsales:
         |   id  |   sale   |    sku    |  quantity  | unit_price |  date      |
         |   1   |    1     |   PR001   |     1      |    80      | 2016-03-20 |
+    And new adjustments:
+        |   id  |   sale   | amount |  adjust_type  |  date      |
+        |   1   |    1     |   10   |   DISCOUNT    | 2016-03-20 |
+    
     
     When we calculate the BMO GL entries
     

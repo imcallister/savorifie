@@ -5,6 +5,8 @@ from django.db.models import Sum
 
 from accounting.models import COGSAssignment
 from accounting.serializers import COGSAssignmentSerializer
+from inventory.serializers import ShipmentLineSerializer
+from inventory.models import ShipmentLine
 import sales.apiv1 as sales_api
 import inventory.apiv1 as inv_api
 
@@ -34,6 +36,23 @@ def fifo_counts(qstring):
         table.append(row)
     
     return sorted(table, key=lambda x: x['arrival_date'])
+
+
+def fifo_available_shipmentlines(qstring, inventory_item):
+    qs = ShipmentLine.objects.filter(inventory_item__label=inventory_item)
+    shipments = sorted(ShipmentLineSerializer(qs, many=True).data, 
+                                              key=lambda x: x['arrival_date'])
+    shipline_ids = [s['id'] for s in shipments]
+
+    assigned = dict((sl['shipment_line'], sl['total']) \
+                    for sl in COGSAssignment.objects.filter(shipment_line_id__in=shipline_ids) \
+                                                    .values('shipment_line') \
+                                                    .annotate(total=Sum('quantity')))    
+
+    for s in shipments:
+        s.update({'available': s['quantity'] - assigned.get(s['id'], 0)})
+
+    return [s for s in shipments if s['available'] > 0]
 
 
 def fifo_available(qstring):
@@ -90,8 +109,6 @@ def fifo_unassigned(qstring):
 def fifo_unassigned_count(qstring):
     unassigned = [e['unassigned'] for e in fifo_unassigned({})]
     return sum((Counter(d) for d in unassigned[1:]), Counter(unassigned[0]))
-
-
 
 
 def cogsassignment(qstring):

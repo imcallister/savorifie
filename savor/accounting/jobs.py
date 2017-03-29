@@ -13,6 +13,29 @@ from sales.models import Sale
 
 logger = logging.getLogger('default')
 
+def fifo_assign(unit_sale_id, to_assign):
+    for ii, qty in to_assign.iteritems():
+        available = acctg_api.fifo_available_shipmentlines({}, ii)
+        if qty != 0:
+            rmg_qty = qty
+            while rmg_qty > 0:
+                sl = available.pop(0)
+                
+                fifo_info = {}
+                assgn_qty = min(rmg_qty, sl['available'])
+                fifo_info['unit_sale_id'] = unit_sale_id
+                fifo_info['quantity'] = assgn_qty
+                fifo_info['shipment_line_id'] = sl['id']
+                rmg_qty -= assgn_qty
+                print('assigning', assgn_qty, sl['id'])
+                COGSAssignment(**fifo_info).save()
+                if len(available) == 0: # no more shipment lines left
+                    rmg_qty = 0
+    return
+
+
+
+
 
 def assign_FIFO(request):
     task_name = 'assign-FIFO'

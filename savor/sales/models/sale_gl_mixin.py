@@ -128,7 +128,11 @@ class SaleGLMixin():
 
     def get_adjustment_lines(self, date):
         adjusts = self.proceedsadjustment_sale.filter(date=date)
-
+        print('=' * 20)
+        print('get_channelfee_lines')
+        print adjusts
+        print('=' * 20)
+        
         lines = []
         for adj in adjusts:
             if adj.adjust_type == 'CHANNEL_FEES':

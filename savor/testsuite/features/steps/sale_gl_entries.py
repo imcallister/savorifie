@@ -1,7 +1,7 @@
-from behave import *
+from behave import given
 from decimal import Decimal
 
-from sales.models import Sale, UnitSale, Channel
+from sales.models import Sale, UnitSale, Channel, ProceedsAdjustment
 from products.models import Product
 from accounting.models import COGSAssignment
 
@@ -12,14 +12,15 @@ logger = logging.getLogger('default')
 def impl(context):
     row = context.table[0]
     channel = Channel.objects.filter(counterparty_id=row['channel']).first()
-    context.bmo = Sale(id=row['id'],
-                       company_id=row['company'],
-                       sale_date=row['sale_date'],
-                       channel=channel,
-                       special_sale=row.get('special_sale', None),
-                       customer_code_id=row['customer_code'],
-                       shipping_charge=Decimal(row['shipping_charge']),
-                       discount=Decimal(row.get('discount', 0)))
+    sale = Sale(id=row['id'],
+                company_id=row['company'],
+                sale_date=row['sale_date'],
+                channel=channel,
+                special_sale=row.get('special_sale', None),
+                customer_code_id=row['customer_code'],
+                )
+    sale.save(update_gl=False)
+    context.bmo = sale
 
 
 @given(u'new unitsales')
@@ -34,10 +35,19 @@ def impl(context):
              date=row['date']).save()
 
 
-
 @given(u'a COGSassignment')
 def impl(context):
     row = context.table[0]
     COGSAssignment(shipment_line_id=row['shipment_line'],
                    unit_sale_id=row['unitsale'],
                    quantity=int(row['quantity'])).save()
+
+@given(u'new adjustments')
+def impl(context):
+    row = context.table[0]
+    ProceedsAdjustment(id=row['id'],
+                       sale_id=row['sale'],
+                       amount=row['amount'],
+                       date=row['date'],
+                       adjust_type=row['adjust_type']
+                       ).save()
