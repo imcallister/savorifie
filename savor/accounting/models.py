@@ -2,31 +2,9 @@ import logging
 
 from django.db import models
 
-import inventory.apiv1 as inventory_api
 
 logger = logging.getLogger('default')
 
-
-def fifo_assign(unit_sale_id, to_assign):
-    ship_lines = inventory_api.shipmentline({})
-    avail_slines = {}
-    for l in ship_lines:
-        if l['inventory_item_label'] not in avail_slines:
-            avail_slines[l['inventory_item_label']] = l['id']
-
-    for sku in to_assign:
-        fifo_info = {}
-        fifo_info['shipment_line_id'] = avail_slines[sku]
-        fifo_info['unit_sale_id'] = unit_sale_id
-        fifo_info['quantity'] = to_assign[sku]
-        COGSAssignment(**fifo_info).save()
-
-
-def total_COGS(u_sale, inv_item_label):
-    assigns = COGSAssignment.objects \
-                            .filter(unit_sale=u_sale) \
-                            .filter(shipment_line__inventory_item__label=inv_item_label)
-    return sum([a.quantity * a.shipment_line.cost for a in assigns])
 
 
 class COGSAssignment(models.Model):

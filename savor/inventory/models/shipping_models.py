@@ -73,12 +73,12 @@ class ShipmentLine(models.Model, accountifie.gl.bmo.BusinessModelObject):
         product_line = self.inventory_item.product_line.label
         inv_item = self.inventory_item.label
         inv_acct_path = 'assets.curr.inventory.%s.%s' % (product_line, inv_item)
-        inv_acct = accountifie.gl.models.Account.objects.filter(path=inv_acct_path).first()
+        inv_acct = accountifie.gl.models.Account.objects.filter(path=inv_acct_path).first().id
 
         GEN_INVENTORY = api_func('environment', 'variable', 'GL_INVENTORY')
-        gen_inv_acct = accountifie.gl.models.Account.objects.get(id=GEN_INVENTORY)
+        gen_inv_acct = GEN_INVENTORY
 
-        counterparty = self.shipment.sent_by
+        counterparty = self.shipment.sent_by.id
         amount = Decimal(self.cost) * Decimal(self.quantity)
 
         tran = []

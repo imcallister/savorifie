@@ -29,18 +29,13 @@ class FulfillLineInline(admin.TabularInline):
     extra = 0
 
 
-class FulfillUpdateInline(admin.TabularInline):
-    model = FulfillUpdate
-    can_delete = True
-    extra = 0
-
 
 class FulfillmentAdmin(admin.ModelAdmin):
     ordering = ('-request_date',)
     list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
     list_filter = ('warehouse', 'status', ShippingMissing,)
     list_select_related = ('order__channel__counterparty',)
-    inlines = [FulfillLineInline, FulfillUpdateInline]
+    inlines = [FulfillLineInline,]
 
     def formfield_for_foreignkey(self, db_field, request=None,**kwargs):
         field = super(FulfillmentAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)

@@ -16,9 +16,9 @@ def impl(context):
             new_lines.append(new_line)
         gl_entries += new_lines
 
-    context.gl_entries = [(row[0].id,
+    context.gl_entries = [(row[0],
                            Decimal(str(row[1])),
-                           row[2].id,
+                           row[2],
                            row[3],
                            row[4]
                            ) for row in gl_entries]

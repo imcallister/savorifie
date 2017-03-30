@@ -1,32 +1,88 @@
 import itertools
 from collections import Counter
 
+from django.db.models import Sum
+
 from accounting.models import COGSAssignment
 from accounting.serializers import COGSAssignmentSerializer
+from inventory.serializers import ShipmentLineSerializer
+from inventory.models import ShipmentLine
 import sales.apiv1 as sales_api
 import inventory.apiv1 as inv_api
 
 
 
 def fifo_counts(qstring):
-    qs = COGSAssignment.objects.all()
-    qs = COGSAssignmentSerializer.setup_eager_loading(qs)
-    data = COGSAssignmentSerializer(qs, many=True).data
+    sl_data = inv_api.shipmentline({})
+    assigned = COGSAssignment.objects.values('shipment_line') \
+                                     .annotate(total=Sum('quantity'))
 
-    order_keys = list(set(row['shipment_label'] for row in data))
-    item_keys = list(set(row['unit_label'] for row in data))
+    shipment_keys = list(set(sl['shipment_label'] for sl in sl_data))
+    item_keys = list(set(sl['unit_label'] for sl in sl_data))
+    arrival_dates = dict((sl['shipment_label'], sl['arrival_date']) for sl in sl_data)
 
-    ship_cnts = inv_api.shipmentcounts({})
-    arrival_dates = dict((sl['order'], sl['arrival_date']) for sl in ship_cnts)
+    table = []
 
-    tbl = []
-    for o in order_keys:
-        row = {'order': o, 'arrival_date': arrival_dates.get(o)}
-        for i in item_keys:
-          row[i] = sum([x['quantity'] for x in data if x['unit_label'] == i and x['shipment_label'] == o])
-        tbl.append(row)
+    for sk in shipment_keys:
+        row = {'order': sk, 'arrival_date': arrival_dates.get(sk)}
+        for item in item_keys:
+            
+            try:
+                sl = next((l for l in sl_data if l['shipment_label'] == sk and l['unit_label'] == item))
+                row[item] = next((a for a in assigned if a['shipment_line'] == sl['id']))['total']
+            except:
+                row[item] = 0
+        
+        table.append(row)
+    
+    return sorted(table, key=lambda x: x['arrival_date'])
 
-    return sorted(tbl, key=lambda x: x['arrival_date'])
+
+def fifo_available_shipmentlines(qstring, inventory_item):
+    qs = ShipmentLine.objects.filter(inventory_item__label=inventory_item)
+    shipments = sorted(ShipmentLineSerializer(qs, many=True).data, 
+                                              key=lambda x: x['arrival_date'])
+    shipline_ids = [s['id'] for s in shipments]
+
+    assigned = dict((sl['shipment_line'], sl['total']) \
+                    for sl in COGSAssignment.objects.filter(shipment_line_id__in=shipline_ids) \
+                                                    .values('shipment_line') \
+                                                    .annotate(total=Sum('quantity')))    
+
+    for s in shipments:
+        s.update({'available': s['quantity'] - assigned.get(s['id'], 0)})
+
+    return [s for s in shipments if s['available'] > 0]
+
+
+def fifo_available(qstring):
+    sl_data = inv_api.shipmentline({})
+    assigned = COGSAssignment.objects.values('shipment_line') \
+                                     .annotate(total=Sum('quantity'))
+
+    shipment_keys = list(set(sl['shipment_label'] for sl in sl_data))
+    item_keys = list(set(sl['unit_label'] for sl in sl_data))
+    
+    table = []
+
+    for sk in shipment_keys:
+        ship_info = [i for i in sl_data if i['shipment_label'] == sk]
+        row = {'order': sk, 'arrival_date': ship_info[0]['arrival_date']}
+
+        for item in item_keys:
+            try:
+                sl = next((l for l in ship_info if l['unit_label'] == item))
+                row[item] = sl['quantity']
+                
+                assgnds = [a for a in assigned if a['shipment_line'] == sl['id']]
+                if len(assgnds) > 0:
+                    row[item] -= assgnds[0]['total']
+            except:
+                row[item] = 0
+
+        table.append(row)
+    return sorted(table, key=lambda x: x['arrival_date'])
+
 
 def fifo_unassigned(qstring):
     u_sales = sales_api.unitsaleitems({})
@@ -53,32 +109,6 @@ def fifo_unassigned(qstring):
 def fifo_unassigned_count(qstring):
     unassigned = [e['unassigned'] for e in fifo_unassigned({})]
     return sum((Counter(d) for d in unassigned[1:]), Counter(unassigned[0]))
-
-
-def fifo_available(qstring):
-    ship_cnts = inv_api.shipmentcounts({})
-    fifo_cnts = fifo_counts({})
-
-    orders = list(set([x['order'] for x in fifo_cnts] + [x['order'] for x in ship_cnts]))
-    items =  list(set(list(itertools.chain.from_iterable([d.keys() for d in ship_cnts])) + 
-                      list(itertools.chain.from_iterable([d.keys() for d in fifo_cnts]))))
-    items.remove('order')
-    items.remove('arrival_date')
-
-    arrival_dates = dict((sl['order'], sl['arrival_date']) for sl in ship_cnts)
-    
-    available = []
-    for order in orders:
-        row = {'order': order, 'arrival_date': arrival_dates.get(order)}
-        ship_cnt = next((x for x in ship_cnts if x['order'] == order), {})
-        fifo_cnt = next((x for x in fifo_cnts if x['order'] == order), {})
-        row.update(dict((item, ship_cnt.get(item, 0) - fifo_cnt.get(item, 0)) for item in items))
-        available.append(row)
-    
-    return sorted(available, key=lambda x: x['arrival_date'])
-            
-
-
 
 
 def cogsassignment(qstring):

@@ -145,6 +145,7 @@ def process_buybuy(file_name):
                 us['sku_id'] = products.models.Product.objects.get(label=us['sku_code']).id
                 del us['sku_code']
                 us_obj = UnitSale(**us)
+                us_obj.date = sale_obj.sale_date
                 us_obj.save()
 
     return {'status': 'SUCCESS', 'exist_sales_ctr': exist_sales_ctr,

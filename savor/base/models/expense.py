@@ -173,11 +173,11 @@ class Expense(models.Model, BusinessModelObject):
         months = None
         if expense_it:
             exp_path = debit.path.replace('assets.noncurr.premandequip', 'equity.retearnings.opexp.admin')
-            debit = accountifie.gl.models.Account.objects.filter(path=exp_path)[0]      
+            debit = accountifie.gl.models.Account.objects.filter(path=exp_path)[0]
         elif capitalize_it:
             acc_asset_dep = all_deprec_accts[debit].depreciation_account
             months = all_deprec_accts[debit].depreciation_period
-        return capitalize_it, debit, acc_asset_dep, months 
+        return capitalize_it, debit.id, acc_asset_dep.id if acc_asset_dep else None, months 
 
 
     def _get_exp_lines(self, exp_acct):
@@ -187,11 +187,11 @@ class Expense(models.Model, BusinessModelObject):
         running_total = DZERO
         if len(allocations) > 0:
             for allocation in allocations:
-                exp_lines.append((exp_acct, Decimal(allocation.amount), self.counterparty, ['project_%s' % allocation.project.id]))
+                exp_lines.append((exp_acct, Decimal(allocation.amount), self.counterparty.id, ['project_%s' % allocation.project.id]))
                 running_total += Decimal(allocation.amount)
 
         if abs(Decimal(self.amount) - running_total) >= Decimal('0.005'):
-            exp_lines.append((exp_acct, Decimal(self.amount) - running_total, self.counterparty, []))
+            exp_lines.append((exp_acct, Decimal(self.amount) - running_total, self.counterparty.id, []))
         
         return exp_lines
 
@@ -204,9 +204,9 @@ class Expense(models.Model, BusinessModelObject):
         """
 
         capitalize_it, debit, acc_asset_dep, months  = self._capitalize(self.account)
-        ACCTS_PAYABLE = self.paid_from
-        PREPAID_EXP = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_PREPAID_EXP', {}))
-        ACCRUED_LIAB = accountifie.gl.models.Account.objects.get(id=env_api.variable('GL_ACCRUED_LIAB', {}))
+        ACCTS_PAYABLE = self.paid_from.id
+        PREPAID_EXP = env_api.variable('GL_PREPAID_EXP', {})
+        ACCRUED_LIAB = env_api.variable('GL_ACCRUED_LIAB', {})
         
         trans = []
 
@@ -223,7 +223,7 @@ class Expense(models.Model, BusinessModelObject):
                         comment= "Capitalized Asset, %s: %s" % (self.id, self.comment),
                         lines=[(ACCTS_PAYABLE,
                                 DZERO - Decimal(self.amount),
-                                self.counterparty,
+                                self.counterparty.id,
                                 [])]
                     )
 
@@ -233,11 +233,11 @@ class Expense(models.Model, BusinessModelObject):
 
             amort_accts = accountifie.gl.models.Account.objects.filter(path=debit.path + '.amortization')
             if len(amort_accts) > 0:
-                acc_pl_dep = amort_accts[0]
+                acc_pl_dep = amort_accts[0].id
 
             deprec_accts = accountifie.gl.models.Account.objects.filter(path=debit.path + '.depreciation')
             if len(deprec_accts) > 0:
-                acc_pl_dep = deprec_accts[0]
+                acc_pl_dep = deprec_accts[0].id
 
             trans.append(dict(
                     company=self.company,
@@ -247,8 +247,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "Depreciating asset,  %s: %s" % (self.id, self.comment),
                     lines=[
-                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty, []),
-                        (acc_asset_dep, Decimal(self.amount), self.counterparty, []),
+                        (acc_pl_dep, DZERO - Decimal(self.amount), self.counterparty.id, []),
+                        (acc_asset_dep, Decimal(self.amount), self.counterparty.id, []),
                         ]
                     ))
 
@@ -265,8 +265,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (PREPAID_EXP, Decimal(self.amount), self.counterparty, []),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),
+                        (PREPAID_EXP, Decimal(self.amount), self.counterparty.id, []),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty.id, []),
                         ]
                     ))
 
@@ -278,7 +278,7 @@ class Expense(models.Model, BusinessModelObject):
                             trans_id='%s.%s.%s' % (self.short_code, self.id, 'EXPS'),
                             bmo_id=self.id,
                             comment= "Expensing %s: %s" % (self.id, self.comment),
-                            lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty, []),]
+                            lines=[(PREPAID_EXP, DZERO - Decimal(self.amount), self.counterparty.id, []),]
                         )
                 tran['lines'] += self._get_exp_lines(debit)
                 trans.append(tran)
@@ -294,8 +294,8 @@ class Expense(models.Model, BusinessModelObject):
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "AP for %s: %s" % (self.id, self.comment),
                     lines=[
-                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty, []),
-                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),
+                        (ACCRUED_LIAB, Decimal(self.amount), self.counterparty.id, []),
+                        (ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty.id, []),
                         ]
                     ))
 
@@ -307,7 +307,7 @@ class Expense(models.Model, BusinessModelObject):
                             trans_id='%s.%s.%s' % (self.short_code, self.id, 'AL'),
                             bmo_id='%s.%s' % (self.short_code, self.id),
                             comment= "Accruing %s: %s" % (self.id, self.comment),
-                            lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty, []),]
+                            lines=[(ACCRUED_LIAB, DZERO - Decimal(self.amount), self.counterparty.id, []),]
                         )
                 
                 tran['lines'] += self._get_exp_lines(debit)
@@ -321,7 +321,7 @@ class Expense(models.Model, BusinessModelObject):
                     trans_id='%s.%s.%s' % (self.short_code, self.id, 'EXP'),
                     bmo_id='%s.%s' % (self.short_code, self.id),
                     comment= "%s: %s" % (self.id, self.comment),
-                    lines=[(ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty, []),]
+                    lines=[(ACCTS_PAYABLE, DZERO - Decimal(self.amount), self.counterparty.id, []),]
                 )
 
             tran['lines'] += self._get_exp_lines(debit)

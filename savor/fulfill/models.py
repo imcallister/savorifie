@@ -130,27 +130,6 @@ class Fulfillment(models.Model):
         items = sorted(items, key=lambda x: x[1])
         return ','.join(['%s %s' % (i[0], i[1]) for i in items])
 
-    @property
-    def latest_status(self):
-        updates = dict((u.update_date, u.status) for u in self.fulfillupdate_set.all())
-        if len(updates) == 0:
-            return 'requested'
-        else:
-            return max(updates.iteritems(), key=operator.itemgetter(0))[1]
-
-
-class FulfillUpdate(models.Model):
-    update_date = models.DateField()
-    comment = models.CharField(max_length=200, blank=True, null=True)
-    status = models.CharField(max_length=30, choices=FULFILL_CHOICES)
-    shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
-    tracking_number = models.CharField(max_length=100, blank=True, null=True)
-    fulfillment = models.ForeignKey(Fulfillment, related_name='fulfill_updates')
-
-    class Meta:
-        app_label = 'fulfill'
-        db_table = 'fulfill_fulfillupdate'
-
 
 class FulfillLine(models.Model):
     inventory_item = models.ForeignKey('products.InventoryItem', blank=True, null=True)

@@ -46,7 +46,8 @@ def expense_trends(request):
     all_dts = ['%sM%02d' % (x[0], x[1]) for x in list(monthrange(last_year,today))]
     cols = dict(zip(all_dts, all_dts))
     
-    raw_data = QueryManager().path_drilldown('SAV', cols, 'equity.retearnings.opexp', excl_contra=['4150'])
+    raw_data = QueryManager().path_drilldown('SAV', cols, 'equity.retearnings.opexp', excl_contra=['3700'])
+
     # pull out top 5
     total_exp = raw_data.sum(axis=1)
     total_exp.sort()
@@ -54,7 +55,6 @@ def expense_trends(request):
     tbl_data = raw_data.loc[total_exp.index[:5]]
     tbl_data.loc['rest'] = raw_data.loc[total_exp.index[5:]].sum(axis=0)
     tbl_data.index = tbl_data.index.map(display_name)
-    
     data = {}
     data['chart_data'] = {}
     data['chart_data']['dates'] = list(tbl_data.columns)

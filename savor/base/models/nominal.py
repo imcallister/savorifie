@@ -1,6 +1,3 @@
-import pytz
-import json
-import datetime
 
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
@@ -9,9 +6,6 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 from accountifie.gl.bmo import BusinessModelObject
 from accountifie.toolkit.utils import get_default_company
-
-
-EASTERN = pytz.timezone('US/Eastern')
 
 
 class NominalTranLine(models.Model):

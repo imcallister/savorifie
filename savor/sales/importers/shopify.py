@@ -186,6 +186,7 @@ def process_shopify(file_name):
                 }
 
                 tax_obj = SalesTax(**obj_data)
+                tax_obj.date = sale_obj.sale_date
                 tax_obj.save()
 
             for idx in v.index:
@@ -195,6 +196,7 @@ def process_shopify(file_name):
                     obj_data['sale_id'] = sale_obj.id
 
                     unitsale_obj = UnitSale(**obj_data)
+                    unitsale_obj.date = sale_obj.sale_date
                     unitsale_obj.save()
 
             # add shopify channel charge (2.9% + 0.30)

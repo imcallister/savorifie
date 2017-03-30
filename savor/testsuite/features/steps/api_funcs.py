@@ -1,11 +1,10 @@
-from behave import *
-from hamcrest import *
+from behave import when, then, given
+from hamcrest import assert_that, equal_to
 from decimal import Decimal
-import flatdict
 
 from accountifie.common.api import api_func
-from base.models import Sale, UnitSale, Channel
-from inventory.models import Product
+from sales.models import Sale, UnitSale, Channel
+from products.models import Product
 
 @given(u'a sale exists')
 def impl(context):
@@ -29,26 +28,22 @@ def impl(context):
     UnitSale(sale_id=sale.id,
              sku=pr,
              quantity=int(row['quantity']),
-             unit_price=Decimal(row['unit_price'])).save(update_gl=False)
+             unit_price=Decimal(row['unit_price']),
+             date=sale.sale_date).save()
 
 
 
 
-@when(u'we call the base.sale api')
+@when(u'we call the sales.sale api')
 def impl(context):
-    context.api_results = [dict(d) for d in api_func('base', 'sale')]
+    context.api_results = [dict(d) for d in api_func('sales', 'sale')]
 
 
 @then(u'the api results should be')
 def impl(context):
-    print('*' * 20)
-    print([flatdict.FlatDict(d) for d in context.api_results])
-    print('*' * 20)
-    expected = [(row['account'],
-                 Decimal(row['amount']),
-                 row['counterparty'],
-                 row['date'],
-                 None if row['date_end']=='' else row['date_end'])
+    flds = ['label', 'customer_code', 'external_channel_id', 'sale_date']
+    
+    rslts = [dict((f, d[f]) for f in flds) for d in context.api_results]
+    expected = [dict((f, row[f]) for f in flds)
                 for row in context.table]
-
-    assert_that(dict(context.api_results), equal_to((expected)))
+    assert_that(rslts, equal_to((expected)))
