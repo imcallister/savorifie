@@ -25,14 +25,14 @@ def impl(context):
 
 @given(u'new unitsales')
 def impl(context):
-    row = context.table[0]
-    pr = Product.objects.filter(label=row['sku']).first()
-    UnitSale(id=row['id'],
-             sale_id=row['sale'],
-             sku=pr,
-             quantity=int(row['quantity']),
-             unit_price=Decimal(row['unit_price']),
-             date=row['date']).save()
+    for row in context.table:
+      pr = Product.objects.filter(label=row['sku']).first()
+      UnitSale(id=row['id'],
+               sale_id=row['sale'],
+               sku=pr,
+               quantity=int(row['quantity']),
+               unit_price=Decimal(row['unit_price']),
+               date=row['date']).save()
 
 
 @given(u'a COGSassignment')
@@ -44,10 +44,10 @@ def impl(context):
 
 @given(u'new adjustments')
 def impl(context):
-    row = context.table[0]
-    ProceedsAdjustment(id=row['id'],
-                       sale_id=row['sale'],
-                       amount=row['amount'],
-                       date=row['date'],
-                       adjust_type=row['adjust_type']
-                       ).save()
+    for row in context.table:
+        ProceedsAdjustment(id=row['id'],
+                           sale_id=row['sale'],
+                           amount=row['amount'],
+                           date=row['date'],
+                           adjust_type=row['adjust_type']
+                           ).save()

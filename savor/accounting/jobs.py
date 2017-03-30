@@ -18,7 +18,7 @@ def fifo_assign(unit_sale_id, to_assign):
         available = acctg_api.fifo_available_shipmentlines({}, ii)
         if qty != 0:
             rmg_qty = qty
-            while rmg_qty > 0:
+            while rmg_qty != 0:
                 sl = available.pop(0)
                 
                 fifo_info = {}
@@ -27,7 +27,6 @@ def fifo_assign(unit_sale_id, to_assign):
                 fifo_info['quantity'] = assgn_qty
                 fifo_info['shipment_line_id'] = sl['id']
                 rmg_qty -= assgn_qty
-                print('assigning', assgn_qty, sl['id'])
                 COGSAssignment(**fifo_info).save()
                 if len(available) == 0: # no more shipment lines left
                     rmg_qty = 0

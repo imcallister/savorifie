@@ -89,6 +89,29 @@ Scenario: Regular Sale GL entries
         |  5100     |   25.0    | retail_buyer   | 2016-03-20 |           |
 
 
+Scenario: Regular Sale with return GL entries
+    Given a new sale:
+        |  id  |  company  |  channel   |  customer_code  |  sale_date   |
+        |   1  |  TEST     |  SHOPIFY   |  retail_buyer   |  2016-03-20  |
+    And new unitsales:
+        |   id  |   sale   |    sku    |  quantity  | unit_price |  date      |
+        |   1   |    1     |   PR001   |     1      |    80      | 2016-03-20 |
+        |   2   |    1     |   PR001   |     -1     |    80      | 2016-04-20 |
+    
+    When we calculate the BMO GL entries
+    
+    Then the lines should be:
+        | account   |   amount  |  counterparty  |    date    |  date_end |
+        |  1100     |   80.0    |    SHOPIFY     | 2016-03-20 |           |
+        |  1200     |   -25.0   | retail_buyer   | 2016-03-20 |           |
+        |  5000     |   -80     | retail_buyer   | 2016-03-20 |           |
+        |  5100     |   25.0    | retail_buyer   | 2016-03-20 |           |
+        |  1100     |   -80.0   |    SHOPIFY     | 2016-04-20 |           |
+        |  1200     |   25.0    | retail_buyer   | 2016-04-20 |           |
+        |  5000     |   80      | retail_buyer   | 2016-04-20 |           |
+        |  5100     |   -25.0   | retail_buyer   | 2016-04-20 |           |
+
+
 Scenario: Free sample. Savor pays all shipping costs
     Given a new sale:
         |  id  |  company  |  channel   |  customer_code | counterparty | special_sale | shipping_charge | sale_date  |
