@@ -36,6 +36,7 @@ Background: There are accounts and companies and counterparties in the system
         |   GL_ACCOUNTS_RECEIVABLE  |   1100    |
         |        GL_INVENTORY       |   1500    |
         |     DEFAULT_COMPANY_ID    |   TEST    |
+        |    DEFAULT_GL_STRATEGY    |   test    |
     
     And there are channels:
         |    counterparty   |

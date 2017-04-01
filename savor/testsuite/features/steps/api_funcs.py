@@ -32,8 +32,6 @@ def impl(context):
              date=sale.sale_date).save()
 
 
-
-
 @when(u'we call the sales.sale api')
 def impl(context):
     context.api_results = [dict(d) for d in api_func('sales', 'sale')]

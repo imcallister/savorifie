@@ -1,11 +1,6 @@
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.views.generic.base import RedirectView, TemplateView
-from django.core.urlresolvers import reverse_lazy
-from django.views.decorators.csrf import csrf_exempt
 
-from django.conf.urls import handler500
 
 import main_views
 
@@ -15,9 +10,9 @@ handler500 = 'main_views.custom_500'
 
 urlpatterns = [
     url(r'^$', main_views.home, name='home'),
-    url(r'react-test/', main_views.react_test, name='react_test'),
     url(r'^maintenance/', main_views.maintenance, name='maintenance'),
     url(r'^reports/$', main_views.reports, name='reports'),
+    url(r'^react/$', main_views.react, name='react'),
     
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')) ,
     url(r'^admin/', include(admin.site.urls)),

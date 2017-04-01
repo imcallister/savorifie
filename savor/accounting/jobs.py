@@ -5,10 +5,9 @@ import pandas as pd
 from django.http import HttpResponseRedirect
 
 from accountifie.celery import background_task
-import apiv1 as acctg_api
+import savor.accounting.apiv1 as acctg_api
 import inventory.apiv1 as inv_api
-from models import COGSAssignment
-from sales.models import Sale
+from accounting.models import COGSAssignment
 
 
 logger = logging.getLogger('default')
@@ -31,9 +30,6 @@ def fifo_assign(unit_sale_id, to_assign):
                 if len(available) == 0: # no more shipment lines left
                     rmg_qty = 0
     return
-
-
-
 
 
 def assign_FIFO(request):
@@ -88,7 +84,5 @@ def _assign_FIFO_job(*args, **kwargs):
         flds['unit_sale_id'] = new_fifo['unit_sale']
         flds['quantity'] = new_fifo['qty']
         COGSAssignment(**flds).save()
-    # 6 force a gl entry calc for all affected Sale objects
-    for sale_id in set([u['sale'] for u in new_fifo_list]):
-        Sale.objects.get(id=sale_id).update_gl()
+    
     return

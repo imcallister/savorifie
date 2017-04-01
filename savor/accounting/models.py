@@ -15,6 +15,11 @@ class COGSAssignment(models.Model):
     def __unicode__(self):
         return '%s --> %s' % (str(self.unit_sale), str(self.shipment_line),)
 
+    def save(self):
+    	models.Model.save(self)
+    	self.unit_sale.sale.update_gl()
+
+
     class Meta:
         app_label = 'accounting'
         db_table = 'accounting_cogsassignment'
