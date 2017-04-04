@@ -15,7 +15,7 @@ class TaxCollector(models.Model):
 
 class SalesTax(models.Model):
     sale = models.ForeignKey('sales.Sale', related_name='sales_tax')
-    date = models.DateField()
+    date = models.DateField(null=True, blank=True)
     collector = models.ForeignKey(TaxCollector)
     tax = models.DecimalField(max_digits=11, decimal_places=2)
 

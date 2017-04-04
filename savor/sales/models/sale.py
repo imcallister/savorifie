@@ -223,23 +223,24 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
             trans = []
 
             for dt in self.get_all_dates():
-                tran = copy.deepcopy(base_tran)
-                tran['date'] = dt
-                
-                if dt == self.sale_date:
-                    tran['comment'] = "%s: %s" % (self.channel, self.external_channel_id)
-                    tran['trans_id'] = '%s.%s.%s' % (self.short_code, self.id, 'SALE')
-                else:
-                    tran['comment'] = "%s: %s. ADJUST:%s" % (self.channel, self.external_channel_id, dt.strftime('%d%b%y'))
-                    tran['trans_id'] = '%s.%s.ADJ%s' % (self.short_code, self.id, dt.strftime('%d%b%y'))
-                
-                tran['lines'] += self.get_grosssales_lines(dt)
-                tran['lines'] += self.get_salestax_lines(dt)
-                tran['lines'] += self.get_adjustment_lines(dt)
-                tran['lines'] += self.get_COGS_lines(dt)
-                # acctr receivable should be sum of all the above lines
-                tran['lines'] += self.get_acctrec_lines(tran['lines'])
+                if dt:
+                    tran = copy.deepcopy(base_tran)
+                    tran['date'] = dt
+                    
+                    if dt == self.sale_date:
+                        tran['comment'] = "%s: %s" % (self.channel, self.external_channel_id)
+                        tran['trans_id'] = '%s.%s.%s' % (self.short_code, self.id, 'SALE')
+                    else:
+                        tran['comment'] = "%s: %s. ADJUST:%s" % (self.channel, self.external_channel_id, dt.strftime('%d%b%y'))
+                        tran['trans_id'] = '%s.%s.ADJ%s' % (self.short_code, self.id, dt.strftime('%d%b%y'))
+                    
+                    tran['lines'] += self.get_grosssales_lines(dt)
+                    tran['lines'] += self.get_salestax_lines(dt)
+                    tran['lines'] += self.get_adjustment_lines(dt)
+                    tran['lines'] += self.get_COGS_lines(dt)
+                    # acctr receivable should be sum of all the above lines
+                    tran['lines'] += self.get_acctrec_lines(tran['lines'])
 
-                trans.append(tran)
+                    trans.append(tran)
                 
             return trans

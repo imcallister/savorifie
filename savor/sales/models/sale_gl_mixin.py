@@ -1,7 +1,10 @@
 import itertools
 from decimal import Decimal
+import logging
 
 import sales_funcs
+
+logger = logging.getLogger('default')
 
 class SaleGLMixin():
 
@@ -63,8 +66,11 @@ class SaleGLMixin():
         COGS_amounts = self.COGS(self.sale_date)
         for ii in COGS_amounts:
             inv_acct = sales_funcs.get_inventory_account(ii)
-            lines.append((inv_acct, -COGS_amounts[ii], self.customer_code.id, []))
-            lines.append((sample_exp_acct, COGS_amounts[ii], self.customer_code.id, []))
+            if self.customer_code:
+                lines.append((inv_acct, -COGS_amounts[ii], self.customer_code.id, []))
+                lines.append((sample_exp_acct, COGS_amounts[ii], self.customer_code.id, []))
+            else:
+                logger.error('Sale.get_specialsale_lines failed. No customer code. %s' % str(self))
         return lines
 
     def get_acctrec_lines(self, lines):
@@ -115,15 +121,17 @@ class SaleGLMixin():
 
     def get_grosssales_lines(self, date):
         lines = []
-        channel_id = self.channel.label
-        customer_code = self.customer_code.id
-        unit_sales = self.unit_sale.filter(date=date)
-        
-        for u_sale in unit_sales:
-            inv_items = u_sale.get_gross_sales()
-            for ii in inv_items:
-                gross_sales_acct = sales_funcs.get_grosssales_account(ii, channel_id)
-                lines.append((gross_sales_acct, -inv_items[ii], customer_code, []))
+        channel_id = self.channel.counterparty.id
+        if self.customer_code:
+            customer_code = self.customer_code.id
+            unit_sales = self.unit_sale.filter(date=date)
+            for u_sale in unit_sales:
+                inv_items = u_sale.get_gross_sales()
+                for ii in inv_items:
+                    gross_sales_acct = sales_funcs.get_grosssales_account(ii, channel_id)
+                    lines.append((gross_sales_acct, -inv_items[ii], customer_code, []))
+        else:
+            logger.error('Sale.get_grosssales_lines failed. No customer code. %s' % str(self))
         return lines
 
     def get_adjustment_lines(self, date):

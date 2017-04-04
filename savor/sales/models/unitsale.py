@@ -1,5 +1,6 @@
 import itertools
 from decimal import Decimal
+import datetime
 
 from django.db import models
 
@@ -15,7 +16,7 @@ UNITSALE_TAGS = (
 
 class UnitSale(models.Model):
     sale = models.ForeignKey('sales.Sale', related_name='unit_sale')
-    date = models.DateField()
+    date = models.DateField(null=True, blank=True)
     sku = models.ForeignKey('products.Product', null=True, blank=True)
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
@@ -27,6 +28,12 @@ class UnitSale(models.Model):
 
     def __unicode__(self):
         return '%s - %s:%s' % (self.id, self.sale, self.sku)
+
+    def default_date(self):
+        try:
+            return self.sale.sale_date
+        except:
+            return datetime.date(2016,1,1)
 
     def save(self):
         models.Model.save(self)
