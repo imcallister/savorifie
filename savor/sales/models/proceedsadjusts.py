@@ -14,6 +14,7 @@ TYPE_TAGS = (
     ('GIFTWRAP_FEES', 'Giftwrap'),
     ('DISCOUNT', 'Discount'),
     ('SHIPPING_CHARGE', 'Shipping Charge'),
+    ('GIFTCARD_REDEMPTION', 'Giftcard redemption'),
     )
 
 

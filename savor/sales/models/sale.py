@@ -136,7 +136,6 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
     def label(self):
         return str(self)
 
-
     def gross_sale_proceeds(self):
         return sum([v for k, v in self.get_unit_sales().iteritems()])
 

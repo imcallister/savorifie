@@ -93,16 +93,23 @@ class SaleGLMixin():
 
     def get_shippingcharge_lines(self, adj):
         lines = []
-        if adj.amount > 0:
+        if adj.amount != 0:
             shipping_acct = sales_funcs.get_shipping_account()
             lines.append((shipping_acct, -Decimal(adj.amount), self.customer_code.id, []))
         return lines
 
 
+    def get_giftcardredemption_lines(self, adj):
+        lines = []
+        if adj.amount != 0:
+            giftcard_accrual_acct = sales_funcs.get_giftcard_acct()
+            lines.append((giftcard_accrual_acct, Decimal(adj.amount), self.customer_code.id, []))
+        return lines
+
     def get_discount_lines(self, adj):
         lines = []
         discount_acct = sales_funcs.get_discount_account(self.channel.label)
-        if adj.amount > 0:
+        if adj.amount != 0:
             lines.append((discount_acct, Decimal(adj.amount), self.customer_code.id, []))
         return lines
 
@@ -126,10 +133,14 @@ class SaleGLMixin():
             customer_code = self.customer_code.id
             unit_sales = self.unit_sale.filter(date=date)
             for u_sale in unit_sales:
-                inv_items = u_sale.get_gross_sales()
-                for ii in inv_items:
-                    gross_sales_acct = sales_funcs.get_grosssales_account(ii, channel_id)
-                    lines.append((gross_sales_acct, -inv_items[ii], customer_code, []))
+                if u_sale.sku.label == 'GIFTCARD':
+                    giftcard_accrual_acct = sales_funcs.get_giftcard_acct()
+                    lines .append((giftcard_accrual_acct, - u_sale.quantity * u_sale.unit_price, customer_code, []))
+                else:
+                    inv_items = u_sale.get_gross_sales()
+                    for ii in inv_items:
+                        gross_sales_acct = sales_funcs.get_grosssales_account(ii, channel_id)
+                        lines.append((gross_sales_acct, -inv_items[ii], customer_code, []))
         else:
             logger.error('Sale.get_grosssales_lines failed. No customer code. %s' % str(self))
         return lines
@@ -147,6 +158,8 @@ class SaleGLMixin():
                 lines += self.get_discount_lines(adj)
             elif adj.adjust_type == 'GIFTWRAP_FEES':
                 lines += self.get_giftwrap_lines(adj)
+            elif adj.adjust_type == 'GIFTCARD_REDEMPTION':
+                lines += self.get_giftcardredemption_lines(adj)
         return lines
 
     def get_salestax_lines(self, date):

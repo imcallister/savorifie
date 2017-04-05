@@ -27,3 +27,7 @@ npm-debug.log
 pip-selfcheck.json
 selenium/
 webpack-stats.local.json
+webpack-hot-stats.json
+webpack-stats.json
+webpack.config.js
+webpack/

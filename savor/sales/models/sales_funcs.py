@@ -37,6 +37,9 @@ def get_receiveables_account(channel):
 def get_special_account(special_sale):
     return api_func('gl', 'account', 'equity.retearnings.sales.samples.%s' % special_sale)['id']
 
+def get_giftcard_acct():
+    return api_func('gl', 'account', 'liabilities.curr.accrued.giftcard')['id']
+
 def get_shipping_account():
     return api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
 
