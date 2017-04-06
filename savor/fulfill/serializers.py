@@ -44,15 +44,6 @@ class ShippingChargeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'ship_date', 'charge', 'order_related', 'external_id', 'comment', 'packing_id',
                   'fulfillment', 'fulfillment_id', 'requested_ship_type', 'warehouse')
 
-class FulfillUpdateSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['shipper']
-    shipper = serializers.StringRelatedField()
-
-    class Meta:
-        model = models.FulfillUpdate
-        fields = ('update_date', 'comment', 'status',
-                  'shipper', 'tracking_number')
-
 
 class FulfillLineSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     _SELECT_RELATED_FIELDS = ['inventory_item']
@@ -97,12 +88,11 @@ class FullFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                               'ship_type__shipper__company']
     _PREFETCH_RELATED_FIELDS = ['fulfill_lines', 'warehousefulfill',
                                 'fulfill_lines__inventory_item',
-                                'fulfill_updates__shipper__company']
+                                ]
 
     warehouse = serializers.StringRelatedField()
     ship_type = invslz.ShippingTypeSerializer()
     fulfill_lines = FulfillLineSerializer(many=True, read_only=True)
-    fulfill_updates = FulfillUpdateSerializer(many=True, read_only=True)
     order = salesslz.ShippingSaleSerializer(read_only=True)
     ship_from = AddressSerializer(read_only=True)
     items_string = serializers.SerializerMethodField()
@@ -115,7 +105,7 @@ class FullFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
         fields = ('id', 'order', 'request_date', 'status',
                   'ship_info', 'warehouse', 'bill_to', 'ship_type',
                   'use_pdf', 'packing_type', 'fulfill_lines',
-                  'ship_from', 'fulfill_updates', 'items_string',
+                  'ship_from', 'items_string',
                   )
 
 

@@ -36,6 +36,7 @@ Background: There are accounts and companies and counterparties in the system
         |   GL_ACCOUNTS_RECEIVABLE  |   1100    |
         |        GL_INVENTORY       |   1500    |
         |     DEFAULT_COMPANY_ID    |   TEST    |
+        |    DEFAULT_GL_STRATEGY    |   test    |
     
     And there are channels:
         |    counterparty   |
@@ -79,11 +80,9 @@ Scenario: Regular Sale api call
         |   id  |    sale      |    sku    |  quantity  | unit_price |
         |   1   | SHOPIFY123   |   PR001   |     1      |    80      |
     
-    When we call the base.sale api
+    When we call the sales.sale api
     
     Then the api results should be:
-        | account   |   amount  |  counterparty  |    date    |  date_end |
-        |  1100     |   80.0    |    SHOPIFY     | 2016-03-20 |           |
-        |  1200     |   -25.0   | retail_buyer   | 2016-03-20 |           |
-        |  5000     |   -80     | retail_buyer   | 2016-03-20 |           |
-        |  5100     |   25.0    | retail_buyer   | 2016-03-20 |           |
+        | label                |   customer_code  |  external_channel_id  |    sale_date  |
+        |  SHOPIFY: SHOPIFY123 |   retail_buyer   |    SHOPIFY123         |    2016-03-20 |
+        

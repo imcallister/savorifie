@@ -194,46 +194,6 @@ def expense_changes(dt):
     return get_bstrap_table(data_url, row_defs)
 
 
-def tasks():
-    data_url = '/audit/api/tasks_list/'
-    row_defs = [{'data_field': 'id_link', 'value': 'ID', 'formatter': 'nameFormatter'},
-                {'data_field': 'status_tag', 'value': 'Status', 'formatter': 'nameFormatter'},
-                {'data_field': 'task_def', 'value': 'Task Def', 'formatter': 'nameFormatter'},
-                {'data_field': 'as_of', 'value': 'Date', 'formatter': 'nameFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
-
-def task_defs():
-    data_url = '/audit/api/task_defs/'
-    row_defs = [{'data_field': 'id', 'value': 'ID', 'formatter': 'nameFormatter'},
-                {'data_field': 'desc', 'value': 'Description', 'formatter': 'nameFormatter'},
-                {'data_field': 'freq', 'value': 'Freqiency', 'formatter': 'nameFormatter'},
-                {'data_field': 'approvers', 'value': 'Approvers', 'formatter': 'nameFormatter'},
-                {'data_field': 'preparers', 'value': 'Preparers', 'formatter': 'nameFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
-
-def audit_trail():
-    data_url = '/audit/api/audit_trail/'
-    row_defs = [{'data_field': 'id', 'value': 'ID', 'formatter': 'nameFormatter'},
-                {'data_field': 'timestamp', 'value': 'Timestamp', 'formatter': 'nameFormatter'},
-                {'data_field': 'desc', 'value': 'Description', 'formatter': 'nameFormatter'},
-                {'data_field': 'comment_fmt', 'value': 'Comment', 'formatter': 'nameFormatter'},
-                {'data_field': 'task_link', 'value': 'Task Link', 'formatter': 'nameFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
-
-
-def task_audit(task_id):
-    data_url = "/audit/api/task_audit/?id=%s" % task_id
-    row_defs = [{'data_field': 'timestamp', 'value': 'Time', 'formatter': 'nameFormatter'},
-                {'data_field': 'desc', 'value': 'Action', 'formatter': 'nameFormatter'},
-                {'data_field': 'comment', 'value': 'Comment', 'formatter': 'nameFormatter'},
-                {'data_field': 'user_name', 'value': 'User', 'formatter': 'nameFormatter'},
-            ]
-    return get_bstrap_table(data_url, row_defs)
-
-
 def fulfill_requested(warehouse=None):
     if warehouse:
         data_url = "/api/fulfill/requested/?warehouse=%s" % warehouse

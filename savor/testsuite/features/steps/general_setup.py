@@ -1,8 +1,6 @@
-from behave import *
-from decimal import Decimal
-from hamcrest import assert_that, equal_to
+from behave import given
 
-from accountifie.gl.factories import *
+from accountifie.gl.factories import CompanyFactory, AccountFactory, CounterpartyFactory, ExternalAccountFactory
 from accountifie.environment.models import Variable
 
 import logging

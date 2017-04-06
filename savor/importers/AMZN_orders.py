@@ -71,6 +71,7 @@ def process_AMZN_orders(file_name):
                 us['sku_id'] = Product.objects.get(label=us['sku']).id
                 del us['sku']
                 us_obj = UnitSale(**us)
+                us_obj.date = sale_obj.sale_date
                 us_obj.save()
 
             if fulfilled_by == 'AMZN':

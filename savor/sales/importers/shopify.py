@@ -9,7 +9,7 @@ from django.shortcuts import render
 from django.template import RequestContext
 from django.http import HttpResponseRedirect
 
-from ..models import Sale, SalesTax, UnitSale, TaxCollector
+from ..models import Sale, SalesTax, UnitSale, TaxCollector, ProceedsAdjustment
 import products.models
 import accountifie.common.uploaders.csv
 from accountifie.toolkit.forms import FileForm
@@ -19,10 +19,9 @@ DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'da
 INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
 PROCESSED_ROOT = os.path.join(DATA_ROOT, 'processed')
 
-"""
-def get_product(sku):
-    return 'BYE' if sku[:2] == 'BE' else 'SYE'
-"""
+
+SHOPIFY_PCT_FEE = Decimal('0.029')
+SHOPIFY_PER_FEE = Decimal('0.3')
 
 
 def get_unitsale(row):
@@ -39,10 +38,10 @@ def get_unitsale(row):
 
 def get_taxes(row):
     taxes = []
-    for i in range(1,6):
+    for i in range(1, 6):
         collector_col = 'Tax %d Name' % i
         amount_col = 'Tax %d Value' % i
-        if not row[collector_col]=='':
+        if not row[collector_col] == '':
             taxes.append((row[collector_col].split(' Tax')[0], Decimal(str(row[amount_col]))))
     return taxes
 
@@ -67,7 +66,7 @@ def order_upload(request):
 
         return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
     else:
-        context.update({'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None})
+        context = {'file_name': request.FILES.values()[0]._name, 'success': False, 'out': None, 'err': None}
         messages.error(request, 'Could not process the shopify file provided, please see below')
         return render(request, 'uploaded.html', context)
 
@@ -83,13 +82,32 @@ def shopify_fee(sale_obj):
     if sale_obj.gift_wrap_fee:
         total += Decimal(sale_obj.gift_wrap_fee)
     total += sale_obj.total_sales_tax()
-    return total * Decimal('0.029') + Decimal('0.3')
+    return total * SHOPIFY_PCT_FEE + SHOPIFY_PER_FEE
 
 PAID_THRU = {
     'Shopify Payments': 'SHOPIFY',
     'PayPal Express Checkout': 'PAYPAL',
     'Amazon Payments': 'AMZN_PMTS'
 }
+
+
+def customer_code(billing_company):
+    if billing_company != '':
+        if api_func('gl', 'counterparty', billing_company):
+            # it exists
+            return billing_company
+        else:
+            return 'unknown'
+    else:
+        return 'retail_buyer'
+
+def discount_code(disc_code):
+    if disc_code == '':
+        return None
+    else:
+        return disc_code
+
+
 
 def process_shopify(file_name):
     if file_name.split('.')[-1] != 'csv':
@@ -100,57 +118,21 @@ def process_shopify(file_name):
         sales = pd.read_csv(incoming_name)
 
     # any pre-formatting of data here
-    sales['Shipping Zip'] = sales['Shipping Zip'].map(lambda x: str(x).replace("'",""))
+    sales['Shipping Zip'] = sales['Shipping Zip'].map(lambda x: str(x).replace("'", ""))
 
     new_sales_ctr = 0
     exist_sales_ctr = 0
     unknown_cp_ctr = 0
 
-    sales_items = []
     for k, v in sales.groupby('Name'):
         sale_info = {}
         v.fillna('', inplace=True)
 
-        # set default values
-        sale_info['gift_wrapping'] = False
-        sale_info['gift_wrap_fee'] = Decimal('0')
-        sale_info['gift_message'] = None
-        for idx in v.index:
-            if v.loc[idx, 'Note Attributes'] != '':
-                sale_info['gift_message'] = v.loc[idx, 'Note Attributes']
-
-        # check for giftwrap option
-        for idx in v.index:
-            if v.loc[idx, 'Lineitem sku'].lower() == 'gw001':
-                sale_info['gift_wrapping'] = True
-                sale_info['gift_wrap_fee'] = v.loc[idx, 'Lineitem price']
-
         sale_info['company_id'] = 'SAV'
         sale_info['external_channel_id'] = str(v.iloc[0]['Name'])
         sale_info['paid_thru_id'] = PAID_THRU.get(v.iloc[0]['Payment Method'])
-        sale_info['shipping_charge'] = Decimal(str(v.iloc[0]['Shipping']))
-        sale_info['discount_code'] = str(v.iloc[0]['Discount Code'])
-        if sale_info['discount_code']=='':
-            sale_info['discount_code'] = None
-
-        sale_info['discount'] = Decimal(v.iloc[0]['Discount Amount'])
-        sale_info['sale_date'] = parse(v.iloc[0]['Created at']).date()
-        sale_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
-
-        company = v.iloc[0]['Billing Company']
-        if company != '':
-            if api_func('gl', 'counterparty', company):
-                # it exists
-                sale_info['customer_code_id']  = company
-            else:
-                unknown_cp_ctr += 1
-                sale_info['customer_code_id']  = 'unknown'
-        else:
-            sale_info['customer_code_id'] = 'retail_buyer'
-
         sale_info['notification_email'] = v.iloc[0]['Email']
         sale_info['memo'] = v.iloc[0]['Notes']
-
         sale_info['shipping_name'] = v.iloc[0]['Shipping Name']
         sale_info['shipping_company'] = v.iloc[0]['Shipping Company']
         sale_info['shipping_address1'] = v.iloc[0]['Shipping Address1']
@@ -160,11 +142,21 @@ def process_shopify(file_name):
         sale_info['shipping_province'] = v.iloc[0]['Shipping Province']
         sale_info['shipping_country'] = v.iloc[0]['Shipping Country']
         sale_info['shipping_phone'] = v.iloc[0]['Shipping Phone']
+        sale_info['sale_date'] = parse(v.iloc[0]['Created at']).date()
+        sale_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
+        sale_info['discount_code'] = discount_code(str(v.iloc[0]['Discount Code']))
+        sale_info['customer_code_id'] = customer_code(v.iloc[0]['Billing Company'])
+        
+        for idx in v.index:
+            if v.loc[idx, 'Note Attributes'] != '':
+                sale_info['gift_message'] = v.loc[idx, 'Note Attributes']
 
-        sales_items.append(sale_info)
-        sale_obj = Sale.objects.filter(external_channel_id=sale_info['external_channel_id']).first()
+            if v.loc[idx, 'Lineitem sku'].lower() == 'gw001':
+                sale_info['gift_wrapping'] = True
+                gift_wrap_fee = v.loc[idx, 'Lineitem price']
 
-        if sale_obj:
+        
+        if Sale.objects.filter(external_channel_id=sale_info['external_channel_id']).first():
             # if sale object already exists ... skip to next one
             exist_sales_ctr += 1
         else:
@@ -186,6 +178,7 @@ def process_shopify(file_name):
                 }
 
                 tax_obj = SalesTax(**obj_data)
+                tax_obj.date = sale_obj.sale_date
                 tax_obj.save()
 
             for idx in v.index:
@@ -195,10 +188,44 @@ def process_shopify(file_name):
                     obj_data['sale_id'] = sale_obj.id
 
                     unitsale_obj = UnitSale(**obj_data)
+                    unitsale_obj.date = sale_obj.sale_date
                     unitsale_obj.save()
 
-            # add shopify channel charge (2.9% + 0.30)
-            sale_obj.channel_charges = shopify_fee(sale_obj)
+            pa = {}
+            pa['amount'] = shopify_fee(sale_obj)
+            if pa['amount'] != Decimal('0'):
+                pa['date'] = sale_obj.sale_date
+                pa['sale_id'] = sale_obj.id
+                pa['adjust_type'] = 'CHANNEL_FEES'
+                ProceedsAdjustment(**pa).save()
+
+            pa = {}
+            pa['amount'] = Decimal(v.iloc[0]['Discount Amount'])
+            if pa['amount'] != Decimal('0'):
+                pa['date'] = sale_obj.sale_date
+                pa['sale_id'] = sale_obj.id
+                pa['adjust_type'] = 'DISCOUNT'
+                ProceedsAdjustment(**pa).save()
+
+            pa = {}
+            pa['amount'] = Decimal(str(v.iloc[0]['Shipping']))
+            if pa['amount'] != Decimal('0'):
+                pa['date'] = sale_obj.sale_date
+                pa['sale_id'] = sale_obj.id
+                pa['adjust_type'] = 'SHIPPING_CHARGE'
+                ProceedsAdjustment(**pa).save()
+
+            if sale_obj.gift_wrapping:
+                pa = {}
+                pa['amount'] = gift_wrap_fee
+                pa['date'] = sale_obj.sale_date
+                pa['sale_id'] = sale_obj.id
+                pa['adjust_type'] = 'GIFTWRAP_FEES'
+                ProceedsAdjustment(**pa).save()
+
+            if sale_info['customer_code_id'] == 'unknown':
+                unknown_cp_ctr += 1
+        
             sale_obj.save()
             
     return {'status': 'SUCCESS', 'exist_sales_ctr': exist_sales_ctr,

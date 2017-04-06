@@ -9,7 +9,7 @@ from accountifie.common.api import api_func
 
 from .models import SalesTax, Sale
 import importers.shopify
-import importers.buybuy
+
 
 
 def assign_COGS(request):
