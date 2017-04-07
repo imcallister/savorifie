@@ -123,8 +123,8 @@ class ShippingSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
-                  'external_channel_id', 'special_sale', 'discount',
-                  'discount_code', 'gift_wrapping', 'gift_wrap_fee',
+                  'external_channel_id', 'special_sale',
+                  'gift_wrapping', 'gift_wrap_fee',
                   'gift_message', 'external_routing_id',
                   'shipping_charge', 'notification_email', 'shipping_name',
                   'shipping_company', 'shipping_address1', 'shipping_address2',
@@ -151,8 +151,8 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = Sale
         fields = ('id', 'label', 'company', 'customer_code', 'channel', 'sale_date',
-                  'external_channel_id', 'special_sale', 'discount',
-                  'discount_code', 'gift_wrapping', 'gift_wrap_fee',
+                  'external_channel_id', 'special_sale',
+                  'gift_wrapping', 'gift_wrap_fee',
                   'gift_message', 'memo', 'external_routing_id',
                   'shipping_charge', 'notification_email', 'shipping_name',
                   'shipping_company', 'shipping_address1', 'shipping_address2',

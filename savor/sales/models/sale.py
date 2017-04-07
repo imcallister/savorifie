@@ -35,16 +35,11 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
                                            help_text='If no ID, leave blank for system-generated ID')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
-    is_return = models.BooleanField(default=False)
-
-    shipping_charge = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
-    channel_charges = models.DecimalField(max_digits=11, decimal_places=2, default=Decimal(0))
+    
     paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
                                   related_name='paid_thru',
                                   limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
-    discount = models.DecimalField(max_digits=11, decimal_places=2, blank=True, null=True)
-    discount_code = models.CharField(max_length=50, blank=True, null=True)
-
+    
     customer_code = models.ForeignKey('gl.Counterparty', blank=True, null=True)
     notification_email = models.EmailField(max_length=254, blank=True, null=True)
     memo = models.TextField(null=True, blank=True)

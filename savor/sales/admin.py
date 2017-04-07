@@ -87,20 +87,18 @@ class SaleAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),
-                                ('external_channel_id', 'channel_charges',),
+                                ('external_channel_id', 'paid_thru'),
                                 ('customer_code', 'special_sale',),
-                                ( 'is_return', 'paid_thru',),
-                                ('memo',),
                                 )
                      }),
-        ('Discount', {'fields': ('discount', 'discount_code',), 'classes': ('collapse',)}),
         ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee',), 'gift_message',), 'classes': ('collapse',)}),
-        ('Shipping Details', {'fields': (('shipping_charge',), ('shipping_name',), 
-                                         ('shipping_company', 'external_routing_id',),
-                                         ('shipping_address1'), ('shipping_address2'),
+        ('Shipping Details', {'fields': (('shipping_name', 'shipping_company'), 
+                                         ('external_routing_id',),
+                                         ('shipping_address1', 'shipping_address2'),
                                          ('shipping_city', 'shipping_country'), ('shipping_province', 'shipping_zip'),
                                          ('shipping_phone', 'notification_email',), ),
-                              'classes': ('collapse',)})
+                              'classes': ('collapse',)}),
+        ('Memo', {'fields': (('memo',)), 'classes': ('collapse',)}),
     )
 
 

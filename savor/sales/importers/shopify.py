@@ -101,13 +101,6 @@ def customer_code(billing_company):
     else:
         return 'retail_buyer'
 
-def discount_code(disc_code):
-    if disc_code == '':
-        return None
-    else:
-        return disc_code
-
-
 
 def process_shopify(file_name):
     if file_name.split('.')[-1] != 'csv':
@@ -144,7 +137,6 @@ def process_shopify(file_name):
         sale_info['shipping_phone'] = v.iloc[0]['Shipping Phone']
         sale_info['sale_date'] = parse(v.iloc[0]['Created at']).date()
         sale_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
-        sale_info['discount_code'] = discount_code(str(v.iloc[0]['Discount Code']))
         sale_info['customer_code_id'] = customer_code(v.iloc[0]['Billing Company'])
         
         for idx in v.index:
