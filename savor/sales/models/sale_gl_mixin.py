@@ -44,8 +44,9 @@ class SaleGLMixin():
 
     def get_payment_lines(self):
         channel_id = self.channel.counterparty.id
+        paid_thru = self.paid_thru.id if self.paid_thru else None
         amount = self.total_receivable(incl_ch_fees=False)
-        accts_rec = sales_funcs.get_receiveables_account(channel_id)
+        accts_rec = sales_funcs.get_receiveables_account(channel_id, paid_thru)
         channel_fees_acct = sales_funcs.get_channelfees_account(channel_id)
 
         lines = []
@@ -74,7 +75,8 @@ class SaleGLMixin():
         return lines
 
     def get_acctrec_lines(self, lines):
-        accts_rec = sales_funcs.get_receiveables_account(self.channel.label)
+        paid_thru = self.paid_thru.id if self.paid_thru else None
+        accts_rec = sales_funcs.get_receiveables_account(self.channel.label, paid_thru)
         rcvbl = -sum(l[1] for l in lines)
         return [(accts_rec, rcvbl, self.payee().id, [])]
 

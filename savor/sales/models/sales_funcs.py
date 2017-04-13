@@ -28,9 +28,11 @@ def create_external_channel_id(special_sale, channel):
         return '%s.%d' % (channel, max_id + 1)
 
 
-def get_receiveables_account(channel):
+def get_receiveables_account(channel, paid_thru):
         if channel in ['PAMPHOM', 'GROMMET', 'PAPERSO', 'UNCOMMON']:
             return api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE_TERMS')
+        elif paid_thru:
+            return api_func('gl', 'account', 'assets.curr.ar.%s' % paid_thru)['id']
         else:
             return api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
 

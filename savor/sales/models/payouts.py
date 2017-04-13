@@ -3,6 +3,9 @@ import logging
 
 from django.db import models
 
+import accountifie.gl.bmo
+import sales_funcs
+from accountifie.toolkit.utils import get_default_company
 
 DZERO = Decimal('0')
 
@@ -36,7 +39,6 @@ class PayoutLine(models.Model):
     tag = models.CharField(max_length=20, choices=PAYOUT_TAGS, blank=True, null=True)
     payout = models.ForeignKey('sales.Payout', related_name='payout_line')
 
-
     class Meta:
         app_label = 'sales'
         db_table = 'sales_payoutline'
@@ -45,13 +47,16 @@ class PayoutLine(models.Model):
         return '%s:%s' % (self.payout, self.id)
 
 
-class Payout(models.Model):
+class Payout(models.Model, accountifie.gl.bmo.BusinessModelObject):
+    company = models.ForeignKey('gl.Company', default=get_default_company)
     channel = models.ForeignKey('sales.Channel')
     payout_date = models.DateField()
     payout = models.DecimalField(max_digits=8, decimal_places=2)
     paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
                                   related_name='ch_payout_paid_thru',
                                   limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
+
+    short_code = 'PAYOUT'
 
     class Meta:
         app_label = 'sales'
@@ -60,6 +65,29 @@ class Payout(models.Model):
     def __unicode__(self):
         return '%s:%s:%s' % (self.channel, self.paid_thru, self.id)
 
+    def save(self):
+        models.Model.save(self)
+        self.update_gl()
+
     def calcd_payout(self):
         return sum([s.amount for s in self.payout_line.all()])
+
+    def get_gl_transactions(self):
+        
+        rec_acct = sales_funcs.get_receiveables_account(None, self.paid_thru.id)
+        general_rec_acct = sales_funcs.get_receiveables_account(None, None)
+
+        total = self.calcd_payout()
+        
+        tran = {}
+        tran['company'] = get_default_company()
+        tran['bmo_id'] = '%s.%s' % (self.short_code, self.id)
+        tran['lines'] = []
+        tran['date'] = self.payout_date
+        tran['comment'] = "Payout - %s: %s" % (self.paid_thru, self.id)
+        tran['trans_id'] = '%s.%s.%s' % (self.short_code, self.id, 'PAYOUT')
+        tran['lines'] += [(rec_acct, -total, self.paid_thru.id, [])]
+        tran['lines'] += [(general_rec_acct, total, self.paid_thru.id, [])]
+        return [tran]
+
 
