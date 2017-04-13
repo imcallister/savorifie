@@ -110,7 +110,7 @@ class SaleGLMixin():
         lines = []
         discount_acct = sales_funcs.get_discount_account(self.channel.label)
         if adj.amount != 0:
-            lines.append((discount_acct, Decimal(adj.amount), self.customer_code.id, []))
+            lines.append((discount_acct, -Decimal(adj.amount), self.customer_code.id, []))
         return lines
 
     def get_giftwrap_lines(self, adj):

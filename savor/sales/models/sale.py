@@ -141,28 +141,30 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
 
     def total_receivable(self, incl_ch_fees=True):
         total = self.gross_sale_proceeds()
-        if self.discount:
-            total -= Decimal(self.discount)
-        if self.shipping_charge:
-            total += Decimal(self.shipping_charge)
-        if self.gift_wrap_fee:
-            total += Decimal(self.gift_wrap_fee)
+        adjusts = self.proceedsadjustment_sale \
+                       .filter(adjust_type__in=['GIFTWRAP_FEES', 'DISCOUNT', 'SHIPPING_CHARGE']) \
+                       .aggregate(models.Sum('amount')).get('amount__sum', Decimal('0'))
+        if adjusts:
+            total += adjusts
         
         tax_amts = self.get_sales_taxes()
         total += sum([v for k, v in tax_amts.iteritems()])
         
-        if incl_ch_fees:
-            total -= self.channel_charges
+        
+        channel_fees =  self.proceedsadjustment_sale \
+                            .filter(adjust_type='CHANNEL_FEES') \
+                            .aggregate(models.Sum('amount')).get('amount__sum', Decimal('0'))
+        
+        if channel_fees:
+            total -= channel_fees
+            
         return total
 
     def taxable_proceeds(self):
         total = self.gross_sale_proceeds()
-        if self.discount:
-            total -= Decimal(self.discount)
-        if self.shipping_charge:
-            total += Decimal(self.shipping_charge)
-        if self.gift_wrap_fee:
-            total += Decimal(self.gift_wrap_fee)
+        total += self.proceedsadjustment_sale \
+                     .filter(adjust_type__in=['GIFTWRAP_FEES', 'DISCOUNT', 'SHIPPING_CHARGE']) \
+                     .aggregate(models.Sum('amount'))['amount__sum']
         return total
 
     def payee(self):
@@ -225,7 +227,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
                         tran['comment'] = "%s: %s" % (self.channel, self.external_channel_id)
                         tran['trans_id'] = '%s.%s.%s' % (self.short_code, self.id, 'SALE')
                     else:
-                        tran['comment'] = "%s: %s. ADJUST:%s" % (self.channel, self.external_channel_id, dt.strftime('%d%b%y'))
+                        tran['comment'] = "%s: %s.ADJUST:%s" % (self.channel, self.external_channel_id, dt.strftime('%d%b%y'))
                         tran['trans_id'] = '%s.%s.ADJ%s' % (self.short_code, self.id, dt.strftime('%d%b%y'))
                     
                     tran['lines'] += self.get_grosssales_lines(dt)

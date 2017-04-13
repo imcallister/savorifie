@@ -7,13 +7,15 @@ from decimal import Decimal
 
 
 from django.conf import settings
-from django.db.models import Prefetch, Sum
+from django.db.models import Prefetch, Sum, F, DecimalField
+from django.db.models.functions import Coalesce
 
 import products.apiv1 as product_api
 from sales.models import Sale, UnitSale, Channel, Payout, PayoutLine
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SaleProceedsSerializer,\
-    PayoutSerializer, SaleIDSerializer
+    PayoutSerializer, SaleIDSerializer, SaleGrossProceedsSerializer, \
+    SaleProceedsAdjustmentSerializer, SalePayoutsSerializer, SalesTaxSerializer3
 
 def external_ids(qstring):
     qs = Sale.objects
@@ -28,6 +30,7 @@ def sale(qstring):
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
     view_type = qstring.get('view', 'full')
+    paid_thru = qstring.get('paid_thru')
 
     if type(start_date) != datetime.date:
         start_date = parse(start_date).date()
@@ -36,6 +39,9 @@ def sale(qstring):
     qs = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date) \
                      .order_by('-sale_date')
 
+    if paid_thru:
+        qs = qs.filter(paid_thru_id=paid_thru)
+    
     if view_type == 'simple':
         serializer = SimpleSaleSerializer
     elif view_type == 'shipping':
@@ -44,6 +50,22 @@ def sale(qstring):
         serializer = SaleFulfillmentSerializer
     elif view_type == 'proceeds':
         serializer = SaleProceedsSerializer
+    elif view_type == 'grossproceeds':
+        qs = qs.annotate(gross_proceeds=Coalesce(Sum(F('unit_sale__quantity') * F('unit_sale__unit_price'), output_field=DecimalField()),
+                                                 Decimal('0')))
+        serializer = SaleGrossProceedsSerializer
+    elif view_type == 'proceedsadjustments':
+        qs = qs.annotate(total_adjustments=Coalesce(Sum('proceedsadjustment_sale__amount', output_field=DecimalField()),
+                                                    Decimal('0')))
+        serializer = SaleProceedsAdjustmentSerializer
+    elif view_type == 'payouts':
+        qs = qs.annotate(total_payout=Coalesce(Sum('payoutline_sale__amount', output_field=DecimalField()),
+                                               Decimal('0')))
+        serializer = SalePayoutsSerializer
+    elif view_type == 'salestax':
+        qs = qs.annotate(total_salestax=Coalesce(Sum('sales_tax__tax', output_field=DecimalField()),
+                                               Decimal('0')))
+        serializer = SalesTaxSerializer3
     else:
         serializer = FullSaleSerializer
 
@@ -254,11 +276,8 @@ def unpaid_sales(channel_lbl, qstring):
 
 def unpaid_channel(channel_lbl, qstring):
     # find Shopify sales which are not in a channel payout batch
-    paidout_sales = []
-    for cpt in Payout.objects.filter(channel__counterparty_id=channel_lbl):
-        paidout_sales += [s.id for s in cpt.sales.all()]
-
-    qs = Sale.objects.filter(channel__counterparty_id='SHOPIFY') \
+    paidout_sales = [x['sale_id'] for x in PayoutLine.objects.filter(payout__channel__label=channel_lbl).values('sale_id')]
+    qs = Sale.objects.filter(channel__label=channel_lbl) \
                      .exclude(id__in=paidout_sales)
     qs = SaleProceedsSerializer.setup_eager_loading(qs)
     unpaid = list(SaleProceedsSerializer(qs, many=True).data)

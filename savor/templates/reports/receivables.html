@@ -71,7 +71,7 @@
         <div class="col-md-4">    
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">Shopify Receivables Reports</h3>
+                    <h3 class="panel-title">Unpaid by Paid Thru</h3>
                 </div>
                 <div class="panel-body">
                     <div>
@@ -82,7 +82,40 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="btn btn-info" data-toggle="modal" data-target="#shopifyComp">Shopify Payouts</a>
+                                <a class="btn btn-info" data-toggle="modal" data-target="#paypalUnpaid">
+                                    View Unpaid Paypal
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-info" data-toggle="modal" data-target="#amazonPaymentsUnpaid">
+                                    View Unpaid Amazon Payments
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-info" data-toggle="modal" data-target="#amazonFBAUnpaid">
+                                    View Unpaid Amazon FBA
+                                </a>
+                            </li>
+                            <li>
+                                <a class="btn btn-info" data-toggle="modal" data-target="#buyBuyFBAUnpaid">
+                                    View Unpaid BuyBuy
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Payout Recs</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav nav-pills nav-stacked">
+                            <li>
+                                <a class="btn btn-warning" data-toggle="modal" data-target="#shopifyComp">
+                                    Shopify Payouts
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -93,8 +126,6 @@
 
 </div>
 
-
-
 <!-- MODAL COMPONENTS -->
 
 <!--help-->
@@ -103,6 +134,11 @@
 
 <!--tables-->
 <div id="bookkeeping.unpaidShopify"></div>
+<div id="bookkeeping.unpaidPaypal"></div>
+<div id="bookkeeping.unpaidAmazonPayments"></div>
+<div id="bookkeeping.unpaidAmazonFBA"></div>
+<div id="bookkeeping.unpaidBuyBuy"></div>
+
 <div id="bookkeeping.shopifyComp"></div>
 
 
