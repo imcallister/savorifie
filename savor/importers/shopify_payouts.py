@@ -32,6 +32,7 @@ def process_shopify_payouts(file_name):
     # payouts are unique by date. create those that do no yet exist
     payout_dates = list(set(r['payout_date'].date() for r in po_records))
     payouts = dict((p.payout_date, p) for p in Payout.objects.filter(payout_date__in=payout_dates))
+
     for d in [d for d in payout_dates if d not in payouts]:
         po_info = {}
         po_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
@@ -42,6 +43,7 @@ def process_shopify_payouts(file_name):
         po.save()
         payouts[d] = po
     
+    payouts_changed = []
     for rec in po_records:
         pol_info = {}
         pol_info['sale'] = rec['sale']
@@ -56,6 +58,11 @@ def process_shopify_payouts(file_name):
             new_recs_ctr += 1
         else:
             exist_recs_ctr += 1
+    
+        payouts_changed.append(pol_info['payout'])
+    
+    for po in list(set(payouts_changed)):
+        po.save()
 
     summary_msg = 'Loaded Shopify payout file: %d new records, %d duplicate records, %d bad rows' \
                                     % (new_recs_ctr, exist_recs_ctr, errors_cnt)

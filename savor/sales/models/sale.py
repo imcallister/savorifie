@@ -38,7 +38,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
     
     paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
                                   related_name='paid_thru',
-                                  limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS']})
+                                  limit_choices_to={'id__in': ['SHOPIFY', 'PAYPAL', 'AMZN', 'AMZN_PMTS', 'BBB']})
     
     customer_code = models.ForeignKey('gl.Counterparty', blank=True, null=True)
     notification_email = models.EmailField(max_length=254, blank=True, null=True)
