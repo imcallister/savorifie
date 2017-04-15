@@ -113,10 +113,29 @@
                     <div>
                         <ul class="nav nav-pills nav-stacked">
                             <li>
-                                <a class="btn btn-warning" data-toggle="modal" data-target="#shopifyComp">
+                                <a class="btn btn-success" data-toggle="modal" data-target="#shopifyComp">
                                     Shopify Payouts
                                 </a>
                             </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Upload Payout Files</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <ul class="nav nav-pills nav-stacked">
+                            <ul class="nav nav-pills nav-stacked">
+                                <li>
+                                    <a class="btn btn-warning" data-toggle="modal" data-target="#SHOPIFYPayoutUploader">Load Shopify</a>
+                                </li>
+                                <li>
+                                    <a class="btn btn-warning" data-toggle="modal" data-target="#AMZNPMTSPayoutUploader">Load Amazon Payments</a>
+                                </li>
+                        </ul>
                         </ul>
                     </div>
                 </div>
@@ -128,8 +147,6 @@
 
 <!-- MODAL COMPONENTS -->
 
-<!--help-->
-<div id="bookkeeping.help"></div>
 
 
 <!--tables-->
@@ -140,6 +157,9 @@
 <div id="bookkeeping.unpaidBuyBuy"></div>
 
 <div id="bookkeeping.shopifyComp"></div>
+
+<!--uploaders-->
+<div id="bookkeeping.upload.SHOPIFYPayoutUploader"></div>
 
 
 {% render_bundle 'receivables' %}

@@ -2,20 +2,19 @@ var React = require('react')
 var ReactDOM = require('react-dom')
 
 var BHelp = require('../help_text/bookkeeping') 
-var UPSHelp = require('../help_text/UPS_upload')
-var FRBHelp = require('../help_text/FRB_upload')
 var BSTable = require('../containers/acctifieTableContainer')
 var Uploader = require('../containers/uploaderContainer') 
 var formatters = require('../helpers/formatters')
 var ModalCmpnt = require('../components/modalCmpnt')
 
 
-var help = <BHelp/>
-var UPS_upload_help = <UPSHelp/>
-var FRB_upload_help = <FRBHelp/>
 
-ReactDOM.render(<ModalCmpnt modalId="help" modalTitle="Help" content={help}/>, 
-				document.getElementById('bookkeeping.help'))
+
+
+var Shopify_uploader = <Uploader instructions="" postUrl={'/importers/upload/shopify_payouts/'}/>
+ReactDOM.render(<ModalCmpnt modalId="SHOPIFYPayoutUploader" modalTitle="Shopify Payout File Upload" content={Shopify_uploader}/>, document.getElementById('bookkeeping.upload.SHOPIFYPayoutUploader'))
+
+
 
 
 var receivables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},
