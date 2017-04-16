@@ -1,5 +1,7 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 import views
+
+
 
 urlpatterns = [
     url(r'^download_salestax/$', views.output_salestax),
@@ -7,4 +9,6 @@ urlpatterns = [
     url(r'^download_grosses/$', views.output_grosses),
     url(r'^sales/shopify_upload/$', views.shopify_upload),
     url(r'^assign_COGS/$', views.assign_COGS),
+
+    
 ]

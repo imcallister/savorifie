@@ -71,17 +71,9 @@ def order_upload(request):
         return render(request, 'uploaded.html', context)
 
 
-def shopify_fee(sale_obj):
-    total = sale_obj.gross_sale_proceeds()
-    """
-    if sale_obj.discount:
-        total -= Decimal(sale_obj.discount)
-    if sale_obj.shipping_charge:
-        total += Decimal(sale_obj.shipping_charge)
-    if sale_obj.gift_wrap_fee:
-        total += Decimal(sale_obj.gift_wrap_fee)
+def shopify_fee(sale_obj, adjust_amounts):
+    total = sale_obj.gross_sale_proceeds() + adjust_amounts
     total += sale_obj.total_sales_tax()
-    """
     return total * SHOPIFY_PCT_FEE + SHOPIFY_PER_FEE
 
 PAID_THRU = {
@@ -100,13 +92,6 @@ def customer_code(billing_company):
             return 'unknown'
     else:
         return 'retail_buyer'
-
-def discount_code(disc_code):
-    if disc_code == '':
-        return None
-    else:
-        return disc_code
-
 
 
 def process_shopify(file_name):
@@ -144,7 +129,6 @@ def process_shopify(file_name):
         sale_info['shipping_phone'] = v.iloc[0]['Shipping Phone']
         sale_info['sale_date'] = parse(v.iloc[0]['Created at']).date()
         sale_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
-        sale_info['discount_code'] = discount_code(str(v.iloc[0]['Discount Code']))
         sale_info['customer_code_id'] = customer_code(v.iloc[0]['Billing Company'])
         
         for idx in v.index:
@@ -192,9 +176,11 @@ def process_shopify(file_name):
                     unitsale_obj.save()
 
 
+            adjust_amounts = Decimal('0')
             pa = {}
-            pa['amount'] = Decimal(v.iloc[0]['Discount Amount'])
+            pa['amount'] = -Decimal(v.iloc[0]['Discount Amount'])
             if pa['amount'] != Decimal('0'):
+                adjust_amounts += pa['amount']
                 pa['date'] = sale_obj.sale_date
                 pa['sale_id'] = sale_obj.id
                 pa['adjust_type'] = 'DISCOUNT'
@@ -203,6 +189,7 @@ def process_shopify(file_name):
             pa = {}
             pa['amount'] = Decimal(str(v.iloc[0]['Shipping']))
             if pa['amount'] != Decimal('0'):
+                adjust_amounts += pa['amount']
                 pa['date'] = sale_obj.sale_date
                 pa['sale_id'] = sale_obj.id
                 pa['adjust_type'] = 'SHIPPING_CHARGE'
@@ -210,6 +197,7 @@ def process_shopify(file_name):
 
             if sale_obj.gift_wrapping:
                 pa = {}
+                adjust_amounts += pa['amount']
                 pa['amount'] = gift_wrap_fee
                 pa['date'] = sale_obj.sale_date
                 pa['sale_id'] = sale_obj.id
@@ -217,14 +205,13 @@ def process_shopify(file_name):
                 ProceedsAdjustment(**pa).save()
 
             pa = {}
-            pa['amount'] = shopify_fee(sale_obj)
+
+            pa['amount'] = shopify_fee(sale_obj, adjust_amounts)
             if pa['amount'] != Decimal('0'):
                 pa['date'] = sale_obj.sale_date
                 pa['sale_id'] = sale_obj.id
                 pa['adjust_type'] = 'CHANNEL_FEES'
                 ProceedsAdjustment(**pa).save()
-
-            
 
             if sale_info['customer_code_id'] == 'unknown':
                 unknown_cp_ctr += 1

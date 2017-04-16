@@ -64,6 +64,46 @@ class SaleProceedsSerializer(serializers.ModelSerializer, EagerLoadingMixin):
                   'shipping_company', 'items_string')
 
 
+class SaleGrossProceedsSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    gross_proceeds = serializers.DecimalField(max_digits=9, decimal_places=2)
+    
+    _PREFETCH_RELATED_FIELDS = ['unit_sale__sku__skuunit__inventory_item']
+
+    class Meta:
+        model = Sale
+        fields = ('id', 'gross_proceeds',)
+
+
+class SaleProceedsAdjustmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    total_adjustments = serializers.DecimalField(max_digits=9, decimal_places=2)
+    
+    _PREFETCH_RELATED_FIELDS = ['proceedsadjustment_sale']
+
+    class Meta:
+        model = Sale
+        fields = ('id','total_adjustments',)
+
+
+class SalePayoutsSerializer(serializers.ModelSerializer, EagerLoadingMixin):
+    total_payout = serializers.DecimalField(max_digits=9, decimal_places=2)
+    
+    _PREFETCH_RELATED_FIELDS = ['payoutline_sale']
+
+    class Meta:
+        model = Sale
+        fields = ('id', 'total_payout',)
+
+
+class SalesTaxSerializer3(serializers.ModelSerializer, EagerLoadingMixin):
+    total_salestax = serializers.DecimalField(max_digits=9, decimal_places=2)
+    
+    _PREFETCH_RELATED_FIELDS = ['sales_tax']
+
+    class Meta:
+        model = Sale
+        fields = ('id', 'total_salestax',)
+
+
 class SaleFulfillmentSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     items_string = serializers.SerializerMethodField()
     unfulfilled_items = serializers.SerializerMethodField()
@@ -123,10 +163,10 @@ class ShippingSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = Sale
         fields = ('id', 'label', 'customer_code', 'channel', 'sale_date',
-                  'external_channel_id', 'special_sale', 'discount',
-                  'discount_code', 'gift_wrapping', 'gift_wrap_fee',
+                  'external_channel_id', 'special_sale',
+                  'gift_wrapping', 'gift_wrap_fee',
                   'gift_message', 'external_routing_id',
-                  'shipping_charge', 'notification_email', 'shipping_name',
+                  'notification_email', 'shipping_name',
                   'shipping_company', 'shipping_address1', 'shipping_address2',
                   'shipping_city', 'shipping_zip', 'shipping_province',
                   'shipping_country', 'shipping_phone')
@@ -151,10 +191,10 @@ class FullSaleSerializer(serializers.ModelSerializer, EagerLoadingMixin):
     class Meta:
         model = Sale
         fields = ('id', 'label', 'company', 'customer_code', 'channel', 'sale_date',
-                  'external_channel_id', 'special_sale', 'discount',
-                  'discount_code', 'gift_wrapping', 'gift_wrap_fee',
+                  'external_channel_id', 'special_sale',
+                  'gift_wrapping', 'gift_wrap_fee',
                   'gift_message', 'memo', 'external_routing_id',
-                  'shipping_charge', 'notification_email', 'shipping_name',
+                  'notification_email', 'shipping_name',
                   'shipping_company', 'shipping_address1', 'shipping_address2',
                   'shipping_city', 'shipping_zip', 'shipping_province',
                   'shipping_country', 'shipping_phone', 'items_string', 'unit_sale')
