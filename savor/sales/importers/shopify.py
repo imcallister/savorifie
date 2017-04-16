@@ -175,6 +175,7 @@ def process_shopify(file_name):
                     unitsale_obj.date = sale_obj.sale_date
                     unitsale_obj.save()
 
+
             adjust_amounts = Decimal('0')
             pa = {}
             pa['amount'] = -Decimal(v.iloc[0]['Discount Amount'])
@@ -204,13 +205,13 @@ def process_shopify(file_name):
                 ProceedsAdjustment(**pa).save()
 
             pa = {}
+
             pa['amount'] = shopify_fee(sale_obj, adjust_amounts)
             if pa['amount'] != Decimal('0'):
                 pa['date'] = sale_obj.sale_date
                 pa['sale_id'] = sale_obj.id
                 pa['adjust_type'] = 'CHANNEL_FEES'
                 ProceedsAdjustment(**pa).save()
-
 
             if sale_info['customer_code_id'] == 'unknown':
                 unknown_cp_ctr += 1
