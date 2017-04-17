@@ -86,10 +86,10 @@ class SaleGLMixin():
     def get_channelfee_lines(self, adj):
         lines = []
         channel_id = self.channel.counterparty.id
-        if adj.amount > 0:
+        if adj.amount != 0:
             channelfees_acct = sales_funcs.get_channelfees_account(channel_id)
             lines.append((channelfees_acct,
-                          Decimal(adj.amount),
+                          -Decimal(adj.amount),
                           channel_id, []))
         return lines
 
