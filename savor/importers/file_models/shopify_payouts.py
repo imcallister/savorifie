@@ -4,6 +4,7 @@ from accountifie.common.uploaders.adaptor.fields import DateField, CharField, De
 from accountifie.common.uploaders.adaptor.model import CsvModel, HeaderLayout
 
 from sales.models import Sale
+from accountifie.gl.models import Counterparty
 
 
 def date_parse(dt):
@@ -24,6 +25,7 @@ def parse_decimal(x):
 
 
 class ShopifyPayoutCSVModel(CsvModel):
+    paid_thru = DjangoModelField(Counterparty, match="PaidThru")
     payout_date = DateField(match="Payout Date", transform=date_parse)
     sale = DjangoModelField(Sale, match="Order", transform=parse_sale)
     amount = DecimalField(match='Net', transform=parse_decimal)
