@@ -69,6 +69,10 @@ class Payout(models.Model, accountifie.gl.bmo.BusinessModelObject):
         models.Model.save(self)
         self.update_gl()
 
+    def delete(self):
+        self.delete_from_gl()
+        models.Model.delete(self)
+
     def calcd_payout(self):
         return sum([s.amount for s in self.payout_line.all()])
 

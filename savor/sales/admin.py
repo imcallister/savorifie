@@ -219,6 +219,10 @@ class PayoutLineInline(admin.TabularInline):
             field.queryset = field.queryset.select_related('channel__counterparty')
         return field
 
+# special signal as normal GL update doesn't work with NominalTransaction
+payout_tran_saved = django.dispatch.Signal(providing_args=[])
+payout_tran_saved.connect(on_bmo_save)
+
 class PayoutAdmin(admin.ModelAdmin):
     ordering = ('-payout_date',)
     list_display = ('__unicode__', 'payout_date', 'payout', 'paid_thru', 'channel',)
@@ -226,6 +230,17 @@ class PayoutAdmin(admin.ModelAdmin):
     list_select_related = ('channel', 'paid_thru')
     
     inlines = [PayoutLineInline]
+
+    def response_change(self, request, new_object):
+        "They saved a change - send signal"
+        payout_tran_saved.send(new_object)
+        return admin.ModelAdmin.response_change(self, request, new_object)
+
+    def response_add(self, request, obj):
+        "They added a new payout tran - send signal"
+        payout_tran_saved.send(obj)
+        return admin.ModelAdmin.response_add(self, request, obj)
+
     
 
 admin.site.register(Payout, PayoutAdmin)
