@@ -52,9 +52,10 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def __unicode__(self):
         return '%.2f: %s: %s' % (self.amount, self.external_id, self.post_date.strftime('%d-%b-%y'))
 
-    def save(self):
+    def save(self, update_gl=True):
         models.Model.save(self)
-        self.update_gl()
+        if update_gl:
+            self.update_gl()
 
     def delete(self):
         self.delete_from_gl()
@@ -85,6 +86,7 @@ class Cashflow(models.Model, accountifie.gl.bmo.BusinessModelObject):
 
         cf_acct = self.ext_account.gl_account.id
         tran = []
+
         tran = dict(company=self.ext_account.company,
                     date=self.post_date,
                     comment= "%s: %s" % (self.id, self.description[:75]),
