@@ -137,8 +137,6 @@ def management(request):
 
 
     unrecd = flfl_api.no_warehouse_record({})
-    context['FBA_unreconciled_count'] = len([x for x in unrecd
-                                              if x['warehouse'] == 'FBA'])
     context['NC2_unreconciled_count'] = len([x for x in unrecd
                                              if x['warehouse'] == 'NC2'])
     context['152Frank_unreconciled_count'] = len([x for x in unrecd
@@ -153,7 +151,6 @@ def management(request):
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
-    context['FBA_unreconciled'] = get_table('no_warehouse_record')(warehouse='FBA')
     context['NC2_unreconciled'] = get_table('no_warehouse_record')(warehouse='NC2')
     context['152Frank_unreconciled'] = get_table('no_warehouse_record')(warehouse='152Frank')
     
