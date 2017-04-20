@@ -1,50 +1,97 @@
 import os
+import sys
+import traceback
+from dateutil.parser import parse
+from decimal import Decimal
 
 from django.conf import settings
 
-from .file_models.FBA import FBACSVModel
-import inventory.apiv1 as inventory_api
-from fulfill.models import WarehouseFulfill
+from .thirdparty_apis.amazon_sellercentral import load_orders, order_details
+import sales.apiv1 as sales_api
+from sales.models import Sale, UnitSale
+from accountifie.common.api import api_func
 
-from accountifie.common.uploaders.upload_tools import order_upload
 import logging
 logger = logging.getLogger('default')
 
 
-DATA_ROOT = getattr(settings, 'DATA_DIR', os.path.join(settings.ENVIRON_DIR, 'data'))
-INCOMING_ROOT = os.path.join(DATA_ROOT, 'incoming')
-PROCESSED_ROOT = os.path.join(DATA_ROOT, 'processed')
 
 def upload(request):
-    processor = process_FBA
-    return order_upload(request,
-                        processor,
-                        label=False)
+    return load_FBA()
 
 
-def process_FBA(file_name):
-    incoming_name = os.path.join(INCOMING_ROOT, file_name)
-    wh_records, errors = FBACSVModel.import_data(data=open(incoming_name, 'rU'))
-    wh_id = inventory_api.warehouse('FBA', {})['id']
+def _FBA_start_date():
+    return sales_api.sales_loaded_thru('AMZN', {}).isoformat()
 
-    new_recs_ctr = 0
-    exist_recs_ctr = 0
-    errors_cnt = len(errors)
 
-    for rec in wh_records:
-        rec['warehouse_id'] = wh_id
-        rec_obj = WarehouseFulfill.objects \
-                                  .filter(warehouse_pack_id=rec['warehouse_ship_id']) \
-                                  .first()
-        if rec_obj:
-            # if warehose fulfill object already exists ... skip to next one
-            exist_recs_ctr += 1
-        else:
-            new_recs_ctr += 1
-            rec_obj = WarehouseFulfill(**rec)
-            rec_obj.save()
+def _map_sku(amzn_sku):
+    if amzn_sku == 'DL-Z7RL-OS4O':
+        return 'BE3'
+    else:
+        return amzn_sku
 
-            
-    summary_msg = 'Loaded FBA fulfillments file: %d new records, %d duplicate records, %d bad rows' \
-                                    % (new_recs_ctr, exist_recs_ctr, errors_cnt)
+def _create_unitsale(us):
+    sku = _map_sku(us.get('SellerSKU'))
+    sku_id = api_func('products', 'inventoryitem', sku)['id']
+    try:
+        return {'quantity': int(us.get('QuantityOrdered', '0')),
+                'unit_price': Decimal(us.get('ItemPrice', '0')),
+                'sku_id': sku_id}
+    except:
+        return
+
+
+def _create_sale(order, order_details):
+    sale_info = {}
+    sale_info['company_id'] = 'SAV'
+    sale_info['external_channel_id'] = order.get('AmazonOrderId')
+    sale_info['paid_thru_id'] = 'AMZN'
+    sale_info['shipping_name'] = order.get('Shipping Name', {}).get('Name')
+    sale_info['shipping_address1'] = order.get('ShippingAddress', {}).get('AddressLine1', '')
+    sale_info['shipping_address2'] = order.get('ShippingAddress', {}).get('AddressLine2', '')
+    sale_info['shipping_city'] = order.get('ShippingAddress', {}).get('City', '')
+    sale_info['shipping_zip'] = order.get('ShippingAddress', {}).get('PostalCode', '')
+    sale_info['shipping_province'] = order.get('ShippingAddress', {}).get('StateOrRegion', '')
+    sale_info['shipping_country'] = order.get('ShippingAddress', {}).get('CountryCode', '')
+    sale_info['sale_date'] = parse(order.get('PurchaseDate')).date()
+    sale_info['channel_id'] = api_func('sales', 'channel', 'AMZN')['id']
+    return sale_info, [_create_unitsale(us) for us in order_details]
+
+
+def load_FBA():
+    orders = load_orders(_FBA_start_date())
+    orders_dict = dict((o.get('AmazonOrderId'), o) for o in orders)
+    
+    FBA_ids = [o.get('AmazonOrderId') for o in orders]
+    existing_ids = [s['external_channel_id'] for s in Sale.objects.filter(external_channel_id__in=FBA_ids).values('external_channel_id')]
+    new_ids = [o for o in FBA_ids if o not in existing_ids]
+
+    new_order_ctr = 0
+    bad_order_ctr = 0
+    errors = []
+
+    for o in new_ids:
+        try:
+            od = order_details(o)
+        except:
+            errors.append('Failed on %s' % o)
+        
+        sale, unitsales = _create_sale(orders_dict.get(o), od)
+
+        try:
+            s = Sale(**sale)
+            s.save()
+            for u in unitsales:
+                if u:
+                    u['sale_id'] = s.id
+                    UnitSale(**u).save()
+            new_order_ctr += 1
+        except:
+            #exc_type, exc_value, exc_traceback = sys.exc_info()
+            #traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+            #traceback.print_exc()
+            bad_order_ctr += 1
+    
+    summary_msg = 'Loaded FBA orders: %d new orders, %d bad ordres' \
+                                    % (new_order_ctr, bad_order_ctr)
     return summary_msg, errors

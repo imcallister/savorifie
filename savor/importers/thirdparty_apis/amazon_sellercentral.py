@@ -25,10 +25,30 @@ def _parse_order(o):
 	return order
 
 
+'ShippingTax', 'ShippingDiscount', 'value', 'PromotionDiscount', 'ItemPrice', 'QuantityShipped', 'ItemTax', 'ShippingPrice', 'QuantityOrdered', 'OrderItemId'
+
+def _parse_order_details(od):
+	simple_flds = ['SellerSKU', 'QuantityOrdered', 'OrderItemId']
+
+	amount_flds = ['ShippingTax', 'ShippingDiscount', 'PromotionDiscount', 'ItemPrice',
+					'ItemTax', 'ShippingPrice']
+	
+	order = dict((f, od.get(f, {}).get('value')) for f in simple_flds)
+	order.update(dict((f, od.get(f, {}).get('Amount', {}).get('value')) for f in amount_flds))
+
+	return order
+
+
 def load_orders(created_after):
 	olist = ORDERS_API.list_orders(MARKETPLACE_IDs, created_after=created_after).parsed['Orders']['Order']
 	return [_parse_order(o) for o in olist]
 
 def order_details(order_id):
-	return ORDERS_API.list_order_items(order_id).parsed['OrderItems']['OrderItem']
+	od = ORDERS_API.list_order_items(order_id).parsed['OrderItems']['OrderItem']
+	if type(od) is not list:
+		od = [od]
+
+	return [_parse_order_details(d) for d in od]
+
+
 	

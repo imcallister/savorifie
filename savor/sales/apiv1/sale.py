@@ -7,7 +7,7 @@ from decimal import Decimal
 
 
 from django.conf import settings
-from django.db.models import Prefetch, Sum, F, DecimalField
+from django.db.models import Prefetch, Sum, F, DecimalField, Max
 from django.db.models.functions import Coalesce
 
 import products.apiv1 as product_api
@@ -24,6 +24,11 @@ def external_ids(qstring):
         qs = qs.filter(external_channel_id__icontains=filter_string)
     return list(SaleIDSerializer(qs, many=True).data)
 
+
+def sales_loaded_thru(channel_lbl, qstring):
+    latest = Sale.objects.filter(channel__label=channel_lbl) \
+                      .aggregate(Max('sale_date'))
+    return latest['sale_date__max']
 
 @dispatch(dict)
 def sale(qstring):
