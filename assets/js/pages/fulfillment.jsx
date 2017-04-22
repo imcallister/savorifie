@@ -1,7 +1,7 @@
 var React = require('react')
 var ReactDOM = require('react-dom')
 
-var JobDisplay = require('../components/loadJobDisplay') 
+var JobDisplay = require('../containers/loadJobContainer') 
 var ModalCmpnt = require('../components/modalCmpnt')
 
 
