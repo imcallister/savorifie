@@ -12,7 +12,11 @@ def date_parse(dt):
 
 
 def parse_sale(sid):
-    return Sale.objects.filter(external_channel_id=sid).first().id
+    s = Sale.objects.filter(external_channel_id=sid).first()
+    if s:
+        return s.id
+    else:
+        return None
 
 def parse_decimal(x):
     x = x.replace('$', '')
