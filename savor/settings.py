@@ -208,39 +208,6 @@ TEMPLATES = [
 ]
 
 
-##  OLD TEMPLATES
-
-# List of callables that know how to import templates from various sources.
-"""
-TEMPLATE_LOADERS = (
-    'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.filesystem.Loader',
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
-    "accountifie.common.views.base_templates",
-
-    "base.views.company_context",
-    )
-
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(PROJECT_DIR, 'templates'),
-    
-)
-"""
-## END OF OLD TEMPLATES
-
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -253,9 +220,6 @@ MIDDLEWARE_CLASSES = (
     'accountifie.middleware.ssl.SSLRedirect',
     'accountifie.toolkit.error_handling.StandardExceptionMiddleware',
 )
-
-
-
 
 ROOT_URLCONF = PROJECT_NAME + '.urls'
 WSGI_APPLICATION = PROJECT_NAME + '.wsgi.application'
@@ -413,6 +377,9 @@ try:
     from localsettings import *
 except ImportError:
     pass
+
+# OVER-RIDE Amazon MWS Settings line="{{ item }}"
+
 
 #recommendations for security from: http://django-secure.readthedocs.org/en/v0.1.2/
 SECURE_SSL_REDIRECT = not DEVELOP   

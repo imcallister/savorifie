@@ -9,6 +9,9 @@ import bulk_shipping
 import buybuy
 import AMZN_orders
 import shopify_payouts
+import amazon_payouts
+import FBA
+
 
 urlpatterns = [
     url(r'importers/nc2_upload/$', NC2.upload),
@@ -21,4 +24,6 @@ urlpatterns = [
     url(r'importers/upload/buybuy/$', buybuy.upload),
     url(r'importers/upload/AMZN_orders/$', AMZN_orders.upload),
     url(r'importers/upload/shopify_payouts/$', shopify_payouts.upload),
+    url(r'importers/upload/amazon_payouts/$', amazon_payouts.upload),
+    url(r'importers/upload/FBA/$', FBA.upload),
 ]
