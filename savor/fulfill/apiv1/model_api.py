@@ -58,26 +58,23 @@ def fulfillment_batch(id, qstring):
     return {'batch_id': batch_id}
 
 def batched_fulfillments(qstring):
-    qs = BatchRequest.objects.all()
-    qs = BatchRequestSerializer.setup_eager_loading(qs)
-
-    batched_flmts = [[x['id'] for x in b['fulfillments']]
-                     for b in BatchRequestSerializer(qs, many=True).data]
-    return list(itertools.chain(*batched_flmts))
+    return [x for x in list(set([x['fulfillments'] for x in BatchRequest.objects.all().values('fulfillments')])) if x]
 
 
 def unbatched_fulfillments(qstring):
+    start_time = time.time()
     batched_flmts = batched_fulfillments(qstring)
-    missing_shipping = [f['id'] for f in fulfillment({'missing_shipping': 'true',
-                                                      'status': 'requested'})]
-
+    
     qs = Fulfillment.objects \
                     .exclude(id__in=batched_flmts) \
-                    .exclude(id__in=missing_shipping) \
+                    .exclude(order__channel__label='AMZN') \
                     .filter(status='requested')
+
     qs = FulfillmentSerializer.setup_eager_loading(qs)
 
-    return FulfillmentSerializer(qs, many=True).data
+    data = FulfillmentSerializer(qs, many=True).data
+    data = [f for f in data if f['ship_info'] != 'incomplete']
+    return data
 
 
 @dispatch(dict)
@@ -233,6 +230,7 @@ def unfulfilled(qstring):
                    .prefetch_related('fulfillments__fulfill_lines__inventory_item') \
                    .all()
 
+    
     incomplete = [s.id for s in sales_qs if s.unfulfilled_items]
     
     qs = Sale.objects.filter(id__in=incomplete)

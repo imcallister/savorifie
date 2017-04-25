@@ -5,6 +5,8 @@ from dateutil.parser import parse
 from decimal import Decimal
 
 from django.conf import settings
+from django.http import JsonResponse
+from django.contrib import messages
 
 from .thirdparty_apis.amazon_sellercentral import load_orders, order_details
 import sales.apiv1 as sales_api
@@ -17,8 +19,8 @@ logger = logging.getLogger('default')
 
 
 def upload(request):
-    return load_FBA()
-
+    summary_msg, error_msgs = load_FBA()
+    return JsonResponse({'summary': summary_msg, 'errors': error_msgs})
 
 def _FBA_start_date():
     return sales_api.sales_loaded_thru('AMZN', {}).isoformat()
@@ -60,7 +62,6 @@ def _create_sale(order, order_details):
 
 
 def load_FBA():
-    print 'running load_FBA'
     orders = load_orders(_FBA_start_date())
     orders_dict = dict((o.get('AmazonOrderId'), o) for o in orders)
     
@@ -69,8 +70,6 @@ def load_FBA():
     
     new_ids = [o for o in FBA_ids if o not in existing_ids]
     cmplt_new_ids = [o for o in new_ids if orders_dict.get(o).get('OrderStatus') != 'Pending']
-    print 'cmplt_new_ids'
-    print cmplt_new_ids
     new_order_ctr = 0
     bad_order_ctr = 0
     errors = []
@@ -94,15 +93,12 @@ def load_FBA():
                     u['date'] = s.sale_date
                     UnitSale(**u).save()
             new_order_ctr += 1
-            print 'saved', o
         except:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
             traceback.print_exc()
             bad_order_ctr += 1
     
-    summary_msg = 'Loaded FBA orders: %d new orders, %d bad ordres' \
+    summary_msg = 'Loaded FBA orders: %d new orders, %d bad orders' \
                                     % (new_order_ctr, bad_order_ctr)
-    print 'OK done'
-    print summary_msg
     return summary_msg, errors
