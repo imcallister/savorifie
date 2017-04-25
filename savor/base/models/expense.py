@@ -98,7 +98,7 @@ class ExpenseAllocation(models.Model):
 
 
 # HARDCODE
-PAID_FROM_CHOICES = [1001, 1002, 1003, 3000, 3005, 3006, 3010, 3020, 3250, 20100]
+PAID_FROM_CHOICES = [1001, 1002, 1003, 1100, 3000, 3005, 3006, 3010, 3020, 3250, 20100]
 
 class Expense(models.Model, BusinessModelObject):
     
