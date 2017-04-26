@@ -1,8 +1,9 @@
 import os
 import itertools
+from decimal import Decimal
 
 from django.conf import settings
-from sales.models import Sale, UnitSale
+from sales.models import Sale, UnitSale, ProceedsAdjustment
 from products.models import Product
 
 from .file_models.buybuy import BuyBuyCSVModel
@@ -47,6 +48,7 @@ def process_buybuy(file_name):
         else:
             new_sales_ctr += 1
             sale_info = dict((k, v) for k, v in s.iteritems() if k != 'unit_sales')
+            shipping_charge = sale_info.pop('shipping_charge')
             sale_info['channel_id'] = api_func('sales', 'channel', sale_info['channel_label'])['id']
             del sale_info['channel_label']
             del sale_info['status']
@@ -60,6 +62,16 @@ def process_buybuy(file_name):
                 us_obj = UnitSale(**us)
                 us_obj.date = sale_obj.sale_date
                 us_obj.save()
+
+            pa = {}
+            pa['amount'] = Decimal(str(shipping_charge))
+            if pa['amount'] != Decimal('0'):
+                adjust_amounts += pa['amount']
+                pa['date'] = sale_obj.sale_date
+                pa['sale_id'] = sale_obj.id
+                pa['adjust_type'] = 'SHIPPING_CHARGE'
+                ProceedsAdjustment(**pa).save()
+
 
     summary_msg = 'Loaded Buy Buy file: %d new records, %d duplicate records, %d bad rows' \
                                     % (new_sales_ctr, exist_sales_ctr, len(errors))
