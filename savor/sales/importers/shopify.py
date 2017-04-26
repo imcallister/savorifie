@@ -137,7 +137,7 @@ def process_shopify(file_name):
 
             if v.loc[idx, 'Lineitem sku'].lower() == 'gw001':
                 sale_info['gift_wrapping'] = True
-                gift_wrap_fee = v.loc[idx, 'Lineitem price']
+                gift_wrap_fee = Decimal(str(v.loc[idx, 'Lineitem price']))
 
         
         if Sale.objects.filter(external_channel_id=sale_info['external_channel_id']).first():
@@ -197,8 +197,8 @@ def process_shopify(file_name):
 
             if sale_obj.gift_wrapping:
                 pa = {}
-                adjust_amounts += pa['amount']
                 pa['amount'] = gift_wrap_fee
+                adjust_amounts += pa['amount']
                 pa['date'] = sale_obj.sale_date
                 pa['sale_id'] = sale_obj.id
                 pa['adjust_type'] = 'GIFTWRAP_FEES'
