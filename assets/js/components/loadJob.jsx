@@ -24,7 +24,7 @@ class JobDisplay extends React.Component {
                   bsSize="large"
                   onClick={this.run}
                 >
-                  Fetch Amazon Orders
+                  Fetch Orders
               </Button>
             </div>
           }

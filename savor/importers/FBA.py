@@ -62,8 +62,11 @@ def _create_sale(order, order_details):
     return sale_info, [_create_unitsale(us) for us in order_details]
 
 
-def load_FBA():
-    orders = load_orders(_FBA_start_date())
+def load_FBA(from_date=None):
+    if not from_date:
+        from_date = _FBA_start_date()
+
+    orders = load_orders(from_date)
     orders_dict = dict((o.get('AmazonOrderId'), o) for o in orders)
     
     FBA_ids = [o.get('AmazonOrderId') for o in orders]
