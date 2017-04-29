@@ -39,7 +39,6 @@ def _parse_order_details(od):
 
 
 def load_orders(created_after):
-	print 'running load_orders', created_after
 	olist = ORDERS_API.list_orders(MARKETPLACE_IDs, created_after=created_after).parsed['Orders']['Order']
 	return [_parse_order(o) for o in olist]
 
