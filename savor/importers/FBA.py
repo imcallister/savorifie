@@ -36,8 +36,9 @@ def _create_unitsale(us):
     sku = _map_sku(us.get('SellerSKU'))
     try:
         sku_id = api_func('products', 'product', sku)['id']
+        item_price = Decimal(us.get('ItemPrice', '0')) / Decimal(us.get('QuantityOrdered', '0'))
         return {'quantity': int(us.get('QuantityOrdered', '0')),
-                'unit_price': Decimal(us.get('ItemPrice', '0')),
+                'unit_price': item_price,
                 'sku_id': sku_id}
     except:
         return
