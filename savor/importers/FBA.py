@@ -7,11 +7,20 @@ from decimal import Decimal
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db import transaction
+
 
 from .thirdparty_apis.amazon_sellercentral import load_orders, order_details
 import sales.apiv1 as sales_api
-from sales.models import Sale, UnitSale
+import inventory.apiv1 as inventory_api
+import products.apiv1 as products_api
+
+from sales.models import Sale, UnitSale, ProceedsAdjustment
 from accountifie.common.api import api_func
+from utilities.channel_fees import FBA_fee
+from fulfill.models import Fulfillment, FulfillLine
+import fulfill.apiv1 as fulfill_api
+
 
 import logging
 logger = logging.getLogger('default')
@@ -19,8 +28,13 @@ logger = logging.getLogger('default')
 
 
 def upload(request):
-    summary_msg, error_msgs = load_FBA()
-    return JsonResponse({'summary': summary_msg, 'errors': error_msgs})
+    try:
+        summary_msg, error_msgs = load_FBA()
+        return JsonResponse({'summary': summary_msg, 'errors': error_msgs})
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
+        return JsonResponse({'summary': 'FBA upload failed on %s, %s' % (exc_type, exc_value), 'errors': []})
 
 def _FBA_start_date():
     return sales_api.sales_loaded_thru('AMZN', {}).isoformat()
@@ -61,6 +75,50 @@ def _create_sale(order, order_details):
     sale_info['customer_code_id'] = 'retail_buyer'
     return sale_info, [_create_unitsale(us) for us in order_details]
 
+@transaction.atomic
+def _save_objects(sale, unitsales, fulfill_channel):
+    FBA_wh = inventory_api.warehouse('FBA', {})['id']
+    FBA_shiptype = inventory_api.shippingtype('FBA', {})['id']
+    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem({}))
+
+    s = Sale(**sale)
+    s.save()
+    for u in unitsales:
+        if u:
+            u['sale_id'] = s.id
+            u['date'] = s.sale_date
+            UnitSale(**u).save()
+
+    pa = {}
+    pa['amount'] = -FBA_fee(s)
+    if pa['amount'] != Decimal('0'):
+        pa['date'] = s.sale_date
+        pa['sale_id'] = s.id
+        pa['adjust_type'] = 'CHANNEL_FEES'
+        ProceedsAdjustment(**pa).save()
+
+    if fulfill_channel == 'AFN':
+        fulfill_info = {}
+        fulfill_info['request_date'] = s.sale_date
+        fulfill_info['warehouse_id'] = FBA_wh
+        fulfill_info['order_id'] = s.id
+        fulfill_info['status'] = 'requested'
+        fulfill_info['bill_to'] = 'AMZN'
+        fulfill_info['ship_type_id'] = FBA_shiptype
+
+        fulfill_obj = Fulfillment(**fulfill_info)
+        fulfill_obj.save()
+
+        unfulfilled_items = fulfill_api.unfulfilled(str(s.id), {})['unfulfilled_items']
+        for label, quantity in unfulfilled_items.iteritems():
+            fline_info = {}
+            fline_info['inventory_item_id'] = inv_items[label]
+            fline_info['quantity'] = quantity
+            fline_info['fulfillment_id'] = fulfill_obj.id
+            fline_obj = FulfillLine(**fline_info)
+            fline_obj.save()
+    return
+
 
 def load_FBA(from_date=None):
     if not from_date:
@@ -68,6 +126,7 @@ def load_FBA(from_date=None):
 
     orders = load_orders(from_date)
     orders_dict = dict((o.get('AmazonOrderId'), o) for o in orders)
+    
     
     FBA_ids = [o.get('AmazonOrderId') for o in orders]
     existing_ids = [s['external_channel_id'] for s in Sale.objects.filter(external_channel_id__in=FBA_ids).values('external_channel_id')]
@@ -89,13 +148,7 @@ def load_FBA(from_date=None):
         sale, unitsales = _create_sale(orders_dict.get(o), od)
 
         try:
-            s = Sale(**sale)
-            s.save()
-            for u in unitsales:
-                if u:
-                    u['sale_id'] = s.id
-                    u['date'] = s.sale_date
-                    UnitSale(**u).save()
+            _save_objects(sale, unitsales, orders_dict.get(o).get('FulfillmentChannel'))
             new_order_ctr += 1
         except:
             exc_type, exc_value, exc_traceback = sys.exc_info()

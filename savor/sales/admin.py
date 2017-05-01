@@ -87,8 +87,9 @@ class SaleAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),
-                                ('external_channel_id', 'paid_thru'),
-                                ('customer_code', 'special_sale',),
+                                ('external_channel_id', 'customer_code',),
+                                ('paid_thru', 'checkout_id',),
+                                ( 'special_sale',),
                                 )
                      }),
         ('Gift Details', {'fields': (('gift_wrapping', 'gift_wrap_fee',), 'gift_message',), 'classes': ('collapse',)}),

@@ -7,20 +7,23 @@ from decimal import Decimal
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db import transaction
 
 from .thirdparty_apis.shopify_api import load_orders
 import sales.apiv1 as sales_api
-from sales.models import Sale, UnitSale
+from sales.models import Sale, UnitSale, ProceedsAdjustment
 from accountifie.common.api import api_func
+
+from utilities.channel_fees import shopify_fee
 
 import logging
 logger = logging.getLogger('default')
 
 
 PAID_THRU = {
-    'Shopify Payments': 'SHOPIFY',
-    'PayPal Express Checkout': 'PAYPAL',
-    'Amazon Payments': 'AMZN_PMTS'
+    'shopify_payments': 'SHOPIFY',
+    'paypal': 'PAYPAL',
+    'amazon_payments': 'AMZN_PMTS'
 }
 
 
@@ -34,15 +37,11 @@ def _Shopify_start_date():
 
 
 def _create_unitsale(us):
-    try:
-        sku_id = api_func('products', 'product', us.sku)['id']
-        return {'quantity': int(us.quantity, '0'),
-                'unit_price': Decimal(us.price),
-                'sku_id': sku_id}
-    except:
-        return
-
-
+    sku_id = api_func('products', 'product', us.sku)['id']
+    return {'quantity': us.quantity,
+            'unit_price': Decimal(us.price),
+            'sku_id': sku_id}
+    
 def _create_taxlines(tl):
     try:
         tax_collector, created = TaxCollector.objects.get_or_create(entity=tl.title)
@@ -57,6 +56,7 @@ def _create_sale(order):
     sale_info = {}
     sale_info['company_id'] = 'SAV'
     sale_info['external_channel_id'] = order.name
+    
     sale_info['paid_thru_id'] = PAID_THRU.get(order.gateway)
     sale_info['shipping_name'] = order.shipping_address.name
     sale_info['shipping_address1'] = order.shipping_address.address1
@@ -68,9 +68,84 @@ def _create_sale(order):
     sale_info['sale_date'] = parse(order.created_at).date()
     sale_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
     sale_info['customer_code_id'] = 'retail_buyer'
-    unit_sales = [_create_unitsale(us) for us in order.line_items]
-    tax_lines = [_get_taxlines(tl) for tl in order.tax_lines]
+    sale_info['checkout_id'] = order.checkout_id
+
+    sale_info['discount'] = Decimal(order.total_discounts)
+    sale_info['shipping_charge'] = sum(Decimal(sl.price) for sl in order.shipping_lines)
+
+    # gift wrapping
+    gw = [li for li in order.line_items if li.sku == 'GW001']
+    if len(gw) > 0:
+        sale_info['gift_wrapping'] = True
+        sale_info['gift_wrap_fee'] = Decimal(gw[0].price)
+
+    gift_msg_attrs = [a.value for a in order.note_attributes if a.name == 'gift-note']
+    if len(gift_msg_attrs) > 0:
+        sale_info['gift_message'] = gift_msg_attrs[0]
+
+
+    non_gw = [li for li in order.line_items if li.sku != 'GW001']
+
+    unit_sales = [_create_unitsale(us) for us in non_gw]
+    tax_lines = [_create_taxlines(tl) for tl in order.tax_lines]
     return sale_info, unit_sales, tax_lines
+
+
+@transaction.atomic
+def _save_objects(sale, unitsales, taxlines, discount, shipping_charge, gift_wrap_fee):
+    s = Sale(**sale)
+    s.save()
+    for u in unitsales:
+        if u:
+            u['sale_id'] = s.id
+            u['date'] = s.sale_date
+            UnitSale(**u).save()
+
+    for tl in taxlines:
+        if tl:
+            tl['sale_id'] = s.id
+            tl['date'] = s.sale_date
+            SalesTax(**tl).save()
+
+    adjust_amounts = Decimal('0')
+    if discount != Decimal('0'):
+        pa = {}
+        pa['amount'] = -discount
+        adjust_amounts += pa['amount']
+        pa['date'] = s.sale_date
+        pa['sale_id'] = s.id
+        pa['adjust_type'] = 'DISCOUNT'
+        ProceedsAdjustment(**pa).save()
+
+    pa = {}
+    if shipping_charge != Decimal('0'):
+        pa = {}
+        pa['amount'] = shipping_charge
+        adjust_amounts += pa['amount']
+        pa['date'] = s.sale_date
+        pa['sale_id'] = s.id
+        pa['adjust_type'] = 'SHIPPING_CHARGE'
+        ProceedsAdjustment(**pa).save()
+
+    if s.gift_wrapping:
+        pa = {}
+        pa['amount'] = gift_wrap_fee
+        adjust_amounts += pa['amount']
+        pa['date'] = s.sale_date
+        pa['sale_id'] = s.id
+        pa['adjust_type'] = 'GIFTWRAP_FEES'
+        ProceedsAdjustment(**pa).save()
+
+    pa = {}
+
+    pa['amount'] = -shopify_fee(s, adjust_amounts)
+    if pa['amount'] != Decimal('0'):
+        pa['date'] = s.sale_date
+        pa['sale_id'] = s.id
+        pa['adjust_type'] = 'CHANNEL_FEES'
+        ProceedsAdjustment(**pa).save()
+
+    return
 
 
 def load_shopify(from_date=None):
@@ -89,36 +164,21 @@ def load_shopify(from_date=None):
     bad_order_ctr = 0
     errors = []
 
-    print 'laoded shopify orders', len(orders)
-    
     for o in new_ids:
-        print 'starting on', o
-        
-        sale, unitsales, taxlines = _create_sale(orders_dict.get(o))
+        try:    
+            sale, unitsales, taxlines = _create_sale(orders_dict.get(o))
+            discount = sale.pop('discount', None)
+            shipping_charge = sale.pop('shipping_charge', None)
+            gift_wrap_fee = sale.pop('gift_wrap_fee', None)
 
-        try:
-            s = Sale(**sale)
-            s.save()
-            for u in unitsales:
-                if u:
-                    u['sale_id'] = s.id
-                    u['date'] = s.sale_date
-                    UnitSale(**u).save()
-
-            for tl in taxlines:
-                if tl:
-                    tl['sale_id'] = s.id
-                    tl['date'] = s.sale_date
-                    SalesTax(**tl).save()
-
+            _save_objects(sale, unitsales, taxlines, discount, shipping_charge, gift_wrap_fee)
             new_order_ctr += 1
         except:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
             traceback.print_exc()
             bad_order_ctr += 1
-        print 'done with', o
-    
+        
     summary_msg = 'Loaded Savor orders: %d new orders, %d bad orders' \
                                     % (new_order_ctr, bad_order_ctr)
     return summary_msg, errors
