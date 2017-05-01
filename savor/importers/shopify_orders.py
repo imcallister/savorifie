@@ -59,6 +59,7 @@ def _create_sale(order):
     
     sale_info['paid_thru_id'] = PAID_THRU.get(order.gateway)
     sale_info['shipping_name'] = order.shipping_address.name
+    sale_info['shipping_company'] = order.shipping_address.company
     sale_info['shipping_address1'] = order.shipping_address.address1
     sale_info['shipping_address2'] = order.shipping_address.address2
     sale_info['shipping_city'] = order.shipping_address.city
@@ -69,6 +70,7 @@ def _create_sale(order):
     sale_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
     sale_info['customer_code_id'] = 'retail_buyer'
     sale_info['checkout_id'] = order.checkout_id
+    sale_info['notification_email'] = order.email
 
     sale_info['discount'] = Decimal(order.total_discounts)
     sale_info['shipping_charge'] = sum(Decimal(sl.price) for sl in order.shipping_lines)

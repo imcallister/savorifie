@@ -34,25 +34,14 @@ class JobDisplay extends React.Component {
             </div> 
           }
           {this.props.stage == 'load_done' &&
-              <div>
-                <div>
-                  <Button
-                      bsStyle="primary"
-                      bsSize="large"
-                      onClick={this.props.OnRun}
-                    >
-                      Fetch Amazon Orders
-                  </Button>
-                </div>
-                <div className={'panel-body'}>
-                  <ul className={"list-group"}>
-                    {
-                      this.props.messages.map(function(msg, i) {
-                        return <li className={"list-group-item"} style={msgStyle}>{msg}</li>
-                      })
-                    }
-                  </ul>
-                </div>
+              <div className={'panel-body'}>
+                <ul className={"list-group"}>
+                  {
+                    this.props.messages.map(function(msg, i) {
+                      return <li className={"list-group-item"} style={msgStyle}>{msg}</li>
+                    })
+                  }
+                </ul>
               </div>
           }
           
