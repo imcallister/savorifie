@@ -10,13 +10,45 @@ from accountifie.query.query_manager_strategy_factory import QueryManagerStrateg
 
 
 from savor.base.models import NominalTransaction, NominalTranLine
-from fulfill.models import WarehouseFulfill, ShippingCharge
+from fulfill.models import WarehouseFulfill, ShippingCharge, Fulfillment, FulfillLine
 from sales.models import UnitSale, SalesTax, ProceedsAdjustment
 from sales.importers.shopify import shopify_fee
-
+import inventory.apiv1 as inventory_api
+import products.apiv1 as products_api
+import fulfill.apiv1 as fulfill_api
 from fulfill.calcs import create_nc2_shippingcharge
 
 logger = logging.getLogger('default')
+
+def backfill_FBA_fulfills():
+    FBA_wh = inventory_api.warehouse('FBA', {})['id']
+    FBA_shiptype = inventory_api.shippingtype('FBA', {})['id']
+    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem({}))
+
+    unfld = fulfill_api.unfulfilled({})
+    unfld_amzn = [s for s in unfld if s['channel'] == 'AMZN']
+
+    for s in unfld_amzn:
+        fulfill_info = {}
+        fulfill_info['request_date'] = s['sale_date']
+        fulfill_info['warehouse_id'] = FBA_wh
+        fulfill_info['order_id'] = s['id']
+        fulfill_info['status'] = 'requested'
+        fulfill_info['bill_to'] = 'AMZN'
+        fulfill_info['ship_type_id'] = FBA_shiptype
+
+        fulfill_obj = Fulfillment(**fulfill_info)
+        fulfill_obj.save()
+
+        unfulfilled_items = fulfill_api.unfulfilled(str(s['id']), {})['unfulfilled_items']
+        for label, quantity in unfulfilled_items.iteritems():
+            fline_info = {}
+            fline_info['inventory_item_id'] = inv_items[label]
+            fline_info['quantity'] = quantity
+            fline_info['fulfillment_id'] = fulfill_obj.id
+            fline_obj = FulfillLine(**fline_info)
+            fline_obj.save()
+    return
 
 def add_shopify_fees():
     for s in Sale.objects.filter(channel__label='SHOPIFY'):
