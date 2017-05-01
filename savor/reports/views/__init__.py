@@ -7,3 +7,4 @@ from sales_analysis import *
 from shipping_handling import *
 from shippingcosts import *
 from periodend import *
+from warehouse import *

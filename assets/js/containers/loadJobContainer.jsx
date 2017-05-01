@@ -23,6 +23,9 @@ class LoadJobContainer extends React.Component {
         this.state.statusMessages.push(err);
       }
       else {
+        console.log('LoadJobContainer.updateMessages');
+        console.log(res);
+        
         var rsp = JSON.parse(res.text);
         var msgs = rsp.errors;
         msgs.push(rsp.summary);

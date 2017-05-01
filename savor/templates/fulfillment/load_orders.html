@@ -1,0 +1,144 @@
+{% extends base_template %}
+{% load staticfiles %}
+{% load render_bundle from webpack_loader %}
+
+
+{% block breadcrumb %}
+<li class="active">Home</li>
+
+{{ block.super }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container-fluid" id="wrapper">
+
+    
+    <div row>
+        <div class="col-md-4">    
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Load and Process Orders</h3>
+                </div>
+                <div class="panel-body">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a class="btn btn-warning" data-toggle="modal" data-target="#FBAdownloader">Download Amazon</a></li>
+                        <li><a class="btn btn-warning" data-toggle="modal" data-target="#ShopifyOrdersdownloader">Download Shopify Orders</a></li>
+                        <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadShopify">Load Shopify (Old-style csv upload)</a></li>
+                        <li><a class="btn btn-primary" data-toggle="modal" data-target="#loadBuyBuy">Load BuyBuy</a></li>
+                        <li><a class="btn btn-primary" href="/admin/sales/sale/add/?next=/inventory/management/" role="button">Create Manual order</a></li>
+                        
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">  
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Last Downloads</h3>
+                </div>
+                <div class="panel-body">
+                    <div>
+                        <div class="row">
+                            <div id='fulfillment.lastUploads'></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- Modal -->
+
+
+
+<div class="modal fade" id="loadShopify" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload Shopify order file</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+
+        <form role='form' enctype="multipart/form-data" method="post" action="/sales/shopify_upload/">{% csrf_token %}
+            <div class="form-group">    
+                {{shopify_upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="loadBuyBuy" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload BuyBuy order file</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+
+        <form role='form' enctype="multipart/form-data" method="post" action="/importers/upload/buybuy/">{% csrf_token %}
+            <div class="form-group">    
+                {{buybuy_upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="loadAmazon" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h3 class="modal-title" id="myModalLabel">Upload Amazon order file</h3>
+      </div>
+      <div class="modal-body">
+        <p>Please choose a .csv file</p>
+
+        <form role='form' enctype="multipart/form-data" method="post" action="/importers/upload/AMZN_orders/">{% csrf_token %}
+            <div class="form-group">    
+                {{amazon_upload_form.as_p}}
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a href='/' class="btn btn-default">Cancel</a>
+        </form>
+
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+<!--uploaders-->
+<div id="fulfillment.download.FBA"></div>
+<div id="fulfillment.download.shopify_orders"></div>
+{% render_bundle 'fulfillment' %}
+
+
+{% endblock %}
+
+
+{% block extrajs %}
+    
+{% endblock %}

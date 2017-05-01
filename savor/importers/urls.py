@@ -11,6 +11,7 @@ import AMZN_orders
 import shopify_payouts
 import amazon_payouts
 import FBA
+import shopify_orders
 
 
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     url(r'importers/upload/shopify_payouts/$', shopify_payouts.upload),
     url(r'importers/upload/amazon_payouts/$', amazon_payouts.upload),
     url(r'importers/upload/FBA/$', FBA.upload),
+    url(r'importers/upload/shopify_orders/$', shopify_orders.upload),
 ]

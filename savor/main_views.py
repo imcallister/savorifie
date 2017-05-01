@@ -43,3 +43,9 @@ def home(request):
 @login_required
 def react(request):
     return render(request, 'main_views/index.html', {})
+
+
+@login_required
+def load_orders(request):
+    output = []
+    return render(request, 'fulfillment/load_orders.html', {})

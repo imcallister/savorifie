@@ -34,6 +34,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
                                            blank=True, null=True,
                                            help_text='If no ID, leave blank for system-generated ID')
     external_routing_id = models.CharField(max_length=50, blank=True, null=True)
+    checkout_id = models.CharField(max_length=50, blank=True, null=True)
     special_sale = models.CharField(max_length=20, choices=SPECIAL_SALES, blank=True, null=True)
     
     paid_thru = models.ForeignKey('gl.Counterparty', blank=True, null=True,
