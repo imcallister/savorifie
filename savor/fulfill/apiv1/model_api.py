@@ -227,8 +227,7 @@ def unfulfilled(qstring):
     """
     sales_qs = Sale.objects \
                    .prefetch_related('unit_sale__sku__skuunit__inventory_item') \
-                   .prefetch_related('fulfillments__fulfill_lines__inventory_item') \
-                   .exclude(channel__label='AMZN')
+                   .prefetch_related('fulfillments__fulfill_lines__inventory_item')
 
     
     incomplete = [s.id for s in sales_qs if s.unfulfilled_items]
