@@ -1,5 +1,5 @@
 import logging
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 from sales.models import Sale
 from accountifie.gl.models import Counterparty
@@ -19,6 +19,20 @@ import fulfill.apiv1 as fulfill_api
 from fulfill.calcs import create_nc2_shippingcharge
 
 logger = logging.getLogger('default')
+
+
+def adjust_shopify_fees():
+    qs = ProceedsAdjustment.objects.filter(date__gte='2016-11-24')
+    qs = qs.filter(sale__paid_thru_id='SHOPIFY')
+    qs = qs.filter(adjust_type="CHANNEL_FEES")
+
+    for p in qs:
+        if p.date == p.sale.sale_date:
+            new_fees = Decimal((p.sale.taxable_proceeds() * Decimal('0.026') + Decimal('0.3')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+            if new_fees > 0:
+                p.amount = -new_fees
+                p.save()
+
 
 def backfill_FBA_fulfills():
     FBA_wh = inventory_api.warehouse('FBA', {})['id']
