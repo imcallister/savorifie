@@ -235,14 +235,6 @@ def sales_counts(qstring):
 
     return sales_counts
     
-
-def payout_comp(channel_lbl, qstring):
-    qs = Payout.objects.filter(channel__counterparty_id=channel_lbl)
-    qs = PayoutSerializer.setup_eager_loading(qs)
-    output = PayoutSerializer(qs, many=True).data
-    return [x for x in output if abs(x['diff']) > 1.0]
-
-
 def unpaid_sales(channel_lbl, qstring):
     """
     For sales in a given channel aggregate all the payoutlines
