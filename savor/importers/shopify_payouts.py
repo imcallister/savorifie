@@ -31,7 +31,6 @@ def process_shopify_payouts(file_name):
     
     # for simplicity only allow file if for a single payor
     paid_thru = [r['paid_thru'].id for r in po_records]
-    
     if len(set(paid_thru)) > 1:
         return 'Nothing loaded. Please load file with a single payor', errors
     else:
