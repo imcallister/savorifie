@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-SHOPIFY_PCT_FEE = Decimal('0.029')
+SHOPIFY_PCT_FEE = Decimal('0.026')
 SHOPIFY_PER_FEE = Decimal('0.3')
 
 FBA_PCT_FEE = Decimal('0.15')

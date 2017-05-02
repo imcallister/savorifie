@@ -163,9 +163,11 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
 
     def taxable_proceeds(self):
         total = self.gross_sale_proceeds()
-        total += self.proceedsadjustment_sale \
+        addl = self.proceedsadjustment_sale \
                      .filter(adjust_type__in=['GIFTWRAP_FEES', 'DISCOUNT', 'SHIPPING_CHARGE']) \
                      .aggregate(models.Sum('amount'))['amount__sum']
+        if addl:
+            total += addl
         return total
 
     def payee(self):
