@@ -28,7 +28,8 @@ def adjust_shopify_fees():
 
     for p in qs:
         if p.date == p.sale.sale_date:
-            new_fees = Decimal((p.sale.taxable_proceeds() * Decimal('0.026') + Decimal('0.3')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
+            pre_fees = p.sale.taxable_proceeds() + p.sale.total_sales_tax()
+            new_fees = Decimal((pre_fees * Decimal('0.026') + Decimal('0.3')).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
             if new_fees > 0:
                 p.amount = -new_fees
                 p.save()
