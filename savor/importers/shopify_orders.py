@@ -3,6 +3,7 @@ import sys
 import traceback
 from dateutil.parser import parse
 from decimal import Decimal
+import datetime
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -28,11 +29,13 @@ PAID_THRU = {
 
 
 def upload(request):
-    summary_msg, error_msgs = load_shopify()
+    summary_msg, error_msgs = load_shopify(request.user.username)
     return JsonResponse({'summary': summary_msg, 'errors': error_msgs})
 
 def _Shopify_start_date():
-    return sales_api.sales_loaded_thru('SHOPIFY', {}).isoformat()
+    loaded_thru = sales_api.sales_loaded_thru('SHOPIFY', {})
+    # take a buffer to reload
+    return (loaded_thru + datetime.timedelta(days=-3)).isoformat()
 
 
 
@@ -150,7 +153,7 @@ def _save_objects(sale, unitsales, taxlines, discount, shipping_charge, gift_wra
     return
 
 
-def load_shopify(from_date=None):
+def load_shopify(user, from_date=None):
     if not from_date:
         from_date = _Shopify_start_date()
 
@@ -174,11 +177,10 @@ def load_shopify(from_date=None):
             gift_wrap_fee = sale.pop('gift_wrap_fee', None)
 
             _save_objects(sale, unitsales, taxlines, discount, shipping_charge, gift_wrap_fee)
+            logger.info('%s saved Shopify order %s' % (user, o))
             new_order_ctr += 1
         except:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
-            traceback.print_exc()
+            logger.exception('%s failed to save Shopify order %s' % (user, o))
             bad_order_ctr += 1
         
     summary_msg = 'Loaded Savor orders: %d new orders, %d bad orders' \

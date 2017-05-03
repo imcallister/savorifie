@@ -3,6 +3,7 @@ import sys
 import traceback
 from dateutil.parser import parse
 from decimal import Decimal
+import datetime
 
 from django.conf import settings
 from django.http import JsonResponse
@@ -29,7 +30,7 @@ logger = logging.getLogger('default')
 
 def upload(request):
     try:
-        summary_msg, error_msgs = load_FBA()
+        summary_msg, error_msgs = load_FBA(request.user.username)
         return JsonResponse({'summary': summary_msg, 'errors': error_msgs})
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -37,7 +38,10 @@ def upload(request):
         return JsonResponse({'summary': 'FBA upload failed on %s, %s' % (exc_type, exc_value), 'errors': []})
 
 def _FBA_start_date():
-    return sales_api.sales_loaded_thru('AMZN', {}).isoformat()
+    loaded_thru = sales_api.sales_loaded_thru('AMZN', {})
+    # take a buffer to reload
+    return (loaded_thru + datetime.timedelta(days=-3)).isoformat()
+
 
 
 def _map_sku(amzn_sku):
@@ -120,7 +124,7 @@ def _save_objects(sale, unitsales, fulfill_channel):
     return
 
 
-def load_FBA(from_date=None):
+def load_FBA(user, from_date=None):
     if not from_date:
         from_date = _FBA_start_date()
 
@@ -141,19 +145,16 @@ def load_FBA(from_date=None):
         try:
             od = order_details(o)
         except:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            traceback.print_exc()
-            errors.append('Failed on %s' % o)
-        
+            logger.exception('Failed to get order details for AMZN order %s' % o)
+            
         sale, unitsales = _create_sale(orders_dict.get(o), od)
 
         try:
             _save_objects(sale, unitsales, orders_dict.get(o).get('FulfillmentChannel'))
+            logger.info('%s saved AMZN order %s' % (user, o))
             new_order_ctr += 1
         except:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
-            traceback.print_exc()
+            logger.exception('%s failed to save order and/or fulfillment for AMZN order %s' % (user, o))
             bad_order_ctr += 1
     
     summary_msg = 'Loaded FBA orders: %d new orders, %d bad orders' \
