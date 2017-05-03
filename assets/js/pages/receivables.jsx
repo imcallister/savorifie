@@ -14,6 +14,8 @@ var ModalCmpnt = require('../components/modalCmpnt')
 var Shopify_uploader = <Uploader instructions="" postUrl={'/importers/upload/shopify_payouts/'}/>
 ReactDOM.render(<ModalCmpnt modalId="SHOPIFYPayoutUploader" modalTitle="Shopify Payout File Upload" content={Shopify_uploader}/>, document.getElementById('bookkeeping.upload.SHOPIFYPayoutUploader'))
 
+var Amazon_uploader = <Uploader instructions="" postUrl={'/importers/upload/amazon_payouts/'}/>
+ReactDOM.render(<ModalCmpnt modalId="AMZNPayoutUploader" modalTitle="Amazon Payout File Upload" content={Amazon_uploader}/>, document.getElementById('bookkeeping.upload.AMZNPayoutUploader'))
 
 
 

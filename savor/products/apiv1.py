@@ -14,7 +14,7 @@ def product(qstring):
 
 @dispatch(str, dict)
 def product(label, qstring):
-    qs = Product.objects.filter(label=label).prefetch_related(Prefetch('skuunit_set')).first()
+    qs = Product.objects.filter(label=label).prefetch_related(Prefetch('skuunit')).first()
     return ProductSerializer(qs).data
 
 

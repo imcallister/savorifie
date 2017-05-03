@@ -48,7 +48,10 @@ def _get_name(o):
 
 
 def _fulfill_list(qstring=None):
+    print ' SLOW _fulfill_list'
+    start_time = time.time()
     orders = api_func('fulfill', 'unfulfilled')
+    print time.time() - start_time
     columns = ["label", "Date", 'ship to', 'Items', 'Unfulfilled', 'Action']
     for o in orders:
         action_form = post_button(o['id'])
@@ -80,9 +83,9 @@ def _miss_ship_list(qstring=None):
     return columns, flflmts
 
 def _unbatched_fulfill_list(qstring=None):
+    start_time = time.time()
     fulfills = api_func('fulfill', 'unbatched_fulfillments')
     fulfills = [f for f in fulfills if f['warehouse'] not in ['WRITEOFF', 'CONSIGN', '152Frank', 'FBA']]
-
     def get_items(f):
         return ','.join(['%d %s' % (l['quantity'], l['inventory_item']) for l in f['fulfill_lines']])
 
@@ -117,6 +120,7 @@ def _backorder_list(qstring=None):
 
 @login_required
 def management(request):
+    start_time = time.time()
     context = {'shopify_upload_form': FileForm()}
     context['buybuy_upload_form'] = FileForm()
     context['amazon_upload_form'] = FileForm()
@@ -125,20 +129,14 @@ def management(request):
 
     context['tbq_columns'], context['tbq_rows'] = _fulfill_list()
     context['to_be_queued'] = len(context['tbq_rows'])
-
     context['back_columns'], context['back_rows'] = _backorder_list()
     context['backordered'] = len(context['back_rows'])
-
     context['unbatched_columns'], context['unbatched_rows'] = _unbatched_fulfill_list()
     context['unbatched_fulfillments'] = len(context['unbatched_rows'])
-
     context['missship_columns'], context['missship_rows'] = _miss_ship_list()
     context['missing_shipping'] = len(context['missship_rows'])
-
-
+    
     unrecd = flfl_api.no_warehouse_record({})
-    context['FBA_unreconciled_count'] = len([x for x in unrecd
-                                              if x['warehouse'] == 'FBA'])
     context['NC2_unreconciled_count'] = len([x for x in unrecd
                                              if x['warehouse'] == 'NC2'])
     context['152Frank_unreconciled_count'] = len([x for x in unrecd
@@ -153,8 +151,6 @@ def management(request):
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
-    context['FBA_unreconciled'] = get_table('no_warehouse_record')(warehouse='FBA')
     context['NC2_unreconciled'] = get_table('no_warehouse_record')(warehouse='NC2')
     context['152Frank_unreconciled'] = get_table('no_warehouse_record')(warehouse='152Frank')
-    
     return render(request, 'management.html', context)

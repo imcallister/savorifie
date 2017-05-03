@@ -1,6 +1,8 @@
 from decimal import Decimal
 
 import sale as sales_api
+from sales.models import Payout
+from sales.serializers import PayoutSerializer
 
 THRESHOLD = Decimal('2')
 
@@ -24,4 +26,11 @@ def proceeds_rec(qstring):
     	s['payout'] = payouts.get(s['id'], Decimal('0'))
     	s['unpaid'] = s['proceeds'] - s['payout']
     return [s for s in sales_list if abs(s['unpaid'] > THRESHOLD)]
-    
+
+def payout_comp(channel_lbl, qstring):
+    qs = Payout.objects.filter(channel__counterparty_id=channel_lbl)
+    qs = PayoutSerializer.setup_eager_loading(qs)
+    output = PayoutSerializer(qs, many=True).data
+    return [x for x in output if abs(x['diff']) > 1.0]
+
+ 

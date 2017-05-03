@@ -29,16 +29,23 @@ def process_shopify_payouts(file_name):
     exist_recs_ctr = 0
     errors_cnt = len(errors)
     
+    # for simplicity only allow file if for a single payor
+    paid_thru = [r['paid_thru'].id for r in po_records]
+    if len(set(paid_thru)) > 1:
+        return 'Nothing loaded. Please load file with a single payor', errors
+    else:
+        paid_thru_id = paid_thru[0]
+
     # payouts are unique by date. create those that do no yet exist
     payout_dates = list(set(r['payout_date'].date() for r in po_records))
-    payouts = dict((p.payout_date, p) for p in Payout.objects.filter(payout_date__in=payout_dates))
+    payouts = dict((p.payout_date, p) for p in Payout.objects.filter(payout_date__in=payout_dates).filter(paid_thru_id=paid_thru_id))
 
     for d in [d for d in payout_dates if d not in payouts]:
         po_info = {}
         po_info['channel_id'] = api_func('sales', 'channel', 'SHOPIFY')['id']
         po_info['payout_date'] = d
         po_info['payout'] = Decimal('0')
-        po_info['paid_thru_id'] = 'SHOPIFY'
+        po_info['paid_thru_id'] = paid_thru_id
         po = Payout(**po_info)
         po.save()
         payouts[d] = po

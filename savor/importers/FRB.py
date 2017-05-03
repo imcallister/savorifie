@@ -47,7 +47,7 @@ def process_frb(file_name):
             new_recs_ctr += 1
             rec['ext_account'] = ext_account
             rec_obj = Cashflow(**rec)
-            rec_obj.save()
+            rec_obj.save(update_gl=False)
 
     summary_msg = 'Loaded FRB file: %d new records, %d duplicate records, %d bad rows' \
                                     % (new_recs_ctr, exist_recs_ctr, errors_cnt)

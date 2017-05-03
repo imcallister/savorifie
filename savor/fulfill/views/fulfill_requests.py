@@ -69,7 +69,7 @@ def queue_orders(request):
         msg += ' %d Bad requests' % len(bad_requests)
         messages.info(request, msg)
         
-        return HttpResponseRedirect("/inventory/management")
+        return HttpResponseRedirect("/fulfillment/management")
     else:
         raise ValueError("This resource requires a POST request")
 
@@ -106,7 +106,7 @@ def shipping(request):
         msg = '%d new ship choices.' % new_ship_choices
         msg += ' %d Bad requests' % len(bad_requests)
         messages.info(request, msg)
-        return HttpResponseRedirect("/inventory/management")
+        return HttpResponseRedirect("/fulfillment/management")
     else:
         raise ValueError("This resource requires a POST request")
 
@@ -383,7 +383,7 @@ def make_batch(request, warehouse):
     warehouse_obj = Warehouse.objects.filter(label=warehouse).first()
     if not warehouse_obj:
         messages.error(request, 'No warehouse found matching %s' % warehouse)
-        return redirect('/inventory/management/')
+        return redirect('/fulfillment/management/')
     else:
         # get all unbatched
         unbatched = fulfill_api.unbatched_fulfillments({})
@@ -399,5 +399,5 @@ def make_batch(request, warehouse):
         batch.save()
 
         messages.success(request, '%d fulfillments added to new batch %s' % (len(to_batch), str(batch)))
-        return redirect('/inventory/management/')
+        return redirect('/fulfillment/management/')
 
