@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from accountifie.common.view_components import basic_modal
 from accountifie.common.table import get_table
 from accountifie.toolkit.utils import get_company
-
+from accountifie.toolkit.forms import FileForm
 
 # HTTP Error 500
 def custom_500(request):
@@ -48,4 +48,5 @@ def react(request):
 @login_required
 def load_orders(request):
     output = []
-    return render(request, 'fulfillment/load_orders.html', {})
+    context = {'shopify_upload_form': FileForm()}
+    return render(request, 'fulfillment/load_orders.html', context)

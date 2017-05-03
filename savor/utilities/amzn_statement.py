@@ -7,6 +7,7 @@ from sales.models import Sale, ProceedsAdjustment
 
 
 CHANNEL_FEE_TYPES = ['FBAPerOrderFulfillmentFee', 'FBAPerUnitFulfillmentFee', 'FBAWeightBasedFee', 'Commission', 'RefundCommission', 'ShippingHB']
+
 class AmazonStatement(object):
 
 	def __init__(self, path, file_name):
@@ -68,6 +69,7 @@ class AmazonStatement(object):
 			except:
 				pass
 	
+
 	def create_upload_file(self):
 		amounts = self.data[['amount-type', 'order-id','amount']].dropna()
 		amounts['amount'] = amounts['amount'].map(lambda x: Decimal(int(x * 100)) * Decimal('0.01'))
