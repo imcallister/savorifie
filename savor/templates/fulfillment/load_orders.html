@@ -92,7 +92,7 @@
 
         <form role='form' enctype="multipart/form-data" method="post" action="/importers/upload/buybuy/">{% csrf_token %}
             <div class="form-group">    
-                {{buybuy_upload_form.as_p}}
+                {{shopify_upload_form.as_p}}
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
             <a href='/' class="btn btn-default">Cancel</a>
