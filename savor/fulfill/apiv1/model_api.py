@@ -162,7 +162,7 @@ def no_warehouse_record(qstring):
     Find fulfillments which have been batched but have 
     no associated warehouse fulfillment record
     """
-    pre_qs = Fulfillment.objects
+    pre_qs = Fulfillment.objects.exclude(ship_type__label='BY_HAND')
 
     if qstring.get('warehouse'):
         pre_qs = pre_qs.filter(warehouse__label=qstring.get('warehouse'))
