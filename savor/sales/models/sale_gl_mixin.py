@@ -42,23 +42,7 @@ class SaleGLMixin():
         return lines
 
 
-    def get_payment_lines(self):
-        channel_id = self.channel.counterparty.id
-        paid_thru = self.paid_thru.id if self.paid_thru else None
-        amount = self.total_receivable(incl_ch_fees=False)
-        accts_rec = sales_funcs.get_receiveables_account(channel_id, paid_thru)
-        channel_fees_acct = sales_funcs.get_channelfees_account(channel_id)
-
-        lines = []
-
-        lines.append((accts_rec, -amount, self.customer_code, []))
-        lines.append((accts_rec, amount - Decimal(self.channel_charges), self.payee(), []))
-        if self.channel_charges > 0:
-            lines.append((channel_fees_acct,
-                          Decimal(self.channel_charges),
-                          channel_id, []))
-        return lines
-
+    
     def get_specialsale_lines(self):
         lines = []
         sample_exp_acct = sales_funcs.get_special_account(self.special_sale)
@@ -122,7 +106,12 @@ class SaleGLMixin():
             lines.append((giftwrap_acct, -Decimal(adj.amount), self.customer_code.id, []))
         return lines
 
-    
+    def get_payment_lines(self, adj):
+        lines = []
+        accts_rec = sales_funcs.get_receiveables_account(None, None)
+        lines.append((accts_rec, -Decimal(adj.amount), self.customer_code, []))
+        return lines
+
 
     """
     functions to generate tran lines
@@ -162,6 +151,8 @@ class SaleGLMixin():
                 lines += self.get_giftwrap_lines(adj)
             elif adj.adjust_type == 'GIFTCARD_REDEMPTION':
                 lines += self.get_giftcardredemption_lines(adj)
+            elif adj.adjust_type == 'PAYMENT':
+                lines += self.get_payment_lines(adj)
         return lines
 
     def get_salestax_lines(self, date):
