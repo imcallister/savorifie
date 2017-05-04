@@ -17,6 +17,7 @@ import inventory.apiv1 as inventory_api
 import products.apiv1 as products_api
 import fulfill.apiv1 as fulfill_api
 from fulfill.calcs import create_nc2_shippingcharge
+from utilities.channel_fees import FBA_fee
 
 logger = logging.getLogger('default')
 
@@ -34,6 +35,15 @@ def adjust_shopify_fees():
                 p.amount = -new_fees
                 p.save()
 
+
+def adjust_FBA_fees():
+    qs = Sale.objects.filter(sale_date__gte='2017-04-05') \
+                     .filter(sale_date__lte='2017-04-27') \
+                     .filter(channel__label='AMZN')
+    
+    for s in qs:
+        ProceedsAdjustment(sale=s, amount=-FBA_fee(s), date=s.sale_date, adjust_type='CHANNEL_FEES').save()
+        s.save()
 
 def backfill_FBA_fulfills():
     FBA_wh = inventory_api.warehouse('FBA', {})['id']
@@ -70,6 +80,8 @@ def add_shopify_fees():
         s.channel_charges = shopify_fee(s)
         s.save()
     return
+
+
 
 def fix_shopify_fees():
     # weren't getting calc'd from 15th Sep to 28th Oct

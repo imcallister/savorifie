@@ -22,7 +22,6 @@ SPECIAL_SALES = (
     ('consignment', 'Consignment'),
     ('prize', 'Gift/Prize'),
     ('retailer', 'Retailer Sample'),
-    ('payment', 'Payment'),
 )
 
 class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
@@ -204,14 +203,7 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
                          lines=[]
                        )
 
-        if self.special_sale == 'payment':
-            tran = dict((k, v) for k, v in base_tran.iteritems())
-            tran['date'] = self.sale_date
-            tran['comment'] = "Payment - %s: %s" % (self.channel, self.external_channel_id)
-            tran['trans_id'] = '%s.%s.%s' % (self.short_code, self.id, 'SALE')
-            tran['lines'] += self.get_payment_lines()
-            return [tran]
-        elif self.special_sale:
+        if self.special_sale:
             tran = dict((k, v) for k, v in base_tran.iteritems())
             tran['date'] = self.sale_date
             tran['comment'] = "%s - %s: %s" % (self.special_sale, self.channel, self.external_channel_id)
