@@ -5,7 +5,7 @@ import logging
 import flatdict
 import time
 
-from django.db.models import Prefetch, Count, F
+from django.db.models import Prefetch, Count, F, Q
 
 from fulfill.models import *
 from fulfill.serializers import *
@@ -62,7 +62,6 @@ def batched_fulfillments(qstring):
 
 
 def unbatched_fulfillments(qstring):
-    start_time = time.time()
     batched_flmts = batched_fulfillments(qstring)
     
     qs = Fulfillment.objects \
@@ -129,12 +128,17 @@ def fulfillment(qstring):
     if 'status' in qstring:
         qs = qs.filter(status__in=qstring['status'].split(','))
 
-    flfmts = serializer(qs, many=True).data
     if qstring.get('missing_shipping', '').lower() == 'true':
-        flfmts = [r for r in flfmts if r['ship_info'] == 'incomplete']
+        qs = qs.exclude(ship_type__label='BY_HAND')
+        qs = qs.filter(Q(bill_to='') | Q(bill_to__isnull=True))
+        
+
+    flfmts = serializer(qs, many=True).data
+
     for f in flfmts:
         f['skus'] = dict((l['inventory_item'], l['quantity']) for l in f['fulfill_lines'])
         del f['fulfill_lines']
+
     return flfmts
 
 
@@ -225,11 +229,11 @@ def unfulfilled(qstring):
     """
     find all sale objects for which there is no fulfillment record
     """
+    start_time = time.time()
     sales_qs = Sale.objects \
                    .prefetch_related('unit_sale__sku__skuunit__inventory_item') \
                    .prefetch_related('fulfillments__fulfill_lines__inventory_item')
 
-    
     incomplete = [s.id for s in sales_qs if s.unfulfilled_items]
     
     qs = Sale.objects.filter(id__in=incomplete)

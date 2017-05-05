@@ -48,10 +48,12 @@ def _get_name(o):
 
 
 def _fulfill_list(qstring=None):
-    print ' SLOW _fulfill_list'
     start_time = time.time()
+    print 'SLOW _fulfill_list'
+
     orders = api_func('fulfill', 'unfulfilled')
-    print time.time() - start_time
+    print 'DONE api call', time.time() - start_time
+
     columns = ["label", "Date", 'ship to', 'Items', 'Unfulfilled', 'Action']
     for o in orders:
         action_form = post_button(o['id'])
@@ -120,13 +122,11 @@ def _backorder_list(qstring=None):
 
 @login_required
 def management(request):
-    start_time = time.time()
     context = {'shopify_upload_form': FileForm()}
     context['buybuy_upload_form'] = FileForm()
     context['amazon_upload_form'] = FileForm()
 
     context['incomplete_orders'] = api_func('sales', 'incomplete_sales_count')
-
     context['tbq_columns'], context['tbq_rows'] = _fulfill_list()
     context['to_be_queued'] = len(context['tbq_rows'])
     context['back_columns'], context['back_rows'] = _backorder_list()
@@ -135,12 +135,6 @@ def management(request):
     context['unbatched_fulfillments'] = len(context['unbatched_rows'])
     context['missship_columns'], context['missship_rows'] = _miss_ship_list()
     context['missing_shipping'] = len(context['missship_rows'])
-    
-    unrecd = flfl_api.no_warehouse_record({})
-    context['NC2_unreconciled_count'] = len([x for x in unrecd
-                                             if x['warehouse'] == 'NC2'])
-    context['152Frank_unreconciled_count'] = len([x for x in unrecd
-                                                  if x['warehouse'] == '152Frank'])
     
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
 
@@ -151,6 +145,4 @@ def management(request):
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
-    context['NC2_unreconciled'] = get_table('no_warehouse_record')(warehouse='NC2')
-    context['152Frank_unreconciled'] = get_table('no_warehouse_record')(warehouse='152Frank')
-    return render(request, 'management.html', context)
+    return render(request, 'fulfillment/management.html', context)
