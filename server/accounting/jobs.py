@@ -5,7 +5,7 @@ import pandas as pd
 from django.http import HttpResponseRedirect
 
 from accountifie.celery import background_task
-import savor.accounting.apiv1 as acctg_api
+import apiv1 as acctg_api
 import inventory.apiv1 as inv_api
 from accounting.models import COGSAssignment
 
