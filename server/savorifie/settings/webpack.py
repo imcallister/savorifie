@@ -12,7 +12,7 @@ if DEBUG:
     WEBPACK_LOADER = {
         'DEFAULT': {
             'BUNDLE_DIR_NAME': 'bundles/',
-            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.local.json'),
+            'STATS_FILE': os.path.join(ENVIRON_DIR, 'webpack-stats.json'),
         }
     }
 else:

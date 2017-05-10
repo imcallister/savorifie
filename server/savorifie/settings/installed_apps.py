@@ -18,6 +18,7 @@ INSTALLED_APPS = (
     'djcelery',
     
     'betterforms',
+    'accounts',
     'base',
     'products',
     'sales',
@@ -27,6 +28,7 @@ INSTALLED_APPS = (
     'accounting',
     'importers',
     'testsuite',
+    'knox',
 
 
     'accountifie.celery',
