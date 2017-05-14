@@ -22,7 +22,6 @@ class HomeView extends React.Component {
             <div className="container">
                 {this.props.isAuthenticated ?
                     <div className="text-center">
-                        <h1>Savorifie Redux</h1>
                         <div className="row">
                             <div className="col-md-6">
                                 <div className="panel panel-default">

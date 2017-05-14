@@ -25,6 +25,7 @@ import {Toolbar, ToolbarGroup, ToolbarSeparator, ToolbarTitle} from 'material-ui
 
 import MenuBar from './shared/components/MenuBar';
 import MenuBar2 from './shared/components/MenuBar2';
+import MenuDrawer from './shared/components/MenuDrawer';
 
 import './styles/main.scss';
 
@@ -32,7 +33,12 @@ const styles = {
   mediumSize: {
     height: '80%',
   },
+  margin: "20px"
 };
+
+const containerStyles = {
+  margin: "20px"  
+}
 
 
 class App extends React.Component {
@@ -55,12 +61,14 @@ class App extends React.Component {
         const { actions } = this.props;
         return (
             <div>
-                <MenuBar2/>
-                <MuiThemeProvider>
-                    <div>
-                        {this.props.children}
-                    </div>
-                </MuiThemeProvider>
+                <MenuDrawer route={this.props.pathName}/>
+                <div className="container-fluid">
+                    <MuiThemeProvider>
+                        <div style={containerStyles}>
+                            {this.props.children}
+                        </div>
+                    </MuiThemeProvider>
+                </div>
             </div>
         );
     }

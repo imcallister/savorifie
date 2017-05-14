@@ -5,6 +5,8 @@ import { connect } from 'react-redux';
 import { authLogoutAndRedirect } from '../../actions/auth';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+import {blue500, red500, greenA200} from 'material-ui/styles/colors';
+import ExitToApp from 'material-ui/svg-icons/action/exit-to-app';
 
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
@@ -19,8 +21,12 @@ import '../../styles/main.scss';
 
 const styles = {
   mediumSize: {
-    height: '80%',
+    height: '100%',
   },
+};
+
+const iconStyles = {
+  marginRight: 24,
 };
 
 const routeLabels = {
@@ -81,11 +87,14 @@ class MenuBar2 extends Component {
                                 }
                             </ToolbarGroup>
                             <ToolbarGroup>
-                              <img className="page-logo margin-bottom-medium margin-top-medium"
+                              <img className="page-logo"
                                      src={savorLogo}
                                      style={styles.mediumSize}
                                      alt="Savor"
                                 />
+                            </ToolbarGroup>
+                            <ToolbarGroup>
+                              <ExitToApp style={iconStyles} />
                             </ToolbarGroup>
                             
                           </Toolbar>

@@ -8,7 +8,8 @@
   },
   "scripts": {
     "build-local": "webpack --config webpack.local.config.js --watch",
-    "build-production": "webpack --config webpack.prod.config.js --progress --colors",
+    "build-prod": "webpack --config webpack.prod.config.js --progress --colors",
+    "build-client-prod": "webpack --config webpack.client.prod.config.js --progress --colors",
     "start": "node server.js"
   },
   "repository": {
@@ -71,11 +72,11 @@
     "object-assign": "^4.1.0",
     "postcss-import": "^9.0.0",
     "postcss-loader": "^1.2.1",
-    "react": "^15.4.1",
+    "react": "^15.5.4",
     "react-bootstrap": "^0.30.7",
     "react-bootstrap-date-picker": "^3.7.0",
-    "react-bootstrap-table": "^2.5.3",
-    "react-dom": "^15.4.1",
+    "react-bootstrap-table": "^2.11.2",
+    "react-dom": "^15.5.4",
     "react-dropzone": "^3.8.0",
     "react-redux": "^4.1.0",
     "react-router": "^3.0.0",

@@ -2,7 +2,10 @@ import datetime
 from dateutil.parser import parse
 
 import accountifie.query.apiv1 as query_api
-from base.models import Cashflow, CreditCardTrans
+from accountifie.common.api import api_func
+from base.models import Expense, Cashflow, CreditCardTrans
+from accountifie.gl.models import ExternalAccount
+
 from fulfill.models import ShippingCharge
 from sales.models import Payout
 
@@ -73,9 +76,23 @@ def last_uploads(qstring):
     output.append({'Upload': 'UPS', 'Last Upload': UPS})
 
     shopify = Payout.objects.filter(channel__counterparty_id='SHOPIFY') \
-                                    .order_by('-payout_date') \
-                                    .first() \
-                                    .payout_date
+                            .order_by('-payout_date') \
+                            .first() \
+                            .payout_date
     output.append({'Upload': 'Shopify Payouts', 'Last Upload': shopify})
+    return output
 
+
+def incompletes(qstring):
+    unalloc_account = api_func('environment', 'variable', 'UNALLOCATED_ACCT')
+    chk_acct = ExternalAccount.objects.get(gl_account__id='1001')
+    cashflows = Cashflow.objects.filter(ext_account=chk_acct)
+
+    output = []
+    output.append({'label': 'Expenses', 'fld': 'expenses', 'amount': Expense.objects.filter(account_id=unalloc_account).count()})
+    output.append({'label': 'Banking', 'fld': 'banking', 'amount': cashflows.filter(counterparty=None).count()})
+    mcard_cnt = CreditCardTrans.objects.filter(counterparty=None).count() + \
+                CreditCardTrans.objects.filter(counterparty_id='unknown').count()
+    output.append({'label': 'Mastercard', 'fld': 'mastercard', 'amount': mcard_cnt})
+    
     return output

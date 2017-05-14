@@ -1,28 +1,36 @@
 import React, {Component} from 'react';
 
-import EditTable  from 'material-ui-table-edit';  
-
-
+import Table from '../components/Table';
 
 var rows = []
  
 const onChange = (row) => {
   console.log(row);
-}
+};
+
+const get_row = (row, headers) => {
+    
+    var output = headers.map(function(h) {
+        var formatter = h.formatter;
+        return (formatter ? formatter(row[h.fld]) : row[h.fld]);
+    });
+    return output;
+    };
+
 
 class TableContainer extends React.Component {
     
-  /*
+  
     constructor() {
       super();
-      this.state = { tableData: [] }
+      this.state = { tableData: [] , rows: []}
     }
 
-
-    componentDidMount() {
+    componentWillMount() {
       this.serverRequest = $.get(this.props.source, function (result) {
         this.setState({
-          tableData: result
+          tableData: result,
+          rows: result.map(r => get_row(r, this.props.headers))
         });
       }.bind(this));
     }
@@ -30,35 +38,14 @@ class TableContainer extends React.Component {
     componentWillUnmount() {
       this.serverRequest.abort();
     }
-    */
 
-    get_rows() {
-      console.log('in get_rows');
-      console.log(this.props.data);
-
-      var output = this.props.data.map(function(r) {return this.get_row(r);}.bind(this));
-      console.log('DONE DONE', output);
-      return output;
-    }
-
-    get_row(row) {
-      var output = this.props.headers.map(function(h) {
-          return row[h.value];
-        });
-      console.log('DONE', output);
-      return output;
-    }
-
+    
     render() {
-      console.log('render');
-      //var rows = this.get_rows();
-      console.log('DONE3', rows);
-          
-      return (
-          <EditTable
+        return (
+          <Table
             onChange={onChange}
             rows={this.state.rows}
-            headerColumns={this.props.headers}
+            headers={this.props.headers}
           />
       );
     }

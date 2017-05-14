@@ -14,7 +14,7 @@ config.entry = {
     reports: './assets/js/pages/reports',
     cogs: './assets/js/pages/cogs',
     shippingcosts: './assets/js/pages/shippingcosts',
-    periodend: './assets/js/pages/periodend',
+    periodend: './assets/js/pages/periodend'
   };
 
 config.output.path = path.resolve('./assets/bundles/');

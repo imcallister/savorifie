@@ -40,7 +40,7 @@ def home(request):
     context = dict(company_id=company_id)
     return render(request, 'main_views/home.html', context)
 
-@login_required
+
 def react(request):
     return render(request, 'main_views/index.html', {})
 
