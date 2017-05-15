@@ -9,7 +9,7 @@ admin.autodiscover()
 handler500 = 'main_views.custom_500'
 
 urlpatterns = [
-    #url(r'^$', main_views.home, name='home'),
+    url(r'^$', main_views.home, name='home'),
     url(r'^react/$', main_views.react, name='react'),
     #url(r'^$', main_views.react, name='react'),
     url(r'^api/accounts/', include('accounts.urls')),
