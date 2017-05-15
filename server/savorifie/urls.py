@@ -10,8 +10,8 @@ handler500 = 'main_views.custom_500'
 
 urlpatterns = [
     #url(r'^$', main_views.home, name='home'),
-    url(r'^/$', main_views.react, name='react'),
-    url(r'^$', main_views.react, name='react'),
+    url(r'^react/$', main_views.react, name='react'),
+    #url(r'^$', main_views.react, name='react'),
     url(r'^api/accounts/', include('accounts.urls')),
     url(r'^maintenance/', main_views.maintenance, name='maintenance'),
     url(r'^reports/$', main_views.reports, name='reports'),
