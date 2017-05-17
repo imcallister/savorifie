@@ -4,6 +4,8 @@ var BundleTracker = require('webpack-bundle-tracker');
 var config = require('./webpack.base.config.js');
 
 config.plugins.push(new BundleTracker({filename: './webpack-stats.local.json'}));
+config.plugins.push(new webpack.ProvidePlugin({'$': 'jquery', 'jQuery': 'jquery', 'window.jQuery': 'jquery'}));
+
 
 config.entry = {
     bookkeeping: './assets/js/pages/bookkeeping',
@@ -14,7 +16,8 @@ config.entry = {
     reports: './assets/js/pages/reports',
     cogs: './assets/js/pages/cogs',
     shippingcosts: './assets/js/pages/shippingcosts',
-    periodend: './assets/js/pages/periodend'
+    periodend: './assets/js/pages/periodend',
+    main: './client/index'
   };
 
 config.output.path = path.resolve('./assets/bundles/');

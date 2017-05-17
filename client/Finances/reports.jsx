@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
+import classNames from 'classnames'; 
+import {Grid, Col, Row} from 'react-bootstrap';
 
 import HighChartContainer from '../shared/containers/HighChart';
 import ReportBuilder from './containers/reportBuilder'
@@ -18,12 +20,12 @@ class ReportsView extends React.Component {
     render() {
         return (
             
-            <div className="container">
+            <div className="container-fluid">
                 {this.props.isAuthenticated ?
-                    <div>
-                        <div className="row">
-                            <div className="col-md-6">
-                                <div className="tab-pane panel panel-default">
+                    <Grid>
+                        <Row className="show-grid">
+                            <Col md={6}>
+                                <div className={classNames("tab-pane, panel, panel-default")}>
                                     <div className="panel-heading">
                                         <h3 className="panel-title">Report Builder</h3>
                                     </div>
@@ -33,7 +35,7 @@ class ReportsView extends React.Component {
                                     </div>
                                 </div>
 
-                                <div className="panel panel-default">
+                                <div className={classNames("panel", "panel-default")}>
                                     <div className="panel-heading">
                                         <h3 className="panel-title">Accounting Quick Links</h3>
                                     </div>
@@ -80,61 +82,67 @@ class ReportsView extends React.Component {
                                         </p>
                                     </div>    
                                 </div>
-                            </div>
+                            </Col>
                             
-                            <div className="col-md-6">
-                                <div className="panel panel-default">
+                            <Col md={6}>
+                                <div className={classNames("panel", "panel-default")}>
                                     <div className="panel-heading">
                                         <h3 className="panel-title">Sales Tax</h3>
                                     </div>
                                     <div className="panel-body">
-                                        <h3>Aggregated by collector</h3>
-                                    <ul>
-                                        <li>
-                                            <a href="/api/reports/collected_salestax/?from_date=2016-6-1&to_date=2016-8-31">
-                                                1-Jun-16 to 31-Aug-16
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="/api/reports/collected_salestax/?from_date=2016-3-1&to_date=2016-5-31">
-                                                    1-Mar-16 to 31-May-16
-                                            </a>
-                                        </li>
-                                    </ul>
-                                    <h3>Download all salestax</h3>
-                                    <ul>
-                                        <li>
-                                            <a href="/api/sales/salestax/?as_csv=true&from_date=2016-6-1&to_date=2016-8-31">
-                                                1-Jun-16 to 31-Aug-16
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="/api/sales/salestax/?as_csv=true&from_date=2016-3-1&to_date=2016-5-31">
-                                                    1-Mar-16 to 31-May-16
-                                            </a>
-                                        </li>
-                                    </ul>
-                                    <h3>Download all taxable sales</h3>
-                                    <ul>
-                                        <li>
-                                            <a href="/api/sales/salestax2/?as_csv=true&from_date=2016-6-1&to_date=2016-8-31">
-                                                1-Jun-16 to 31-Aug-16
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="/api/sales/salestax2/?as_csv=true&from_date=2016-3-1&to_date=2016-5-31">
-                                                    1-Mar-16 to 31-May-16
-                                            </a>
-                                        </li>
-                                    </ul>
+                                        <p>
+                                            <h4>Aggregated by collector</h4>
+                                            <ul>
+                                                <li>
+                                                    <a href="/api/reports/collected_salestax/?from_date=2016-6-1&to_date=2016-8-31">
+                                                        1-Jun-16 to 31-Aug-16
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="/api/reports/collected_salestax/?from_date=2016-3-1&to_date=2016-5-31">
+                                                            1-Mar-16 to 31-May-16
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </p>
+                                        <p>
+                                            <h4>Download all salestax</h4>
+                                            <ul>
+                                                <li>
+                                                    <a href="/api/sales/salestax/?as_csv=true&from_date=2016-6-1&to_date=2016-8-31">
+                                                        1-Jun-16 to 31-Aug-16
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="/api/sales/salestax/?as_csv=true&from_date=2016-3-1&to_date=2016-5-31">
+                                                            1-Mar-16 to 31-May-16
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </p>
+                                        <p>
+                                            <h4>Download all taxable sales</h4>
+                                            <ul>
+                                                <li>
+                                                    <a href="/api/sales/salestax2/?as_csv=true&from_date=2016-6-1&to_date=2016-8-31">
+                                                        1-Jun-16 to 31-Aug-16
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="/api/sales/salestax2/?as_csv=true&from_date=2016-3-1&to_date=2016-5-31">
+                                                            1-Mar-16 to 31-May-16
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                            </Col>
+                        </Row>
+                    </Grid>
                 
                     :
-                    <div className="margin-top-medium text-center">
+                    <div className={classNames("margin-top-medium", "text-center")}>
                         <p><Link to="/login"><b>Login to access application</b></Link>.</p>
                     </div>
                 }

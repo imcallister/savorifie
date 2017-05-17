@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router';
 import { push } from 'react-router-redux';
 import { connect } from 'react-redux';
+import classNames from 'classnames';
+
 import { authLogoutAndRedirect } from '../../actions/auth';
 
 import Drawer from 'material-ui/Drawer';
@@ -47,7 +49,7 @@ class MenuBar extends Component {
 
 	render() {
         return (
-            <nav className="navbar navbar-default">
+            <nav className={classNames("navbar", "navbar-default")}>
                 <div className="container-fluid">
                     <div className="navbar-header">
                         <Link to="/">
@@ -57,10 +59,10 @@ class MenuBar extends Component {
                             />
                         </Link>
                     </div>
-                    <div className="collapse navbar-collapse" id="top-navbar">
+                    <div className={classNames("collapse", "navbar-collapse")} id="top-navbar">
                         
                         {this.props.isAuthenticated ?
-                            <ul className="nav navbar-nav navbar-right">
+                            <ul className={classNames("nav", "navbar-nav", "navbar-right")}>
                                 <li>
                                     <a className="js-go-to-index-button" 
                                         tabIndex="0"
@@ -91,7 +93,7 @@ class MenuBar extends Component {
                                 </li>
                             </ul>
                         :
-                            <ul className="nav navbar-nav navbar-right">
+                            <ul className={classNames("nav", "navbar-nav", "navbar-right")}>
                                 <li>
                                     <a className="js-go-to-index-button" tabIndex="0" onClick={this.props.goToIndex}>
                                         <i className="fa fa-home"/> Home

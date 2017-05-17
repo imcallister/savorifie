@@ -29,12 +29,8 @@ class UserLoginView(GenericAPIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        print "HIIII   YOOOOO"
         """User login with username and password."""
-        print request.__dict__
-        
         token = AuthToken.objects.create(request.user)
-        print token
         return Response({
             'user': self.get_serializer(request.user).data,
             'token': token

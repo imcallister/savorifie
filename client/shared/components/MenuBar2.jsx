@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { push } from 'react-router-redux';
 import { connect } from 'react-redux';
 import { authLogoutAndRedirect } from '../../actions/auth';
+import classNames from 'classnames';
 
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import {blue500, red500, greenA200} from 'material-ui/styles/colors';
@@ -79,7 +80,7 @@ class MenuBar2 extends Component {
                                     <ToolbarTitle text={routeLabels[this.state.route]} />
                                     </div>
                                     :
-                                    <ul className="nav navbar-nav navbar-right">
+                                    <ul className={classNames("nav", "navbar-nav", "navbar-right")}>
                                         <li className={this.props.loginClass}>
                                             <Link className="js-login-button" to="/login">Login</Link>
                                         </li>

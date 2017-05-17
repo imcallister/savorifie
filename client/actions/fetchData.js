@@ -28,7 +28,7 @@ export function getData(token, url) {
     return (dispatch, state) => {
 
         dispatch(fetchData());
-        return fetch(`${SERVER_URL}' + url + '/?raw=true`, {
+        return fetch(url + '/?raw=true', {
             credentials: 'include',
             mode: 'no-cors',
             headers: {

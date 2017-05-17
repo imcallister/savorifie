@@ -50,7 +50,7 @@ class PayablesView extends React.Component {
             <div className="container">
                 {this.props.isAuthenticated ?
                     <div>
-                        <div className="panel panel-default">
+                        <div className={classNames("panel", "panel-default")}>
                             <div className="panel-heading">
                                 <h3 className="panel-title">Incomplete Entries</h3>
                             </div>
@@ -63,7 +63,7 @@ class PayablesView extends React.Component {
                         
                         <div className="row">
                             <div className="col-md-8">  
-                                <div className="panel panel-default">
+                                <div className={classNames("panel", "panel-default")}>
                                     <div className="panel-heading">
                                         <h3 className="panel-title">Payables</h3>
                                     </div>
@@ -76,7 +76,7 @@ class PayablesView extends React.Component {
                             </div>
 
                             <div className="col-md-4">  
-                                <div className="panel panel-default">
+                                <div className={classNames("panel", "panel-default")}>
                                     <div className="panel-heading">
                                         <h3 className="panel-title">File Uploads</h3>
                                     </div>
@@ -86,7 +86,7 @@ class PayablesView extends React.Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="panel panel-default">
+                                <div className={classNames("panel", "panel-default")}>
                                     <div className="panel-heading">
                                         <h3 className="panel-title">Uploads</h3>
                                     </div>
@@ -106,7 +106,7 @@ class PayablesView extends React.Component {
                     </div>
                 
                     :
-                    <div className="margin-top-medium text-center">
+                    <div className={classNames("margin-top-medium", "text-center")}>
                         <p><Link to="/login"><b>Login to access application</b></Link>.</p>
                     </div>
                 }

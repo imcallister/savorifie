@@ -17,6 +17,7 @@ config.entry = {
     cogs: './assets/js/pages/cogs',
     shippingcosts: './assets/js/pages/shippingcosts',
     periodend: './assets/js/pages/periodend',
+    main: './client/index'
 };
 
 module.exports = config;

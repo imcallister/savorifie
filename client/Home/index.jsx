@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router';
 import { connect } from 'react-redux';
+import classNames from 'classnames'; 
 
 import HighChartContainer from '../shared/containers/HighChart';  
 
@@ -28,8 +29,9 @@ class HomeView extends React.Component {
                                     <div className="panel-heading">
                                         <h3 className="panel-title">Expense Trends</h3>
                                     </div>
-                                    <div className="panel-body">
-                                        <HighChartContainer chartName="inventory.expense_trends"
+                                    <div className={classNames("panel-body", "highchart")}>
+                                        <HighChartContainer className="highchart"
+                                                            chartName="inventory.expense_trends"
                                                             source="/chart/reports/expense_trends/"
                                         />
                                     </div>    
@@ -66,6 +68,7 @@ const mapStateToProps = (state) => {
         userName: state.auth.userName,
         statusText: state.auth.statusText,
         isAuthenticated: state.auth.isAuthenticated,
+        token: state.auth.token
     };
 };
 

@@ -55,6 +55,11 @@ class MenuDrawer extends Component {
       this.props.dispatch(push('/' + index));
     }
 
+    handleLogout = (event) => {
+        console.log('handling Logout');
+        this.props.dispatch(authLogoutAndRedirect());
+    };
+
     handleRouteChange = (event, index) => {
         if (index == 'logout') {
             this.props.dispatch(authLogoutAndRedirect());
@@ -102,7 +107,7 @@ class MenuDrawer extends Component {
                                         <Divider />
                                         <MenuItem onTouchTap={this.handleClose.bind(this, "admin")}>Admin</MenuItem>
                                         <MenuItem onTouchTap={this.handleClose.bind(this, "maintenance")}>Maintenance</MenuItem>
-                                        <MenuItem onTouchTap={this.handleClose.bind(this, "logs")}>Logs</MenuItem>
+                                        <MenuItem onTouchTap={this.handleClose.bind(this, "/logs/")}>Logs</MenuItem>
                                       </Drawer>
                                     
                                    
@@ -123,7 +128,9 @@ class MenuDrawer extends Component {
                             />
                         </ToolbarGroup>
                         <ToolbarGroup>
-                          <ExitToApp style={iconStyles} />
+                            <IconButton style={iconStyles} onTouchTap={this.handleLogout} tooltip="Logout">
+                                <ExitToApp/>
+                            </IconButton>
                         </ToolbarGroup>
                         
                       </Toolbar>

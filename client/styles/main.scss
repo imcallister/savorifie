@@ -1,13 +1,14 @@
-@import "./config/reset";
-@import "./config/fonts";
-@import "./config/typography";
+@import "./config/reset.scss";
+@import "./config/fonts.scss";
+@import "./config/typography.scss";
+@import "./config/variables.scss";
 
-@import "./theme/base";
-@import "./theme/login";
-@import "./theme/navbar";
-@import "./theme/footer";
+@import "./theme/base.scss";
+@import "./theme/login.scss";
+@import "./theme/navbar.scss";
+@import "./theme/footer.scss";
 
-@import "./utils/margins";
+@import "./utils/margins.scss";
 
 .page-logo {
   max-width: 200px;
