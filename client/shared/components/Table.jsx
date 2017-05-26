@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {Table, TableBody, TableHeader, TableHeaderColumn, TableRow, TableRowColumn} from 'material-ui/Table';
 
+import '../../styles/main.scss';
 
 class MUITableRow extends Component {
     render() {

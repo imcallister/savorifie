@@ -27,6 +27,7 @@ import MenuBar from './shared/components/MenuBar';
 import MenuBar2 from './shared/components/MenuBar2';
 import MenuDrawer from './shared/components/MenuDrawer';
 
+import 'bootstrap/dist/css/bootstrap.css';
 import './styles/main.scss';
 
 const styles = {

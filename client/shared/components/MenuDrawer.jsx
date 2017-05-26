@@ -50,24 +50,21 @@ class MenuDrawer extends Component {
 
     handleToggle = () => this.setState({open: !this.state.open});
     
-    handleClose = (index) => {
-      this.setState({open: false, route: index});
-      this.props.dispatch(push('/' + index));
+    handleClose = (index, serverFlag) => {
+        console.log('MenuDrawer, index:', index, serverFlag)
+        
+        if (serverFlag == true) {
+            console.log('coming into serverFlag');
+            console.log(window);
+            window.location.replace('/' + index);
+        };
+
+        this.setState({open: false, route: index});
+        this.props.dispatch(push('/' + index));
     }
 
     handleLogout = (event) => {
-        console.log('handling Logout');
         this.props.dispatch(authLogoutAndRedirect());
-    };
-
-    handleRouteChange = (event, index) => {
-        if (index == 'logout') {
-            this.props.dispatch(authLogoutAndRedirect());
-        }
-        else {
-            this.setState({open: false, route: index});
-            this.props.dispatch(push('/' + index));
-        }
     };
 
 	render() {
@@ -105,9 +102,9 @@ class MenuDrawer extends Component {
                                         <Divider />
                                         <MenuItem onTouchTap={this.handleClose.bind(this, "analysis")}>Analysis</MenuItem>
                                         <Divider />
-                                        <MenuItem onTouchTap={this.handleClose.bind(this, "admin")}>Admin</MenuItem>
-                                        <MenuItem onTouchTap={this.handleClose.bind(this, "maintenance")}>Maintenance</MenuItem>
-                                        <MenuItem onTouchTap={this.handleClose.bind(this, "/logs/")}>Logs</MenuItem>
+                                        <MenuItem onTouchTap={this.handleClose.bind(this, "admin/", true)}>Admin</MenuItem>
+                                        <MenuItem onTouchTap={this.handleClose.bind(this, "superuser/maintenance/", true)}>Maintenance</MenuItem>
+                                        <MenuItem onTouchTap={this.handleClose.bind(this, "superuser/logs/", true)}>Logs</MenuItem>
                                       </Drawer>
                                     
                                    

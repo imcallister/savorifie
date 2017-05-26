@@ -8,7 +8,7 @@ import { syncHistoryWithStore } from 'react-router-redux';
 import Root from './shared/containers/Root';
 import configureStore from './store/configureStore';
 import { authLoginUserSuccess } from './actions/auth';
-import 'bootstrap/dist/css/bootstrap.css';
+
 
 const target = document.getElementById('root');
 
