@@ -19,6 +19,9 @@ import FRBHelp  from '../help_text/FRB_upload';
 import '../styles/main.scss';
 import savorLogo from '../shared/images/savor-logo.png';
 
+var log_headers = [{fld: 'Upload', label: 'Upload'},
+                           {fld: 'Last Upload', label: 'Last Upload', formatter: formatters.date}
+                           ];
 
 
 class LogsView extends React.Component {
@@ -35,16 +38,6 @@ class LogsView extends React.Component {
             <div className="container">
                 {this.props.isAuthenticated ?
                     <div>
-                        <div className={classNames("panel", "panel-default")}>
-                            <div className="panel-heading">
-                                <h3 className="panel-title">Incomplete Entries</h3>
-                            </div>
-                            <div className="panel-body">
-                                <div>
-                                    <SwatchRow config={SWATCH_COLORS} source='/api/reports/incompletes/?raw=true' />
-                                </div>
-                            </div>
-                        </div>
                         
                         <div className="row">
                             <div className="col-md-8">  
@@ -54,7 +47,7 @@ class LogsView extends React.Component {
                                     </div>
                                     <div className="panel-body">
                                         <div>
-                                            <TableContainer source='${SERVER_URL}/api/reports/payables/?raw=true' headers={payables_headers}/>
+                                            <TableContainer source='/logslist/?format=json&level=INFO' headers={payables_headers}/>
                                         </div>
                                     </div>
                                 </div>
@@ -67,7 +60,7 @@ class LogsView extends React.Component {
                                     </div>
                                     <div className="panel-body">
                                         <div>
-                                           <TableContainer source='${SERVER_URL}/api/reports/last_uploads/?raw=true' headers={last_upload_headers}/>
+                                           <TableContainer source='/api/reports/last_uploads/?raw=true' headers={last_upload_headers}/>
                                         </div>
                                     </div>
                                 </div>
