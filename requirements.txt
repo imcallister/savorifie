@@ -46,5 +46,4 @@ graphene[django]
 django-graphiql
 python-amazon-mws==0.6
 ShopifyAPI==2.4.0
--e git+https://github.com/electronifie/pconfig.git#egg=Pconfig
--e git+https://github.com/electronifie/accountifie.git#egg=accountifie
+-e git+https://github.com/imcallister/accountifie.git#egg=accountifie

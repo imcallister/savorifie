@@ -117,7 +117,8 @@ class Fulfillment(models.Model):
 
     @property
     def ship_info(self):
-        if self.ship_type and self.bill_to:
+        
+        if self.ship_type and self.bill_to not in [None, '']:
             return 'complete'
         elif self.ship_type and self.ship_type.label=='BY_HAND':
             return 'complete'
