@@ -18,17 +18,17 @@ def fifo_assign(unit_sale_id, to_assign):
         if qty != 0:
             rmg_qty = qty
             while rmg_qty != 0:
-                sl = available.pop(0)
-                
-                fifo_info = {}
-                assgn_qty = min(rmg_qty, sl['available'])
-                fifo_info['unit_sale_id'] = unit_sale_id
-                fifo_info['quantity'] = assgn_qty
-                fifo_info['shipment_line_id'] = sl['id']
-                rmg_qty -= assgn_qty
-                COGSAssignment(**fifo_info).save()
                 if len(available) == 0: # no more shipment lines left
                     rmg_qty = 0
+                else:
+                    sl = available.pop(0)
+                    fifo_info = {}
+                    assgn_qty = min(rmg_qty, sl['available'])
+                    fifo_info['unit_sale_id'] = unit_sale_id
+                    fifo_info['quantity'] = assgn_qty
+                    fifo_info['shipment_line_id'] = sl['id']
+                    rmg_qty -= assgn_qty
+                    COGSAssignment(**fifo_info).save()
     return
 
 
