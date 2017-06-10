@@ -20,6 +20,9 @@ ReactDOM.render(<ModalCmpnt modalId="AMZNPayoutUploader" modalTitle="Amazon Payo
 var AMZN_PMTS_uploader = <Uploader instructions="" postUrl={'/importers/upload/AMZN_PMTs/'}/>
 ReactDOM.render(<ModalCmpnt modalId="AMZNPmtsPayoutUploader" modalTitle="Amazon Payments Payout File Upload" content={AMZN_PMTS_uploader}/>, document.getElementById('bookkeeping.upload.AMZNPmtsPayoutUploader'))
 
+var Paypal_uploader = <Uploader instructions="" postUrl={'/importers/upload/paypal/'}/>
+ReactDOM.render(<ModalCmpnt modalId="PaypalPayoutUploader" modalTitle="Paypal Payout File Upload" content={Paypal_uploader}/>, document.getElementById('bookkeeping.upload.PaypalPayoutUploader'))
+
 
 var receivables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},
 					 	  {'fld': 'amount', 'label': 'Amount', formatter: formatters.drill}
