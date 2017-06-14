@@ -6,6 +6,7 @@ var BSTable = require('../containers/acctifieTableContainer')
 var Uploader = require('../containers/uploaderContainer') 
 var formatters = require('../helpers/formatters')
 var ModalCmpnt = require('../components/modalCmpnt')
+var InputContainer = require('../containers/inputContainer')
 
 
 
@@ -22,6 +23,9 @@ ReactDOM.render(<ModalCmpnt modalId="AMZNPmtsPayoutUploader" modalTitle="Amazon 
 
 var Paypal_uploader = <Uploader instructions="" postUrl={'/importers/upload/paypal/'}/>
 ReactDOM.render(<ModalCmpnt modalId="PaypalPayoutUploader" modalTitle="Paypal Payout File Upload" content={Paypal_uploader}/>, document.getElementById('bookkeeping.upload.PaypalPayoutUploader'))
+
+var Missing_Amazon_uploader = <InputContainer label="Order ID" postUrl={'/importers/upload/missing_amazon/'}/>
+ReactDOM.render(<ModalCmpnt modalId="MissingAmazonUploader" modalTitle="Missing Amazon Orders Upload" content={Missing_Amazon_uploader}/>, document.getElementById('bookkeeping.upload.MissingAmazonUploader'))
 
 
 var receivables_cols  = [{'fld': 'counterparty', 'counterparty': 'Upload Name'},

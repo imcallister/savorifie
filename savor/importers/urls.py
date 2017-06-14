@@ -32,4 +32,5 @@ urlpatterns = [
     url(r'importers/upload/shopify_orders/$', shopify_orders.upload),
     url(r'importers/upload/AMZN_PMTs/$', AMZN_PMTS_payouts.upload),
     url(r'importers/upload/paypal/$', paypal_payouts.upload),
+    url(r'importers/upload/missing_amazon/$', FBA.missing_amazon),
 ]
