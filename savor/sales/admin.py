@@ -214,10 +214,12 @@ class PayoutLineInline(admin.TabularInline):
     can_delete = True
     extra = 0
 
+
     def formfield_for_foreignkey(self, db_field, request=None,**kwargs):
+        print 'payoutlineinline formfield'
         field = super(PayoutLineInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
         if db_field.name == 'sale':
-            field.queryset = field.queryset.select_related('channel__counterparty')
+            field.queryset = field.queryset.select_related('customer_code', 'channel__counterparty', 'paid_thru')
         return field
 
 # special signal as normal GL update doesn't work with NominalTransaction
@@ -242,6 +244,11 @@ class PayoutAdmin(admin.ModelAdmin):
         payout_tran_saved.send(obj)
         return admin.ModelAdmin.response_add(self, request, obj)
 
+    def get_queryset(self, request):
+        print 'payoutadmin get qeryset'
+        po_model = super(PayoutAdmin, self).get_queryset(request)
+        po_model = po_model.prefetch_related('payout_line').prefetch_related('payout_line__sale', 'payout_line__sale__channel')
+        return po_model
     
 
 admin.site.register(Payout, PayoutAdmin)

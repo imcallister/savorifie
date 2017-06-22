@@ -44,7 +44,7 @@ class PayoutLine(models.Model):
         db_table = 'sales_payoutline'
 
     def __unicode__(self):
-        return '%s:%s' % (self.payout, self.id)
+        return '%s' % (self.id)
 
 
 class Payout(models.Model, accountifie.gl.bmo.BusinessModelObject):
