@@ -1,10 +1,19 @@
 from decimal import Decimal
 
 import sale as sales_api
-from sales.models import Payout
-from sales.serializers import PayoutSerializer
+from sales.models import Payout, PayoutLine
+from sales.serializers import PayoutSerializer, PayoutLineSerializer
 
 THRESHOLD = Decimal('2')
+
+
+def payout(id, qstring):
+    qs = PayoutLine.objects.filter(payout_id=id)
+    
+    serializer = PayoutLineSerializer
+    qs = serializer.setup_eager_loading(qs)
+    return serializer(qs, many=True).data
+
 
 def proceeds_rec(qstring):
     paid_thru = qstring.get('paid_thru')
