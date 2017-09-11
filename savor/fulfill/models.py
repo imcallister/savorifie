@@ -30,7 +30,7 @@ PACKING_TYPES = (
 )
 
 
-class ShippingCharge(models.Model, BusinessModelObject):
+class ShippingCharge(models.Model):
     company = models.ForeignKey('gl.Company', default=get_default_company)
     shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
     account = models.CharField(max_length=25, blank=True, null=True)
@@ -50,7 +50,7 @@ class ShippingCharge(models.Model, BusinessModelObject):
         app_label = 'fulfill'
         db_table = 'fulfill_shippingcharge'
 
-
+    """
     def save(self, update_gl=True):
         models.Model.save(self)
         if update_gl:
@@ -92,6 +92,7 @@ class ShippingCharge(models.Model, BusinessModelObject):
 
         tran['lines'] = lines
         return [tran]
+    """
 
 
 

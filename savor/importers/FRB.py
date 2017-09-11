@@ -46,6 +46,7 @@ def process_frb(file_name):
         else:
             new_recs_ctr += 1
             rec['ext_account'] = ext_account
+            rec['counterparty_id'] = 'unknown'
             rec_obj = Cashflow(**rec)
             rec_obj.save(update_gl=False)
 
