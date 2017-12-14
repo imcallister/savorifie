@@ -47,7 +47,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('quantity', models.PositiveIntegerField(default=0)),
                 ('cost', models.DecimalField(decimal_places=2, default=0, max_digits=6)),
-                ('company', models.ForeignKey(default=accountifie.toolkit.utils.gl_helpers.get_default_company, on_delete=django.db.models.deletion.CASCADE, to='gl.Company')),
+                ('company', models.ForeignKey(default='SAV', on_delete=django.db.models.deletion.CASCADE, to='gl.Company')),
                 ('inventory_item', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='products.InventoryItem')),
                 ('shipment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='inventory.Shipment')),
             ],

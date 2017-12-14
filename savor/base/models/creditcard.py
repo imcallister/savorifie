@@ -8,7 +8,7 @@ from accountifie.toolkit.utils import get_default_company
 CC_AP_CHOICES = ['1100', '1250', '3000', '3006']
 
 class CreditCardTrans(models.Model, BusinessModelObject):
-    company = models.ForeignKey('gl.Company', default=get_default_company)
+    company = models.ForeignKey('gl.Company', default='SAV')
     card_company = models.ForeignKey('gl.Counterparty', related_name='card_company')
     counterparty = models.ForeignKey('gl.Counterparty',
                                      null=True,

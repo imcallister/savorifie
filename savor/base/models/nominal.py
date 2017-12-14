@@ -28,7 +28,7 @@ class NominalTransaction(models.Model, BusinessModelObject):
     the legacy data into these.
     
     """
-    company = models.ForeignKey('gl.Company', default=get_default_company)
+    company = models.ForeignKey('gl.Company', default='SAV')
     date = models.DateField(db_index=True)
     date_end = models.DateField(db_index=True, blank=True, null=True)
 
