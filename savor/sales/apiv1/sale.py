@@ -1,3 +1,4 @@
+import time
 import datetime
 from dateutil.parser import parse
 from multipledispatch import dispatch
@@ -32,6 +33,7 @@ def sales_loaded_thru(channel_lbl, qstring):
 
 @dispatch(dict)
 def sale(qstring):
+    start = time.time()
     start_date = qstring.get('from_date', settings.DATE_EARLY)
     end_date = qstring.get('to_date', datetime.datetime.now().date())
     view_type = qstring.get('view', 'full')
@@ -75,7 +77,9 @@ def sale(qstring):
         serializer = FullSaleSerializer
 
     qs = serializer.setup_eager_loading(qs)
-    return list(serializer(qs, many=True).data)
+    data = list(serializer(qs, many=True).data)
+    print('done with api/sale/sale', time.time() - start)
+    return data
 
 
 @dispatch(str, dict)

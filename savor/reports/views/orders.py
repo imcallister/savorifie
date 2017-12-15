@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.template import RequestContext
 
 from accountifie.common.api import api_func
-import fulfill.apiv1 as flfl_api
+
 import tables.bstrap_tables
 from accountifie.toolkit.utils import get_modal
 from accountifie.common.table import get_table
@@ -55,17 +55,17 @@ def order_drilldown(request, order_id):
         fulfill_info['request_date'] = parse(f['request_date']).strftime('%d-%b-%y')
         fulfill_info['items_requested'] = f['items_string']
         fulfill_info['status'] = f['status']
-        
+
         ship_type = f.get('ship_type')
         if ship_type:
             fulfill_info['ship_type'] = ship_type.get('label', 'Unknown')
         else:
             fulfill_info['ship_type'] = 'Unknown'
-        
+
         fulfill_info['bill_to'] = f['bill_to']
 
-        ship_charges = flfl_api.shippingcharge({'fulfill': f['id']})
-        if len(ship_charges) > 0:
+        ship_charges = api_func('fulfill', 'shippingcharge', {'fulfill': f['id']})
+        if ship_charges and len(ship_charges) > 0:
             fulfill_info['ship_info'] = True
             fulfill_info['num_packages'] = len(ship_charges)
             context['shipInfo'] = get_modal(get_table('shipping_info')(f['id']),

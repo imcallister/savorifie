@@ -8,15 +8,13 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from django.utils.safestring import mark_safe
 
-
+from accountifie.common.api import api_func
 from accountifie.common.models import Address
 from inventory.models import Warehouse, ShippingType
 from fulfill.models import BatchRequest, Fulfillment, FulfillLine
 import fulfill.serializers as flfslz
-import inventory.apiv1 as inventory_api
-import fulfill.apiv1 as fulfill_api
-import products.apiv1 as products_api
-import sales.apiv1 as sales_api
+from reports.calcs.unbatched_fulfillments import unbatched_fulfillments
+
 
 import datetime
 import pytz
@@ -31,9 +29,9 @@ def get_today():
 @login_required
 def queue_orders(request):
     new_back_orders = 0
-    warehouses = [w['label'] for w in inventory_api.warehouse({})]
-    new_requests = dict((w,0) for w in warehouses)
-    back_to_queue = dict((w,0) for w in warehouses)
+    warehouses = [w['label'] for w in api_func('inventory', 'warehouse', {})]
+    new_requests = dict((w, 0) for w in warehouses)
+    back_to_queue = dict((w, 0) for w in warehouses)
 
     bad_requests = []
 
@@ -76,7 +74,7 @@ def queue_orders(request):
 
 @login_required
 def shipping(request):
-    ship_options = dict((o['label'], o) for o in inventory_api.shipoption({}))
+    ship_options = dict((o['label'], o) for o in api_func('inventory', shipoption, {}))
     new_ship_choices = 0
 
     bad_requests = []
@@ -112,9 +110,8 @@ def shipping(request):
 
 def create_backorder(order_id):
     # check that it has not been requested already
-    unfulfilled_items = fulfill_api.unfulfilled(str(order_id), {})['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem({}))
-    order = sales_api.sale(order_id, {})
+    unfulfilled_items = api_func('fulfill', 'unfulfilled', str(order_id), {})['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem', {}))
     
     if unfulfilled_items is None:
         return 'FULFILL_ALREADY_REQUESTED'
@@ -150,11 +147,10 @@ def backorder_to_requested(warehouse, fulfill_id):
 
 
 def create_fulfill_request(warehouse, order_id):
-    warehouse_labels = [w['label'] for w in inventory_api.warehouse({})]
-    unfulfilled_items = fulfill_api.unfulfilled(str(order_id), {})['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in products_api.inventoryitem({}))
-    order = sales_api.sale(order_id, {})
-
+    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse', {})]
+    unfulfilled_items = api_func('fulfill', 'unfulfilled', str(order_id), {})['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem', {}))
+    
     if unfulfilled_items is None:
         return 'FULFILL_ALREADY_REQUESTED'
     elif warehouse not in warehouse_labels:
@@ -279,7 +275,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
             fd['ifs_ship_type'] = 'HOLD'
         return fd
 
-    sku_names = dict((i['label'], i['description']) for i in products_api.inventoryitem({}))
+    sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem', {}))
     master_sku_names = dict(('MST%s' % k, '%s Master' % v) for k, v in sku_names.iteritems())
     sku_names.update(master_sku_names)
 
@@ -318,64 +314,6 @@ def NC2_pick_list(request, data, label='MICH_batch'):
 
     return response
 
-@login_required
-def MICH_pick_list(request, data, label='MICH_batch'):
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
-    writer = csv.writer(response)
-
-    sku_names = dict((i['label'], i['description']) for i in products_api.inventoryitem({}))
-    flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
-
-    for f in flf_data:
-        f['ship']['id'] = 'FLF%s' % f['ship']['id']
-    
-    headers = OrderedDict([('SAVOR ID', 'id'),
-                            ('Channel', 'order:channel'),
-                            ('Name', 'order:shipping_name'),
-                            ('Shipping Company', 'order:shipping_company'),
-                            ('Customer Reference', 'order:external_routing_id'),
-                            ('Shipping Address1', 'order:shipping_address1'),
-                            ('Shipping Address2', 'order:shipping_address2'),
-                            ('Shipping City', 'order:shipping_city'),
-                            ('Shipping Zip', 'order:shipping_zip'),
-                            ('Shipping Province', 'order:shipping_province'),
-                            ('Shipping Country', 'order:shipping_country'),
-                            ('Shipping Phone', 'order:shipping_phone'),
-                            ('Email', 'order:notification_email'),
-                            ('Shipping Type', 'ship_type:description'),
-                            ('Bill To', 'bill_to'),
-                            ('Gift Message', 'order:gift_message'),
-                            ('Use PDF?', 'use_pdf'),
-                            ('Pack Type', 'packing_type'),
-                            ('Ship From Company', 'ship_from:company'),
-                            ('Ship From Address1', 'ship_from:address1'),
-                            ('Ship From Address2', 'ship_from:address2'),
-                            ('Ship From City', 'ship_from:city'),
-                            ('Ship From ZIP', 'ship_from:postal_code')
-                           ])
-
-    header_row = headers.keys()
-    header_row += [u'Item', u'Item Name', u'Quantity']
-    writer.writerow(header_row)
-
-    for flf in flf_data:
-        row = [flf['ship'].get(headers[col], '') for col in headers]
-        label = flf['skus'][0]['inventory_item']
-        row += [label, sku_names[label], flf['skus'][0]['quantity']]
-        writer.writerow(row)
-
-        # if more than 1 sku..
-        for i in range(1, len(flf['skus'])):
-            line = [''] * len(headers)
-            label = flf['skus'][i]['inventory_item']
-            line += [label, sku_names[label], flf['skus'][i]['quantity']]
-            writer.writerow(line)
-
-        writer.writerow([unicode('=' * 20).encode('utf-8')] * (len(header_row)))
-
-    return response
 
 
 @login_required
@@ -386,7 +324,7 @@ def make_batch(request, warehouse):
         return redirect('/fulfillment/management/')
     else:
         # get all unbatched
-        unbatched = fulfill_api.unbatched_fulfillments({})
+        unbatched = unbatched_fulfillments({})
         to_batch = [f for f in unbatched if f['warehouse'] == warehouse]
 
         batch_info = {}

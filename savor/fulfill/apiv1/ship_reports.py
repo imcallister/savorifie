@@ -5,9 +5,10 @@ import datetime
 from django.db.models import Q
 
 from .model_api import *
-from fulfill.models import ShippingCharge, Fulfillment
-from fulfill.serializers import ShippingChargeSerializer, FulfillmentSerializer
+from ..models import ShippingCharge, Fulfillment
+from ..serializers import ShippingChargeSerializer, FulfillmentSerializer
 from accountifie.toolkit.utils import monthrange
+
 
 def fulfill_no_shipcharge(qstring):
     with_shipcharge = [s['fulfillment_id'] for s in shippingcharge({}) \

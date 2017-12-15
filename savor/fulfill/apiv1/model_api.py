@@ -1,16 +1,13 @@
-import csv
 from multipledispatch import dispatch
-import itertools
 import logging
 import flatdict
 import time
 
-from django.db.models import Prefetch, Count, F, Q
+from django.db.models import Count, Q
 
-from fulfill.models import *
-from fulfill.serializers import *
-from sales.models import *
-from sales.serializers import SimpleSaleSerializer, SaleFulfillmentSerializer
+from ..models import *
+from ..serializers import *
+
 
 logger = logging.getLogger('default')
 
@@ -56,24 +53,6 @@ def fulfillment_batch(id, qstring):
                            .first() \
                            .id
     return {'batch_id': batch_id}
-
-def batched_fulfillments(qstring):
-    return [x for x in list(set([x['fulfillments'] for x in BatchRequest.objects.all().values('fulfillments')])) if x]
-
-
-def unbatched_fulfillments(qstring):
-    batched_flmts = batched_fulfillments(qstring)
-    
-    qs = Fulfillment.objects \
-                    .exclude(id__in=batched_flmts) \
-                    .exclude(order__channel__label='AMZN') \
-                    .filter(status='requested')
-
-    qs = FulfillmentSerializer.setup_eager_loading(qs)
-
-    data = FulfillmentSerializer(qs, many=True).data
-    data = [f for f in data if f['ship_info'] != 'incomplete']
-    return data
 
 
 @dispatch(dict)
@@ -131,7 +110,7 @@ def fulfillment(qstring):
     if qstring.get('missing_shipping', '').lower() == 'true':
         qs = qs.exclude(ship_type__label='BY_HAND')
         qs = qs.filter(Q(bill_to='') | Q(bill_to__isnull=True))
-        
+
 
     flfmts = serializer(qs, many=True).data
 
@@ -215,21 +194,10 @@ def fulfilled(qstring):
     data = [dict((str(k), str(v)) for k, v in flatdict.FlatDict(f).iteritems()) for f in fulfilled]
     return data
 
-def backordered(qstring):
-    """
-    find all sale objects for which fulfillment is backordered
-    """
-    qs = Fulfillment.objects.filter(status='back-ordered')
-    qs = FulfillmentSerializer.setup_eager_loading(qs)
-    return FulfillmentSerializer(qs, many=True).data
 
-
+"""
 @dispatch(dict)
 def unfulfilled(qstring):
-    """
-    find all sale objects for which there is no fulfillment record
-    """
-    start_time = time.time()
     sales_qs = Sale.objects \
                    .prefetch_related('unit_sale__sku__skuunit__inventory_item') \
                    .prefetch_related('fulfillments__fulfill_lines__inventory_item')
@@ -243,8 +211,7 @@ def unfulfilled(qstring):
 
 @dispatch(str, dict)
 def unfulfilled(id, qstring):
-    """
-    find all sale objects for which there is no fulfillment record
-    """
     qs = Sale.objects.get(id=id)
     return SaleFulfillmentSerializer(qs).data
+
+"""

@@ -6,21 +6,6 @@ from django.contrib.admin import SimpleListFilter
 from django.http import HttpResponseRedirect
 
 from .models import *
-import fulfill.apiv1 as fulfill_api
-
-
-class ShippingMissing(SimpleListFilter):
-    title = 'shipping_missing'
-    parameter_name = 'shipping_missing'
-
-    def lookups(self, request, model_admin):
-            return (('complete', 'Shipping Info Complete'), ('incomplete', 'Shipping Info Incomplete'))
-
-    def queryset(self, request, qs):
-        if self.value():
-            fulfillment_ids = [x['id'] for x in fulfill_api.fulfillment({})
-                               if x['ship_info'] == self.value() and x['status'] == 'requested']
-            return qs.filter(id__in=fulfillment_ids)
 
 
 class FulfillLineInline(admin.TabularInline):
@@ -33,7 +18,7 @@ class FulfillLineInline(admin.TabularInline):
 class FulfillmentAdmin(admin.ModelAdmin):
     ordering = ('-request_date',)
     list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
-    list_filter = ('warehouse', 'status', ShippingMissing,)
+    list_filter = ('warehouse', 'status',)
     list_select_related = ('order__channel__counterparty',)
     inlines = [FulfillLineInline,]
 

@@ -9,7 +9,12 @@ from django.utils.safestring import mark_safe
 from accountifie.common.api import api_func
 from accountifie.common.table import get_table
 from accountifie.toolkit.forms import FileForm
-import fulfill.apiv1 as flfl_api
+
+from reports.calcs.unfulfilled import unfulfilled
+from reports.calcs.backordered import backordered
+from reports.calcs.unbatched_fulfillments import unbatched_fulfillments
+from reports.calcs.missing_shipping import missing_shipping
+from reports.calcs.batchrequest import batchrequest
 
 
 def post_button(order_id, back=False):
@@ -49,13 +54,12 @@ def _get_name(o):
 
 def _fulfill_list(qstring=None):
     start_time = time.time()
-    print 'SLOW _fulfill_list'
+    #orders = api_func('fulfill', 'unfulfilled')
+    orders = unfulfilled({})
 
-    orders = api_func('fulfill', 'unfulfilled')
-    print 'DONE api call', time.time() - start_time
-
-    columns = ["label", "Date", 'ship to', 'Items', 'Unfulfilled', 'Action']
+    columns = ["label", "Date", 'ship to', 'gift_wrapping', 'Items', 'Unfulfilled', 'Action']
     for o in orders:
+        o['gift_wrapping'] = 'Yes' if o['gift_wrapping'] else 'No'
         action_form = post_button(o['id'])
         o.update({'ship to': _get_name(o)})
         o.update({'Action': action_form})
@@ -66,9 +70,7 @@ def _fulfill_list(qstring=None):
 
 
 def _miss_ship_list(qstring=None):
-    flflmts = api_func('fulfill',
-                       'fulfillment',
-                       qstring={'missing_shipping': 'true',
+    flflmts = missing_shipping({'missing_shipping': 'true',
                                 'status': 'requested'})
 
     def get_items(f):
@@ -84,10 +86,12 @@ def _miss_ship_list(qstring=None):
         f.update({'Fulfill Created': parse(f['request_date']).strftime('%d-%b-%y')})
     return columns, flflmts
 
+
 def _unbatched_fulfill_list(qstring=None):
     start_time = time.time()
-    fulfills = api_func('fulfill', 'unbatched_fulfillments')
+    fulfills = unbatched_fulfillments({})
     fulfills = [f for f in fulfills if f['warehouse'] not in ['WRITEOFF', 'CONSIGN', '152Frank', 'FBA']]
+    
     def get_items(f):
         return ','.join(['%d %s' % (l['quantity'], l['inventory_item']) for l in f['fulfill_lines']])
 
@@ -101,7 +105,7 @@ def _unbatched_fulfill_list(qstring=None):
 
 
 def _backorder_list(qstring=None):
-    back_fulfills = api_func('fulfill', 'backordered')
+    back_fulfills = backordered({})
 
     columns = ["label", "Date", 'ship to', 'Items', 'Unfulfilled', 'Action']
     for f in back_fulfills:
@@ -136,10 +140,10 @@ def management(request):
     context['missship_columns'], context['missship_rows'] = _miss_ship_list()
     context['missing_shipping'] = len(context['missship_rows'])
     
-    context['batch_columns'] = ['id', 'created_date', 'comment', 'location', 'fulfillment_count', 'get_list']
+    context['batch_columns'] = ['id', 'created_date', 'comment', 'location_name', 'fulfillments_count', 'get_list']
 
-    batch_requests = sorted(api_func('fulfill', 'batchrequest'),
-                            key=lambda x: int(x['id']),
+    batch_requests = sorted(batchrequest({}),
+                            key=lambda x: x['created_date'],
                             reverse=True)
     for batch in batch_requests:
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])

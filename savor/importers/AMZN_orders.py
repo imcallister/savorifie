@@ -4,7 +4,6 @@ import itertools
 from django.conf import settings
 from sales.models import Sale, UnitSale
 from fulfill.models import Fulfillment, FulfillLine
-import fulfill.apiv1 as fulfill_api
 from products.models import Product
 import inventory.apiv1 as inventory_api
 import products.apiv1 as products_api
@@ -86,7 +85,7 @@ def process_AMZN_orders(file_name):
                 fulfill_obj = Fulfillment(**fulfill_info)
                 fulfill_obj.save()
 
-                unfulfilled_items = fulfill_api.unfulfilled(str(sale_obj.id), {})['unfulfilled_items']
+                unfulfilled_items = api_func('fulfill', 'unfulfilled', str(sale_obj.id), {})['unfulfilled_items']
                 for label, quantity in unfulfilled_items.iteritems():
                     fline_info = {}
                     fline_info['inventory_item_id'] = inv_items[label]
