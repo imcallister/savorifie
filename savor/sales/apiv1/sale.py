@@ -10,13 +10,18 @@ from decimal import Decimal
 from django.conf import settings
 from django.db.models import Prefetch, Sum, F, DecimalField, Max
 from django.db.models.functions import Coalesce
+from django.utils.safestring import mark_safe
 
 import products.apiv1 as product_api
+from fulfill.models import FulfillLine
+from products.models import SKUUnit
+
 from sales.models import Sale, UnitSale, Channel, Payout, PayoutLine
 from sales.serializers import FullSaleSerializer, SimpleSaleSerializer, \
     ShippingSaleSerializer, SaleFulfillmentSerializer, SaleProceedsSerializer,\
     PayoutSerializer, SaleIDSerializer, SaleGrossProceedsSerializer, \
-    SaleProceedsAdjustmentSerializer, SalePayoutsSerializer, SalesTaxSerializer3
+    SaleProceedsAdjustmentSerializer, SalePayoutsSerializer, SalesTaxSerializer3, \
+    SimpleSaleSerializer2
 
 def external_ids(qstring):
     qs = Sale.objects
@@ -30,6 +35,40 @@ def sales_loaded_thru(channel_lbl, qstring):
     latest = Sale.objects.filter(channel__label=channel_lbl) \
                       .aggregate(Max('sale_date'))
     return latest['sale_date__max']
+
+def _get_lines(skus, us):
+    return [{'inventory_item': s['inventory_item'],
+             'sale_id': us['sale_id'],
+             'quantity__sum': us['quantity__sum'] * s['quantity']} for s in skus.get(us['sku_id'], [])]
+
+@dispatch(dict)
+def sales_list(q):
+    start_date = q.get('from_date', settings.DATE_EARLY)
+    end_date = q.get('to_date', datetime.datetime.now().date())
+
+    usls = sorted(UnitSale.objects.values('sale_id', 'sku__label').annotate(Sum('quantity')),
+                  key=lambda x: x['sale_id'])
+    
+    def _get_str(row):
+        return '%s %s' % (row['quantity__sum'], row['sku__label'])
+
+    items = dict((k, ','.join([_get_str(r) for r in list(g)])) for k, g in itertools.groupby(usls, key=lambda x: x['sale_id']))
+
+    if type(start_date) != datetime.date:
+        start_date = parse(start_date).date()
+    if type(end_date) != datetime.date:
+        end_date = parse(end_date).date()
+    qs = Sale.objects.filter(sale_date__gte=start_date, sale_date__lte=end_date) \
+                     .order_by('-sale_date')
+
+    qs = SimpleSaleSerializer2.setup_eager_loading(qs)
+    data = SimpleSaleSerializer2(qs, many=True).data
+
+    for d in data:
+        d['drilldown'] = mark_safe('<a href="/order/drilldown/%s">%s</a>' % (d['id'], d['label']))
+        d['items_string'] = items.get(d['id'], '')
+    return data
+
 
 @dispatch(dict)
 def sale(qstring):
@@ -51,6 +90,8 @@ def sale(qstring):
     
     if view_type == 'simple':
         serializer = SimpleSaleSerializer
+    elif view_type == 'simple2':
+        serializer = SimpleSaleSerializer2
     elif view_type == 'shipping':
         serializer = ShippingSaleSerializer
     elif view_type == 'fulfillment':
@@ -75,10 +116,8 @@ def sale(qstring):
         serializer = SalesTaxSerializer3
     else:
         serializer = FullSaleSerializer
-
     qs = serializer.setup_eager_loading(qs)
     data = list(serializer(qs, many=True).data)
-    print('done with api/sale/sale', time.time() - start)
     return data
 
 

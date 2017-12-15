@@ -144,17 +144,16 @@ def unit_sales():
 
 
 def orders_list():
-    data_url = "/api/sales/sale/?view=fulfillment"
+    data_url = "/api/sales/sales_list/"
     row_defs = [{'data_field': 'drilldown', 'value': 'Order ID', 'formatter': 'nameFormatter'},
                 {'data_field': 'sale_date', 'value': 'Sale Date', 'formatter': 'nameFormatter'},
                 {'data_field': 'channel', 'value': 'Channel', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_name', 'value': 'Name', 'formatter': 'nameFormatter'},
                 {'data_field': 'shipping_company', 'value': 'Company', 'formatter': 'nameFormatter'},
-                {'data_field': 'shipping_city', 'value': 'Name', 'formatter': 'nameFormatter'},
-                {'data_field': 'shipping_zip', 'value': 'Company', 'formatter': 'nameFormatter'},
-                {'data_field': 'shipping_province', 'value': 'Company', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_city', 'value': 'City', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_zip', 'value': 'Zip', 'formatter': 'nameFormatter'},
+                {'data_field': 'shipping_province', 'value': 'State', 'formatter': 'nameFormatter'},
                 {'data_field': 'items_string', 'value': 'SKUs', 'formatter': 'nameFormatter'},
-                {'data_field': 'unfulfilled_string', 'value': 'Unfulfilled', 'formatter': 'nameFormatter'},
             ]
     return get_bstrap_table(data_url, row_defs)
 
