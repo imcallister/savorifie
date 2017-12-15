@@ -31,7 +31,7 @@ PACKING_TYPES = (
 
 
 class ShippingCharge(models.Model):
-    company = models.ForeignKey('gl.Company', default=get_default_company)
+    company = models.ForeignKey('gl.Company', default='SAV')
     shipper = models.ForeignKey('inventory.Shipper', blank=True, null=True)
     account = models.CharField(max_length=25, blank=True, null=True)
     external_id = models.CharField(max_length=50, blank=True, null=True)

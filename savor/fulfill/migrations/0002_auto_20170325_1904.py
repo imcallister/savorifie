@@ -44,7 +44,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='shippingcharge',
             name='company',
-            field=models.ForeignKey(default=accountifie.toolkit.utils.gl_helpers.get_default_company, on_delete=django.db.models.deletion.CASCADE, to='gl.Company'),
+            field=models.ForeignKey(default='SAV', on_delete=django.db.models.deletion.CASCADE, to='gl.Company'),
         ),
         migrations.AddField(
             model_name='shippingcharge',

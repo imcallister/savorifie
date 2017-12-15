@@ -102,7 +102,7 @@ PAID_FROM_CHOICES = [1001, 1002, 1003, 1100, 3000, 3005, 3006, 3010, 3020, 3250,
 
 class Expense(models.Model, BusinessModelObject):
     
-    company = models.ForeignKey('gl.Company', default=get_default_company)
+    company = models.ForeignKey('gl.Company', default='SAV')
     
     employee = models.ForeignKey('gl.Employee', null=True)
     account = models.ForeignKey('gl.Account')

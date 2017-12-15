@@ -9,7 +9,6 @@ from .models import Channel, TaxCollector, UnitSale, Sale, SalesTax, Payout, Pay
 from accountifie.gl.bmo import on_bmo_save
 from accountifie.common.api import api_func
 from inventory.models import Warehouse
-import fulfill.views
 
 
 class ChannelAdmin(admin.ModelAdmin):
@@ -132,27 +131,7 @@ class SaleAdmin(admin.ModelAdmin):
         _selected_action = forms.CharField(widget=forms.MultipleHiddenInput)
         warehouse = forms.ModelChoiceField(Warehouse.objects.all())
 
-    def queue_for_backorder(self, request, queryset):
-        new_backorders = 0
-        dupe_fulfills = 0
-        unknown_errors = 0
-
-        for order in queryset:
-            res = fulfill.views.create_backorder(order.id)
-            if res == 'FULFILL_BACKORDERED':
-                new_backorders += 1
-            elif res == 'FULFILL_ALREADY_REQUESTED':
-                dupe_fulfills += 1
-            else:
-                unknown_errors += 1
-
-        messages.success(request, "Successfully created %d future orders." % (new_backorders))
-        messages.info(request, "%d dupes were skipped." % dupe_fulfills)
-        messages.error(request, "%d unknown errors." % unknown_errors)
-
-        return HttpResponseRedirect(request.get_full_path())
-
-
+    
     def queue_for_warehouse(self, request, queryset):
         form = None
         if 'apply' in request.POST:
@@ -198,7 +177,6 @@ class SaleAdmin(admin.ModelAdmin):
                        })
 
     queue_for_warehouse.short_description = 'Queue for fulfillment'
-    queue_for_backorder.short_description = 'Add to back-order queue'
     delete_model.short_description = 'Delete sales and related GL entries'
 
 admin.site.register(Sale, SaleAdmin)
