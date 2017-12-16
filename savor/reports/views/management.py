@@ -70,13 +70,14 @@ def _fulfill_list(qstring=None):
 
 
 def _miss_ship_list(qstring=None):
+    start = time.time()
     flflmts = missing_shipping({'missing_shipping': 'true',
                                 'status': 'requested'})
-
     def get_items(f):
         return ','.join(['%d %s' % (v, k) for k, v in f['skus'].iteritems()])
 
     columns = ["label", "Fulfill Created", 'ship to', 'Items', 'Action']
+    
     for f in flflmts:
         action_form = miss_ship_button(f['id'])
         f.update({'label': f['order']['label']})
@@ -126,6 +127,7 @@ def _backorder_list(qstring=None):
 
 @login_required
 def management(request):
+    start = time.time()
     context = {'shopify_upload_form': FileForm()}
     context['buybuy_upload_form'] = FileForm()
     context['amazon_upload_form'] = FileForm()
@@ -139,7 +141,7 @@ def management(request):
     context['unbatched_fulfillments'] = len(context['unbatched_rows'])
     context['missship_columns'], context['missship_rows'] = _miss_ship_list()
     context['missing_shipping'] = len(context['missship_rows'])
-    
+
     context['batch_columns'] = ['id', 'created_date', 'comment', 'location_name', 'fulfillments_count', 'get_list']
 
     batch_requests = sorted(batchrequest({}),

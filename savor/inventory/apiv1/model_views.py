@@ -31,6 +31,7 @@ def shipper(company, qstring):
 @dispatch(dict)
 def shipoption(qstring):
     qs = ShipOption.objects.all()
+    qs = ShipOptionSerializer.setup_eager_loading(qs)
     return ShipOptionSerializer(qs, many=True).data
 
 

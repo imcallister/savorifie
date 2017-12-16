@@ -199,9 +199,11 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
+                'django.template.context_processors.request',
                 "django.contrib.messages.context_processors.messages",
                 "accountifie.common.views.base_templates",
                 "base.views.company_context",
+
             ],
         },
     },
@@ -226,6 +228,9 @@ WSGI_APPLICATION = PROJECT_NAME + '.wsgi.application'
 
 
 INSTALLED_APPS = (
+    'material',
+    'material.admin',
+
     'django.contrib.sites',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -271,10 +276,7 @@ INSTALLED_APPS = (
 
     'django.contrib.admin',
     'django.contrib.admindocs',
-    #'django_bootstrap_typeahead',
-    #'django_graphiql',
-    #'graphene.contrib.django',    
-    'debug_toolbar',
+    #'debug_toolbar',
     'django_behave',
 
     'rest_framework',

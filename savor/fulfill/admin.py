@@ -19,7 +19,7 @@ class FulfillmentAdmin(admin.ModelAdmin):
     ordering = ('-request_date',)
     list_display = ('__unicode__', 'request_date', 'status', 'warehouse', 'ship_type', 'bill_to', 'use_pdf', 'packing_type',)
     list_filter = ('warehouse', 'status',)
-    list_select_related = ('order__channel__counterparty',)
+    list_select_related = ('order__channel__counterparty', 'warehouse', 'ship_type')
     inlines = [FulfillLineInline,]
 
     def formfield_for_foreignkey(self, db_field, request=None,**kwargs):

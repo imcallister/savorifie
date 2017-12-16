@@ -73,7 +73,7 @@ class SaleAdmin(admin.ModelAdmin):
     ordering = ('-sale_date',)
     list_display=('external_channel_id', 'sale_date', 'channel',
                   'customer_code', 'shipping_name', 'special_sale', 'paid_thru')
-    list_filter = ('channel', 'paid_thru', FulfillRequested)
+    list_filter = ('channel', 'paid_thru',)
     search_fields = ('external_channel_id', 'channel__counterparty__name',)
     save_as = True
     actions = ['delete_model', 'queue_for_warehouse', 'queue_for_backorder']
@@ -82,7 +82,7 @@ class SaleAdmin(admin.ModelAdmin):
         SalesTaxInline,
         ProceedsAdjustmentInline
     ]
-    list_select_related = ('channel__counterparty', 'channel',)
+    list_select_related = ('channel__counterparty', 'channel', 'customer_code', 'paid_thru')
 
     fieldsets = (
         ('Details', {'fields': (('channel', 'sale_date',),

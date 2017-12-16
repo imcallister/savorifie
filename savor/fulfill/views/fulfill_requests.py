@@ -15,7 +15,6 @@ from fulfill.models import BatchRequest, Fulfillment, FulfillLine
 import fulfill.serializers as flfslz
 from reports.calcs.unbatched_fulfillments import unbatched_fulfillments
 
-
 import datetime
 import pytz
 
@@ -29,11 +28,12 @@ def get_today():
 @login_required
 def queue_orders(request):
     new_back_orders = 0
-    warehouses = [w['label'] for w in api_func('inventory', 'warehouse', {})]
+    warehouses = [w['label'] for w in api_func('inventory', 'warehouse')]
     new_requests = dict((w, 0) for w in warehouses)
     back_to_queue = dict((w, 0) for w in warehouses)
 
     bad_requests = []
+    msg = ''
 
     if request.method == 'POST':
         for k,v in request.POST.iteritems():
@@ -59,12 +59,16 @@ def queue_orders(request):
                     else:
                         bad_requests.append(k[9:])
 
-        msg = '%d new future orders.' % new_back_orders
+        if new_back_orders >0 :
+            msg += '%d new future orders.' % new_back_orders
         for wh in warehouses:
-            msg += ' %d new %s fulfillments.' % (new_requests[wh], wh)
+            if new_requests[wh] > 0:
+                msg += ' %d new %s fulfillments.' % (new_requests[wh], wh)
         for wh in warehouses:
-            msg += ' %d future orders to %s.' % (back_to_queue[wh], wh)
-        msg += ' %d Bad requests' % len(bad_requests)
+            if back_to_queue[wh] > 0:
+                msg += ' %d future orders to %s.' % (back_to_queue[wh], wh)
+        if len(bad_requests) > 0:
+            msg += ' %d Bad requests' % len(bad_requests)
         messages.info(request, msg)
         
         return HttpResponseRedirect("/fulfillment/management")
@@ -74,7 +78,7 @@ def queue_orders(request):
 
 @login_required
 def shipping(request):
-    ship_options = dict((o['label'], o) for o in api_func('inventory', shipoption, {}))
+    ship_options = dict((o['label'], o) for o in api_func('inventory', 'shipoption'))
     new_ship_choices = 0
 
     bad_requests = []
@@ -147,9 +151,9 @@ def backorder_to_requested(warehouse, fulfill_id):
 
 
 def create_fulfill_request(warehouse, order_id):
-    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse', {})]
-    unfulfilled_items = api_func('fulfill', 'unfulfilled', str(order_id), {})['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem', {}))
+    warehouse_labels = [w['label'] for w in api_func('inventory', 'warehouse')]
+    unfulfilled_items = api_func('sales', 'unfulfilled', str(order_id))['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem'))
     
     if unfulfilled_items is None:
         return 'FULFILL_ALREADY_REQUESTED'
@@ -183,7 +187,7 @@ def create_fulfill_request(warehouse, order_id):
 @login_required
 def request_fulfill(request, warehouse, order_id):
     if request.GET.has_key('backorder'):
-        if lower(request.GET.get('backorder')) == 'true':
+        if request.GET.get('backorder').lower() == 'true':
             res = backorder_to_requested(warehouse, order_id)
         else:
             res = create_fulfill_request(warehouse, order_id)
@@ -275,7 +279,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
             fd['ifs_ship_type'] = 'HOLD'
         return fd
 
-    sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem', {}))
+    sku_names = dict((i['label'], i['description']) for i in api_func('products', 'inventoryitem'))
     master_sku_names = dict(('MST%s' % k, '%s Master' % v) for k, v in sku_names.iteritems())
     sku_names.update(master_sku_names)
 

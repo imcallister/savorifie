@@ -24,7 +24,7 @@ class ShippingTypeSerializer(serializers.ModelSerializer, EagerLoadingMixin):
 
 
 class ShipOptionSerializer(serializers.ModelSerializer, EagerLoadingMixin):
-    _SELECT_RELATED_FIELDS = ['channel', 'ship_from', 'ship_type']
+    _SELECT_RELATED_FIELDS = ['ship_from', 'ship_type']
 
     ship_type = serializers.StringRelatedField()
     ship_from = serializers.StringRelatedField()

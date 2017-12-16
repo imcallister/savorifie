@@ -48,3 +48,4 @@ python-amazon-mws==0.6
 ShopifyAPI==2.4.0
 requests==2.9.1
 accountifie==0.2
+django-material==1.1.0
