@@ -11,6 +11,8 @@ from django.conf import settings
 from django.db.models import Prefetch, Sum, F, DecimalField, Max
 from django.db.models.functions import Coalesce
 from django.utils.safestring import mark_safe
+from django.db.models.lookups import MonthTransform as Month, YearTransform as Year
+
 
 import products.apiv1 as product_api
 from fulfill.models import FulfillLine
@@ -165,6 +167,32 @@ def sale(id, qstring):
     return FullSaleSerializer(qs).data
 
 
+
+def sales_by_month(qstring):
+    output = qstring.get('output', 'raw')
+    by_month = UnitSale.objects \
+                       .annotate(year=Year('date'), month=Month('date')) \
+                       .values('year', 'month') \
+                       .annotate(qty=Sum('quantity'))
+    
+    def fmt_month(yr, mth):
+        return datetime.date(yr, mth, 1)
+
+    rslt = [(fmt_month(r['year'], r['month']), r['qty']) for r in by_month]
+    if output == 'raw':
+        return rslt
+    elif output == 'chart':
+        sorted_data = sorted(rslt, key=operator.itemgetter(0))
+
+        chart_data = {}
+        chart_data['chart_data'] = {}
+        chart_data['chart_data']['x_points'] = [x[0] for x in sorted_data]
+        chart_data['chart_data']['values'] = []
+        chart_data['chart_data']['values'].append([x[1] for x in sorted_data])
+        chart_data['chart_data']['seriesTypes'] = ['bar']
+        return chart_data
+
+"""
 def sales_by_month(qstring):
     all_sales = sorted(sale({'view': 'full'}), key=lambda x: parse(x['sale_date']))
     output = qstring.get('output', 'raw')
@@ -195,7 +223,7 @@ def sales_by_month(qstring):
         return chart_data
     else:
         return None
-
+"""
 
 def incomplete_sales_count(qstring):
     return Sale.objects.filter(customer_code='unknown').count()
@@ -223,6 +251,31 @@ def sales_by_counterparty(qstring):
         return chart_data
 
 
+def sales_by_channel(qstring):
+    output = qstring.get('output', 'raw')
+    by_channel = UnitSale.objects.values('sale__channel__label').annotate(Sum('quantity'))
+    rslt = dict((r['sale__channel__label'], r['quantity__sum']) for r in by_channel)
+    # only count those at greater than 5% of total
+    total_units = sum(rslt.values())
+    threshold = int(0.05 * total_units)
+
+    if output == 'raw':
+        return rslt
+    elif output == 'chart':
+        rslt = dict((k, v) for k, v in rslt.items() if v >= threshold)
+        rslt['OTHER'] = total_units - sum(rslt.values())
+
+        sorted_data = sorted(rslt.items(), key=operator.itemgetter(1))
+
+        chart_data = {}
+        chart_data['chart_data'] = {}
+        chart_data['chart_data']['x_points'] = [x[0] for x in sorted_data]
+        chart_data['chart_data']['values'] = []
+        chart_data['chart_data']['values'].append([x[1] for x in sorted_data])
+        chart_data['chart_data']['seriesTypes'] = ['bar']
+        return chart_data
+
+"""
 def sales_by_channel(qstring):
     all_sales = sorted(sale({'view': 'full'}), key=lambda x: x['channel'])
     output = qstring.get('output', 'raw')
@@ -253,7 +306,7 @@ def sales_by_channel(qstring):
         chart_data['chart_data']['values'].append([x[1] for x in sorted_data])
         chart_data['chart_data']['seriesTypes'] = ['bar']
         return chart_data
-
+"""
 
 def missing_cps(qstring):
     qs = Sale.objects.filter(customer_code='unknown')
