@@ -155,12 +155,12 @@ class ExpenseAdmin(admin.ModelAdmin):
                     'counterparty', 'amount',)
     list_filter = ('expense_date', 'employee', 'paid_from', UnmatchedExpense)
     search_fields = ['id', 'counterparty__id', 'account__id']
-    list_editable = ('account', 'comment', 'counterparty',)
+    #list_editable = ('account', 'comment', 'counterparty',)
     
-    form = ExpenseDALForm
+    #form = ExpenseDALForm
 
-    def get_changelist_form(self, request, **kwargs):
-        return self.form
+    #def get_changelist_form(self, request, **kwargs):
+    #    return self.form
 
     def get_actions(self, request):
         actions = super(ExpenseAdmin, self).get_actions(request)
