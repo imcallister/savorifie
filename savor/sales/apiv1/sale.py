@@ -237,12 +237,13 @@ def sales_by_channel(qstring):
     total_units = sum(rslt.values())
     threshold = int(0.05 * total_units)
     
-    rslt = dict((k, v) for k, v in rslt.items() if v >= threshold)
-    rslt['OTHER'] = total_units - sum(rslt.values())
 
     if output == 'raw':
         return rslt
     elif output == 'chart':
+        rslt = dict((k, v) for k, v in rslt.items() if v >= threshold)
+        rslt['OTHER'] = total_units - sum(rslt.values())
+
         sorted_data = sorted(rslt.items(), key=operator.itemgetter(1))
 
         chart_data = {}
