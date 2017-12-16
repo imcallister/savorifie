@@ -71,6 +71,24 @@ def sales_list(q):
 
 
 @dispatch(dict)
+def unfulfilled(qstring):
+    sales_qs = Sale.objects \
+                   .prefetch_related('unit_sale__sku__skuunit__inventory_item') \
+                   .prefetch_related('fulfillments__fulfill_lines__inventory_item')
+
+    incomplete = [s.id for s in sales_qs if s.unfulfilled_items]
+    
+    qs = Sale.objects.filter(id__in=incomplete)
+    qs = SaleFulfillmentSerializer.setup_eager_loading(qs)
+    return SaleFulfillmentSerializer(qs, many=True).data
+
+
+@dispatch(str, dict)
+def unfulfilled(id, qstring):
+    qs = Sale.objects.get(id=id)
+    return SaleFulfillmentSerializer(qs).data
+
+@dispatch(dict)
 def sale(qstring):
     start = time.time()
     start_date = qstring.get('from_date', settings.DATE_EARLY)

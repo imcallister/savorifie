@@ -213,5 +213,4 @@ def unfulfilled(qstring):
 def unfulfilled(id, qstring):
     qs = Sale.objects.get(id=id)
     return SaleFulfillmentSerializer(qs).data
-
 """

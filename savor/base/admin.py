@@ -66,11 +66,12 @@ class CashflowAdmin(admin.ModelAdmin):
     list_display = ('ext_account', 'description', 'amount', 'post_date', 'counterparty',
                     'trans_type', 'expense_acct')
     list_filter = ('ext_account', UnmatchedCashflows)
-    list_editable = ('counterparty', 'trans_type', 'expense_acct')
+    #list_editable = ('counterparty', 'trans_type', 'expense_acct')
     search_fields = ('counterparty__id',)
     actions = ['expense_stubs_from_cashflows']
+    list_select_related = ('company', 'ext_account', 'counterparty', 'trans_type', 'expense_acct')
 
-    form = CashflowDALForm
+    #form = CashflowDALForm
 
     def get_queryset(self, request):
         return super(CashflowAdmin, self).get_queryset(request)\
@@ -81,8 +82,8 @@ class CashflowAdmin(admin.ModelAdmin):
                                                          'expense_acct'
                                                          )
 
-    def get_changelist_form(self, request, **kwargs):
-        return self.form
+    #def get_changelist_form(self, request, **kwargs):
+    #    return self.form
 
     def expense_stubs_from_cashflows(self, request, queryset):
         rslts = make_expense_stubs(queryset.values())
@@ -108,18 +109,19 @@ class CreditCardTransDALForm(forms.ModelForm):
 
 class CreditCardTransAdmin(admin.ModelAdmin):
     ordering = ('-trans_date',)
-    list_editable = ('counterparty', 'acct_payable', 'expense_acct',)
+    #list_editable = ('counterparty', 'acct_payable', 'expense_acct',)
     list_display = ('trans_id', 'card_company', 'trans_date',
                     'amount', 'payee', 'counterparty', 
                     'acct_payable', 'expense_acct',)
     list_filter = ('card_number', 'trans_type', UnmatchedCashflows)
     search_fields = ['trans_id', 'counterparty__id',]
     actions = ['expense_stubs_from_ccard']
+    list_select_related = ('company', 'card_company', 'counterparty', 'acct_payable', 'expense_acct')
 
-    form = CreditCardTransDALForm
+    #form = CreditCardTransDALForm
 
-    def get_changelist_form(self, request, **kwargs):
-        return self.form
+    #def get_changelist_form(self, request, **kwargs):
+    #    return self.form
 
     def expense_stubs_from_ccard(self, request, queryset):
         rslts = make_stubs_from_ccard(queryset.values())
