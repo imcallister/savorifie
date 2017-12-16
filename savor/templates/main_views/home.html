@@ -21,6 +21,30 @@ these divs are needed.
     <div class="col-md-6">
         <div class="panel panel-default">
             <div class="panel-heading">
+                <h3 class="panel-title">Sales by Month</h3>
+            </div>
+            <div class="panel-body">
+                <div id="by_month" class="panel-body" style="width:100%;height:100%"></div>
+            </div>    
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Sales by Channel</h3>
+            </div>
+            <div class="panel-body">
+                <div id="by_channel" class="panel-body" style="width:100%;height:100%"></div>
+            </div>    
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
                 <h3 class="panel-title">Expense Trends</h3>
             </div>
             <div class="panel-body">
@@ -44,7 +68,6 @@ these divs are needed.
 
 </div>
 
-
 {% endblock %}
 
 {% block extrajs %}
@@ -58,5 +81,26 @@ these divs are needed.
     $(document).ready(expense_trends("{% url 'expense_trends' %}", 'expense_trends_panel'));
     
     </script>
+    <script type="text/javascript">
+        $(document).ready(simpleChart2("/api/sales/sales_by_month?raw=true&output=chart",
+                                         "by_month",
+                                         'Units Sold by Month',
+                                         ['column'],
+                                         [0],
+                                         ['Unit Sales'],
+                                         ['Units']
+                                         ));
+    </script>
+    <script type="text/javascript">
+        $(document).ready(simpleChart2("/api/sales/sales_by_channel?raw=true&output=chart",
+                                         "by_channel",
+                                         'Units Sold by Channel',
+                                         ['column'],
+                                         [0],
+                                         ['Unit Sales'],
+                                         ['Units']
+                                         ));
+    </script>
 
+    
 {% endblock %}
