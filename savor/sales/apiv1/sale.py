@@ -231,11 +231,19 @@ def sales_by_channel(qstring):
         return sum([u['quantity'] for u in o['unit_sale']])
 
     grouped = itertools.groupby(all_sales, key=lambda x: x['channel'])
+    rslt = dict((k, sum([agg(o) for o in v])) for k, v in grouped)
+    
+    # only count those at greater than 5% of total
+    total_units = sum(rslt.values())
+    threshold = int(0.05 * total_units)
+    
+    rslt = dict((k, v) for k, v in rslt.items() if v >= threshold)
+    rslt['OTHER'] = total_units - sum(rslt.values())
+
     if output == 'raw':
-        return dict((k, sum([agg(o) for o in v])) for k, v in grouped)
+        return rslt
     elif output == 'chart':
-        data = dict((k, sum([agg(o) for o in v])) for k, v in grouped)
-        sorted_data = sorted(data.items(), key=operator.itemgetter(1))
+        sorted_data = sorted(rslt.items(), key=operator.itemgetter(1))
 
         chart_data = {}
         chart_data['chart_data'] = {}
