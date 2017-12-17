@@ -14,16 +14,17 @@ def parse_decimal(x):
     else:
     	return x
 
+def parse_tran_num(x):
+    return x[:19]
 
 class FRBCSVModel(CsvModel):
     post_date = DateField(match="Date", transform=date_parse)
-    debit = DecimalField(match="Amount Debit", transform=parse_decimal)
-    credit = DecimalField(match="Amount Credit", transform=parse_decimal)
+    debit = DecimalField(match="Debit", transform=parse_decimal)
+    credit = DecimalField(match="Credit", transform=parse_decimal)
     description = CharField(match="Description")
-    external_id = CharField(match="Transaction Number")
+    external_id = CharField(match="Transaction Number", transform=parse_tran_num)
 
 
     class Meta:
         delimiter = ','
-        skip_rows = 3
         layout = HeaderLayout

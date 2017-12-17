@@ -25,7 +25,7 @@ def upload(request):
 
 def process_frb(file_name):
     incoming_name = os.path.join(INCOMING_ROOT, file_name)
-    cf_records, errors = FRBCSVModel.import_data(data=open(incoming_name, 'rU'), skip_rows=3)
+    cf_records, errors = FRBCSVModel.import_data(data=open(incoming_name, 'rU'))
     
     new_recs_ctr = 0
     exist_recs_ctr = 0

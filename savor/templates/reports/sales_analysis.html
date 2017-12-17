@@ -80,28 +80,11 @@
       <div class="col-sm-6">
           <div class="panel panel-default">
             <div class="panel-body">
-                <div id="by_counterparty" class="panel-body" style="width:100%;height:400px"></div>
-            </div>
-          </div>
-      </div><!-- /.col-sm-8 -->      
-    </div><!-- row -->
-
-    <div class="row">
-      <div class="col-sm-6">
-          <div class="panel panel-default">
-            <div class="panel-body">
                 <div id="by_channel" class="panel-body" style="width:100%;height:400px"></div>
             </div>
           </div>
       </div><!-- /.col-sm-8 -->
-      <div class="col-sm-6">
-          <div class="panel panel-default">
-            <div class="panel-body">
-                <div id="trace_traded_orders" class="panel-body" style="width:100%;height:400px"></div>
-            </div>
-          </div>
-      </div><!-- /.col-sm-8 -->
-    </div>
+    </div><!-- row -->
 </div>
 
 {% endblock %}
@@ -133,16 +116,6 @@
         $(document).ready(simpleChart2("/api/sales/sales_by_month?raw=true&output=chart",
                                          "by_month",
                                          'Units Sold by Month',
-                                         ['column'],
-                                         [0],
-                                         ['Unit Sales'],
-                                         ['Units']
-                                         ));
-    </script>
-    <script type="text/javascript">
-        $(document).ready(simpleChart2("/api/sales/sales_by_counterparty?raw=true&output=chart",
-                                         "by_counterparty",
-                                         'Units Sold by Counterparty',
                                          ['column'],
                                          [0],
                                          ['Unit Sales'],
