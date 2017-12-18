@@ -17,7 +17,8 @@ def bookkeeping(request):
     cashflows = Cashflow.objects.filter(ext_account=chk_acct)
     
     context['incomplete_expenses'] = Expense.objects.filter(account_id=unalloc_account).count()
-    context['incomplete_banking'] = cashflows.filter(counterparty=None).count()
+    context['incomplete_banking'] = cashflows.filter(counterparty=None).count() + \
+                                    cashflows.filter(counterparty_id='unknown').count()
     context['incomplete_mcard'] = CreditCardTrans.objects.filter(counterparty=None).count() + \
                                   CreditCardTrans.objects.filter(counterparty_id='unknown').count()
 
