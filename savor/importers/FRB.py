@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from django.conf import settings
 
@@ -35,20 +36,22 @@ def process_frb(file_name):
     ext_account = ExternalAccount.objects.get(gl_account__id='1001')
 
     for rec in cf_records:
-        rec['amount'] = rec.pop('debit') + rec.pop('credit')
-        rec_obj = Cashflow.objects \
-                          .filter(post_date=rec['post_date']) \
-                          .filter(amount=rec['amount']) \
-                          .filter(external_id=rec['external_id']) \
-                          .count()
-        if rec_obj > 0:
-            exist_recs_ctr += 1
-        else:
-            new_recs_ctr += 1
-            rec['ext_account'] = ext_account
-            rec['counterparty_id'] = 'unknown'
-            rec_obj = Cashflow(**rec)
-            rec_obj.save(update_gl=False)
+        # cutoff at 13th-Nov ... when the format changed
+        if rec['date'] > datetime.date(2017, 11, 13):
+            rec['amount'] = rec.pop('debit') + rec.pop('credit')
+            rec_obj = Cashflow.objects \
+                              .filter(post_date=rec['post_date']) \
+                              .filter(amount=rec['amount']) \
+                              .filter(external_id=rec['external_id']) \
+                              .count()
+            if rec_obj > 0:
+                exist_recs_ctr += 1
+            else:
+                new_recs_ctr += 1
+                rec['ext_account'] = ext_account
+                rec['counterparty_id'] = 'unknown'
+                rec_obj = Cashflow(**rec)
+                rec_obj.save(update_gl=False)
 
     summary_msg = 'Loaded FRB file: %d new records, %d duplicate records, %d bad rows' \
                                     % (new_recs_ctr, exist_recs_ctr, errors_cnt)
