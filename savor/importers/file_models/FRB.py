@@ -21,7 +21,7 @@ class FRBCSVModel(CsvModel):
     post_date = DateField(match="Date", transform=date_parse)
     debit = DecimalField(match="Debit", transform=parse_decimal)
     credit = DecimalField(match="Credit", transform=parse_decimal)
-    description = CharField(match="Description")
+    description = CharField(match="Statement Description")
     external_id = CharField(match="Transaction Number", transform=parse_tran_num)
 
 
