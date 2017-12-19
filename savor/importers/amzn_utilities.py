@@ -13,7 +13,7 @@ from sales.models import Sale, UnitSale, ProceedsAdjustment
 from utilities.channel_fees import FBA_fee
 from fulfill.models import Fulfillment, FulfillLine
 
-
+from reports.calcs.unfulfilled import unfulfilled
 
 
 def _map_sku(amzn_sku):
@@ -93,7 +93,8 @@ def _save_objects(sale, unitsales, fulfill_channel):
         fulfill_obj = Fulfillment(**fulfill_info)
         fulfill_obj.save()
 
-        unfulfilled_items = api_func('fulfill', 'unfulfilled', str(s.id), {})['unfulfilled_items']
+        #unfulfilled_items = api_func('fulfill', 'unfulfilled', str(s.id), {})['unfulfilled_items']
+        unfulfilled_items = unfulfilled(str(s.id), {})['unfulfilled_items']
         for label, quantity in unfulfilled_items.iteritems():
             fline_info = {}
             fline_info['inventory_item_id'] = inv_items[label]
