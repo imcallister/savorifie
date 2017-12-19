@@ -30,7 +30,7 @@ class IncomeStatement(Report):
     def calcs(self):
         table_data = []
 
-        top_level_paths = ['equity.retearnings.' + x for x in ['sales', 'opexp', 'costofsales']]
+        top_level_paths = ['equity.retearnings.' + x for x in ['sales', 'opexp']]
 
         path_totals = {}
         for table_path in top_level_paths:
@@ -60,7 +60,7 @@ class IncomeStatement(Report):
             table_data += income.to_dict(orient='records')
             
         other_expense_data = []
-        for path in ['equity.retearnings.' + x for x in ['interestexpense', 'taxexp', 'gainloss']]:
+        for path in ['equity.retearnings.' + x for x in ['intexpense', 'taxexp', 'gainloss']]:
             other_expense_data.append(self.query_manager.pd_path_balances(self.company_id, self.columns, [path], excl_contra=['3700'])) 
         other_expenses = pd.concat(other_expense_data)
 
