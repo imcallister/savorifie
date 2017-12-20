@@ -37,7 +37,7 @@ def get_receiveables_account(channel, paid_thru):
             return api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
 
 def get_special_account(special_sale):
-    return api_func('gl', 'account', 'equity.retearnings.sales.samples.%s' % special_sale)['id']
+    return api_func('gl', 'account', 'equity.retearnings.sales.discounts.%s' % special_sale)['id']
 
 def get_giftcard_acct():
     return api_func('gl', 'account', 'liabilities.curr.accrued.giftcard')['id']
@@ -46,7 +46,7 @@ def get_shipping_account():
     return api_func('gl', 'account', 'liabilities.curr.accrued.shipping')['id']
 
 def get_giftwrap_account():
-    return api_func('gl', 'account', 'equity.retearnings.sales.extra.giftwrap')['id']
+    return api_func('gl', 'account', 'equity.retearnings.sales.gross.giftwrap')['id']
 
 def get_salestax_account():
     return api_func('gl', 'account', 'liabilities.curr.accrued.salestax')['id']
@@ -55,7 +55,7 @@ def get_discount_account(channel):
     return api_func('gl', 'account', 'equity.retearnings.sales.discounts.%s' % channel)['id']
 
 def get_channelfees_account(channel):
-    return api_func('gl', 'account', 'equity.retearnings.opexp.sales.channelfees.%s' % channel)['id']
+    return api_func('gl', 'account', 'equity.retearnings.sales.costs.channelfees.%s' % channel)['id']
 
 def get_grosssales_account(inv_item, channel):
     product_line = api_func('products', 'inventoryitem', inv_item)['product_line']['label']
