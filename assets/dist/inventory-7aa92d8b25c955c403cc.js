@@ -48,11 +48,17 @@
 
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(36);
-	var Highcharts = __webpack_require__(758);
+	var SwatchRow = __webpack_require__(764);
+	var Highcharts = __webpack_require__(761);
 
-	ReactDOM.render(React.createElement(Highcharts, { chartName: 'tax.collect', source: '/chart/reports/collected_salestax/' }), document.getElementById("highchart.test"));
+	var SWATCHES = [{ color: 'dbpanel-plum', item: 'SYE1' }, { color: 'dbpanel-ocean', item: 'SYE2' }, { color: 'dbpanel-slate', item: 'SYE3' }, { color: 'dbpanel-plum', item: 'BE1' }, { color: 'dbpanel-ocean', item: 'BE2' }, { color: 'dbpanel-slate', item: 'BE3' }, { color: 'dbpanel-slate', item: 'WE3' }, { color: 'dbpanel-blue', item: 'WE4' }];
 
-	ReactDOM.render(React.createElement(Highcharts, { chartName: 'tax.collect2', source: '/chart/sales/sale_count/' }), document.getElementById("highchart.test2"));
+	ReactDOM.render(React.createElement(SwatchRow, { swatches: SWATCHES, source: '/api/inventory/locationinventory/NC2/?raw=true' }), document.getElementById("inventory.NC2.inventory"));
+	ReactDOM.render(React.createElement(SwatchRow, { swatches: SWATCHES, source: '/api/inventory/locationinventory/152Frank/?raw=true' }), document.getElementById("inventory.152Frank.inventory"));
+	ReactDOM.render(React.createElement(SwatchRow, { swatches: SWATCHES, source: '/api/inventory/locationinventory/LAPort/?raw=true' }), document.getElementById("inventory.LAPort.inventory"));
+	ReactDOM.render(React.createElement(SwatchRow, { swatches: SWATCHES, source: '/api/inventory/locationinventory/FBA/?raw=true' }), document.getElementById("inventory.FBA.inventory"));
+
+	ReactDOM.render(React.createElement(Highcharts, { chartName: 'inventory.totalsales', source: '/chart/sales/sale_count/' }), document.getElementById("inventory.totalsales"));
 
 /***/ }),
 /* 1 */
@@ -346,6 +352,10 @@
 	process.removeListener = noop;
 	process.removeAllListeners = noop;
 	process.emit = noop;
+	process.prependListener = noop;
+	process.prependOnceListener = noop;
+
+	process.listeners = function (name) { return [] }
 
 	process.binding = function (name) {
 	    throw new Error('process.binding is not supported');
@@ -21785,14 +21795,373 @@
 /* 183 */,
 /* 184 */,
 /* 185 */,
-/* 186 */,
-/* 187 */,
+/* 186 */
+/***/ (function(module, exports) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
+
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
+
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
+
+
+/***/ }),
+/* 187 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	var stylesInDom = {},
+		memoize = function(fn) {
+			var memo;
+			return function () {
+				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+				return memo;
+			};
+		},
+		isOldIE = memoize(function() {
+			return /msie [6-9]\b/.test(self.navigator.userAgent.toLowerCase());
+		}),
+		getHeadElement = memoize(function () {
+			return document.head || document.getElementsByTagName("head")[0];
+		}),
+		singletonElement = null,
+		singletonCounter = 0,
+		styleElementsInsertedAtTop = [];
+
+	module.exports = function(list, options) {
+		if(false) {
+			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+		}
+
+		options = options || {};
+		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+		// tags it will allow on a page
+		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+
+		// By default, add <style> tags to the bottom of <head>.
+		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
+
+		var styles = listToStyles(list);
+		addStylesToDom(styles, options);
+
+		return function update(newList) {
+			var mayRemove = [];
+			for(var i = 0; i < styles.length; i++) {
+				var item = styles[i];
+				var domStyle = stylesInDom[item.id];
+				domStyle.refs--;
+				mayRemove.push(domStyle);
+			}
+			if(newList) {
+				var newStyles = listToStyles(newList);
+				addStylesToDom(newStyles, options);
+			}
+			for(var i = 0; i < mayRemove.length; i++) {
+				var domStyle = mayRemove[i];
+				if(domStyle.refs === 0) {
+					for(var j = 0; j < domStyle.parts.length; j++)
+						domStyle.parts[j]();
+					delete stylesInDom[domStyle.id];
+				}
+			}
+		};
+	}
+
+	function addStylesToDom(styles, options) {
+		for(var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+			if(domStyle) {
+				domStyle.refs++;
+				for(var j = 0; j < domStyle.parts.length; j++) {
+					domStyle.parts[j](item.parts[j]);
+				}
+				for(; j < item.parts.length; j++) {
+					domStyle.parts.push(addStyle(item.parts[j], options));
+				}
+			} else {
+				var parts = [];
+				for(var j = 0; j < item.parts.length; j++) {
+					parts.push(addStyle(item.parts[j], options));
+				}
+				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+			}
+		}
+	}
+
+	function listToStyles(list) {
+		var styles = [];
+		var newStyles = {};
+		for(var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var id = item[0];
+			var css = item[1];
+			var media = item[2];
+			var sourceMap = item[3];
+			var part = {css: css, media: media, sourceMap: sourceMap};
+			if(!newStyles[id])
+				styles.push(newStyles[id] = {id: id, parts: [part]});
+			else
+				newStyles[id].parts.push(part);
+		}
+		return styles;
+	}
+
+	function insertStyleElement(options, styleElement) {
+		var head = getHeadElement();
+		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
+		if (options.insertAt === "top") {
+			if(!lastStyleElementInsertedAtTop) {
+				head.insertBefore(styleElement, head.firstChild);
+			} else if(lastStyleElementInsertedAtTop.nextSibling) {
+				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
+			} else {
+				head.appendChild(styleElement);
+			}
+			styleElementsInsertedAtTop.push(styleElement);
+		} else if (options.insertAt === "bottom") {
+			head.appendChild(styleElement);
+		} else {
+			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+		}
+	}
+
+	function removeStyleElement(styleElement) {
+		styleElement.parentNode.removeChild(styleElement);
+		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
+		if(idx >= 0) {
+			styleElementsInsertedAtTop.splice(idx, 1);
+		}
+	}
+
+	function createStyleElement(options) {
+		var styleElement = document.createElement("style");
+		styleElement.type = "text/css";
+		insertStyleElement(options, styleElement);
+		return styleElement;
+	}
+
+	function createLinkElement(options) {
+		var linkElement = document.createElement("link");
+		linkElement.rel = "stylesheet";
+		insertStyleElement(options, linkElement);
+		return linkElement;
+	}
+
+	function addStyle(obj, options) {
+		var styleElement, update, remove;
+
+		if (options.singleton) {
+			var styleIndex = singletonCounter++;
+			styleElement = singletonElement || (singletonElement = createStyleElement(options));
+			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
+			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
+		} else if(obj.sourceMap &&
+			typeof URL === "function" &&
+			typeof URL.createObjectURL === "function" &&
+			typeof URL.revokeObjectURL === "function" &&
+			typeof Blob === "function" &&
+			typeof btoa === "function") {
+			styleElement = createLinkElement(options);
+			update = updateLink.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+				if(styleElement.href)
+					URL.revokeObjectURL(styleElement.href);
+			};
+		} else {
+			styleElement = createStyleElement(options);
+			update = applyToTag.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+			};
+		}
+
+		update(obj);
+
+		return function updateStyle(newObj) {
+			if(newObj) {
+				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
+					return;
+				update(obj = newObj);
+			} else {
+				remove();
+			}
+		};
+	}
+
+	var replaceText = (function () {
+		var textStore = [];
+
+		return function (index, replacement) {
+			textStore[index] = replacement;
+			return textStore.filter(Boolean).join('\n');
+		};
+	})();
+
+	function applyToSingletonTag(styleElement, index, remove, obj) {
+		var css = remove ? "" : obj.css;
+
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = replaceText(index, css);
+		} else {
+			var cssNode = document.createTextNode(css);
+			var childNodes = styleElement.childNodes;
+			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
+			if (childNodes.length) {
+				styleElement.insertBefore(cssNode, childNodes[index]);
+			} else {
+				styleElement.appendChild(cssNode);
+			}
+		}
+	}
+
+	function applyToTag(styleElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+
+		if(media) {
+			styleElement.setAttribute("media", media)
+		}
+
+		if(styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = css;
+		} else {
+			while(styleElement.firstChild) {
+				styleElement.removeChild(styleElement.firstChild);
+			}
+			styleElement.appendChild(document.createTextNode(css));
+		}
+	}
+
+	function updateLink(linkElement, obj) {
+		var css = obj.css;
+		var sourceMap = obj.sourceMap;
+
+		if(sourceMap) {
+			// http://stackoverflow.com/a/26603875
+			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+		}
+
+		var blob = new Blob([css], { type: "text/css" });
+
+		var oldSrc = linkElement.href;
+
+		linkElement.href = URL.createObjectURL(blob);
+
+		if(oldSrc)
+			URL.revokeObjectURL(oldSrc);
+	}
+
+
+/***/ }),
 /* 188 */,
 /* 189 */,
 /* 190 */,
 /* 191 */,
 /* 192 */,
-/* 193 */,
+/* 193 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+
+	(function () {
+		'use strict';
+
+		var hasOwn = {}.hasOwnProperty;
+
+		function classNames () {
+			var classes = [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+
+			return classes.join(' ');
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
+
+/***/ }),
 /* 194 */,
 /* 195 */,
 /* 196 */,
@@ -22357,7 +22726,10 @@
 /* 755 */,
 /* 756 */,
 /* 757 */,
-/* 758 */
+/* 758 */,
+/* 759 */,
+/* 760 */,
+/* 761 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22371,7 +22743,7 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var React = __webpack_require__(1);
-	var HighChart = __webpack_require__(759);
+	var HighChart = __webpack_require__(762);
 
 	var HChartContainer = function (_React$Component) {
 	  _inherits(HChartContainer, _React$Component);
@@ -22409,7 +22781,7 @@
 	module.exports = HChartContainer;
 
 /***/ }),
-/* 759 */
+/* 762 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22423,7 +22795,7 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var React = __webpack_require__(1);
-	var Highcharts = __webpack_require__(760);
+	var Highcharts = __webpack_require__(763);
 
 	var Chart = function (_React$Component) {
 	  _inherits(Chart, _React$Component);
@@ -22451,7 +22823,7 @@
 	module.exports = Chart;
 
 /***/ }),
-/* 760 */
+/* 763 */
 /***/ (function(module, exports) {
 
 	/*
@@ -22847,6 +23219,193 @@
 	a?!this.selected:a;this.checkbox&&(this.checkbox.checked=a);k(this,a?"select":"unselect")},drawTracker:a.drawTrackerGraph})})(L);(function(a){var B=a.Chart,A=a.each,H=a.inArray,G=a.isArray,r=a.isObject,f=a.pick,l=a.splat;B.prototype.setResponsive=function(f){var k=this.options.responsive,l=[],d=this.currentResponsive;k&&k.rules&&A(k.rules,function(c){void 0===c._id&&(c._id=a.uniqueKey());this.matchResponsiveRule(c,l,f)},this);var c=a.merge.apply(0,a.map(l,function(c){return a.find(k.rules,function(a){return a._id===
 	c}).chartOptions})),l=l.toString()||void 0;l!==(d&&d.ruleIds)&&(d&&this.update(d.undoOptions,f),l?(this.currentResponsive={ruleIds:l,mergedOptions:c,undoOptions:this.currentOptions(c)},this.update(c,f)):this.currentResponsive=void 0)};B.prototype.matchResponsiveRule=function(a,k){var l=a.condition;(l.callback||function(){return this.chartWidth<=f(l.maxWidth,Number.MAX_VALUE)&&this.chartHeight<=f(l.maxHeight,Number.MAX_VALUE)&&this.chartWidth>=f(l.minWidth,0)&&this.chartHeight>=f(l.minHeight,0)}).call(this)&&
 	k.push(a._id)};B.prototype.currentOptions=function(a){function f(a,c,k,q){var b,d;for(b in a)if(!q&&-1<H(b,["series","xAxis","yAxis"]))for(a[b]=l(a[b]),k[b]=[],d=0;d<a[b].length;d++)c[b][d]&&(k[b][d]={},f(a[b][d],c[b][d],k[b][d],q+1));else r(a[b])?(k[b]=G(a[b])?[]:{},f(a[b],c[b]||{},k[b],q+1)):k[b]=c[b]||null}var q={};f(a,this.options,q,0);return q}})(L);return L});
+
+
+/***/ }),
+/* 764 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var React = __webpack_require__(1);
+	var SwatchRow = __webpack_require__(765);
+
+	var SwatchRowContainer = function (_React$Component) {
+	  _inherits(SwatchRowContainer, _React$Component);
+
+	  function SwatchRowContainer() {
+	    _classCallCheck(this, SwatchRowContainer);
+
+	    var _this = _possibleConstructorReturn(this, (SwatchRowContainer.__proto__ || Object.getPrototypeOf(SwatchRowContainer)).call(this));
+
+	    _this.state = { loaded: false, counts: {} };
+	    return _this;
+	  }
+
+	  _createClass(SwatchRowContainer, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      this.serverRequest = $.get(this.props.source, function (result) {
+	        this.setState({
+	          counts: result,
+	          loaded: true
+	        });
+	      }.bind(this));
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return React.createElement(SwatchRow, { loaded: this.state.loaded, counts: this.state.counts, swatches: this.props.swatches });
+	    }
+	  }]);
+
+	  return SwatchRowContainer;
+	}(React.Component);
+
+	module.exports = SwatchRowContainer;
+
+/***/ }),
+/* 765 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var React = __webpack_require__(1);
+	var SwatchPanel = __webpack_require__(766);
+
+	var SwatchRow = function (_React$Component) {
+	  _inherits(SwatchRow, _React$Component);
+
+	  function SwatchRow() {
+	    _classCallCheck(this, SwatchRow);
+
+	    return _possibleConstructorReturn(this, (SwatchRow.__proto__ || Object.getPrototypeOf(SwatchRow)).apply(this, arguments));
+	  }
+
+	  _createClass(SwatchRow, [{
+	    key: 'render',
+	    value: function render() {
+
+	      var getSwatch = function (cfg) {
+	        return React.createElement(
+	          'div',
+	          { className: "col-md-1" },
+	          React.createElement(SwatchPanel, { color: cfg.color, bigText: this.props.counts[cfg.item] || 0, smallText: cfg.item })
+	        );
+	      }.bind(this);
+
+	      if (this.props.loaded) {
+	        return React.createElement(
+	          'div',
+	          { className: "row" },
+	          this.props.swatches.map(getSwatch)
+	        );
+	      } else {
+	        return null;
+	      }
+	    }
+	  }]);
+
+	  return SwatchRow;
+	}(React.Component);
+
+	module.exports = SwatchRow;
+
+/***/ }),
+/* 766 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	__webpack_require__(767);
+
+	var React = __webpack_require__(1);
+	var classNames = __webpack_require__(193);
+
+	module.exports = React.createClass({
+	    displayName: 'exports',
+
+	    render: function render() {
+	        return React.createElement(
+	            'div',
+	            { className: classNames('dbpanel', this.props.color, 'row', 'no-padding') },
+	            React.createElement(
+	                'div',
+	                { className: classNames('col-md-5', 'widget-left') },
+	                React.createElement('svg', null)
+	            ),
+	            React.createElement(
+	                'div',
+	                { className: classNames('col-md-7', 'widget-right') },
+	                React.createElement(
+	                    'div',
+	                    { className: 'large' },
+	                    this.props.bigText
+	                ),
+	                React.createElement(
+	                    'div',
+	                    { className: 'text-muted' },
+	                    this.props.smallText
+	                )
+	            )
+	        );
+	    }
+	});
+
+/***/ }),
+/* 767 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+
+	// load the styles
+	var content = __webpack_require__(768);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(187)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!../../node_modules/css-loader/index.js!../../node_modules/less-loader/index.js!./dashboardStyles.less", function() {
+				var newContent = require("!!../../node_modules/css-loader/index.js!../../node_modules/less-loader/index.js!./dashboardStyles.less");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
+
+/***/ }),
+/* 768 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	exports = module.exports = __webpack_require__(186)();
+	// imports
+
+
+	// module
+	exports.push([module.id, "/*\nLumino Admin Bootstrap Template\nVersion 1.0\n*/\n/*Global Styles*/\nbody {\n  background: #f1f4f7;\n  padding-top: 50px;\n  color: #5f6468;\n}\np {\n  color: #777;\n}\na,\na:hover,\na:focus {\n  color: #30a5ff;\n}\nh1,\nh2,\nh3,\nh4,\nh5,\nh6 {\n  color: #5f6468;\n}\nh1 {\n  font-weight: 300;\n  font-size: 40px;\n}\nh2 {\n  font-weight: 300;\n  margin-bottom: 20px;\n}\nh3,\nh4 {\n  font-weight: 300;\n}\n.large {\n  font-size: 2em;\n}\n.text-muted {\n  color: #9fadbb;\n}\n.color-gray {\n  color: #5f6468;\n}\n.color-blue {\n  color: #30a5ff;\n}\n.color-teal {\n  color: #1ebfae;\n}\n.color-orange {\n  color: #ffb53e;\n}\n.color-red {\n  color: #f9243f;\n}\n.bg-primary .glyphicon-remove {\n  color: #5f6468;\n}\n.bg-primary .glyphicon-remove:hover {\n  color: #ef4040;\n}\n.no-padding {\n  padding: 0;\n  margin: 0;\n}\n.glyphicon-xl {\n  font-size: 6em;\n}\n.glyphicon-l {\n  font-size: 3em;\n}\n.glyphicon-m {\n  font-size: 1.5em;\n}\n.glyphicon-s {\n  font-size: 0.75em;\n}\n.form-control {\n  border: 1px solid #eee;\n  box-shadow: none;\n}\n.form-control:focus {\n  border: 1px solid #30a5ff;\n  outline: 0;\n  box-shadow: inset 0px 0px 0px 1px #30a5ff;\n}\n/*Buttons*/\na.btn:hover,\nbutton:hover {\n  opacity: 0.8;\n}\na.btn:active,\nbutton:active {\n  box-shadow: inset 0px 0px 500px rgba(0, 0, 0, 0.1);\n  opacity: 1;\n}\n.btn-default,\n.btn-default:hover,\n.btn-default:focus,\n.btn-default:active,\n.btn-default.active,\n.open > .dropdown-toggle.btn-default,\n.btn-default.disabled,\n.btn-default[disabled],\nfieldset[disabled] .btn-default,\n.btn-default.disabled:hover,\n.btn-default[disabled]:hover,\nfieldset[disabled] .btn-default:hover,\n.btn-default.disabled:focus,\n.btn-default[disabled]:focus,\nfieldset[disabled] .btn-default:focus,\n.btn-default.disabled:active,\n.btn-default[disabled]:active,\nfieldset[disabled] .btn-default:active,\n.btn-default.disabled.active,\n.btn-default[disabled].active,\nfieldset[disabled] .btn-default.active {\n  background-color: #e9ecf2;\n  border-color: #e9ecf2;\n  color: #1b3548;\n}\n.btn-primary,\n.btn-primary:hover,\n.btn-primary:focus,\n.btn-primary:active,\n.btn-primary.active,\n.open > .dropdown-toggle.btn-primary,\n.btn-primary.disabled,\n.btn-primary[disabled],\nfieldset[disabled] .btn-primary,\n.btn-primary.disabled:hover,\n.btn-primary[disabled]:hover,\nfieldset[disabled] .btn-primary:hover,\n.btn-primary.disabled:focus,\n.btn-primary[disabled]:focus,\nfieldset[disabled] .btn-primary:focus,\n.btn-primary.disabled:active,\n.btn-primary[disabled]:active,\nfieldset[disabled] .btn-primary:active,\n.btn-primary.disabled.active,\n.btn-primary[disabled].active,\nfieldset[disabled] .btn-primary.active {\n  background-color: #30a5ff;\n  border-color: #30a5ff;\n}\n.btn-success,\n.btn-success:hover,\n.btn-success:focus,\n.btn-success:active,\n.btn-success.active,\n.open > .dropdown-toggle.btn-success,\n.btn-success.disabled,\n.btn-success[disabled],\nfieldset[disabled] .btn-success,\n.btn-success.disabled:hover,\n.btn-success[disabled]:hover,\nfieldset[disabled] .btn-success:hover,\n.btn-success.disabled:focus,\n.btn-success[disabled]:focus,\nfieldset[disabled] .btn-success:focus,\n.btn-success.disabled:active,\n.btn-success[disabled]:active,\nfieldset[disabled] .btn-success:active,\n.btn-success.disabled.active,\n.btn-success[disabled].active,\nfieldset[disabled] .btn-success.active {\n  background-color: #8ad919;\n  border-color: #8ad919;\n}\n.btn-warning,\n.btn-warning:hover,\n.btn-warning:focus,\n.btn-warning:active,\n.btn-warning.active,\n.open > .dropdown-toggle.btn-warning,\n.btn-warning.disabled,\n.btn-warning[disabled],\nfieldset[disabled] .btn-warning,\n.btn-warning.disabled:hover,\n.btn-warning[disabled]:hover,\nfieldset[disabled] .btn-warning:hover,\n.btn-warning.disabled:focus,\n.btn-warning[disabled]:focus,\nfieldset[disabled] .btn-warning:focus,\n.btn-warning.disabled:active,\n.btn-warning[disabled]:active,\nfieldset[disabled] .btn-warning:active,\n.btn-warning.disabled.active,\n.btn-warning[disabled].active,\nfieldset[disabled] .btn-warning.active {\n  background-color: #ffb53e;\n  border-color: #ffb53e;\n}\n.btn-danger,\n.btn-danger:hover,\n.btn-danger:focus,\n.btn-danger:active,\n.btn-danger.active,\n.open > .dropdown-toggle.btn-danger,\n.btn-danger.disabled,\n.btn-danger[disabled],\nfieldset[disabled] .btn-danger,\n.btn-danger.disabled:hover,\n.btn-danger[disabled]:hover,\nfieldset[disabled] .btn-danger:hover,\n.btn-danger.disabled:focus,\n.btn-danger[disabled]:focus,\nfieldset[disabled] .btn-danger:focus,\n.btn-danger.disabled:active,\n.btn-danger[disabled]:active,\nfieldset[disabled] .btn-danger:active,\n.btn-danger.disabled.active,\n.btn-danger[disabled].active,\nfieldset[disabled] .btn-danger.active {\n  background-color: #f9243f;\n  border-color: #f9243f;\n}\n/*Backgrounds*/\n.bg-primary {\n  color: #1b3548;\n  background-color: #e9ecf2;\n}\na.bg-primary:hover {\n  background-color: #e9ecf2;\n}\n.bg-success {\n  color: #fff;\n  background-color: #8ad919;\n}\na.bg-success:hover {\n  background-color: #8ad919;\n}\n.bg-success a {\n  color: rgba(255, 255, 255, 0.75);\n}\n.bg-info {\n  color: #fff;\n  background-color: #30a5ff;\n}\na.bg-info:hover {\n  background-color: #30a5ff;\n}\n.bg-info a {\n  color: rgba(255, 255, 255, 0.75);\n}\n.bg-warning {\n  color: #fff;\n  background-color: #ffb53e;\n}\na.bg-warning:hover {\n  background-color: #ffb53e;\n}\n.bg-warning a {\n  color: rgba(255, 255, 255, 0.75);\n}\n.bg-danger {\n  color: #fff;\n  background-color: #f9243f;\n}\na.bg-danger:hover {\n  background-color: #f9243f;\n}\n.bg-danger a {\n  color: rgba(255, 255, 255, 0.75);\n}\n/*Panels*/\n.dbpanel {\n  border: 0;\n}\n.dbpanel-heading {\n  font-size: 18px;\n  font-weight: 300;\n  letter-spacing: 0.025em;\n  height: 66px;\n  line-height: 45px;\n}\n.dbpanel-default .dbpanel-heading {\n  background: #fff;\n  border-bottom: 1px solid #eee;\n  color: #5f6468;\n}\n.dbpanel-footer {\n  background: #fff;\n  border-top: 1px solid #eee;\n}\n.dbpanel-widget {\n  padding: 0;\n  position: relative;\n}\n.dbpanel-widget .dbpanel-footer {\n  border: 0;\n  text-align: center;\n}\n.dbpanel-footer .input-group {\n  padding: 0px;\n  margin: 0 -5px;\n}\n.dbpanel-footer .input-group-btn:last-child > .btn,\n.dbpanel-footer .input-group-btn:last-child > .btn-group {\n  margin: 0;\n}\n.dbpanel-widget .dbpanel-footer a {\n  color: #999;\n}\n.dbpanel-widget .dbpanel-footer a:hover {\n  color: #666;\n  text-decoration: none;\n}\n.dbpanel-blue {\n  background: #30a5ff;\n  color: #fff;\n}\n.dbpanel-teal {\n  background: #1ebfae;\n  color: #fff;\n}\n.dbpanel-orange {\n  background: #ffb53e;\n  color: #fff;\n}\n.dbpanel-red {\n  background: #f9243f;\n  color: #fff;\n}\n.dbpanel-blue .dbpanel-body p,\n.dbpanel-teal .dbpanel-body p,\n.dbpanel-orange .dbpanel-body p,\n.dbpanel-red .dbpanel-body p {\n  color: #fff;\n  color: rgba(255, 255, 255, 0.8);\n}\n.dbpanel-blue .dbpanel-heading,\n.dbpanel-teal .dbpanel-heading,\n.dbpanel-orange .dbpanel-heading,\n.dbpanel-red .dbpanel-heading {\n  border-bottom: 1px solid rgba(255, 255, 255, 0.2);\n}\n.dbpanel-blue .text-muted,\n.dbpanel-teal .text-muted,\n.dbpanel-orange .text-muted,\n.dbpanel-red .text-muted {\n  color: rgba(255, 255, 255, 0.5);\n}\n.dark-overlay {\n  background: rgba(0, 0, 0, 0.05);\n  text-align: center;\n}\n.widget-left {\n  height: 80px;\n  padding-top: 15px;\n  text-align: center;\n  border-top-left-radius: 4px;\n  border-bottom-left-radius: 4px;\n}\n.widget-right {\n  text-align: left;\n  line-height: 1.6em;\n  margin: 0px;\n  padding: 20px;\n  height: 80px;\n  color: #999;\n  font-weight: 300;\n  background: #fff;\n  border-top-right-radius: 4px;\n  border-bottom-right-radius: 4px;\n}\n@media (max-width: 768px) {\n  .widget-right {\n    width: 100%;\n    margin: 0;\n    text-align: center;\n    border-top-left-radius: 0px;\n    border-top-right-radius: 0px;\n    border-bottom-left-radius: 4px;\n    border-bottom-right-radius: 4px;\n  }\n}\n@media (max-width: 768px) {\n  .widget-left {\n    border-top-left-radius: 4px;\n    border-top-right-radius: 4px;\n    border-bottom-left-radius: 0px;\n    border-bottom-right-radius: 0px;\n  }\n}\n.widget-right .text-muted {\n  color: #9fadbb;\n}\n.widget-right .large {\n  color: #5f6468;\n}\n.dbpanel-blue .widget-left {\n  background: #00008B;\n  color: #fff;\n}\n.dbpanel-teal .widget-left {\n  background: #1ebfae;\n  color: #fff;\n}\n.dbpanel-orange .widget-left {\n  background: #ffb53e;\n  color: #fff;\n}\n.dbpanel-red .widget-left {\n  background: #f9243f;\n  color: #fff;\n}\n.dbpanel-slate .widget-left {\n  background: #778899;\n  color: #fff;\n}\n.dbpanel-ocean .widget-left {\n  background: #229CE4;\n  color: #fff;\n}\n.dbpanel-plum .widget-left {\n  background: #8E4585;\n  color: #fff;\n}\n.dbpanel-widget {\n  background: #fff;\n}\n/*Jumbotron*/\n.jumbotron {\n  background: #fff;\n  border-bottom: 1px solid #eee;\n  color: #5f6468;\n}\n/*Tabs*/\n.dbpanel .tabs {\n  margin: 0;\n  padding: 0;\n}\n.nav-tabs {\n  background: #e9ecf2;\n  border: 0;\n}\n.nav-tabs li a:hover {\n  background: #fff;\n}\n.nav-tabs li a,\n.nav-tabs li a:hover,\n.nav-tabs li.active a,\n.nav-tabs li.active a:hover {\n  border: 0;\n  padding: 15px 20px;\n}\n.nav-pills {\n  padding: 15px;\n  padding-bottom: 0;\n}\n.nav-pills li a,\n.nav-pills li a:hover,\n.nav-pills li.active a,\n.nav-pills li.active a:hover {\n  border: 0;\n  padding: 7px 15px;\n}\n.nav-pills li.active a,\n.nav-pills li.active a:hover {\n  background: #30a5ff;\n}\n.tab-content {\n  padding: 15px;\n}\n.user-menu {\n  display: inline-block;\n  margin-top: 14px;\n  margin-right: 10px;\n  float: right;\n  list-style: none;\n  padding: 0;\n}\n.user-menu a {\n  color: #fff;\n}\n.user-menu a:hover,\n.user-menu a:focus {\n  text-decoration: none;\n}\n/* Sidebar */\n.sidebar {\n  display: block;\n  background-color: #fff;\n  padding: 0;\n  display: none;\n}\n.sidebar form {\n  padding: 20px 15px 5px 15px;\n  border-bottom: 1px solid #eee;\n  margin-bottom: 20px;\n}\n@media (min-width: 768px) {\n  .sidebar {\n    position: fixed;\n    top: 50px;\n    bottom: 0;\n    left: 0;\n    z-index: 1000;\n    display: block;\n    margin: 0;\n    padding: 0;\n    overflow-x: hidden;\n    overflow-y: auto;\n    background-color: #fff;\n    box-shadow: 1px 0px 10px rgba(0, 0, 0, 0.05);\n  }\n}\n.sidebar ul.nav a:hover,\n.sidebar ul.nav li.parent ul li a:hover {\n  text-decoration: none;\n  background-color: #e9ecf2;\n}\n.sidebar ul.nav .active a,\n.sidebar ul.nav li.parent a.active,\n.sidebar ul.nav .active > a:hover,\n.sidebar ul.nav li.parent a.active:hover,\n.sidebar ul.nav .active > a:focus,\n.sidebar ul.nav li.parent a.active:focus {\n  color: #fff;\n  background-color: #30a5ff;\n}\n.sidebar ul.nav ul,\n.sidebar ul.nav ul li {\n  list-style: none;\n  list-style-type: none;\n}\n.sidebar ul.nav ul.children {\n  width: auto;\n  padding: 0;\n  margin: 0;\n  background: #f9f9f9;\n}\n.sidebar ul.nav ul.children li a {\n  height: 40px;\n  background: #f9f9f9;\n  color: #30a5ff!important;\n}\n.sidebar ul.nav li.current a {\n  background-color: #30a5ff;\n  color: #fff!important;\n}\n.sidebar ul.nav li.parent ul li a {\n  border: none;\n  display: block;\n  padding-left: 30px;\n  line-height: 40px;\n}\n.sidebar span.glyphicon {\n  margin-right: 10px;\n}\n.sidebar ul.nav li.divider {\n  border-bottom: 1px solid #eee;\n  margin: 20px 0;\n}\n.sidebar .attribution {\n  position: absolute;\n  bottom: 0px;\n  width: 100%;\n  padding: 15px;\n  text-align: center;\n  border-top: 1px solid #eee;\n  font-size: 12px;\n}\n/*Breadcrumbs*/\n.breadcrumb {\n  border-radius: 0;\n  padding: 10px 15px;\n  background: #e9ecf2;\n  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);\n  margin: 0 ;\n}\nh1.page-header {\n  margin-top: 30px;\n  border-bottom: 0;\n}\n/*Charts*/\n.main-chart {\n  background: #fff;\n}\n.easypiechart-panel {\n  text-align: center;\n  padding: 1px 0;\n  margin-bottom: 20px;\n}\n.placeholder h2 {\n  margin-bottom: 0px;\n}\n.donut {\n  width: 100%;\n}\n.easypiechart {\n  position: relative;\n  text-align: center;\n  width: 120px;\n  height: 120px;\n  margin: 20px auto 10px auto;\n}\n.easypiechart .percent {\n  display: block;\n  position: absolute;\n  font-size: 26px;\n  top: 38px;\n  width: 120px;\n}\n#easypiechart-blue .percent {\n  color: #30a5ff;\n}\n#easypiechart-teal .percent {\n  color: #1ebfae;\n}\n#easypiechart-orange .percent {\n  color: #ffb53e;\n}\n#easypiechart-red .percent {\n  color: #ef4040;\n}\n/*Calendar Widget*/\n#calendar,\n.datepicker-inline {\n  width: 100%;\n}\n#calendar table {\n  width: 100%;\n}\n.datepicker table tr td.old,\n.datepicker table tr td.new {\n  color: rgba(255, 255, 255, 0.5);\n}\n.datepicker table tr td.active,\n.datepicker table tr td.active:hover,\n.datepicker table tr td.active.disabled,\n.datepicker table tr td.active.disabled:hover,\n.datepicker table tr td.active:hover,\n.datepicker table tr td.active:hover:hover,\n.datepicker table tr td.active.disabled:hover,\n.datepicker table tr td.active.disabled:hover:hover,\n.datepicker table tr td.active:focus,\n.datepicker table tr td.active:hover:focus,\n.datepicker table tr td.active.disabled:focus,\n.datepicker table tr td.active.disabled:hover:focus,\n.datepicker table tr td.active:active,\n.datepicker table tr td.active:hover:active,\n.datepicker table tr td.active.disabled:active,\n.datepicker table tr td.active.disabled:hover:active,\n.datepicker table tr td.active.active,\n.datepicker table tr td.active:hover.active,\n.datepicker table tr td.active.disabled.active,\n.datepicker table tr td.active.disabled:hover.active,\n.open .dropdown-toggle.datepicker table tr td.active,\n.open .dropdown-toggle.datepicker table tr td.active:hover,\n.open .dropdown-toggle.datepicker table tr td.active.disabled,\n.open .dropdown-toggle.datepicker table tr td.active.disabled:hover {\n  color: #ffffff;\n  background-color: rgba(0, 0, 0, 0.5);\n  border-color: #285e8e;\n}\n.datepicker table tr td span:hover,\n.datepicker thead tr:first-child th:hover,\n.datepicker tfoot tr th:hover,\n.datepicker table tr td.day:hover,\n.datepicker table tr td.day.focused {\n  background: rgba(0, 0, 0, 0.25);\n}\n.dbpanel-heading .glyphicon {\n  margin-right: 10px;\n}\n/*Todo List Widget*/\n.todo-list-item .glyphicon {\n  margin-right: 5px;\n  color: #9fadbb;\n}\n.todo-list-item .glyphicon:hover {\n  margin-right: 5px;\n  color: #1b3548;\n}\n.todo-list {\n  padding: 0;\n  margin: -15px;\n  background: #fff;\n  color: #5f6468;\n}\n#checkbox {\n  margin: 0;\n}\n.todo-list .checkbox {\n  display: inline-block;\n  margin: 0px;\n}\n.dbpanel-body input[type=checkbox]:checked + label {\n  text-decoration: line-through;\n  color: #777;\n}\n.todo-list-item {\n  list-style: none;\n  line-height: 0.9;\n  padding: 14px 15px 8px 15px;\n}\n.todo-list-item:hover,\na.todo-list-item:focus {\n  text-decoration: none;\n  background-color: #f6f6f6;\n}\n.todo-list-item .trash .glyph:hover {\n  color: #ef4040;\n}\n/*Chat Widget*/\n.chat ul {\n  list-style: none;\n  margin: -15px;\n  padding: 15px;\n}\n.chat ul li {\n  margin-bottom: 10px;\n  padding: 15px 5px;\n  border-bottom: 1px solid #eee;\n}\n.chat ul li.left .chat-body {\n  margin-left: 100px;\n}\n.chat ul li.right .chat-body {\n  margin-right: 100px;\n}\n.chat ul li .chat-body p {\n  margin: 0;\n}\n.chat ul .glyphicon {\n  margin-right: 5px;\n}\n.chat .dbpanel-body {\n  overflow-y: scroll;\n  height: 300px;\n}\n.chat-body small {\n  margin-left: 5px;\n}\n/*Tables*/\n.table {\n  background: #fff;\n}\n.fixed-table-container {\n  border: 1px solid #eee;\n}\n.fixed-table-container thead th {\n  background: #f7f7f8;\n  border-color: #ddd;\n  color: #5f6468;\n  font-weight: 300;\n  font-size: 16px;\n}\n.fixed-table-container tbody td {\n  border: 1px solid #eee;\n}\n.fixed-table-container tbody td:last-child {\n  border-right: none;\n}\n.table > thead > tr > th {\n  border-bottom: 1px solid #e6e7e8;\n  vertical-align: middle;\n  height: 50px;\n}\n.fixed-table-pagination .pagination {\n  margin-top: 10px;\n  margin-bottom: 0px;\n}\n.fixed-table-pagination .pagination-detail {\n  margin-top: 20px;\n}\n/*Icons*/\n.sidebar .glyph,\n.user-menu .glyph {\n  height: 16px;\n  width: 16px;\n  margin: 0 10px 0 0;\n  stroke-width: 3px;\n}\n.user-menu .glyph {\n  stroke-width: 4px;\n}\n.breadcrumb .glyph {\n  height: 14px;\n  width: 14px;\n  margin: -2px 0 0 0;\n  stroke-width: 4px;\n}\n.alert .glyph,\n.dbpanel-heading .glyph {\n  width: 26px;\n  height: 26px;\n  margin: 0 10px 0 0;\n  stroke-width: 2px;\n}\n.dbpanel-widget .glyph {\n  stroke-width: 2px;\n}\n.todo-list .glyph {\n  width: 14px;\n  height: 14px;\n  stroke-width: 4px;\n  color: #999;\n}\n.glyph.table {\n  background: none;\n  border: none;\n}\n/*Icon Grid*/\n.icon-grid div {\n  border: 1px solid #ddd;\n  margin: 0 0 -1px -1px;\n  text-align: center;\n  padding: 10px 0 20px 0;\n}\n.icon-grid svg {\n  width: 35%;\n  display: block;\n  margin: 0 auto;\n}\n.icon-grid h4 {\n  display: none;\n}\n.icon-grid pre {\n  margin: 10px 10px -10px 10px;\n  border-radius: 0;\n  font-size: 10px;\n  border-color: #ddd;\n  height: 65px;\n  overflow: scroll;\n}\n", ""]);
+
+	// exports
 
 
 /***/ })

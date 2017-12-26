@@ -10,6 +10,8 @@ var SWATCHES = [{color: 'dbpanel-plum', item: 'SYE1'},
 	            {color: 'dbpanel-plum', item: 'BE1'},
 	            {color: 'dbpanel-ocean', item: 'BE2'},
 	            {color: 'dbpanel-slate', item: 'BE3'},
+                {color: 'dbpanel-slate', item: 'WE3'},
+                {color: 'dbpanel-blue', item: 'WE4'},
 ]
 
 

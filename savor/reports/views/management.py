@@ -147,8 +147,10 @@ def management(request):
     batch_requests = sorted(batchrequest({}),
                             key=lambda x: x['created_date'],
                             reverse=True)
+    
     for batch in batch_requests:
         link = mark_safe('<a href="/fulfill/batch_list/%s/">Download</a>' % batch['id'])
         batch.update({'get_list': link})
     context['batch_rows'] = batch_requests
+    
     return render(request, 'fulfillment/management.html', context)

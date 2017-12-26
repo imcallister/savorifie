@@ -9,7 +9,7 @@ class SwatchRow extends React.Component {
       
       var getSwatch = function(cfg) {
           return (
-            <div className={"col-md-2"}>
+            <div className={"col-md-1"}>
               <SwatchPanel color={cfg.color} bigText={this.props.counts[cfg.item] || 0} smallText={cfg.item}/>
             </div>
             )

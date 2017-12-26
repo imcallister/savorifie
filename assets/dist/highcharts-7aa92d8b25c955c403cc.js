@@ -48,7 +48,7 @@
 
 	var React = __webpack_require__(1);
 	var ReactDOM = __webpack_require__(36);
-	var Highcharts = __webpack_require__(758);
+	var Highcharts = __webpack_require__(761);
 
 	ReactDOM.render(React.createElement(Highcharts, { chartName: 'tax.collect', source: '/chart/reports/collected_salestax/' }), document.getElementById("highchart.test"));
 
@@ -346,6 +346,10 @@
 	process.removeListener = noop;
 	process.removeAllListeners = noop;
 	process.emit = noop;
+	process.prependListener = noop;
+	process.prependOnceListener = noop;
+
+	process.listeners = function (name) { return [] }
 
 	process.binding = function (name) {
 	    throw new Error('process.binding is not supported');
@@ -22357,7 +22361,10 @@
 /* 755 */,
 /* 756 */,
 /* 757 */,
-/* 758 */
+/* 758 */,
+/* 759 */,
+/* 760 */,
+/* 761 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22371,7 +22378,7 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var React = __webpack_require__(1);
-	var HighChart = __webpack_require__(759);
+	var HighChart = __webpack_require__(762);
 
 	var HChartContainer = function (_React$Component) {
 	  _inherits(HChartContainer, _React$Component);
@@ -22409,7 +22416,7 @@
 	module.exports = HChartContainer;
 
 /***/ }),
-/* 759 */
+/* 762 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -22423,7 +22430,7 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var React = __webpack_require__(1);
-	var Highcharts = __webpack_require__(760);
+	var Highcharts = __webpack_require__(763);
 
 	var Chart = function (_React$Component) {
 	  _inherits(Chart, _React$Component);
@@ -22451,7 +22458,7 @@
 	module.exports = Chart;
 
 /***/ }),
-/* 760 */
+/* 763 */
 /***/ (function(module, exports) {
 
 	/*

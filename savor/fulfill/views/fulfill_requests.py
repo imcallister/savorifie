@@ -215,15 +215,10 @@ def batch_list(request, batch_id):
     batch_qs = BatchRequest.objects.get(id=batch_id)
     batch_info = flfslz.BatchRequestSerializer(batch_qs).data
 
-    if batch_info['location'] == 'MICH':
-        return MICH_pick_list(request, batch_info['fulfillments'],
-                              label='MICH_batch_%s' % str(batch_id))
-    elif batch_info['location'] == 'NC2':
+    if batch_info['location'] == 'NC2':
         return NC2_pick_list(request, batch_info['fulfillments'],
                               label='NC2_batch_%s' % str(batch_id))
-    elif batch_info['location'] == '152Frank':
-        return MICH_pick_list(request, batch_info['fulfillments'],
-                              label='152Frank_batch_%s' % str(batch_id))
+
 
 
 NC2_NOTES = {
