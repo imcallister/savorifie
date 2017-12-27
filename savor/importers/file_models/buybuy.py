@@ -26,6 +26,13 @@ def parse_decimal(x):
     else:
         return x
 
+def string_parse(x):
+    if x == 'N/A':
+        return ''
+    else:
+        return x
+
+
 class BuyBuyCSVModel(CsvModel):
     external_channel_id = CharField(match="PO Number")
     shipping_charge = DecimalField(match="Shipping",
@@ -34,17 +41,17 @@ class BuyBuyCSVModel(CsvModel):
     sale_date = DateField(match="Order Date", transform=date_parse)
     channel_label = CharField(match="Sales Division", transform=channel_parse)
     customer_code_id = CharField(match="BillTo Company Name", transform=company_parse)
-    notification_email = CharField(match="ShipTo Email")
+    notification_email = CharField(match="ShipTo Email", transform=string_parse)
 
-    shipping_name = CharField(match='ShipTo Name')
-    shipping_company = CharField(match='ShipTo Company Name')
-    shipping_address1 = CharField(match='ShipTo Address1')
-    shipping_address2 = CharField(match='ShipTo Address2')
-    shipping_city = CharField(match='ShipTo City')
+    shipping_name = CharField(match='ShipTo Name', transform=string_parse)
+    shipping_company = CharField(match='ShipTo Company Name', transform=string_parse)
+    shipping_address1 = CharField(match='ShipTo Address1', transform=string_parse)
+    shipping_address2 = CharField(match='ShipTo Address2', transform=string_parse)
+    shipping_city = CharField(match='ShipTo City', transform=string_parse)
     shipping_zip = CharField(match='ShipTo Postal Code', transform= lambda x: x.replace("'", ""))
-    shipping_province = CharField(match='ShipTo State')
-    shipping_country = CharField(match='ShipTo Country')
-    shipping_phone = CharField(match='BillTo Day Phone')
+    shipping_province = CharField(match='ShipTo State', transform=string_parse)
+    shipping_country = CharField(match='ShipTo Country', transform=string_parse)
+    shipping_phone = CharField(match='BillTo Day Phone', transform=string_parse)
 
     quantity = IntegerField(match='Quantity')
     unit_price = DecimalField(match='Unit Cost', transform=lambda x: parse_decimal(x.replace('$', '')))
