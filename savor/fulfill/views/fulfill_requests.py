@@ -306,7 +306,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
     for flf in flf_data:
         opt_skus = optimize_NC2(flf['skus'])
         for i in range(0, len(opt_skus)):
-            line = [flf['ship'].get(headers[col], '') for col in headers]
+            line = [flf['ship'].get(headers[col], '').encode('utf-8') for col in headers]
             label = opt_skus[i]['inventory_item']
             line += [label, opt_skus[i]['quantity']]
             writer.writerow(line)
