@@ -276,7 +276,7 @@ INSTALLED_APPS = (
 
     'django.contrib.admin',
     'django.contrib.admindocs',
-    #'debug_toolbar',
+    'debug_toolbar',
     'django_behave',
 
     'rest_framework',
