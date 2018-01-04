@@ -41,7 +41,7 @@ class BuyBuyCSVModel(CsvModel):
     sale_date = DateField(match="Order Date", transform=date_parse)
     channel_label = CharField(match="Sales Division", transform=channel_parse)
     customer_code_id = CharField(match="BillTo Company Name", transform=company_parse)
-    notification_email = CharField(match="ShipTo Email", transform=string_parse)
+    notification_email = CharField(match="BillTo Email", transform=string_parse)
 
     shipping_name = CharField(match='ShipTo Name', transform=string_parse)
     shipping_company = CharField(match='ShipTo Company Name', transform=string_parse)
