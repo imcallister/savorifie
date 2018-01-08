@@ -37,7 +37,7 @@ def process_frb(file_name):
 
     for rec in cf_records:
         # cutoff at 13th-Nov ... when the format changed
-        if rec['date'] > datetime.date(2017, 11, 13):
+        if rec['post_date'].date() > datetime.date(2017, 11, 13):
             rec['amount'] = rec.pop('debit') + rec.pop('credit')
             rec_obj = Cashflow.objects \
                               .filter(post_date=rec['post_date']) \
