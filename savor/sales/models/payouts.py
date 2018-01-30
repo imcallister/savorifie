@@ -79,7 +79,11 @@ class Payout(models.Model, accountifie.gl.bmo.BusinessModelObject):
     def get_gl_transactions(self):
         
         rec_acct = sales_funcs.get_receiveables_account(None, self.paid_thru.id)
-        general_rec_acct = sales_funcs.get_receiveables_account(None, None)
+
+        if self.paid_thru.id == 'PAYPAL':
+            general_rec_acct = sales_funcs.get_paypal_acct()
+        else:
+            general_rec_acct = sales_funcs.get_receiveables_account(None, None)
 
         total = self.calcd_payout()
         

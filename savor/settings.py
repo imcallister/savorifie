@@ -228,8 +228,8 @@ WSGI_APPLICATION = PROJECT_NAME + '.wsgi.application'
 
 
 INSTALLED_APPS = (
-    'material',
-    'material.admin',
+    #'material',
+    #'material.admin',
 
     'django.contrib.sites',
     'django.contrib.auth',

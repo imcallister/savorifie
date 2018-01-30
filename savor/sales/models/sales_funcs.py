@@ -36,6 +36,9 @@ def get_receiveables_account(channel, paid_thru):
         else:
             return api_func('environment', 'variable', 'GL_ACCOUNTS_RECEIVABLE')
 
+def get_paypal_acct():
+    return '1002'
+
 def get_special_account(special_sale):
     return api_func('gl', 'account', 'equity.retearnings.sales.discounts.%s' % special_sale)['id']
 
