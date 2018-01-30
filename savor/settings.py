@@ -263,7 +263,6 @@ INSTALLED_APPS = (
 
     'accountifie.celery',
     'accountifie.common',
-    'accountifie.forecasts',
     'accountifie.gl',
     'accountifie.snapshot',
     'accountifie.environment',
