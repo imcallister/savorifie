@@ -7,7 +7,7 @@ import accountifie.gl.bmo
 
 DZERO = Decimal('0')
 
-CASHFLOW_TRANSTYPE_CHOICES = ['1102', '1100', '1250', '3000', '1500', '7090', '3510', '3005', '3006']
+CASHFLOW_TRANSTYPE_CHOICES = ['1002', '1100', '1250', '3000', '1500', '7090', '3510', '3005', '3006']
 
 class CashflowAllocation(models.Model):
     cashflow = models.ForeignKey('base.Cashflow')
