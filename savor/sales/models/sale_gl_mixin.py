@@ -59,10 +59,14 @@ class SaleGLMixin():
         return lines
 
     def get_acctrec_lines(self, lines):
-        paid_thru = self.paid_thru.id if self.paid_thru else None
-        accts_rec = sales_funcs.get_receiveables_account(self.channel.label, paid_thru)
         rcvbl = -sum(l[1] for l in lines)
-        return [(accts_rec, rcvbl, self.payee().id, [])]
+        paid_thru = self.paid_thru.id if self.paid_thru else None
+        if paid_thru == 'PAYPAL':
+            accts_rec = sales_funcs.get_paypal_acct()
+            return [(accts_rec, rcvbl, self.customer_code.id, [])]
+        else:
+            accts_rec = sales_funcs.get_receiveables_account(self.channel.label, paid_thru)
+            return [(accts_rec, rcvbl, self.payee().id, [])]
 
 
 
