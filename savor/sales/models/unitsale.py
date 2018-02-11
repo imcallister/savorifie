@@ -16,8 +16,8 @@ UNITSALE_TAGS = (
 
 class UnitSale(models.Model):
     sale = models.ForeignKey('sales.Sale', related_name='unit_sale')
-    date = models.DateField(null=True, blank=True)
-    sku = models.ForeignKey('products.Product', null=True, blank=True)
+    date = models.DateField()
+    sku = models.ForeignKey('products.Product')
     quantity = models.IntegerField(default=0)
     unit_price = models.DecimalField(default=0, max_digits=11, decimal_places=2)
     tag = models.CharField(max_length=20, choices=UNITSALE_TAGS, blank=True, null=True)
