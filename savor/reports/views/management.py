@@ -21,12 +21,12 @@ def post_button(order_id, back=False):
     html = '<select class="form-control" name="q_choice_%s"> \
               <option>----</option>' % order_id
     if back:
-        for wh in ['MICH', '152Frank', 'NC2']:
+        for wh in ['152Frank', 'NC2', 'FBA']:
             html += '<option>Queue future order for %s</option>' % wh
 
     if not back:
         html += '<option>Future Order</option>'
-        for wh in ['MICH', '152Frank', 'NC2']:
+        for wh in ['152Frank', 'NC2', 'FBA']:
             html += '<option>Queue for %s</option>' % wh
 
     html += '</select>'
