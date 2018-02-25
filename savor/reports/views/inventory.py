@@ -19,5 +19,5 @@ def inventory_counts(request):
             print 'Failing on', sku
 
     context['location_counts'] = api_func('inventory', 'locationinventory')
-
+    print(context)
     return render(request, 'inventory.html', context)

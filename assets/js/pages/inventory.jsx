@@ -19,6 +19,7 @@ ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationin
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/152Frank/?raw=true' />, document.getElementById("inventory.152Frank.inventory"));
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/LAPort/?raw=true' />, document.getElementById("inventory.LAPort.inventory"));
 ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/FBA/?raw=true' />, document.getElementById("inventory.FBA.inventory"));
+ReactDOM.render(<SwatchRow swatches={SWATCHES} source='/api/inventory/locationinventory/FBACA/?raw=true' />, document.getElementById("inventory.FBACA.inventory"));
 
 ReactDOM.render(<Highcharts chartName="inventory.totalsales" source="/chart/sales/sale_count/"/>, document.getElementById("inventory.totalsales"));
 
