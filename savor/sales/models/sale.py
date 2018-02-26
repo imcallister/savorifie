@@ -196,12 +196,11 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
             sale_amts[s.sku] += Decimal(s.quantity) * Decimal(s.unit_price)
         return sale_amts
 
-    
     def get_gl_transactions(self):
         base_tran = dict(company=self.company,
                          bmo_id='%s.%s' % (self.short_code, self.id),
                          lines=[]
-                       )
+                         )
 
         if self.special_sale:
             tran = dict((k, v) for k, v in base_tran.iteritems())
@@ -217,14 +216,12 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
                 if dt:
                     tran = copy.deepcopy(base_tran)
                     tran['date'] = dt
-                    
                     if dt == self.sale_date:
                         tran['comment'] = "%s: %s" % (self.channel, self.external_channel_id)
                         tran['trans_id'] = '%s.%s.%s' % (self.short_code, self.id, 'SALE')
                     else:
                         tran['comment'] = "%s: %s.ADJUST:%s" % (self.channel, self.external_channel_id, dt.strftime('%d%b%y'))
                         tran['trans_id'] = '%s.%s.ADJ%s' % (self.short_code, self.id, dt.strftime('%d%b%y'))
-                    
                     tran['lines'] += self.get_grosssales_lines(dt)
                     tran['lines'] += self.get_salestax_lines(dt)
                     tran['lines'] += self.get_adjustment_lines(dt)
@@ -233,5 +230,4 @@ class Sale(models.Model, accountifie.gl.bmo.BusinessModelObject, SaleGLMixin):
                     tran['lines'] += self.get_acctrec_lines(tran['lines'])
 
                     trans.append(tran)
-                
             return trans

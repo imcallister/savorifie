@@ -20,7 +20,7 @@ def _map_sku(amzn_sku):
     if amzn_sku == 'DL-Z7RL-OS4O':
         return 'BE3'
     else:
-        return amzn_sku
+        return amzn_sku.replace('-CA', '')
 
 
 def _FBA_start_date():
