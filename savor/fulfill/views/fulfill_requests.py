@@ -114,9 +114,9 @@ def shipping(request):
 
 def create_backorder(order_id):
     # check that it has not been requested already
-    unfulfilled_items = api_func('fulfill', 'unfulfilled', str(order_id), {})['unfulfilled_items']
-    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem', {}))
-    
+    unfulfilled_items = api_func('sales', 'unfulfilled', str(order_id))['unfulfilled_items']
+    inv_items = dict((i['label'], i['id']) for i in api_func('products', 'inventoryitem'))
+
     if unfulfilled_items is None:
         return 'FULFILL_ALREADY_REQUESTED'
     else:
