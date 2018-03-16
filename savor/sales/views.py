@@ -10,6 +10,8 @@ from accountifie.common.api import api_func
 from .models import SalesTax, Sale
 import importers.shopify
 
+import logging
+logger = logging.getLogger('default')
 
 
 def assign_COGS(request):
@@ -71,9 +73,20 @@ def allsales_dump(request):
                   ]
 
     writer.writerow(header_row)
+
+    def _clean(x):
+        if x:
+            return x.encode('utf-8')
+        else:
+            return ''
+
     for sl in all_sales:
-        line = [sl.get(f,'') for f in header_row]
-        writer.writerow(line)
+        try:
+            line = [_clean(sl.get(f, '')) for f in header_row]
+            writer.writerow(line)
+        except:
+            logger.info('CSV line write fail. allsales_dump', sl)
+
     return response
 
 
