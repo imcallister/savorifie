@@ -16,6 +16,7 @@ import fulfill.serializers as flfslz
 from reports.calcs.unbatched_fulfillments import unbatched_fulfillments
 
 import datetime
+from dateutil.parser import parse
 import pytz
 
 UTC = pytz.timezone('UTC')
@@ -218,6 +219,9 @@ def batch_list(request, batch_id):
     if batch_info['location'] == 'NC2':
         return NC2_pick_list(request, batch_info['fulfillments'],
                               label='NC2_batch_%s' % str(batch_id))
+    elif batch_info['location'] == 'FBA':
+        return FBA_batch(request, batch_info['fulfillments'],
+                              label='FBA_batch_%s' % str(batch_id))
 
 
 
@@ -254,6 +258,65 @@ def optimize_NC2(skus):
                 opt_skus.append({'inventory_item': inv_item,
                                  'quantity': sngl_cnt})
     return opt_skus
+
+
+def _map_sku(savor_sku):
+    if savor_sku == 'BE3':
+        return 'DL-Z7RL-OS4O'
+    else:
+        return savor_sku
+
+
+@login_required
+def FBA_batch(request, data, label='FBA_batch'):
+    DisplayableComment = 'Here is a displayable_comment'
+    DisplayableOrderComment = 'Here is a displayable_order_comment'
+    DeliverySLA = 'Standard'
+    FulfillmentAction = 'Ship'
+    MarketplaceID = 'ATVPDKIKX0DER'
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
+    writer = csv.writer(response)
+
+    flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
+    for f in flf_data:
+        f['ship']['id'] = 'FLF%s' % f['ship']['id']
+        f['ship']['order_date'] = datetime.datetime.now().isoformat().split('.')[0]
+        f['ship']['country_code'] = 'US'
+
+    headers = OrderedDict([('DisplayableOrderID', 'id'),
+                           ('DisplayableOrderDate', 'order_date'),
+                           ('MerchantFulfillmentOrderItemID', 'id'),
+                           ('GiftMessage', 'order:gift_message'),
+                           ('NotificationEmail', 'order:notification_email'),
+                           ('AddressPhoneNumber', 'order:shipping_phone'),
+                           ('AddressName', 'order:shipping_name'),
+                           ('AddressFieldThree', 'order:shipping_company'),
+                           ('AddressFieldOne', 'order:shipping_address1'),
+                           ('AddressFieldTwo', 'order:shipping_address2'),
+                           ('AddressCity', 'order:shipping_city'),
+                           ('AddressStateOrRegion', 'order:shipping_province'),
+                           ('AddressPostalCode', 'order:shipping_zip'),
+                           ('AddressCountryCode', 'country_code'),
+                           ])
+
+    header_row = headers.keys()
+    header_row += [u'MerchantSKU', u'Quantity', u'DisplayableComment', 
+                   u'DisplayableOrderComment', u'DeliverySLA',
+                   u'FulfillmentAction', u'MarketplaceID']
+    writer.writerow(header_row)
+
+    for flf in flf_data:
+        for i in range(0, len(flf['skus'])):
+            line = [flf['ship'].get(headers[col], '') for col in headers]
+            line = [x if x is not None else '' for x in line]
+            line = [x.encode('utf-8') for x in line]
+            line += [_map_sku(flf['skus'][i]['inventory_item']), flf['skus'][i]['quantity']]
+            line += [DisplayableComment, DisplayableOrderComment, DeliverySLA, FulfillmentAction, MarketplaceID]
+            writer.writerow(line)
+
+    return response
 
 
 @login_required
@@ -328,15 +391,17 @@ def make_batch(request, warehouse):
         unbatched = unbatched_fulfillments({})
         to_batch = [f for f in unbatched if f['warehouse'] == warehouse]
 
-        batch_info = {}
-        batch_info['created_date'] = datetime.datetime.now().date()
-        batch_info['location_id'] = warehouse_obj.id
-        batch = BatchRequest(**batch_info)
-        batch.save()
-        for f in to_batch:
-            batch.fulfillments.add(f['id'])
-        batch.save()
-
-        messages.success(request, '%d fulfillments added to new batch %s' % (len(to_batch), str(batch)))
+        if len(to_batch) > 0:
+            batch_info = {}
+            batch_info['created_date'] = datetime.datetime.now().date()
+            batch_info['location_id'] = warehouse_obj.id
+            batch = BatchRequest(**batch_info)
+            batch.save()
+            for f in to_batch:
+                batch.fulfillments.add(f['id'])
+            batch.save()
+            messages.success(request, '%d fulfillments added to new batch %s' % (len(to_batch), str(batch)))
+        else:
+            messages.success(request, 'No fulfillments to be batched for %s' % (warehouse))
         return redirect('/fulfillment/management/')
 
