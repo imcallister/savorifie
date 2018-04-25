@@ -270,7 +270,7 @@ def _map_sku(savor_sku):
 @login_required
 def FBA_batch(request, data, label='FBA_batch'):
     DisplayableComment = 'Here is a displayable_comment'
-    DisplayableOrderComment = 'Here is a displayable_order_comment'
+    DisplayableOrderComment = 'Thanks so much for your Savor order! If you love your keepsake box, please share it with your friends by tagging us @savor.it.all. For customer returns, please email customerserivce@savor.us'
     DeliverySLA = 'Standard'
     FulfillmentAction = 'Ship'
     MarketplaceID = 'ATVPDKIKX0DER'
