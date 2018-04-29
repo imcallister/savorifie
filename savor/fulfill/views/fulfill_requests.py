@@ -317,7 +317,7 @@ def FBA_batch(request, data, label='FBA_batch'):
             line['Quantity'] = fl['quantity']
             line['MerchantFulfillmentOrderItemID'] += '-%d' % i
             if len(line['AddressPostalCode'].split('-')[0]) < 5:
-                line['AddressPostalCode'] = '0%d' % line['AddressPostalCode']
+                line['AddressPostalCode'] = '0%s' % str(line['AddressPostalCode'])
             line.update(constants)
             writer.writerow([line.get(h) for h in col_order])
 
