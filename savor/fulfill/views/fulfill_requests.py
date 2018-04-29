@@ -269,7 +269,7 @@ def _map_sku(savor_sku):
 
 @login_required
 def FBA_batch(request, data, label='FBA_batch'):
-    constants = {'DisplayableComment': 'Here is a displayable_comment',
+    constants = {'DisplayableComment': '',
                  'DisplayableOrderComment': 'Thanks so much for your Savor order! If you love your keepsake box, please share it with your friends by tagging us @savor.it.all. For customer returns, please email customerserivce@savor.us',
                  'DeliverySLA': 'Standard',
                  'FulfillmentAction': 'Ship',
@@ -316,6 +316,8 @@ def FBA_batch(request, data, label='FBA_batch'):
             line['MerchantSKU'] = _map_sku(fl['inventory_item'])
             line['Quantity'] = fl['quantity']
             line['MerchantFulfillmentOrderItemID'] += '-%d' % i
+            if len(line['AddressPostalCode'].split('-')[0]) < 5:
+                line['AddressPostalCode'] = '0%d' % line['AddressPostalCode']
             line.update(constants)
             writer.writerow([line.get(h) for h in col_order])
 
