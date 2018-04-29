@@ -269,11 +269,19 @@ def _map_sku(savor_sku):
 
 @login_required
 def FBA_batch(request, data, label='FBA_batch'):
-    DisplayableComment = 'Here is a displayable_comment'
-    DisplayableOrderComment = 'Thanks so much for your Savor order! If you love your keepsake box, please share it with your friends by tagging us @savor.it.all. For customer returns, please email customerserivce@savor.us'
-    DeliverySLA = 'Standard'
-    FulfillmentAction = 'Ship'
-    MarketplaceID = 'ATVPDKIKX0DER'
+    constants = {'DisplayableComment': 'Here is a displayable_comment',
+                 'DisplayableOrderComment': 'Thanks so much for your Savor order! If you love your keepsake box, please share it with your friends by tagging us @savor.it.all. For customer returns, please email customerserivce@savor.us',
+                 'DeliverySLA': 'Standard',
+                 'FulfillmentAction': 'Ship',
+                 'MarketplaceID': 'ATVPDKIKX0DER',
+                 'PerUnitDeclaredValue': ''}
+
+    col_order = ['MerchantFulfillmentOrderID',  'DisplayableOrderID',  'DisplayableOrderDate', 'MerchantSKU', 'Quantity',
+                 'MerchantFulfillmentOrderItemID', 'GiftMessage', 'DisplayableComment', 'PerUnitDeclaredValue',
+                 'DisplayableOrderComment', 'DeliverySLA', 'AddressName', 'AddressFieldOne', 'AddressFieldTwo', 'AddressFieldThree',
+                 'AddressCity', 'AddressCountryCode', 'AddressStateOrRegion', 'AddressPostalCode', 'AddressPhoneNumber',
+                 'NotificationEmail', 'FulfillmentAction', 'MarketplaceID']
+
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
@@ -285,36 +293,31 @@ def FBA_batch(request, data, label='FBA_batch'):
         f['ship']['order_date'] = datetime.datetime.now().isoformat().split('.')[0]
         f['ship']['country_code'] = 'US'
 
-    headers = OrderedDict([('DisplayableOrderID', 'id'),
-                           ('DisplayableOrderDate', 'order_date'),
-                           ('MerchantFulfillmentOrderItemID', 'id'),
-                           ('GiftMessage', 'order:gift_message'),
-                           ('NotificationEmail', 'order:notification_email'),
-                           ('AddressPhoneNumber', 'order:shipping_phone'),
-                           ('AddressName', 'order:shipping_name'),
-                           ('AddressFieldThree', 'order:shipping_company'),
-                           ('AddressFieldOne', 'order:shipping_address1'),
-                           ('AddressFieldTwo', 'order:shipping_address2'),
-                           ('AddressCity', 'order:shipping_city'),
-                           ('AddressStateOrRegion', 'order:shipping_province'),
-                           ('AddressPostalCode', 'order:shipping_zip'),
-                           ('AddressCountryCode', 'country_code'),
-                           ])
+    headers = {'DisplayableOrderID': 'id',
+               'DisplayableOrderDate': 'order_date',
+               'MerchantFulfillmentOrderItemID': 'id',
+               'GiftMessage': 'order:gift_message',
+               'NotificationEmail': 'order:notification_email',
+               'AddressPhoneNumber': 'order:shipping_phone',
+               'AddressName': 'order:shipping_name',
+               'AddressFieldThree': 'order:shipping_company',
+               'AddressFieldOne': 'order:shipping_address1',
+               'AddressFieldTwo': 'order:shipping_address2',
+               'AddressCity': 'order:shipping_city',
+               'AddressStateOrRegion': 'order:shipping_province',
+               'AddressPostalCode': 'order:shipping_zip',
+               'AddressCountryCode': 'country_code'}
 
-    header_row = headers.keys()
-    header_row += [u'MerchantSKU', u'Quantity', u'DisplayableComment', 
-                   u'DisplayableOrderComment', u'DeliverySLA',
-                   u'FulfillmentAction', u'MarketplaceID']
-    writer.writerow(header_row)
-
+    writer.writerow(col_order)
     for flf in flf_data:
-        for i in range(0, len(flf['skus'])):
-            line = [flf['ship'].get(headers[col], '') for col in headers]
-            line = [x if x is not None else '' for x in line]
-            line = [x.encode('utf-8') for x in line]
-            line += [_map_sku(flf['skus'][i]['inventory_item']), flf['skus'][i]['quantity']]
-            line += [DisplayableComment, DisplayableOrderComment, DeliverySLA, FulfillmentAction, MarketplaceID]
-            writer.writerow(line)
+        for i, fl in enumerate(flf['skus']):
+            line = dict((col, flf['ship'].get(headers[col], '')) for col in headers)
+            line = dict((k, v.encode('utf-8') if v is not None else '') for k, v in line.items)
+            line['MerchantSKU'] = _map_sku(fl['inventory_item'])
+            line['Quantity'] = fl['quantity']
+            line['MerchantFulfillmentOrderItemID'] += str(i) 
+            line.update(constants)
+            writer.writerow([line.get(h) for h in col_order])
 
     return response
 
@@ -374,6 +377,7 @@ def NC2_pick_list(request, data, label='MICH_batch'):
             line = [x.encode('utf-8') for x in line]
             label = opt_skus[i]['inventory_item']
             line += [label, opt_skus[i]['quantity']]
+
             writer.writerow(line)
 
     return response
