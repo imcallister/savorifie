@@ -282,10 +282,9 @@ def FBA_batch(request, data, label='FBA_batch'):
                  'AddressCity', 'AddressCountryCode', 'AddressStateOrRegion', 'AddressPostalCode', 'AddressPhoneNumber',
                  'NotificationEmail', 'FulfillmentAction', 'MarketplaceID']
 
-
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="%s.csv"' % label
-    writer = csv.writer(response)
+    response['Content-Disposition'] = 'attachment; filename="%s.txt"' % label
+    writer = csv.writer(response, delimiter='\t')
 
     flf_data = [{'skus': d['fulfill_lines'], 'ship': flatdict.FlatDict(d)} for d in data]
     for f in flf_data:
@@ -295,6 +294,7 @@ def FBA_batch(request, data, label='FBA_batch'):
 
     headers = {'DisplayableOrderID': 'id',
                'DisplayableOrderDate': 'order_date',
+               'MerchantFulfillmentOrderID': 'id',
                'MerchantFulfillmentOrderItemID': 'id',
                'GiftMessage': 'order:gift_message',
                'NotificationEmail': 'order:notification_email',
@@ -312,10 +312,10 @@ def FBA_batch(request, data, label='FBA_batch'):
     for flf in flf_data:
         for i, fl in enumerate(flf['skus']):
             line = dict((col, flf['ship'].get(headers[col], '')) for col in headers)
-            line = dict((k, v.encode('utf-8') if v is not None else '') for k, v in line.items)
+            line = dict((k, v.encode('utf-8') if v is not None else '') for k, v in line.items())
             line['MerchantSKU'] = _map_sku(fl['inventory_item'])
             line['Quantity'] = fl['quantity']
-            line['MerchantFulfillmentOrderItemID'] += str(i) 
+            line['MerchantFulfillmentOrderItemID'] += '-%d' % i
             line.update(constants)
             writer.writerow([line.get(h) for h in col_order])
 
