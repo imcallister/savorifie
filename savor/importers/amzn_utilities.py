@@ -19,6 +19,8 @@ from reports.calcs.unfulfilled import unfulfilled
 def _map_sku(amzn_sku):
     if amzn_sku == 'DL-Z7RL-OS4O':
         return 'BE3'
+    elif amzn_sku == 'RN-929Q-8HJB':
+        return 'WE3'
     else:
         return amzn_sku.replace('-CA', '')
 

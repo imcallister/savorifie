@@ -16,11 +16,11 @@ import fulfill.serializers as flfslz
 from reports.calcs.unbatched_fulfillments import unbatched_fulfillments
 
 import datetime
-from dateutil.parser import parse
 import pytz
 
 UTC = pytz.timezone('UTC')
 EASTERN = pytz.timezone('US/Eastern')
+
 
 def get_today():
     return datetime.datetime.utcnow().replace(tzinfo=UTC).astimezone(EASTERN).date()
